@@ -1,0 +1,25 @@
+{
+  "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
+  "name": "dev-workflow",
+  "description": "Claude Code commands for multi-session development workflows: plan features with structured PRDs, checkpoint progress, and resume across sessions.",
+  "owner": {
+    "name": "Andrea Serra"
+  },
+  "plugins": [
+    {
+      "name": "dev-workflow",
+      "description": "Plan features with structured PRDs, checkpoint progress, and resume across sessions.",
+      "version": "1.0.0",
+      "author": {
+        "name": "Andrea Serra"
+      },
+      "source": {
+        "source": "github",
+        "repo": "andreaserradev-gbj/dev-workflow"
+      },
+      "category": "productivity",
+      "homepage": "https://github.com/andreaserradev-gbj/dev-workflow",
+      "tags": ["claude-code", "workflow", "planning", "prd", "checkpoint", "session"]
+    }
+  ]
+}
