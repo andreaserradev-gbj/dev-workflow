@@ -53,13 +53,13 @@ find "$PROJECT_ROOT/.dev/<feature-name>" -name "*.md" -type f
 
 #### 2b. For each PRD file found:
 
-1. **Read the file** using the Read tool
-2. **Identify completed items** - tasks/steps that were finished this session
+1. **Read the file**
+2. **Identify completed items** — tasks/steps finished this session
 3. **Update status markers**:
    - Change `⬜` to `✅` for completed items
    - Keep `⬜` for pending items
    - Update any "Status" fields (e.g., "In Progress", "Complete")
-4. **Use the Edit tool** to make the changes
+4. **Edit the file** to save changes
 
 #### 2c. Track your updates:
 
@@ -73,7 +73,7 @@ This record will be reported in Step 7.
 
 ### Step 3: Capture Git State
 
-Capture the current git state for checkpoint context:
+If this is a git repository, capture the current state:
 
 ```bash
 # Branch name
@@ -82,23 +82,32 @@ git branch --show-current
 # Last commit (one-line summary)
 git log --oneline -1
 
-# Uncommitted changes (first 5 lines)
-git status --short | head -5
+# Uncommitted changes
+git status --short
 ```
 
-Store these values — they will be included in the checkpoint YAML frontmatter.
+Store these values for the checkpoint YAML frontmatter.
+
+**If not a git repository**: Skip this step and omit `branch`, `last_commit`, and `uncommitted_changes` from the YAML frontmatter.
 
 ### Step 4: Capture Session Context
 
-Ask me the following prompts one at a time. Pre-fill answers from conversation context when obvious. Skip any prompt where the answer is clearly "none."
+Infer the following from conversation context. Present your findings and ask: "I captured these from our session—correct me if I missed anything or got something wrong."
 
-1. **Decisions made this session**: "What key decisions were made? (I noticed: [pre-filled from conversation if obvious])"
-2. **Blockers/gotchas**: "Any blockers or gotchas to flag for next session? (skip if none)"
-3. **Custom notes**: "Any other notes or instructions? (skip if nothing)"
+1. **Decisions made** — architectural choices, trade-offs, approaches selected
+2. **Blockers/gotchas** — issues encountered, things to watch out for
+3. **Notes** — anything else relevant for the next session
+
+If a category is empty, omit it. Do not ask multiple rounds of questions.
 
 ### Step 5: Generate Continuation Prompt
 
-Create a continuation prompt following this exact format:
+**Template rules**:
+- Always include `<context>`, `<current_state>`, `<next_action>`, and `<key_files>`.
+- Omit `<decisions>`, `<blockers>`, and `<notes>` sections entirely if empty.
+- If not a git repo, omit `branch`, `last_commit`, and `uncommitted_changes` from frontmatter.
+
+Create a continuation prompt following this format:
 
 ```
 ---
@@ -114,15 +123,11 @@ Read the following PRD files in order:
 2. [path to relevant sub-PRDs if applicable]
 
 <context>
-## Quick Context (5-Question Check)
+## Context
 
-| Question | Answer |
-|----------|--------|
-| Where am I? | [Current phase/step] |
-| Where am I going? | [Next phases/steps] |
-| What's the goal? | [Feature goal in one sentence] |
-| What have I learned? | See Research Findings in master plan |
-| What have I done? | [Key completions] |
+**Goal**: [Feature goal in one sentence]
+**Current phase**: [Phase name] — [current step]
+**Key completions**: [What's been done]
 </context>
 
 <current_state>
@@ -178,13 +183,9 @@ Read the following PRD files in order:
 Please continue with [Next Steps summary — adapt to the current phase: research, design, or implementation], following the specifications in the PRD.
 ```
 
-**Template rules**:
-- Omit `<decisions>`, `<blockers>`, and `<notes>` sections entirely if they are empty.
-- Always include `<context>`, `<current_state>`, `<next_action>`, and `<key_files>`.
-
 ### Step 6: Save Checkpoint
 
-Update the checkpoint file at `$PROJECT_ROOT/.dev/<feature-name>/checkpoint.md` with the new continuation prompt. If the file already exists, overwrite it completely with the new content. Use the Edit tool to replace the entire file content.
+Write the continuation prompt to `$PROJECT_ROOT/.dev/<feature-name>/checkpoint.md`. Create the file if it doesn't exist, or overwrite it completely if it does.
 
 ### Step 7: Summary
 

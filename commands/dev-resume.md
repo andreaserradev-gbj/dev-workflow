@@ -45,14 +45,14 @@ Read the checkpoint file: `$PROJECT_ROOT/.dev/<feature-name>/checkpoint.md`
 If the checkpoint has YAML frontmatter (version 2 format), perform these checks:
 
 1. **Branch match**: Compare `branch` in frontmatter to current branch (`git branch --show-current`). If different, warn: "Checkpoint was on branch `X`, you're now on `Y`. Switch branch or continue?"
-2. **Staleness check**: Compare `checkpointed` timestamp to now. If older than 7 days, warn: "This checkpoint is [N] days old. Some context may be outdated."
+2. **Staleness check**: Compare `checkpointed` timestamp to now. If older than a few days, note: "This checkpoint is [N] days old." (Informational only — proceed unless context seems significantly outdated.)
 3. **Uncommitted changes drift**: If `uncommitted_changes: true` in frontmatter, run `git status --short` and compare. If the working tree is now clean (changes were committed or discarded), note: "Uncommitted changes from the checkpoint appear to have been resolved."
 
 If the checkpoint lacks YAML frontmatter (version 1 format), skip these checks and proceed.
 
 ### Step 4: Build Resumption Summary
 
-1. **Read the PRD files** listed at the top of the checkpoint in order
+1. **Read the PRD files** listed at the top of the checkpoint in order. If no PRD files are listed (malformed checkpoint), scan `$PROJECT_ROOT/.dev/<feature-name>/` for `*.md` files and read them instead.
 2. **Scan all checkpoint sections** — including `<context>`, `<current_state>`, `<next_action>`, `<key_files>`, `<decisions>`, `<blockers>`, and `<notes>` if present. For version 1 checkpoints without XML tags, use the heading-based sections instead.
 3. **Present a focused summary**:
 
@@ -73,8 +73,14 @@ When resuming, you may find the codebase has drifted from the checkpoint. Follow
 
 | Situation | Action |
 |-----------|--------|
-| File changed since checkpoint but still exists | Proceed, note the drift in summary |
+| File differs from checkpoint description (based on `git diff` or content mismatch) | Proceed, note the drift in summary |
 | Key file missing or renamed | **STOP** — ask me how to proceed |
 | New files not mentioned in checkpoint | Proceed, mention them |
 | Branch mismatch | Ask (handled in Step 3) |
 | PRD files missing | **STOP** — cannot resume without PRD |
+
+### Step 6: Begin Work
+
+After confirmation, proceed with the first action from `<next_action>`. Follow the PRD phases and gates.
+
+When you reach a phase gate or context is filling up, run `/dev-checkpoint` to save progress.

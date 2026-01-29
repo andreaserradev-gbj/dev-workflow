@@ -23,31 +23,9 @@ You produce documentation, not code. Every session must end with files on disk.
 
 **Note**: All `.dev/` references in this command refer to `$PROJECT_ROOT/.dev/`, where `$PROJECT_ROOT` is determined in Step 0.
 
-## PLAN MODE OVERRIDE
+## PLAN MODE NOTE
 
-If plan mode is active (you received a system reminder assigning a plan file and telling you to use `ExitPlanMode`), adapt your workflow as follows:
-
-**Your 3-phase workflow (Understand, Research, Write PRD) stays the same.** Ignore plan mode's 5-phase workflow (Explore/Design/Review/Final Plan/ExitPlanMode). The PRD IS the plan.
-
-**Phase 1 and Phase 2 are unchanged** — ask questions, confirm understanding, research the codebase.
-
-**Phase 3 changes**:
-1. Instead of writing files to `$PROJECT_ROOT/.dev/<feature-name>/`, write a **PRD summary** to the plan file. The summary should include:
-   - Executive Summary (what and why)
-   - Architecture Decision (approach chosen and rationale)
-   - Proposed file structure (`$PROJECT_ROOT/.dev/<feature-name>/00-master-plan.md` and any sub-PRDs)
-   - Implementation phases overview (phase names, goals, and step counts)
-   - File Changes Summary (new and modified files)
-2. End the plan file with: "Approve this PRD plan to generate the full PRD files in `$PROJECT_ROOT/.dev/<feature-name>/`."
-3. Call `ExitPlanMode`.
-
-**After ExitPlanMode is approved** (CRITICAL — read carefully):
-- You are STILL in the `/dev-plan` command. Your job is to produce PRD documentation, NOT to implement code.
-- DO NOT read code files, create implementation tasks, or start building anything.
-- Your ONLY next step: expand the approved summary into full PRD files under `$PROJECT_ROOT/.dev/<feature-name>/` using the templates in Phase 3 below.
-- Follow Phase 3 exactly: create `00-master-plan.md` (and sub-PRDs if complex), list the files you created, then suggest `/dev-checkpoint`.
-
-**If plan mode is NOT active**: Ignore this section entirely. Follow Phases 1-3 as written below.
+If plan mode is active: write a PRD summary to the plan file, call `ExitPlanMode`, then write the full PRD files after approval. You are still producing documentation, not code.
 
 ## 3-COMMAND ECOSYSTEM
 
@@ -59,14 +37,9 @@ If plan mode is active (you received a system reminder assigning a plan file and
 
 `/dev-resume` reads the checkpoint and PRD files to resume work. It expects `$PROJECT_ROOT/.dev/<feature-name>/` to contain at minimum `00-master-plan.md`.
 
-## AVAILABLE AGENTS
+## EXPLORE AGENT
 
-You have powerful agents to accelerate research. Use the **Task tool** to launch them:
-- **`feature-dev:code-explorer`** — deep codebase analysis: traces execution paths, maps architecture layers, documents dependencies
-- **`feature-dev:code-architect`** — designs feature architectures: analyzes existing patterns, provides implementation blueprints with specific files to create/modify
-- **Explore agent** (`subagent_type=Explore`) — fast codebase search: find files by pattern, search for keywords, answer structural questions
-
-Launch 2-3 agents in parallel when possible for faster research.
+Use the **Task tool** with `subagent_type=Explore` for codebase research. It can find files by pattern, search for keywords, and answer structural questions. Launch multiple searches in parallel when possible.
 
 ## PHASE 1: UNDERSTAND
 
@@ -97,13 +70,21 @@ If `$ARGUMENTS` above is empty (the user ran `/dev-plan` with no arguments):
 
 ## PHASE 2: RESEARCH
 
-Based on my answers, investigate the codebase using the agents listed above. Focus on:
+Based on my answers, investigate the codebase using the Explore agent. Focus on:
 - Existing patterns that can be reused
 - Files that will need modification
 - Architecture constraints and dependencies
 - Similar implementations to learn from
 
-Present a concise summary of findings and ask for corrections or additions.
+### Research Summary Format
+
+After investigation, present:
+1. **Patterns to reuse** — existing code/architecture you'll leverage
+2. **Files to modify** — list of paths with 1-line descriptions
+3. **Key decisions** — 2-3 architectural choices needing confirmation
+4. **Open questions** — anything unclear (if any)
+
+Keep it to ~10-15 lines. Ask for corrections or additions before proceeding.
 
 > **Guardrail**: Research serves the PRD. Move to writing after one research round. If I request deeper investigation, do one more round — then write.
 
@@ -122,7 +103,6 @@ Present a concise summary of findings and ask for corrections or additions.
 ## RULES
 
 - ALWAYS produce at least `$PROJECT_ROOT/.dev/<feature-name>/00-master-plan.md`
-- Do NOT implement code — your output is documentation
 - Do NOT research endlessly — one round of research, then write
 - Fold research findings into the master plan's "Research Findings" section (no separate `findings.md`)
 - Use status markers (`⬜`/`✅`) and phase gates so `/dev-checkpoint` can parse progress
@@ -274,7 +254,7 @@ _(Only for complex features. Remove this section for simple features.)_
 [Explanation of what to do]
 
 ```
-// Code snippet showing the change
+[Pseudocode or interface signature]
 ```
 
 ### Step 2: [Title]
@@ -308,7 +288,8 @@ _(Only for complex features. Remove this section for simple features.)_
 
 ---
 
-## CHECKPOINT COMPATIBILITY
+<details>
+<summary><strong>CHECKPOINT COMPATIBILITY</strong> (reference for maintainers)</summary>
 
 Your PRD files must be parseable by `/dev-checkpoint` and `/dev-resume`. The contract:
 
@@ -322,3 +303,5 @@ Your PRD files must be parseable by `/dev-checkpoint` and `/dev-resume`. The con
 | YAML frontmatter | `branch`, `last_commit`, `uncommitted_changes`, `checkpointed` in checkpoint | `/dev-resume` verifies context (branch, staleness, drift) |
 | Semantic XML tags | `<context>`, `<current_state>`, `<next_action>`, `<key_files>`, `<decisions>`, `<blockers>`, `<notes>` | `/dev-resume` scans sections; `/dev-checkpoint` wraps content |
 | Decisions/Blockers | `<decisions>` and `<blockers>` sections (omitted if empty) | `/dev-checkpoint` captures; `/dev-resume` surfaces in summary |
+
+</details>
