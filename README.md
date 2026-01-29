@@ -2,9 +2,11 @@
 
 # dev-workflow
 
-Claude Code commands for multi-session development workflows: plan features with structured PRDs, checkpoint progress, and resume across sessions.
+**Claude Code commands for multi-session development workflows: plan features with structured PRDs, checkpoint progress, and resume across sessions.**
 
-Software features rarely fit in a single session. `dev-workflow` gives Claude Code a **plan → build → checkpoint → resume** cycle so context survives across sessions.
+> **Before:** *"Here's where I left off: I was working on the auth feature, finished the login endpoint, the tests are passing, next step is adding the refresh token logic, oh and I decided to use Redis for session storage because..."*
+>
+> **After:** `/dev-resume`
 
 **[Installation](#installation) · [How It Works](#how-it-works) · [Commands](#commands) · [Why This Workflow?](#why-this-workflow)**
 
@@ -62,16 +64,19 @@ Commands will be available as `/dev-plan`, `/dev-checkpoint`, `/dev-resume`.
 
 ## How It Works
 
-1. **Plan** (`/dev-plan`) -- produce a structured PRD in `.dev/<feature-name>/`
-2. **Build** -- implement the feature following the PRD phases and gates
-3. **Checkpoint** (`/dev-checkpoint`) -- capture progress, git state, decisions, and next steps
-4. **Resume** (`/dev-resume`) -- reload the checkpoint, verify context, and pick up where you left off
+1. **Plan** — Run `/dev-plan` in edit mode (not plan mode, which would skip saving the detailed PRD)
+2. **Iterate** — Draft and refine the PRD through a few iterations
+3. **Checkpoint** — Run `/dev-checkpoint` to capture progress
+4. **Restart** — Exit and reopen Claude (better than clearing context)
+5. **Resume** — Run `/dev-resume` in plan mode so Claude creates its own implementation plan
+6. **Build** — Switch to edit mode with cleared context for focused work
+7. **Repeat** — Checkpoint before context fills up, then cycle continues
 
 ## Commands
 
 ### `/dev-plan`
 
-**Run in:** edit mode
+> **Run in:** edit mode
 
 Plan a new feature with structured PRD documentation. Walks through three phases:
 
@@ -83,7 +88,7 @@ The PRD uses status markers (`⬜`/`✅`) and phase gates (`⏸️ GATE`) that t
 
 ### `/dev-checkpoint`
 
-**Run in:** edit mode
+> **Run in:** edit mode
 
 Save progress and generate a continuation prompt. Performs these steps:
 
@@ -95,7 +100,7 @@ Save progress and generate a continuation prompt. Performs these steps:
 
 ### `/dev-resume`
 
-**Run in:** plan mode
+> **Run in:** plan mode
 
 Resume work from a previous checkpoint. Performs these steps:
 
@@ -130,23 +135,37 @@ By default, `.dev/` is tracked in git -- PRDs and checkpoints become part of you
 
 ## Why This Workflow?
 
+> **TL;DR:** Complex features overflow context windows. This workflow saves structured progress to disk so you can clear context and resume without re-explaining everything.
+
 When implementing complex features, my usual approach is to start in plan mode and ask Claude to explore specific files, architecture patterns, or areas of the codebase while thinking through a particular problem. I iterate based on the findings. Sometimes it's a single pass, but often there are multiple rounds of exploration and brainstorming. For complex features, this can consume nearly the entire context window before arriving at a solution.
+
+---
 
 In these scenarios, I found myself repeatedly asking Claude to save the plan to a project folder so I could digest the information, verify the codebase findings, and adjust course when Claude's analysis was incomplete or when it surfaced code I hadn't considered. Saving plans to Claude's internal folders wasn't enough for complex cases, which is why I kept asking to persist PRDs in my project.
 
+---
+
 After finalizing a plan, the build phase often spans multiple sessions due to context constraints. I needed a way to tell Claude where to restart and how to persist progress. Updating the entire PRD was one solution, but loading it at startup created a lot of context for Claude to digest every time. So I created a separate checkpoint file to store only the insights from the previous iteration, and start the next session from there.
+
+---
 
 This led to writing nearly the same "resume from checkpoint" prompt over and over, which made me think: why not consolidate this pattern into a reusable workflow? The **plan → build → checkpoint → resume** cycle is just context engineering best practices adapted to fit my working style.
 
 ### How I Use It
 
-**Simple features or bug fixes:** I start with a fresh prompt in plan mode, switch to edit mode, and complete the session.
+I replace plan mode with `/dev-plan`. Why not run it *in* plan mode? Because plan mode would shift focus toward implementation rather than PRD creation. Claude would skip saving the detailed PRD. After drafting and refining the PRD through a few iterations, I invoke `/dev-checkpoint` to capture progress.
 
-**Complex features (the majority of my work):** I replace plan mode with `/dev-plan`. Why not run it *in* plan mode? Because plan mode would shift focus toward implementation rather than PRD creation. Claude would skip saving the detailed PRD. After drafting and refining the PRD through a few iterations, I invoke `/dev-checkpoint` to capture progress.
+---
 
-Then I clear the context (or exit and reopen Claude) and run `/dev-resume` in plan mode. Why plan mode here? Because I want Claude to create its own implementation plan based on the checkpoint. When I switch to edit mode, I choose to clear context so Claude starts fresh with only the details for the focused step.
+I exit and reopen Claude (it seems better than clearing the context) and run `/dev-resume` in plan mode. Why plan mode here? Because I want Claude to create its own implementation plan based on the checkpoint. When I switch to edit mode, I choose to clear context so Claude starts fresh with only the details for the focused step.
 
-I stop Claude before the context fills up with too many details, ask it to commit, and create a new checkpoint. Sometimes the checkpoint is a natural pause to run manual tests, add unit tests, or verify behavior. Other times it's simply a signal to proceed to the next phase. It depends on the task. Frontend work has different checkpointing needs than backend, API changes differ from refactors, and so on. Then I clear the context, and the cycle repeats.
+---
+
+I stop Claude before the context fills up with too many details, ask it to commit, and create a new checkpoint. Sometimes the checkpoint is a natural pause to run manual tests, add unit tests, or verify behavior. Other times it's simply a signal to proceed to the next phase. It depends on the task. Frontend work has different checkpointing needs than backend, API changes differ from refactors, and so on.
+
+---
+
+Then I clear the context, and the cycle repeats.
 
 ### A Note on Master and Sub-PRDs
 
