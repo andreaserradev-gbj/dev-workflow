@@ -1,17 +1,14 @@
+<div align="center">
+
 # dev-workflow
 
 Claude Code commands for multi-session development workflows: plan features with structured PRDs, checkpoint progress, and resume across sessions.
 
-These commands are developed and tested for [Claude Code](https://docs.anthropic.com/en/docs/claude-code).
+Software features rarely fit in a single session. `dev-workflow` gives Claude Code a **plan → build → checkpoint → resume** cycle so context survives across sessions.
 
-## Overview
+**[Installation](#installation) · [How It Works](#how-it-works) · [Commands](#commands) · [Why This Workflow?](#why-this-workflow)**
 
-Software features rarely fit in a single session. `dev-workflow` gives Claude Code a **plan - build - checkpoint - resume** cycle so context survives across sessions:
-
-1. **Plan** (`/dev-plan`) -- produce a structured PRD in `.dev/<feature-name>/`
-2. **Build** -- implement the feature following the PRD phases and gates
-3. **Checkpoint** (`/dev-checkpoint`) -- capture progress, git state, decisions, and next steps
-4. **Resume** (`/dev-resume`) -- reload the checkpoint, verify context, and pick up where you left off
+</div>
 
 ## Installation
 
@@ -40,9 +37,18 @@ ln -s "$(pwd)/commands/dev-resume.md" ~/.claude/commands/dev-resume.md
 
 Commands will be available as `/dev-plan`, `/dev-checkpoint`, `/dev-resume`.
 
+## How It Works
+
+1. **Plan** (`/dev-plan`) -- produce a structured PRD in `.dev/<feature-name>/`
+2. **Build** -- implement the feature following the PRD phases and gates
+3. **Checkpoint** (`/dev-checkpoint`) -- capture progress, git state, decisions, and next steps
+4. **Resume** (`/dev-resume`) -- reload the checkpoint, verify context, and pick up where you left off
+
 ## Commands
 
 ### `/dev-plan`
+
+**Run in:** edit mode
 
 Plan a new feature with structured PRD documentation. Walks through three phases:
 
@@ -54,6 +60,8 @@ The PRD uses status markers (`⬜`/`✅`) and phase gates (`⏸️ GATE`) that t
 
 ### `/dev-checkpoint`
 
+**Run in:** edit mode
+
 Save progress and generate a continuation prompt. Performs these steps:
 
 1. Identify the active feature
@@ -63,6 +71,8 @@ Save progress and generate a continuation prompt. Performs these steps:
 5. Generate and save `.dev/<feature-name>/checkpoint.md`
 
 ### `/dev-resume`
+
+**Run in:** plan mode
 
 Resume work from a previous checkpoint. Performs these steps:
 
@@ -75,15 +85,14 @@ Resume work from a previous checkpoint. Performs these steps:
 ## Workflow
 
 ```
-  /dev-plan                /dev-checkpoint           /dev-resume
- ┌──────────┐            ┌───────────────┐         ┌────────────┐
- │ Understand│            │ Update markers│         │ Load       │
- │ Research  │──build──>  │ Capture git   │──next──>│ Verify     │
- │ Write PRD │            │ Capture context│  session│ Summarize  │
- └──────────┘            │ Save checkpoint│         │ Continue   │
-                          └───────────────┘         └────────────┘
-                                  │                       │
-                                  └───── repeat ──────────┘
+┌────────────┐       ┌──────────────────┐       ┌──────────────┐
+│            │       │                  │       │              │
+│ /dev-plan  │──────►│ /dev-checkpoint  │──────►│ /dev-resume  │
+│            │ build │                  │ next  │              │
+└────────────┘       └──────────────────┘session└──────────────┘
+                              ▲                        │
+                              │         build          │
+                              └────────────────────────┘
 ```
 
 The cycle repeats: build, checkpoint, resume, build, checkpoint, resume... until the feature is complete.
@@ -96,38 +105,29 @@ By default, `.dev/` is tracked in git -- PRDs and checkpoints become part of you
 .dev/
 ```
 
-## Format Reference
+## Why This Workflow?
 
-The three commands share a contract so they can read each other's output.
+When implementing complex features, my usual approach is to start in plan mode and ask Claude to explore specific files, architecture patterns, or areas of the codebase while thinking through a particular problem. I iterate based on the findings. Sometimes it's a single pass, but often there are multiple rounds of exploration and brainstorming. For complex features, this can consume nearly the entire context window before arriving at a solution.
 
-### PRD format (produced by `/dev-plan`)
+In these scenarios, I found myself repeatedly asking Claude to save the plan to a project folder so I could digest the information, verify the codebase findings, and adjust course when Claude's analysis was incomplete or when it surfaced code I hadn't considered. Saving plans to Claude's internal folders wasn't enough for complex cases, which is why I kept asking to persist PRDs in my project.
 
-| Element | Format | Used By |
-|---------|--------|---------|
-| Status markers | `⬜` (pending) / `✅` (done) | `/dev-checkpoint` updates these |
-| Phase gates | `⏸️ **GATE**: ... Continue or /dev-checkpoint.` | `/dev-checkpoint` identifies pause points |
-| File paths | Backtick-quoted in File Changes Summary | `/dev-resume` reads for context |
-| Sub-PRD links | Relative links in Sub-PRD Overview table | `/dev-resume` navigates the full plan |
-| Feature directory | `.dev/<feature-name>/` | Both commands locate files here |
+After finalizing a plan, the build phase often spans multiple sessions due to context constraints. I needed a way to tell Claude where to restart and how to persist progress. Updating the entire PRD was one solution, but loading it at startup created a lot of context for Claude to digest every time. So I created a separate checkpoint file to store only the insights from the previous iteration, and start the next session from there.
 
-### Checkpoint format (produced by `/dev-checkpoint`)
+This led to writing nearly the same "resume from checkpoint" prompt over and over, which made me think: why not consolidate this pattern into a reusable workflow? The **plan → build → checkpoint → resume** cycle is just context engineering best practices adapted to fit my working style.
 
-| Element | Format | Used By |
-|---------|--------|---------|
-| YAML frontmatter | `branch`, `last_commit`, `uncommitted_changes`, `checkpointed` | `/dev-resume` verifies context |
-| Semantic XML tags | `<context>`, `<current_state>`, `<next_action>`, `<key_files>`, `<decisions>`, `<blockers>`, `<notes>` | `/dev-resume` scans sections |
-| Decisions/Blockers | `<decisions>` and `<blockers>` sections (omitted if empty) | `/dev-resume` surfaces in summary |
+### How I Use It
 
-### Backward compatibility
+**Simple features or bug fixes:** I start with a fresh prompt in plan mode, switch to edit mode, and complete the session.
 
-Version 1 checkpoints (without YAML frontmatter or XML tags) are handled gracefully -- `/dev-resume` falls back to heading-based parsing.
+**Complex features (the majority of my work):** I replace plan mode with `/dev-plan`. Why not run it *in* plan mode? Because plan mode would shift focus toward implementation rather than PRD creation. Claude would skip saving the detailed PRD. After drafting and refining the PRD through a few iterations, I invoke `/dev-checkpoint` to capture progress.
 
-## Examples
+Then I clear the context (or exit and reopen Claude) and run `/dev-resume` in plan mode. Why plan mode here? Because I want Claude to create its own implementation plan based on the checkpoint. When I switch to edit mode, I choose to clear context so Claude starts fresh with only the details for the focused step.
 
-The `examples/` directory contains real artifacts produced during the development of these commands:
+I stop Claude before the context fills up with too many details, ask it to commit, and create a new checkpoint. Sometimes the checkpoint is a natural pause to run manual tests, add unit tests, or verify behavior. Other times it's simply a signal to proceed to the next phase. It depends on the task. Frontend work has different checkpointing needs than backend, API changes differ from refactors, and so on. Then I clear the context, and the cycle repeats.
 
-- `examples/00-master-plan.md` -- a complete PRD with status markers, phase gates, research findings, architecture decisions, and file changes summary
-- `examples/checkpoint.md` -- a v2 checkpoint with YAML frontmatter and semantic XML tags
+### A Note on Master and Sub-PRDs
+
+For very complex features where the context requirements are substantial, I found that a single PRD becomes too long and cluttered. This ties back to the same principle: you want Claude to start with the least context possible to avoid drift or hallucination. So when needed, I ask Claude during the `/dev-plan` phase to break the PRD into sub-tasks, each with its own focused document. Claude usually doesn't do this by itself, so you have to be explicit about it.
 
 ## Credits
 
