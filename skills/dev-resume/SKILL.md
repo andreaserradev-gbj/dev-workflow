@@ -1,7 +1,7 @@
 ---
+name: dev-resume
 description: Resume work from a previous session checkpoint
-version: 2
-reads: $PROJECT_ROOT/.dev/<feature-name>/checkpoint.md, $PROJECT_ROOT/.dev/<feature-name>/*.md
+disable-model-invocation: true
 ---
 
 ## Resume From Checkpoint

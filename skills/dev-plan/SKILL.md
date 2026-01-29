@@ -1,5 +1,7 @@
 ---
+name: dev-plan
 description: Plan a new feature with structured PRD documentation
+disable-model-invocation: true
 ---
 
 ## Step 0: Determine Project Root
@@ -93,8 +95,8 @@ Keep it to ~10-15 lines. Ask for corrections or additions before proceeding.
 1. **Determine complexity**: Simple (1-3 files, single phase) = single PRD file. Complex (4+ files, multiple phases) = master plan + sub-PRDs.
 2. **Propose architecture approach** based on research. Ask me to confirm or adjust.
 3. **Create files** under `$PROJECT_ROOT/.dev/<feature-name>/`:
-   - Always create `00-master-plan.md` (use Master Plan Template below)
-   - For complex features, create `01-sub-prd-[name].md` etc. (use Sub-PRD Template below)
+   - Always create `00-master-plan.md` using the template in `master-plan-template.md`
+   - For complex features, create `01-sub-prd-[name].md` etc. using the template in `sub-prd-template.md`
 4. **State what was created** — list every file path written.
 5. **Suggest running `/dev-checkpoint`** to save a continuation prompt.
 
@@ -110,186 +112,7 @@ Keep it to ~10-15 lines. Ask for corrections or additions before proceeding.
 
 ---
 
-## Template: Master Plan (`00-master-plan.md`)
-
-```markdown
-# [Feature Name] - Master Plan
-
-**Status**: Not Started
-**Created**: [Date]
-**Last Updated**: [Date]
-
----
-
-## Executive Summary
-
-[1-2 paragraphs: what the feature does and why it's needed]
-
-**Reference**: [Path to existing implementation if any]
-
----
-
-## Research Findings
-
-### Codebase Patterns
-- [Pattern]: [Where found] — [How it applies]
-
-### Dependencies
-- [Dependency]: [Purpose]
-
-### Technical Decisions
-
-| Decision | Rationale | Alternatives Considered |
-|----------|-----------|------------------------|
-| [Choice] | [Why]     | [What else was considered] |
-
----
-
-## Architecture Decision
-
-**Approach**: [The main architectural choice]
-
-[Explanation of why this approach was chosen]
-
-**Data Flow**:
-[ASCII diagram if helpful]
-
----
-
-## Sub-PRD Overview
-
-_(Only for complex features. Remove this section for simple features.)_
-
-| Sub-PRD | Title | Dependency | Status | Document |
-|---------|-------|------------|--------|----------|
-| **1** | [Title] | None | Not Started | [link] |
-| **2** | [Title] | 1 | Not Started | [link] |
-
----
-
-## Implementation Order
-
-### Phase 1: [Phase Name]
-**Goal**: [What this phase accomplishes]
-
-1. ⬜ [Step 1]
-2. ⬜ [Step 2]
-3. ⬜ [Step 3]
-
-**Verification**: [How to verify this phase is complete]
-
-⏸️ **GATE**: Phase complete. Continue or `/dev-checkpoint`.
-
----
-
-### Phase 2: [Phase Name]
-**Goal**: [What this phase accomplishes]
-
-1. ⬜ [Step 1]
-2. ⬜ [Step 2]
-
-**Verification**: [How to verify this phase is complete]
-
-⏸️ **GATE**: Phase complete. Continue or `/dev-checkpoint`.
-
----
-
-## File Changes Summary
-
-### New Files
-
-| File | Purpose |
-|------|---------|
-| `path/to/file` | [Description] |
-
-### Modified Files
-
-| File | Changes |
-|------|---------|
-| `path/to/file` | [What changes] |
-
----
-
-## Reference Files
-
-- [Path]: [Description]
-- [Path]: [Description]
-```
-
----
-
-## Template: Sub-PRD (`01-sub-prd-[name].md`)
-
-```markdown
-# Sub-PRD: [Title]
-
-**Parent**: [00-master-plan.md](./00-master-plan.md)
-**Status**: Not Started
-**Dependency**: [Previous sub-PRD if any]
-**Last Updated**: [Date]
-
----
-
-## Implementation Progress
-
-| Step | Description | Status |
-|------|-------------|--------|
-| **1** | [Description] | ⬜ Not Started |
-| **2** | [Description] | ⬜ Not Started |
-
----
-
-## Goal
-
-[What this sub-PRD accomplishes]
-
----
-
-## Implementation Steps
-
-### Step 1: [Title]
-
-**File**: `path/to/file`
-
-[Explanation of what to do]
-
-```
-[Pseudocode or interface signature]
-```
-
-### Step 2: [Title]
-...
-
----
-
-## Files Changed
-
-### New Files
-
-| File | Purpose |
-|------|---------|
-| `path/to/file` | [Description] |
-
-### Modified Files
-
-| File | Changes |
-|------|---------|
-| `path/to/file` | [What changes] |
-
----
-
-## Verification Checklist
-
-- [ ] [Verification step 1]
-- [ ] [Verification step 2]
-
-⏸️ **GATE**: Sub-PRD complete. Continue to next sub-PRD or `/dev-checkpoint`.
-```
-
----
-
-<details>
-<summary><strong>CHECKPOINT COMPATIBILITY</strong> (reference for maintainers)</summary>
+## CHECKPOINT COMPATIBILITY
 
 Your PRD files must be parseable by `/dev-checkpoint` and `/dev-resume`. The contract:
 
@@ -303,5 +126,3 @@ Your PRD files must be parseable by `/dev-checkpoint` and `/dev-resume`. The con
 | YAML frontmatter | `branch`, `last_commit`, `uncommitted_changes`, `checkpointed` in checkpoint | `/dev-resume` verifies context (branch, staleness, drift) |
 | Semantic XML tags | `<context>`, `<current_state>`, `<next_action>`, `<key_files>`, `<decisions>`, `<blockers>`, `<notes>` | `/dev-resume` scans sections; `/dev-checkpoint` wraps content |
 | Decisions/Blockers | `<decisions>` and `<blockers>` sections (omitted if empty) | `/dev-checkpoint` captures; `/dev-resume` surfaces in summary |
-
-</details>

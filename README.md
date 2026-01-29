@@ -50,16 +50,16 @@ Then in Claude Code:
 
 ### Manual install
 
-Clone the repo and symlink (or copy) the command files into your Claude Code commands directory:
+Clone the repo and symlink (or copy) the skill directories into your Claude Code skills directory:
 
 ```bash
 git clone https://github.com/andreaserradev-gbj/dev-workflow.git
 cd dev-workflow
 
-# Symlink all commands
-ln -s "$(pwd)/commands/dev-plan.md" ~/.claude/commands/dev-plan.md
-ln -s "$(pwd)/commands/dev-checkpoint.md" ~/.claude/commands/dev-checkpoint.md
-ln -s "$(pwd)/commands/dev-resume.md" ~/.claude/commands/dev-resume.md
+# Symlink all skills
+ln -s "$(pwd)/skills/dev-plan" ~/.claude/skills/dev-plan
+ln -s "$(pwd)/skills/dev-checkpoint" ~/.claude/skills/dev-checkpoint
+ln -s "$(pwd)/skills/dev-resume" ~/.claude/skills/dev-resume
 ```
 
 Commands will be available as `/dev-plan`, `/dev-checkpoint`, `/dev-resume`.
