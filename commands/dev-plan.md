@@ -2,15 +2,26 @@
 description: Plan a new feature with structured PRD documentation
 ---
 
+## Step 0: Determine Project Root
+
+Before proceeding, determine the project root directory:
+
+1. If this is a git repository, use: `git rev-parse --show-toplevel`
+2. If not a git repository, use the initial working directory from the session context (shown in the environment info at session start)
+
+Store this as `$PROJECT_ROOT` and use it for all `.dev/` path references throughout this command.
+
 ## PRIMARY DIRECTIVE
 
-Your sole deliverable is PRD files written to `.dev/<feature-name>/`.
+Your sole deliverable is PRD files written to `$PROJECT_ROOT/.dev/<feature-name>/`.
 This command is part of a 3-command system that creates persistent memory across Claude sessions:
 - **`/dev-plan`** (this command) — produces the PRD documentation
 - **`/dev-checkpoint`** — saves progress and generates a continuation prompt
 - **`/dev-resume`** — loads a checkpoint and resumes work
 
 You produce documentation, not code. Every session must end with files on disk.
+
+**Note**: All `.dev/` references in this command refer to `$PROJECT_ROOT/.dev/`, where `$PROJECT_ROOT` is determined in Step 0.
 
 ## PLAN MODE OVERRIDE
 
@@ -21,32 +32,32 @@ If plan mode is active (you received a system reminder assigning a plan file and
 **Phase 1 and Phase 2 are unchanged** — ask questions, confirm understanding, research the codebase.
 
 **Phase 3 changes**:
-1. Instead of writing files to `.dev/<feature-name>/`, write a **PRD summary** to the plan file. The summary should include:
+1. Instead of writing files to `$PROJECT_ROOT/.dev/<feature-name>/`, write a **PRD summary** to the plan file. The summary should include:
    - Executive Summary (what and why)
    - Architecture Decision (approach chosen and rationale)
-   - Proposed file structure (`.dev/<feature-name>/00-master-plan.md` and any sub-PRDs)
+   - Proposed file structure (`$PROJECT_ROOT/.dev/<feature-name>/00-master-plan.md` and any sub-PRDs)
    - Implementation phases overview (phase names, goals, and step counts)
    - File Changes Summary (new and modified files)
-2. End the plan file with: "Approve this PRD plan to generate the full PRD files in `.dev/<feature-name>/`."
+2. End the plan file with: "Approve this PRD plan to generate the full PRD files in `$PROJECT_ROOT/.dev/<feature-name>/`."
 3. Call `ExitPlanMode`.
 
 **After ExitPlanMode is approved** (CRITICAL — read carefully):
 - You are STILL in the `/dev-plan` command. Your job is to produce PRD documentation, NOT to implement code.
 - DO NOT read code files, create implementation tasks, or start building anything.
-- Your ONLY next step: expand the approved summary into full PRD files under `.dev/<feature-name>/` using the templates in Phase 3 below.
+- Your ONLY next step: expand the approved summary into full PRD files under `$PROJECT_ROOT/.dev/<feature-name>/` using the templates in Phase 3 below.
 - Follow Phase 3 exactly: create `00-master-plan.md` (and sub-PRDs if complex), list the files you created, then suggest `/dev-checkpoint`.
 
 **If plan mode is NOT active**: Ignore this section entirely. Follow Phases 1-3 as written below.
 
 ## 3-COMMAND ECOSYSTEM
 
-`/dev-checkpoint` reads your PRD files and creates `.dev/<feature-name>/checkpoint.md` with a continuation prompt. It relies on:
+`/dev-checkpoint` reads your PRD files and creates `$PROJECT_ROOT/.dev/<feature-name>/checkpoint.md` with a continuation prompt. It relies on:
 - **Status markers** (`⬜`/`✅`) in implementation steps to track progress
 - **Phase gates** with "Continue or `/dev-checkpoint`" to mark safe pause points
 - **File Changes Summary** to know which files will be modified
 - **Sub-PRD links** in the master plan to navigate the full plan
 
-`/dev-resume` reads the checkpoint and PRD files to resume work. It expects `.dev/<feature-name>/` to contain at minimum `00-master-plan.md`.
+`/dev-resume` reads the checkpoint and PRD files to resume work. It expects `$PROJECT_ROOT/.dev/<feature-name>/` to contain at minimum `00-master-plan.md`.
 
 ## AVAILABLE AGENTS
 
@@ -100,7 +111,7 @@ Present a concise summary of findings and ask for corrections or additions.
 
 1. **Determine complexity**: Simple (1-3 files, single phase) = single PRD file. Complex (4+ files, multiple phases) = master plan + sub-PRDs.
 2. **Propose architecture approach** based on research. Ask me to confirm or adjust.
-3. **Create files** under `.dev/<feature-name>/`:
+3. **Create files** under `$PROJECT_ROOT/.dev/<feature-name>/`:
    - Always create `00-master-plan.md` (use Master Plan Template below)
    - For complex features, create `01-sub-prd-[name].md` etc. (use Sub-PRD Template below)
 4. **State what was created** — list every file path written.
@@ -110,7 +121,7 @@ Present a concise summary of findings and ask for corrections or additions.
 
 ## RULES
 
-- ALWAYS produce at least `.dev/<feature-name>/00-master-plan.md`
+- ALWAYS produce at least `$PROJECT_ROOT/.dev/<feature-name>/00-master-plan.md`
 - Do NOT implement code — your output is documentation
 - Do NOT research endlessly — one round of research, then write
 - Fold research findings into the master plan's "Research Findings" section (no separate `findings.md`)
@@ -307,7 +318,7 @@ Your PRD files must be parseable by `/dev-checkpoint` and `/dev-resume`. The con
 | Phase gates | `⏸️ **GATE**: ... Continue or /dev-checkpoint.` | `/dev-checkpoint` identifies pause points |
 | File paths | Backtick-quoted in File Changes Summary | `/dev-resume` reads for context |
 | Sub-PRD links | Relative links in Sub-PRD Overview table | `/dev-resume` navigates the full plan |
-| Feature directory | `.dev/<feature-name>/` | Both commands locate files here |
+| Feature directory | `$PROJECT_ROOT/.dev/<feature-name>/` | Both commands locate files here |
 | YAML frontmatter | `branch`, `last_commit`, `uncommitted_changes`, `checkpointed` in checkpoint | `/dev-resume` verifies context (branch, staleness, drift) |
 | Semantic XML tags | `<context>`, `<current_state>`, `<next_action>`, `<key_files>`, `<decisions>`, `<blockers>`, `<notes>` | `/dev-resume` scans sections; `/dev-checkpoint` wraps content |
 | Decisions/Blockers | `<decisions>` and `<blockers>` sections (omitted if empty) | `/dev-checkpoint` captures; `/dev-resume` surfaces in summary |

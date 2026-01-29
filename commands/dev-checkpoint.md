@@ -1,22 +1,31 @@
 ---
 description: Save progress and generate continuation prompt for next session
 version: 2
-output: .dev/<feature-name>/checkpoint.md
-reads: .dev/<feature-name>/*.md, git state
+output: $PROJECT_ROOT/.dev/<feature-name>/checkpoint.md
+reads: $PROJECT_ROOT/.dev/<feature-name>/*.md, git state
 ---
 
 ## Checkpoint Current Session
 
 Review the current session and create a continuation prompt for the next session.
 
+### Step 0: Determine Project Root
+
+Before proceeding, determine the project root directory:
+
+1. If this is a git repository, use: `git rev-parse --show-toplevel`
+2. If not a git repository, use the initial working directory from the session context (shown in the environment info at session start)
+
+Store this as `$PROJECT_ROOT` and use it for all `.dev/` path references throughout this command.
+
 ### Step 1: Identify the Active Feature
 
-First, check if a `.dev/` directory exists. If it does not exist, ask me to specify the feature name and create the `.dev/<feature-name>/` directory before proceeding.
+First, check if a `$PROJECT_ROOT/.dev/` directory exists. If it does not exist, ask me to specify the feature name and create the `$PROJECT_ROOT/.dev/<feature-name>/` directory before proceeding.
 
-If `.dev/` exists, find all available features:
+If `$PROJECT_ROOT/.dev/` exists, find all available features:
 
 ```bash
-find .dev -maxdepth 1 -type d ! -name .dev
+find "$PROJECT_ROOT/.dev" -maxdepth 1 -type d ! -name .dev
 ```
 
 **If an argument was provided** (`$ARGUMENTS`):
@@ -30,7 +39,7 @@ find .dev -maxdepth 1 -type d ! -name .dev
 - If only one feature exists: use that one
 - If no features exist: ask me to specify the feature name
 
-The checkpoint will be saved to `.dev/<feature-name>/checkpoint.md`.
+The checkpoint will be saved to `$PROJECT_ROOT/.dev/<feature-name>/checkpoint.md`.
 
 ### Step 2: Update PRD Status Markers
 
@@ -152,7 +161,7 @@ Please continue with [Next Steps summary — adapt to the current phase: researc
 
 ### Step 6: Save Checkpoint
 
-Update the checkpoint file at `.dev/<feature-name>/checkpoint.md` with the new continuation prompt. If the file already exists, overwrite it completely with the new content. Use the Edit tool to replace the entire file content.
+Update the checkpoint file at `$PROJECT_ROOT/.dev/<feature-name>/checkpoint.md` with the new continuation prompt. If the file already exists, overwrite it completely with the new content. Use the Edit tool to replace the entire file content.
 
 ### Step 7: Summary
 

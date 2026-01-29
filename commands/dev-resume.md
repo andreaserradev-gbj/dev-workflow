@@ -1,19 +1,28 @@
 ---
 description: Resume work from a previous session checkpoint
 version: 2
-reads: .dev/<feature-name>/checkpoint.md, .dev/<feature-name>/*.md
+reads: $PROJECT_ROOT/.dev/<feature-name>/checkpoint.md, $PROJECT_ROOT/.dev/<feature-name>/*.md
 ---
 
 ## Resume From Checkpoint
 
+### Step 0: Determine Project Root
+
+Before proceeding, determine the project root directory:
+
+1. If this is a git repository, use: `git rev-parse --show-toplevel`
+2. If not a git repository, use the initial working directory from the session context (shown in the environment info at session start)
+
+Store this as `$PROJECT_ROOT` and use it for all `.dev/` path references throughout this command.
+
 ### Step 1: Identify Feature to Resume
 
-First, check if a `.dev/` directory exists. If it does not exist, inform me that no `.dev/` directory was found and ask what I'd like to work on. Do not proceed further.
+First, check if a `$PROJECT_ROOT/.dev/` directory exists. If it does not exist, inform me that no `$PROJECT_ROOT/.dev/` directory was found and ask what I'd like to work on. Do not proceed further.
 
-If `.dev/` exists, find all available checkpoints:
+If `$PROJECT_ROOT/.dev/` exists, find all available checkpoints:
 
 ```bash
-find .dev -name "checkpoint.md" -type f
+find "$PROJECT_ROOT/.dev" -name "checkpoint.md" -type f
 ```
 
 **If an argument was provided** (`$ARGUMENTS`):
@@ -29,7 +38,7 @@ find .dev -name "checkpoint.md" -type f
 
 ### Step 2: Load Checkpoint
 
-Read the checkpoint file: `.dev/<feature-name>/checkpoint.md`
+Read the checkpoint file: `$PROJECT_ROOT/.dev/<feature-name>/checkpoint.md`
 
 ### Step 3: Verify Checkpoint Context
 
