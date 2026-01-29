@@ -30,7 +30,6 @@ To update to the latest version:
 
 ```
 /plugin marketplace update dev-workflow
-/plugin update dev-workflow@dev-workflow
 ```
 
 If the plugin doesn't load correctly after updating, clear the cache and reinstall:
@@ -44,7 +43,7 @@ Then in Claude Code:
 
 ```
 /plugin marketplace add andreaserradev-gbj/dev-workflow
-/plugin install dev-workflow@dev-workflow
+/plugin install dev-workflow
 ```
 
 </details>
