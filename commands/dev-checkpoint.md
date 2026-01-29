@@ -41,12 +41,35 @@ find "$PROJECT_ROOT/.dev" -maxdepth 1 -type d ! -name .dev
 
 The checkpoint will be saved to `$PROJECT_ROOT/.dev/<feature-name>/checkpoint.md`.
 
-### Step 2: Update PRD Status Markers
+### Step 2: Update PRD Status Markers (REQUIRED)
 
-For each relevant task file in the feature directory:
-- Change ⬜ to ✅ for completed items
-- Keep ⬜ for pending items
-- Update any "Status" fields (e.g., "In Progress", "Complete")
+**This step is REQUIRED. Do not skip it.**
+
+#### 2a. List all PRD files in the feature directory:
+
+```bash
+find "$PROJECT_ROOT/.dev/<feature-name>" -name "*.md" -type f
+```
+
+#### 2b. For each PRD file found:
+
+1. **Read the file** using the Read tool
+2. **Identify completed items** - tasks/steps that were finished this session
+3. **Update status markers**:
+   - Change `⬜` to `✅` for completed items
+   - Keep `⬜` for pending items
+   - Update any "Status" fields (e.g., "In Progress", "Complete")
+4. **Use the Edit tool** to make the changes
+
+#### 2c. Track your updates:
+
+Keep a record of:
+- Which files were updated
+- What specific markers were changed (e.g., "Changed ⬜ to ✅ for 'Set up database schema'")
+
+This record will be reported in Step 7.
+
+**If no updates are needed** (nothing was completed), explicitly state: "No PRD updates needed - no items were completed this session."
 
 ### Step 3: Capture Git State
 
@@ -167,6 +190,6 @@ Update the checkpoint file at `$PROJECT_ROOT/.dev/<feature-name>/checkpoint.md` 
 
 Tell me:
 - Which feature was checkpointed
-- Which PRD files were updated
+- **PRD updates made** (list each file and what was changed, or state "No updates needed")
 - What the next steps are
 - Confirm the checkpoint location
