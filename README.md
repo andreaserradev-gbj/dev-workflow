@@ -21,6 +21,29 @@ Software features rarely fit in a single session. `dev-workflow` gives Claude Co
 
 Commands will be available as `/dev-workflow:dev-plan`, `/dev-workflow:dev-checkpoint`, `/dev-workflow:dev-resume`.
 
+### Updating
+
+To update to the latest version:
+
+```
+/plugin marketplace update dev-workflow
+/plugin update dev-workflow@dev-workflow
+```
+
+If the plugin doesn't load correctly after updating, clear the cache and reinstall:
+
+```bash
+rm -rf ~/.claude/plugins/cache/dev-workflow
+rm -rf ~/.claude/plugins/marketplaces/dev-workflow
+```
+
+Then in Claude Code:
+
+```
+/plugin marketplace add andreaserradev-gbj/dev-workflow
+/plugin install dev-workflow@dev-workflow
+```
+
 ### Manual install
 
 Clone the repo and symlink (or copy) the command files into your Claude Code commands directory:
