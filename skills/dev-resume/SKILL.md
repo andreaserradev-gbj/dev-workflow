@@ -2,6 +2,7 @@
 name: dev-resume
 description: Resume work from a previous session checkpoint
 disable-model-invocation: true
+user-invocable: true
 ---
 
 ## Resume From Checkpoint

@@ -2,6 +2,7 @@
 name: dev-plan
 description: Plan a new feature with structured PRD documentation
 disable-model-invocation: true
+user-invocable: true
 ---
 
 ## Step 0: Determine Project Root

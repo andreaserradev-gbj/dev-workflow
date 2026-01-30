@@ -2,6 +2,7 @@
 name: dev-checkpoint
 description: Save progress and generate continuation prompt for next session
 disable-model-invocation: true
+user-invocable: true
 ---
 
 ## Checkpoint Current Session
