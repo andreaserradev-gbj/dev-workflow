@@ -1,8 +1,8 @@
 # Commands to Skills Migration - Master Plan
 
-**Status**: Blocked (Plugin skill autocomplete bug #20998)
+**Status**: PR #1 open — blocked on bug #20998 (autocomplete)
 **Created**: 2026-01-29
-**Last Updated**: 2026-01-29
+**Last Updated**: 2026-01-30
 
 ---
 

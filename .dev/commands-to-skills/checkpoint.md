@@ -1,8 +1,8 @@
 ---
 branch: feature/commands-to-skills
-last_commit: 10e5695 Migrate from commands/ to skills/ format
-uncommitted_changes: true
-checkpointed: 2026-01-29T22:10:00Z
+last_commit: b17c83c Add CLAUDE.md, user-invocable frontmatter, and .dev/ example
+uncommitted_changes: false
+checkpointed: 2026-01-30T10:45:00Z
 ---
 
 Read the following PRD files in order:
@@ -13,16 +13,17 @@ Read the following PRD files in order:
 ## Context
 
 **Goal**: Migrate dev-workflow plugin from commands/ to skills/ format
-**Current phase**: Phase 6 (Merge) — blocked on upstream bug
-**Key completions**: All skills migrated, templates extracted, commands/ deleted
+**Current phase**: Phase 6 (Merge) — PR open, blocked on upstream bug
+**Key completions**: All skills migrated, PR #1 created with dogfooding showcase
 </context>
 
 <current_state>
 ## Current Progress
 
 - ✅ Phase 1-5: All migration work complete
-- ✅ Skills load correctly (visible in `/skills`, execute when typed manually)
-- ⬜ Phase 6: Merge blocked pending bug fix
+- ✅ Branch pushed to GitHub
+- ✅ PR #1 created: https://github.com/andreaserradev-gbj/dev-workflow/pull/1
+- ⬜ Phase 6: Merge blocked pending bug #20998 fix
 </current_state>
 
 <next_action>
@@ -32,9 +33,10 @@ After bug #20998 is fixed:
 1. Test autocomplete works for `/dev-workflow:dev-plan`, `/dev-workflow:dev-checkpoint`, `/dev-workflow:dev-resume`
 2. Complete Phase 6 merge tasks:
    - Review diff: `git diff main..feature/commands-to-skills`
-   - Merge branch to main
+   - Merge PR #1 to main
    - Delete feature branch
    - Tag release `v1.2.0`
+3. Delete `.claude-plugin/plugin.json` (local testing file)
 </next_action>
 
 <key_files>
@@ -45,7 +47,17 @@ After bug #20998 is fixed:
 - dev-checkpoint skill: skills/dev-checkpoint/SKILL.md
 - dev-resume skill: skills/dev-resume/SKILL.md
 - Plugin manifest: .claude-plugin/marketplace.json
+- PR: https://github.com/andreaserradev-gbj/dev-workflow/pull/1
 </key_files>
+
+<decisions>
+## Decisions
+
+1. Include `.dev/` folder in PR as dogfooding showcase
+2. Include `CLAUDE.md` for repository guidance
+3. Keep `plugin.json` untracked (local testing only, delete on merge)
+4. Added `user-invocable: true` to skill frontmatter
+</decisions>
 
 <blockers>
 ## Blockers / Gotchas
@@ -56,13 +68,12 @@ After bug #20998 is fixed:
   - Workaround: Type full command `/dev-workflow:dev-plan` without autocomplete
 </blockers>
 
-<decisions>
-## Decisions
+<notes>
+## Notes
 
-1. Keep skills/ format (not reverting to commands/) — bug will be fixed upstream
-2. Branch kept locally until bug is resolved
-3. Uncommitted changes: added `user-invocable: true` to SKILL.md files (testing)
-</decisions>
+- PR serves as meta-demonstration of using dev-workflow to develop dev-workflow itself
+- The `.dev/commands-to-skills/` directory in the PR shows real PRD and checkpoint files
+</notes>
 
 ---
 
