@@ -85,3 +85,10 @@ When resuming, you may find the codebase has drifted from the checkpoint. Follow
 After confirmation, proceed with the first action from `<next_action>`. Follow the PRD phases and gates.
 
 When you reach a phase gate or context is filling up, run `/dev-checkpoint` to save progress.
+
+## PRIVACY RULES
+
+When resuming, verify that checkpoint and PRD files do not contain sensitive information. If you find any of the following, warn the user:
+- Absolute paths containing usernames (e.g., `/Users/username/...`)
+- Secrets, API keys, tokens, or credentials
+- Personal information that shouldn't be stored

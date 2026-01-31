@@ -109,6 +109,19 @@ Keep it to ~10-15 lines. Ask for corrections or additions before proceeding.
 - Use status markers (`⬜`/`✅`) and phase gates so `/dev-checkpoint` can parse progress
 - End by telling me what files were created and suggesting `/dev-checkpoint`
 
+## PRIVACY RULES
+
+**NEVER include in PRD files:**
+- Absolute paths containing usernames (e.g., `/Users/username/...`, `/home/username/...`)
+- Secrets, API keys, tokens, or credentials
+- Personal information (names, emails, addresses)
+- Environment variables containing sensitive values
+
+**ALWAYS use instead:**
+- Relative paths from project root (e.g., `./src/`, `plugins/dev-workflow/`)
+- Generic references (e.g., "official Claude plugins marketplace" instead of full local path)
+- Placeholders for secrets (e.g., `<API_KEY>`, `$ENV_VAR`)
+
 ---
 
 ## Template: Master Plan (`00-master-plan.md`)

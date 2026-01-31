@@ -108,6 +108,12 @@ If a category is empty, omit it. Do not ask multiple rounds of questions.
 - Omit `<decisions>`, `<blockers>`, and `<notes>` sections entirely if empty.
 - If not a git repo, omit `branch`, `last_commit`, and `uncommitted_changes` from frontmatter.
 
+**Privacy rules** (MUST follow):
+- NEVER include absolute paths containing usernames (e.g., `/Users/username/...`)
+- NEVER include secrets, API keys, tokens, or credentials
+- Use relative paths from project root instead (e.g., `./src/`, `plugins/`)
+- Use generic descriptions for external references
+
 Create a continuation prompt following this format:
 
 ```
