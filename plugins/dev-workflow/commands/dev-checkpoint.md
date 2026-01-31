@@ -1,5 +1,6 @@
 ---
 description: Save progress and generate continuation prompt for next session
+argument-hint: <feature name>
 version: 2
 output: $PROJECT_ROOT/.dev/<feature-name>/checkpoint.md
 reads: $PROJECT_ROOT/.dev/<feature-name>/*.md, git state

@@ -1,5 +1,6 @@
 ---
 description: Resume work from a previous session checkpoint
+argument-hint: <feature name>
 version: 2
 reads: $PROJECT_ROOT/.dev/<feature-name>/checkpoint.md, $PROJECT_ROOT/.dev/<feature-name>/*.md
 ---

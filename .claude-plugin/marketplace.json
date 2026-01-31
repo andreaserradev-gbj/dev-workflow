@@ -9,11 +9,11 @@
     {
       "name": "dev-workflow",
       "description": "Plan features with structured PRDs, checkpoint progress, and resume across sessions.",
-      "version": "1.1.0",
+      "version": "1.2.0",
       "author": {
         "name": "Andrea Serra"
       },
-      "source": "./",
+      "source": "plugins/dev-workflow",
       "category": "productivity",
       "homepage": "https://github.com/andreaserradev-gbj/dev-workflow",
       "tags": ["claude-code", "workflow", "planning", "prd", "checkpoint", "session"],

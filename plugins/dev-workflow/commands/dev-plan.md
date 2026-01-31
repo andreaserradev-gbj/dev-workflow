@@ -1,5 +1,6 @@
 ---
 description: Plan a new feature with structured PRD documentation
+argument-hint: <feature description>
 ---
 
 ## Step 0: Determine Project Root

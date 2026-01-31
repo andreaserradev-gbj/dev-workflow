@@ -57,9 +57,9 @@ git clone https://github.com/andreaserradev-gbj/dev-workflow.git
 cd dev-workflow
 
 # Symlink all commands
-ln -s "$(pwd)/commands/dev-plan.md" ~/.claude/commands/dev-plan.md
-ln -s "$(pwd)/commands/dev-checkpoint.md" ~/.claude/commands/dev-checkpoint.md
-ln -s "$(pwd)/commands/dev-resume.md" ~/.claude/commands/dev-resume.md
+ln -s "$(pwd)/plugins/dev-workflow/commands/dev-plan.md" ~/.claude/commands/dev-plan.md
+ln -s "$(pwd)/plugins/dev-workflow/commands/dev-checkpoint.md" ~/.claude/commands/dev-checkpoint.md
+ln -s "$(pwd)/plugins/dev-workflow/commands/dev-resume.md" ~/.claude/commands/dev-resume.md
 ```
 
 Commands will be available as `/dev-plan`, `/dev-checkpoint`, `/dev-resume`.

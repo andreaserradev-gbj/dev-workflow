@@ -14,13 +14,15 @@ The plugin stores PRDs and checkpoints in a `.dev/<feature-name>/` directory wit
 ## Repository Structure
 
 ```
-commands/           # Slash command definitions (markdown files with YAML frontmatter)
-  dev-plan.md       # Feature planning command
-  dev-checkpoint.md # Progress checkpointing command
-  dev-resume.md     # Session resumption command
-.claude-plugin/     # Plugin metadata
-  plugin.json       # Plugin name, version, description
-  marketplace.json  # Marketplace listing info
+plugins/dev-workflow/           # Plugin package (official marketplace format)
+  .claude-plugin/
+    plugin.json                 # Plugin name, version, description
+  commands/                     # Slash command definitions
+    dev-plan.md                 # Feature planning command
+    dev-checkpoint.md           # Progress checkpointing command
+    dev-resume.md               # Session resumption command
+.claude-plugin/                 # Marketplace metadata (repo root)
+  marketplace.json              # Marketplace listing info
 ```
 
 ## Plugin Installation
@@ -35,9 +37,9 @@ The plugin can be installed via marketplace or manually:
 
 **Manual (symlinks):**
 ```bash
-ln -s "$(pwd)/commands/dev-plan.md" ~/.claude/commands/dev-plan.md
-ln -s "$(pwd)/commands/dev-checkpoint.md" ~/.claude/commands/dev-checkpoint.md
-ln -s "$(pwd)/commands/dev-resume.md" ~/.claude/commands/dev-resume.md
+ln -s "$(pwd)/plugins/dev-workflow/commands/dev-plan.md" ~/.claude/commands/dev-plan.md
+ln -s "$(pwd)/plugins/dev-workflow/commands/dev-checkpoint.md" ~/.claude/commands/dev-checkpoint.md
+ln -s "$(pwd)/plugins/dev-workflow/commands/dev-resume.md" ~/.claude/commands/dev-resume.md
 ```
 
 ## Command File Format
