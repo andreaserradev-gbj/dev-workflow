@@ -82,7 +82,7 @@ dev-workflow/
 **Goal**: Set up the new directory structure and plugin manifest
 
 1. ✅ Create `plugins/dev-workflow/.claude-plugin/` directory
-2. ✅ Create `plugins/dev-workflow/.claude-plugin/plugin.json` with plugin metadata (version 1.2.0)
+2. ✅ Create `plugins/dev-workflow/.claude-plugin/plugin.json` with plugin metadata (name, author, description)
 3. ✅ Create `plugins/dev-workflow/commands/` directory
 
 **Verification**: Directory structure exists with plugin.json
@@ -132,13 +132,36 @@ dev-workflow/
 
 ---
 
+### Phase 5: Fix JSON Schema Issues
+**Goal**: Fix plugin loading errors discovered during testing
+
+1. ✅ Add `./` prefix to source path in marketplace.json (`plugins/dev-workflow` → `./plugins/dev-workflow`)
+2. ✅ Remove invalid `$schema` field from plugin.json
+3. ✅ Remove invalid `version` field from plugin.json
+4. ✅ Add required `author` field to plugin.json
+
+**Verification**: Plugin loads and commands work correctly
+
+⏸️ **GATE**: Phase complete. Feature complete.
+
+---
+
+## Gotchas / Lessons Learned
+
+| Issue | Solution |
+|-------|----------|
+| Source path in marketplace.json must be a valid relative path | Use `./` prefix (e.g., `./plugins/dev-workflow` not `plugins/dev-workflow`) |
+| plugin.json has a minimal schema | Only `name`, `author`, and `description` are valid fields — do not include `$schema` or `version` |
+
+---
+
 ## File Changes Summary
 
 ### New Files
 
 | File | Purpose |
 |------|---------|
-| `plugins/dev-workflow/.claude-plugin/plugin.json` | Plugin manifest (name, description, author, version) |
+| `plugins/dev-workflow/.claude-plugin/plugin.json` | Plugin manifest (name, author, description) |
 | `plugins/dev-workflow/commands/dev-plan.md` | Moved from root, with argument-hint added |
 | `plugins/dev-workflow/commands/dev-checkpoint.md` | Moved from root, with argument-hint added |
 | `plugins/dev-workflow/commands/dev-resume.md` | Moved from root, with argument-hint added |
