@@ -13,7 +13,7 @@
       "author": {
         "name": "Andrea Serra"
       },
-      "source": "plugins/dev-workflow",
+      "source": "./plugins/dev-workflow",
       "category": "productivity",
       "homepage": "https://github.com/andreaserradev-gbj/dev-workflow",
       "tags": ["claude-code", "workflow", "planning", "prd", "checkpoint", "session"],
