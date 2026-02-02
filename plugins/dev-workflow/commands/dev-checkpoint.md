@@ -10,6 +10,14 @@ reads: $PROJECT_ROOT/.dev/<feature-name>/*.md, git state
 
 Review the current session and create a continuation prompt for the next session.
 
+### Agents
+
+This command uses a specialized agent for progress analysis:
+
+- **checkpoint-analyzer** (Haiku, orange) — Scans PRD files and extracts progress, decisions, and blockers
+
+Agent definition is in `plugins/dev-workflow/agents/`.
+
 ### Step 0: Determine Project Root
 
 Before proceeding, determine the project root directory:
@@ -42,37 +50,57 @@ find "$PROJECT_ROOT/.dev" -maxdepth 1 -type d ! -name .dev
 
 The checkpoint will be saved to `$PROJECT_ROOT/.dev/<feature-name>/checkpoint.md`.
 
-### Step 2: Update PRD Status Markers (REQUIRED)
+### Step 2: Analyze Session with Agent
+
+Launch the **checkpoint-analyzer agent** to scan PRD files and the current session:
+
+```
+"Analyze the PRD files in $PROJECT_ROOT/.dev/<feature-name>/ and the current session.
+Find: completed items (⬜ → ✅), pending items, decisions made, blockers encountered.
+Determine current phase and next step."
+```
+
+Use `subagent_type=checkpoint-analyzer` and `model=haiku`.
+
+### Step 3: Review Agent Findings
+
+After the agent returns:
+
+1. **Verify accuracy** — Check that completed/pending items match what happened
+2. **Add missing context** — Include any decisions or blockers the agent missed
+
+### Step 4: Update PRD Status Markers (REQUIRED)
 
 **This step is REQUIRED. Do not skip it.**
 
-#### 2a. List all PRD files in the feature directory:
+Based on the agent's findings, update PRD files:
+
+#### 4a. List all PRD files in the feature directory:
 
 ```bash
 find "$PROJECT_ROOT/.dev/<feature-name>" -name "*.md" -type f
 ```
 
-#### 2b. For each PRD file found:
+#### 4b. For each PRD file with updates needed (from agent analysis):
 
 1. **Read the file**
-2. **Identify completed items** — tasks/steps finished this session
-3. **Update status markers**:
-   - Change `⬜` to `✅` for completed items
+2. **Update status markers**:
+   - Change `⬜` to `✅` for completed items identified by the agent
    - Keep `⬜` for pending items
    - Update any "Status" fields (e.g., "In Progress", "Complete")
-4. **Edit the file** to save changes
+3. **Edit the file** to save changes
 
-#### 2c. Track your updates:
+#### 4c. Track your updates:
 
 Keep a record of:
 - Which files were updated
 - What specific markers were changed (e.g., "Changed ⬜ to ✅ for 'Set up database schema'")
 
-This record will be reported in Step 7.
+This record will be reported in Step 8.
 
 **If no updates are needed** (nothing was completed), explicitly state: "No PRD updates needed - no items were completed this session."
 
-### Step 3: Capture Git State
+### Step 5: Capture Git State
 
 If this is a git repository, capture the current state:
 
@@ -91,17 +119,15 @@ Store these values for the checkpoint YAML frontmatter.
 
 **If not a git repository**: Skip this step and omit `branch`, `last_commit`, and `uncommitted_changes` from the YAML frontmatter.
 
-### Step 4: Capture Session Context
+### Step 6: Confirm Session Context
 
-Infer the following from conversation context. Present your findings and ask: "I captured these from our session—correct me if I missed anything or got something wrong."
+Present the agent's findings (decisions, blockers, notes) and ask: "I captured these from our session—correct me if I missed anything or got something wrong."
 
-1. **Decisions made** — architectural choices, trade-offs, approaches selected
-2. **Blockers/gotchas** — issues encountered, things to watch out for
-3. **Notes** — anything else relevant for the next session
+If a category is empty, omit it.
 
-If a category is empty, omit it. Do not ask multiple rounds of questions.
+**STOP. Do not proceed to Step 7 until the user confirms these findings are correct or provides corrections. Wait for explicit confirmation.**
 
-### Step 5: Generate Continuation Prompt
+### Step 7: Generate Continuation Prompt
 
 **Template rules**:
 - Always include `<context>`, `<current_state>`, `<next_action>`, and `<key_files>`.
@@ -190,11 +216,11 @@ Read the following PRD files in order:
 Please continue with [Next Steps summary — adapt to the current phase: research, design, or implementation], following the specifications in the PRD.
 ```
 
-### Step 6: Save Checkpoint
+### Step 8: Save Checkpoint
 
 Write the continuation prompt to `$PROJECT_ROOT/.dev/<feature-name>/checkpoint.md`. Create the file if it doesn't exist, or overwrite it completely if it does.
 
-### Step 7: Summary
+### Step 9: Summary
 
 Tell me:
 - Which feature was checkpointed

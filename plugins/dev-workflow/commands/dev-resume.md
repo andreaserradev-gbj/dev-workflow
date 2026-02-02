@@ -1,11 +1,19 @@
 ---
 description: Resume work from a previous session checkpoint
 argument-hint: <feature name>
-version: 2
+version: 3
 reads: $PROJECT_ROOT/.dev/<feature-name>/checkpoint.md, $PROJECT_ROOT/.dev/<feature-name>/*.md
 ---
 
 ## Resume From Checkpoint
+
+### Agents
+
+This command uses a specialized agent for context loading:
+
+- **context-loader** (Haiku, yellow) — Parses checkpoint, compares git state, and builds context summary
+
+Agent definition is in `plugins/dev-workflow/agents/`.
 
 ### Step 0: Determine Project Root
 
@@ -37,38 +45,66 @@ find "$PROJECT_ROOT/.dev" -name "checkpoint.md" -type f
 - If only one checkpoint exists: use that one
 - If no checkpoints exist: ask me which task I'd like to work on
 
-### Step 2: Load Checkpoint
+### Step 2: Gather Git State
 
-Read the checkpoint file: `$PROJECT_ROOT/.dev/<feature-name>/checkpoint.md`
+Before launching the agent, gather the current git state:
 
-### Step 3: Verify Checkpoint Context
+```bash
+git branch --show-current
+git status --porcelain | head -1  # Check if there are uncommitted changes
+```
 
-If the checkpoint has YAML frontmatter (version 2 format), perform these checks:
+Store these values:
+- `$CURRENT_BRANCH` — current branch name
+- `$HAS_UNCOMMITTED` — true if `git status --porcelain` has output, false otherwise
 
-1. **Branch match**: Compare `branch` in frontmatter to current branch (`git branch --show-current`). If different, warn: "Checkpoint was on branch `X`, you're now on `Y`. Switch branch or continue?"
-2. **Staleness check**: Compare `checkpointed` timestamp to now. If older than a few days, note: "This checkpoint is [N] days old." (Informational only — proceed unless context seems significantly outdated.)
-3. **Uncommitted changes drift**: If `uncommitted_changes: true` in frontmatter, run `git status --short` and compare. If the working tree is now clean (changes were committed or discarded), note: "Uncommitted changes from the checkpoint appear to have been resolved."
+### Step 3: Load and Analyze Checkpoint with Agent
 
-If the checkpoint lacks YAML frontmatter (version 1 format), skip these checks and proceed.
+Launch the **context-loader agent** to parse the checkpoint and compare state:
 
-### Step 4: Build Resumption Summary
+```
+"Parse the checkpoint at $PROJECT_ROOT/.dev/<feature-name>/checkpoint.md.
 
-1. **Read the PRD files** listed at the top of the checkpoint in order. If no PRD files are listed (malformed checkpoint), scan `$PROJECT_ROOT/.dev/<feature-name>/` for `*.md` files and read them instead.
-2. **Scan all checkpoint sections** — including `<context>`, `<current_state>`, `<next_action>`, `<key_files>`, `<decisions>`, `<blockers>`, and `<notes>` if present. For version 1 checkpoints without XML tags, use the heading-based sections instead.
-3. **Present a focused summary**:
+Current git state (gathered by parent command):
+- Branch: $CURRENT_BRANCH
+- Uncommitted changes: $HAS_UNCOMMITTED
+
+Compare this against the checkpoint frontmatter and report any drift.
+Extract context summary, decisions, blockers, and next actions.
+Read the PRD files listed in the checkpoint."
+```
+
+Use `subagent_type=context-loader` and `model=haiku`.
+
+### Step 4: Review Agent Findings
+
+After the agent returns:
+
+1. **Check context validity**:
+   - **Fresh**: Proceed normally
+   - **Stale**: Note the age but proceed unless significantly outdated
+   - **Drifted**: Warn about branch mismatch or significant changes
+
+2. **Handle warnings**:
+   - If branch mismatch: Ask "Checkpoint was on branch `X`, you're now on `Y`. Switch branch or continue?"
+   - If uncommitted changes resolved: Note "Uncommitted changes from the checkpoint appear to have been resolved."
+
+### Step 5: Present Resumption Summary
+
+Present the agent's summary in this format:
 
 ```
 **Status**: [Current phase/step from context]
 **Last session**: [1-sentence summary of what was accomplished]
-**Decisions**: [Key decisions from <decisions>, or "None recorded"]
-**Watch out for**: [Blockers from <blockers>, or "Nothing flagged"]
+**Decisions**: [Key decisions, or "None recorded"]
+**Watch out for**: [Blockers, or "Nothing flagged"]
 
-**Start with**: [Concrete first action from <next_action>]
+**Start with**: [Concrete first action from next steps]
 ```
 
-4. **Wait for go-ahead** — do not proceed until I confirm.
+**Wait for go-ahead** — do not proceed until I confirm.
 
-### Step 5: Handling Discrepancies
+### Step 6: Handling Discrepancies
 
 When resuming, you may find the codebase has drifted from the checkpoint. Follow these rules:
 
@@ -77,12 +113,21 @@ When resuming, you may find the codebase has drifted from the checkpoint. Follow
 | File differs from checkpoint description (based on `git diff` or content mismatch) | Proceed, note the drift in summary |
 | Key file missing or renamed | **STOP** — ask me how to proceed |
 | New files not mentioned in checkpoint | Proceed, mention them |
-| Branch mismatch | Ask (handled in Step 3) |
+| Branch mismatch | Ask (handled in Step 4) |
 | PRD files missing | **STOP** — cannot resume without PRD |
 
-### Step 6: Begin Work
+### Step 7: Read Key Files
 
-After confirmation, proceed with the first action from `<next_action>`. Follow the PRD phases and gates.
+Before beginning work, read the key files identified by the agent:
+- Main PRD (`00-master-plan.md`)
+- Current sub-PRD (if applicable)
+- Any key implementation files mentioned
+
+This ensures full context before starting work.
+
+### Step 8: Begin Work
+
+After confirmation, proceed with the first action from the agent's summary. Follow the PRD phases and gates.
 
 When you reach a phase gate or context is filling up, run `/dev-checkpoint` to save progress.
 

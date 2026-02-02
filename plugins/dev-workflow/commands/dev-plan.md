@@ -38,9 +38,14 @@ If plan mode is active: write a PRD summary to the plan file, call `ExitPlanMode
 
 `/dev-resume` reads the checkpoint and PRD files to resume work. It expects `$PROJECT_ROOT/.dev/<feature-name>/` to contain at minimum `00-master-plan.md`.
 
-## EXPLORE AGENT
+## AGENTS
 
-Use the **Task tool** with `subagent_type=Explore` for codebase research. It can find files by pattern, search for keywords, and answer structural questions. Launch multiple searches in parallel when possible.
+This command uses specialized agents for research and planning:
+
+- **prd-researcher** (Sonnet, cyan) — Researches codebase for patterns, dependencies, and reference implementations
+- **prd-planner** (Sonnet, green) — Designs implementation phases and file changes
+
+Agent definitions are in `plugins/dev-workflow/agents/`.
 
 ## PHASE 1: UNDERSTAND
 
@@ -71,31 +76,54 @@ If `$ARGUMENTS` above is empty (the user ran `/dev-plan` with no arguments):
 
 ## PHASE 2: RESEARCH
 
-Based on my answers, investigate the codebase using the Explore agent. Focus on:
-- Existing patterns that can be reused
-- Files that will need modification
-- Architecture constraints and dependencies
-- Similar implementations to learn from
+Launch **2-3 prd-researcher agents in parallel** using the Task tool with different focuses:
 
-### Research Summary Format
+```
+Agent 1: "Find similar implementations and patterns to reuse for [feature]. Include file:line references."
+Agent 2: "Identify architecture constraints, dependencies, and integration points for [feature]."
+Agent 3: "List all files that will need modification for [feature] and what changes are needed."
+```
 
-After investigation, present:
-1. **Patterns to reuse** — existing code/architecture you'll leverage
-2. **Files to modify** — list of paths with 1-line descriptions
-3. **Key decisions** — 2-3 architectural choices needing confirmation
-4. **Open questions** — anything unclear (if any)
+Use `subagent_type=prd-researcher` and `model=sonnet` for each agent.
 
-Keep it to ~10-15 lines. Ask for corrections or additions before proceeding.
+### After Agents Return
+
+1. **Synthesize findings** — Combine agent outputs into a unified Research Summary
+2. **Present summary** using this format:
+   - **Patterns to reuse** — existing code/architecture you'll leverage (with `file:line` refs)
+   - **Files to modify** — list of paths with 1-line descriptions
+   - **Key decisions** — 2-3 architectural choices needing confirmation
+   - **Open questions** — anything unclear (if any)
+
+Keep it to ~10-15 lines.
+
+**STOP. Do not proceed to Phase 3 until the user confirms the research findings or provides corrections.**
 
 > **Guardrail**: Research serves the PRD. Move to writing after one research round. If I request deeper investigation, do one more round — then write.
 
 ## PHASE 3: WRITE THE PRD
 
-1. **Determine complexity**: Simple (1-3 files, single phase) = single PRD file. Complex (4+ files, multiple phases) = master plan + sub-PRDs.
-2. **Propose architecture approach** based on research. Ask me to confirm or adjust.
+Launch **1 prd-planner agent** to design the implementation structure:
+
+```
+"Design implementation phases for [feature].
+Research findings: [summarize key patterns and files from Phase 2].
+Determine if this needs sub-PRDs (complex) or a single PRD (simple)."
+```
+
+Use `subagent_type=prd-planner` and `model=sonnet`.
+
+### After Agent Returns
+
+1. **Review agent output** — Verify phases are logical and complete
+2. **Propose architecture approach** — Present the recommended structure to the user
+
+**STOP. Do not create any files until the user confirms the architecture approach or requests adjustments.**
+
 3. **Create files** under `$PROJECT_ROOT/.dev/<feature-name>/`:
    - Always create `00-master-plan.md` (use Master Plan Template below)
    - For complex features, create `01-sub-prd-[name].md` etc. (use Sub-PRD Template below)
+   - Incorporate research findings (Phase 2) and implementation plan (agent output) into the PRD
 4. **State what was created** — list every file path written.
 5. **Suggest running `/dev-checkpoint`** to save a continuation prompt.
 
