@@ -1,6 +1,5 @@
 ---
 name: checkpoint-analyzer
-model: haiku
 color: orange
 description: Analyze session for checkpoint generation
 tools: Read, Glob, Grep, LS

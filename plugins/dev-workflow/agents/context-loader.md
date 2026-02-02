@@ -1,6 +1,5 @@
 ---
 name: context-loader
-model: haiku
 color: yellow
 description: Parse checkpoint and compare git state for session resume
 tools: Read, Glob, Grep, LS

@@ -1,6 +1,5 @@
 ---
 name: prd-planner
-model: sonnet
 color: green
 description: Design implementation structure for PRD
 tools: Read, Glob, Grep, LS, WebFetch, WebSearch
