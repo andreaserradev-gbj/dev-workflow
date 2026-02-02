@@ -11,7 +11,7 @@ reads: $PROJECT_ROOT/.dev/<feature-name>/checkpoint.md, $PROJECT_ROOT/.dev/<feat
 
 This command uses a specialized agent for context loading:
 
-- **context-loader** (Haiku, yellow) — Parses checkpoint, compares git state, and builds context summary
+- **context-loader** (yellow) — Parses checkpoint, compares git state, and builds context summary
 
 Agent definition is in `plugins/dev-workflow/agents/`.
 
@@ -74,7 +74,7 @@ Extract context summary, decisions, blockers, and next actions.
 Read the PRD files listed in the checkpoint."
 ```
 
-Use `subagent_type=context-loader` and `model=haiku`.
+Use `subagent_type=context-loader`.
 
 ### Step 4: Review Agent Findings
 

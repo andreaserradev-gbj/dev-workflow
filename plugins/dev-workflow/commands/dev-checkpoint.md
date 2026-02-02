@@ -14,7 +14,7 @@ Review the current session and create a continuation prompt for the next session
 
 This command uses a specialized agent for progress analysis:
 
-- **checkpoint-analyzer** (Haiku, orange) — Scans PRD files and extracts progress, decisions, and blockers
+- **checkpoint-analyzer** (orange) — Scans PRD files and extracts progress, decisions, and blockers
 
 Agent definition is in `plugins/dev-workflow/agents/`.
 
@@ -60,7 +60,7 @@ Find: completed items (⬜ → ✅), pending items, decisions made, blockers enc
 Determine current phase and next step."
 ```
 
-Use `subagent_type=checkpoint-analyzer` and `model=haiku`.
+Use `subagent_type=checkpoint-analyzer`.
 
 ### Step 3: Review Agent Findings
 

@@ -42,8 +42,8 @@ If plan mode is active: write a PRD summary to the plan file, call `ExitPlanMode
 
 This command uses specialized agents for research and planning:
 
-- **prd-researcher** (Sonnet, cyan) — Researches codebase for patterns, dependencies, and reference implementations
-- **prd-planner** (Sonnet, green) — Designs implementation phases and file changes
+- **prd-researcher** (cyan) — Researches codebase for patterns, dependencies, and reference implementations
+- **prd-planner** (green) — Designs implementation phases and file changes
 
 Agent definitions are in `plugins/dev-workflow/agents/`.
 
@@ -84,7 +84,7 @@ Agent 2: "Identify architecture constraints, dependencies, and integration point
 Agent 3: "List all files that will need modification for [feature] and what changes are needed."
 ```
 
-Use `subagent_type=prd-researcher` and `model=sonnet` for each agent.
+Use `subagent_type=prd-researcher` for each agent.
 
 ### After Agents Return
 
@@ -111,7 +111,7 @@ Research findings: [summarize key patterns and files from Phase 2].
 Determine if this needs sub-PRDs (complex) or a single PRD (simple)."
 ```
 
-Use `subagent_type=prd-planner` and `model=sonnet`.
+Use `subagent_type=prd-planner`.
 
 ### After Agent Returns
 
