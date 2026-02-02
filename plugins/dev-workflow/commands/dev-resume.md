@@ -129,7 +129,16 @@ This ensures full context before starting work.
 
 After confirmation, proceed with the first action from the agent's summary. Follow the PRD phases and gates.
 
-When you reach a phase gate or context is filling up, run `/dev-checkpoint` to save progress.
+**CRITICAL: PHASE GATE ENFORCEMENT**
+
+When you encounter a phase gate in the PRD (marked with `⏸️ **GATE**:`):
+
+1. **STOP IMMEDIATELY** — Do not proceed to the next phase
+2. **Report completion** — Tell the user what was accomplished in this phase
+3. **Ask explicitly**: "Phase [N] complete. Continue to Phase [N+1] or run `/dev-checkpoint`?"
+4. **Wait for user response** — Do NOT proceed until the user explicitly says to continue
+
+This is a HARD STOP, not a suggestion. Phase gates exist to give the user control over progress. Ignoring them defeats the purpose of the checkpoint system.
 
 ## PRIVACY RULES
 
