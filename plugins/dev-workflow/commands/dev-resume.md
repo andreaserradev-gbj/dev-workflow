@@ -74,7 +74,7 @@ Extract context summary, decisions, blockers, and next actions.
 Read the PRD files listed in the checkpoint."
 ```
 
-Use `subagent_type=context-loader`.
+Use `subagent_type=dev-workflow:context-loader`.
 
 ### Step 4: Review Agent Findings
 

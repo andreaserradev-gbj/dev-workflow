@@ -60,7 +60,7 @@ Find: completed items (⬜ → ✅), pending items, decisions made, blockers enc
 Determine current phase and next step."
 ```
 
-Use `subagent_type=checkpoint-analyzer`.
+Use `subagent_type=dev-workflow:checkpoint-analyzer`.
 
 ### Step 3: Review Agent Findings
 

@@ -84,7 +84,7 @@ Agent 2: "Identify architecture constraints, dependencies, and integration point
 Agent 3: "List all files that will need modification for [feature] and what changes are needed."
 ```
 
-Use `subagent_type=prd-researcher` for each agent.
+Use `subagent_type=dev-workflow:prd-researcher` for each agent.
 
 ### After Agents Return
 
@@ -111,7 +111,7 @@ Research findings: [summarize key patterns and files from Phase 2].
 Determine if this needs sub-PRDs (complex) or a single PRD (simple)."
 ```
 
-Use `subagent_type=prd-planner`.
+Use `subagent_type=dev-workflow:prd-planner`.
 
 ### After Agent Returns
 
