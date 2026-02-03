@@ -48,22 +48,6 @@ Then in Claude Code:
 
 </details>
 
-### Manual install
-
-Clone the repo and symlink (or copy) the command files into your Claude Code commands directory:
-
-```bash
-git clone https://github.com/andreaserradev-gbj/dev-workflow.git
-cd dev-workflow
-
-# Symlink all commands
-ln -s "$(pwd)/plugins/dev-workflow/commands/dev-plan.md" ~/.claude/commands/dev-plan.md
-ln -s "$(pwd)/plugins/dev-workflow/commands/dev-checkpoint.md" ~/.claude/commands/dev-checkpoint.md
-ln -s "$(pwd)/plugins/dev-workflow/commands/dev-resume.md" ~/.claude/commands/dev-resume.md
-```
-
-Commands will be available as `/dev-plan`, `/dev-checkpoint`, `/dev-resume`.
-
 ## How It Works
 
 1. **Plan** — Run `/dev-plan` in edit mode (not plan mode, which would skip saving the detailed PRD)

@@ -1,76 +1,59 @@
 # CLAUDE.md
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
-
 ## Project Overview
 
-This is a Claude Code plugin that provides three slash commands for multi-session development workflows:
-- `/dev-plan` - Plan features with structured PRD documentation
-- `/dev-checkpoint` - Save progress and generate continuation prompts
-- `/dev-resume` - Resume work from a previous checkpoint
-
-The plugin stores PRDs and checkpoints in a `.dev/<feature-name>/` directory within user projects.
+Claude Code plugin for multi-session development workflows. See [README.md](README.md) for usage and installation.
 
 ## Repository Structure
 
 ```
-plugins/dev-workflow/           # Plugin package (official marketplace format)
+plugins/dev-workflow/           # Plugin package
   .claude-plugin/
-    plugin.json                 # Plugin name, version, description
+    plugin.json                 # Plugin metadata
+  agents/                       # Subagent definitions for Task tool
+    checkpoint-analyzer.md
+    context-loader.md
+    prd-planner.md
+    prd-researcher.md
   commands/                     # Slash command definitions
-    dev-plan.md                 # Feature planning command
-    dev-checkpoint.md           # Progress checkpointing command
-    dev-resume.md               # Session resumption command
-.claude-plugin/                 # Marketplace metadata (repo root)
-  marketplace.json              # Marketplace listing info
+    dev-plan.md
+    dev-checkpoint.md
+    dev-resume.md
+.claude-plugin/
+  marketplace.json              # Marketplace metadata
 ```
 
-## Plugin Installation
+## Development
 
-The plugin can be installed via marketplace or manually:
+Test plugin changes locally:
 
-**Marketplace:**
-```
-/plugin marketplace add andreaserradev-gbj/dev-workflow
-/plugin install dev-workflow
-```
-
-**Manual (symlinks):**
 ```bash
-ln -s "$(pwd)/plugins/dev-workflow/commands/dev-plan.md" ~/.claude/commands/dev-plan.md
-ln -s "$(pwd)/plugins/dev-workflow/commands/dev-checkpoint.md" ~/.claude/commands/dev-checkpoint.md
-ln -s "$(pwd)/plugins/dev-workflow/commands/dev-resume.md" ~/.claude/commands/dev-resume.md
+claude --plugin-dir ./plugins/dev-workflow
 ```
+
+Restart Claude Code to pick up changes.
 
 ## Command File Format
 
-Each command file uses YAML frontmatter with optional fields:
-- `description`: Brief description shown in command help
-- `version`: Command version number
-- `output`: Path pattern for generated files
-- `reads`: Files the command reads
+YAML frontmatter fields: `description`, `version`, `output`, `reads`
 
-The body contains structured instructions with phases, templates, and rules that Claude follows when the command is invoked.
+Body contains structured instructions with phases, templates, and rules.
 
 ## Key Conventions
 
 ### Status Markers
-Commands use these markers to track progress in PRD files:
-- `⬜` - Pending/not started
+- `⬜` - Pending
 - `✅` - Completed
 
 ### Phase Gates
-PRDs include gate markers for safe pause points:
 ```
 ⏸️ **GATE**: Phase complete. Continue or `/dev-checkpoint`.
 ```
 
 ### Checkpoint XML Tags
-Checkpoints wrap content in semantic tags for parsing:
-- `<context>`, `<current_state>`, `<next_action>`, `<key_files>`
-- `<decisions>`, `<blockers>`, `<notes>` (optional)
+Required: `<context>`, `<current_state>`, `<next_action>`, `<key_files>`
+Optional: `<decisions>`, `<blockers>`, `<notes>`
 
 ### Project Root Detection
-Commands determine project root via:
 1. `git rev-parse --show-toplevel` for git repos
 2. Initial working directory otherwise
