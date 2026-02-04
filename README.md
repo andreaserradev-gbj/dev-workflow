@@ -21,7 +21,7 @@
 /plugin install dev-workflow
 ```
 
-Commands will be available as `/dev-workflow:dev-plan`, `/dev-workflow:dev-checkpoint`, `/dev-workflow:dev-resume`.
+Commands will be available as `/dev-workflow:dev-plan`, `/dev-workflow:dev-checkpoint`, `/dev-workflow:dev-resume`, `/dev-workflow:dev-status`.
 
 <details>
 <summary><strong>Updating & Troubleshooting</strong></summary>
@@ -95,6 +95,19 @@ Resume work from a previous checkpoint. Performs these steps:
 3. Build a focused summary with a concrete "Start with" action
 4. Wait for confirmation before proceeding
 5. Handle discrepancies (missing files, branch mismatch, drift)
+
+### `/dev-status`
+
+> **Run in:** edit mode
+
+Scan all features and generate a status report. Performs these steps:
+
+1. Discover all feature folders in `.dev/`
+2. Launch parallel agents to analyze PRD files (batched, max 5 agents)
+3. Extract status, progress, and last activity for each feature
+4. Display summary table with counts by status
+5. Offer to archive completed or stale (>30 days) features to `.dev-archive/`
+6. Save report to `.dev/status-report-YYYY-MM-DD.md`
 
 ## Workflow
 

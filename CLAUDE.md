@@ -13,12 +13,14 @@ plugins/dev-workflow/           # Plugin package
   agents/                       # Subagent definitions for Task tool
     checkpoint-analyzer.md
     context-loader.md
+    feature-batch-scanner.md
     prd-planner.md
     prd-researcher.md
   commands/                     # Slash command definitions
     dev-plan.md
     dev-checkpoint.md
     dev-resume.md
+    dev-status.md
 .claude-plugin/
   marketplace.json              # Marketplace metadata
 ```
