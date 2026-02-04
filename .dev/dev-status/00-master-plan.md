@@ -1,6 +1,6 @@
 # Dev-Status Command - Master Plan
 
-**Status**: In Progress
+**Status**: Testing
 **Created**: 2026-02-04
 **Last Updated**: 2026-02-04
 
@@ -79,16 +79,16 @@ Command aggregates results
 ### Phase 1: Create Feature Batch Scanner Agent
 **Goal**: Create the agent that scans a batch of feature folders and extracts status for each.
 
-1. ⬜ Create `plugins/dev-workflow/agents/feature-batch-scanner.md` with YAML frontmatter
-2. ⬜ Define Mission section: scan multiple feature folders from a provided list
-3. ⬜ Define Output Format with structured status per feature:
+1. ✅ Create `plugins/dev-workflow/agents/feature-batch-scanner.md` with YAML frontmatter
+2. ✅ Define Mission section: scan multiple feature folders from a provided list
+3. ✅ Define Output Format with structured status per feature:
    - Feature name
    - Status (Active / Complete / Stale / No PRD)
    - Phase progress (X/Y phases, A/B steps)
    - Last checkpoint date
    - Next action summary (if active)
-4. ⬜ Add Guidelines for parsing PRD files and status markers
-5. ⬜ Add Privacy Rules section
+4. ✅ Add Guidelines for parsing PRD files and status markers
+5. ✅ Add Privacy Rules section
 
 **Verification**: File exists and follows agent structure pattern.
 
@@ -99,16 +99,16 @@ Command aggregates results
 ### Phase 2: Create Dev-Status Command
 **Goal**: Create the command that orchestrates scanning, aggregation, archiving, and report saving.
 
-1. ⬜ Create `plugins/dev-workflow/commands/dev-status.md` with YAML frontmatter
-2. ⬜ Add Step 0: Determine Project Root (git rev-parse pattern)
-3. ⬜ Add Step 1: Discover Features (find command, exclude `.dev-archive`)
-4. ⬜ Add Step 2: Calculate Batches (distribute folders across max 5 agents)
-5. ⬜ Add Step 3: Launch Parallel Agents (one `feature-batch-scanner` per batch)
-6. ⬜ Add Step 4: Aggregate Results (collect outputs, build summary table)
-7. ⬜ Add Step 5: Present Report (display table, identify archivable features)
-8. ⬜ Add Step 6: Archive Offer (ask user, move folders to `.dev-archive/`)
-9. ⬜ Add Step 7: Save Report (write to `.dev/status-report-YYYY-MM-DD.md`)
-10. ⬜ Add Privacy Rules section
+1. ✅ Create `plugins/dev-workflow/commands/dev-status.md` with YAML frontmatter
+2. ✅ Add Step 0: Determine Project Root (git rev-parse pattern)
+3. ✅ Add Step 1: Discover Features (find command, exclude `.dev-archive`)
+4. ✅ Add Step 2: Calculate Batches (distribute folders across max 5 agents)
+5. ✅ Add Step 3: Launch Parallel Agents (one `feature-batch-scanner` per batch)
+6. ✅ Add Step 4: Aggregate Results (collect outputs, build summary table)
+7. ✅ Add Step 5: Present Report (display table, identify archivable features)
+8. ✅ Add Step 6: Archive Offer (ask user, move folders to `.dev-archive/`)
+9. ✅ Add Step 7: Save Report (write to `.dev/status-report-YYYY-MM-DD.md`)
+10. ✅ Add Privacy Rules section
 
 **Verification**: Command file exists and can be invoked via `/dev-status`.
 
