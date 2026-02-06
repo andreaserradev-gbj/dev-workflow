@@ -84,7 +84,7 @@ Agent 2: "Identify architecture constraints, dependencies, and integration point
 Agent 3: "List all files that will need modification for [feature] and what changes are needed."
 ```
 
-Use `subagent_type=dev-workflow:prd-researcher` for each agent.
+Use `subagent_type=dev-workflow:prd-researcher` and `model=sonnet` for each agent.
 
 ### After Agents Return
 

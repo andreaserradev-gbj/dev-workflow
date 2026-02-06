@@ -78,7 +78,7 @@ For each agent, provide a prompt like:
 For each folder, determine: Status (Active/Complete/Stale/No PRD), Progress (phases and steps), Last Checkpoint date, and Next Action."
 ```
 
-Use `subagent_type=dev-workflow:feature-batch-scanner` for each agent.
+Use `subagent_type=dev-workflow:feature-batch-scanner` and `model=haiku` for each agent.
 
 **IMPORTANT**: Launch all agents in a single message with multiple Task tool calls to run them in parallel.
 
