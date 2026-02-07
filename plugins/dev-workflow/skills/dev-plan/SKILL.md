@@ -4,7 +4,6 @@ description: >-
   Plan a new feature with structured PRD documentation.
   Researches codebase patterns, designs implementation phases,
   and writes PRD files to .dev/.
-disable-model-invocation: true
 argument-hint: <feature description>
 ---
 

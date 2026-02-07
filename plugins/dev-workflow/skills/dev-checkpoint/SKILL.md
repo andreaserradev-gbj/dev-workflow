@@ -4,7 +4,6 @@ description: >-
   Save progress and generate a continuation prompt.
   Updates PRD status markers, captures git state,
   and writes checkpoint.md for the next session.
-disable-model-invocation: true
 argument-hint: <feature name>
 ---
 

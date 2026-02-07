@@ -4,7 +4,6 @@ description: >-
   Resume work from a previous session checkpoint.
   Loads checkpoint.md, verifies git state, and presents
   a resumption summary before continuing.
-disable-model-invocation: true
 argument-hint: <feature name>
 ---
 

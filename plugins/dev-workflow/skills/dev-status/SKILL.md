@@ -4,7 +4,6 @@ description: >-
   Show status of all features in .dev/.
   Scans feature folders using parallel agents, generates
   a status report, and offers to archive completed features.
-disable-model-invocation: true
 ---
 
 ## Dev Status Report
