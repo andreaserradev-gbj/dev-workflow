@@ -2,13 +2,15 @@
 
 # dev-workflow
 
-**Claude Code commands for multi-session development workflows: plan features with structured PRDs, checkpoint progress, and resume across sessions.**
+**Claude Code skills for multi-session development workflows: plan features with structured PRDs, checkpoint progress, and resume across sessions.**
+
+*Built on the [AgentSkills.io](https://agentskills.io) open standard for cross-platform compatibility.*
 
 > **Before:** *"Here's where I left off: I was working on the auth feature, finished the login endpoint, the tests are passing, next step is adding the refresh token logic, oh and I decided to use Redis for session storage because..."*
 >
 > **After:** `/dev-resume`
 
-**[Installation](#installation) · [How It Works](#how-it-works) · [Commands](#commands) · [Why This Workflow?](#why-this-workflow)**
+**[Installation](#installation) · [How It Works](#how-it-works) · [Skills](#skills) · [Why This Workflow?](#why-this-workflow)**
 
 </div>
 
@@ -58,7 +60,9 @@ Then in Claude Code:
 6. **Build** — Switch to edit mode with cleared context for focused work
 7. **Repeat** — Checkpoint before context fills up, then cycle continues
 
-## Commands
+## Skills
+
+Skills use the [AgentSkills.io](https://agentskills.io) format — each skill lives in its own directory under `skills/` with a `SKILL.md` file and optional `references/` for supporting templates.
 
 ### `/dev-plan`
 
