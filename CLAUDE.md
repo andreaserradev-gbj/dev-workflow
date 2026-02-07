@@ -29,6 +29,10 @@ plugins/dev-workflow/           # Plugin package
       SKILL.md
     dev-status/
       SKILL.md
+.codex/
+  INSTALL.md                    # Installation instructions for Codex
+docs/
+  README.codex.md               # Codex usage documentation
 .claude-plugin/
   marketplace.json              # Marketplace metadata
 ```

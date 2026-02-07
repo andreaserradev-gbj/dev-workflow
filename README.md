@@ -50,6 +50,14 @@ Then in Claude Code:
 
 </details>
 
+### For Codex
+
+Tell Codex:
+
+> Fetch and follow instructions from https://raw.githubusercontent.com/andreaserradev-gbj/dev-workflow/refs/heads/main/.codex/INSTALL.md
+
+Or see [docs/README.codex.md](docs/README.codex.md) for manual installation and usage details.
+
 ## How It Works
 
 1. **Plan** — Run `/dev-plan` in edit mode (not plan mode, which would skip saving the detailed PRD)
