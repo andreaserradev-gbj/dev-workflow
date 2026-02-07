@@ -16,11 +16,23 @@ plugins/dev-workflow/           # Plugin package
     feature-batch-scanner.md
     prd-planner.md
     prd-researcher.md
-  commands/                     # Slash command definitions
-    dev-plan.md
-    dev-checkpoint.md
-    dev-resume.md
-    dev-status.md
+  skills/                       # Skill definitions (AgentSkills.io format)
+    dev-plan/
+      SKILL.md
+      references/
+        prd-templates.md
+    dev-checkpoint/
+      SKILL.md
+      references/
+        checkpoint-template.md
+    dev-resume/
+      SKILL.md
+    dev-status/
+      SKILL.md
+.codex/
+  INSTALL.md                    # Installation instructions for Codex
+docs/
+  README.codex.md               # Codex usage documentation
 .claude-plugin/
   marketplace.json              # Marketplace metadata
 ```
@@ -35,11 +47,13 @@ claude --plugin-dir ./plugins/dev-workflow
 
 Restart Claude Code to pick up changes.
 
-## Command File Format
+## Skill File Format
 
-YAML frontmatter fields: `description`, `version`, `output`, `reads`
+Skills follow the [AgentSkills.io](https://agentskills.io) open standard.
 
-Body contains structured instructions with phases, templates, and rules.
+YAML frontmatter fields: `name`, `description`, `disable-model-invocation`, `argument-hint`
+
+Body contains structured instructions with phases, templates, and rules. Large templates are extracted into `references/` subdirectories.
 
 ## Key Conventions
 

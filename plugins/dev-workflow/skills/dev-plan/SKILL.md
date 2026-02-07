@@ -1,5 +1,9 @@
 ---
-description: Plan a new feature with structured PRD documentation
+name: dev-plan
+description: >-
+  Plan a new feature with structured PRD documentation.
+  Researches codebase patterns, designs implementation phases,
+  and writes PRD files to .dev/.
 argument-hint: <feature description>
 ---
 
@@ -14,10 +18,10 @@ Store this as `$PROJECT_ROOT` and use it for all `.dev/` path references through
 
 ## PRIMARY DIRECTIVE
 
-Your sole deliverable is PRD files written to `$PROJECT_ROOT/.dev/<feature-name>/`.
-You produce documentation, not code. Every session must end with files on disk.
+The sole deliverable is PRD files written to `$PROJECT_ROOT/.dev/<feature-name>/`.
+Produce documentation, not code. Every session must end with files on disk.
 
-This is part of a 3-command system (`/dev-plan` → `/dev-checkpoint` → `/dev-resume`). The other commands parse your PRD files using status markers (`⬜`/`✅`), phase gates, file changes summary, and sub-PRD links.
+This is part of a 3-command system (`/dev-plan` → `/dev-checkpoint` → `/dev-resume`). The other commands parse PRD files using status markers (`⬜`/`✅`), phase gates, file changes summary, and sub-PRD links.
 
 **Plan mode**: If active, write a PRD summary to the plan file, call `ExitPlanMode`, then write full PRD files after approval.
 
@@ -73,7 +77,7 @@ Use `subagent_type=dev-workflow:prd-researcher` and `model=sonnet` for each agen
 
 1. **Synthesize findings** — Combine agent outputs into a unified Research Summary
 2. **Present summary** using this format:
-   - **Patterns to reuse** — existing code/architecture you'll leverage (with `file:line` refs)
+   - **Patterns to reuse** — existing code/architecture to leverage (with `file:line` refs)
    - **Files to modify** — list of paths with 1-line descriptions
    - **Key decisions** — 2-3 architectural choices needing confirmation
    - **Open questions** — anything unclear (if any)
@@ -82,7 +86,7 @@ Keep it to ~10-15 lines.
 
 **STOP. Do not proceed to Phase 3 until the user confirms the research findings or provides corrections.**
 
-> **Guardrail**: Research serves the PRD. Move to writing after one research round. If I request deeper investigation, do one more round — then write.
+> **Guardrail**: Research serves the PRD. Move to writing after one research round. If deeper investigation is requested, do one more round — then write.
 
 ## PHASE 3: WRITE THE PRD
 
@@ -104,13 +108,13 @@ Use `subagent_type=dev-workflow:prd-planner`.
 **STOP. Do not create any files until the user confirms the architecture approach or requests adjustments.**
 
 3. **Create files** under `$PROJECT_ROOT/.dev/<feature-name>/`:
-   - Always create `00-master-plan.md` (use Master Plan Template below)
-   - For complex features, create `01-sub-prd-[name].md` etc. (use Sub-PRD Template below)
+   - Always create `00-master-plan.md` — use the Master Plan template in [prd-templates.md](references/prd-templates.md)
+   - For complex features, create `01-sub-prd-[name].md` etc. — use the Sub-PRD template in [prd-templates.md](references/prd-templates.md)
    - Incorporate research findings (Phase 2) and implementation plan (agent output) into the PRD
 4. **State what was created** — list every file path written.
 5. **Suggest running `/dev-checkpoint`** to save a continuation prompt.
 
-> **Guardrail**: You MUST create files. If you reach this phase without writing, stop everything else and write the PRD.
+> **Guardrail**: Files MUST be created. If this phase is reached without writing, stop everything else and write the PRD.
 
 ## RULES
 
@@ -123,180 +127,3 @@ Use `subagent_type=dev-workflow:prd-planner`.
 - Absolute paths with usernames → use relative paths from project root
 - Secrets, API keys, tokens, credentials → use placeholders (`<API_KEY>`, `$ENV_VAR`)
 - Personal information (names, emails) → use generic references
-
----
-
-## Template: Master Plan (`00-master-plan.md`)
-
-```markdown
-# [Feature Name] - Master Plan
-
-**Status**: Not Started
-**Created**: [Date]
-**Last Updated**: [Date]
-
----
-
-## Executive Summary
-
-[1-2 paragraphs: what the feature does and why it's needed]
-
-**Reference**: [Path to existing implementation if any]
-
----
-
-## Research Findings
-
-### Codebase Patterns
-- [Pattern]: [Where found] — [How it applies]
-
-### Dependencies
-- [Dependency]: [Purpose]
-
-### Technical Decisions
-
-| Decision | Rationale | Alternatives Considered |
-|----------|-----------|------------------------|
-| [Choice] | [Why]     | [What else was considered] |
-
-### Constraints
-
-- **Reuse**: [Existing utilities/helpers to use instead of rebuilding]
-- **Patterns to follow**: [Conventions from reference implementations]
-- **Avoid**: [Known anti-patterns or approaches that won't work]
-
----
-
-## Architecture Decision
-
-**Approach**: [The main architectural choice]
-
-[Explanation of why this approach was chosen]
-
-**Data Flow**:
-[ASCII diagram if helpful]
-
----
-
-## Sub-PRD Overview
-
-_(Only for complex features. Remove this section for simple features.)_
-
-| Sub-PRD | Title | Dependency | Status | Document |
-|---------|-------|------------|--------|----------|
-| **1** | [Title] | None | Not Started | [link] |
-| **2** | [Title] | 1 | Not Started | [link] |
-
----
-
-## Implementation Order
-
-### Phase 1: [Phase Name]
-**Goal**: [What this phase accomplishes]
-
-1. ⬜ [Step 1]
-2. ⬜ [Step 2]
-3. ⬜ [Step 3]
-
-**Verification**:
-- [ ] [What should work after this phase]
-- [ ] Run: `[specific command, e.g. npm test, npm run build]`
-
-⏸️ **GATE**: Phase complete. Continue or `/dev-checkpoint`.
-
-_(Repeat for additional phases. Each needs: Goal, numbered ⬜ steps, Verification checklist, and ⏸️ GATE.)_
-
----
-
-## File Changes Summary
-
-### New Files
-
-| File | Purpose |
-|------|---------|
-| `path/to/file` | [Description] |
-
-### Modified Files
-
-| File | Changes |
-|------|---------|
-| `path/to/file` | [What changes] |
-
----
-
-## Reference Files
-
-- [Path]: [Description]
-- [Path]: [Description]
-```
-
----
-
-## Template: Sub-PRD (`01-sub-prd-[name].md`)
-
-```markdown
-# Sub-PRD: [Title]
-
-**Parent**: [00-master-plan.md](./00-master-plan.md)
-**Status**: Not Started
-**Dependency**: [Previous sub-PRD if any]
-**Last Updated**: [Date]
-
----
-
-## Implementation Progress
-
-| Step | Description | Status |
-|------|-------------|--------|
-| **1** | [Description] | ⬜ Not Started |
-| **2** | [Description] | ⬜ Not Started |
-
----
-
-## Goal
-
-[What this sub-PRD accomplishes]
-
----
-
-## Implementation Steps
-
-### Step 1: [Title]
-
-**File**: `path/to/file`
-
-[Explanation of what to do]
-
-```
-[Pseudocode or interface signature]
-```
-
-### Step 2: [Title]
-...
-
----
-
-## Files Changed
-
-### New Files
-
-| File | Purpose |
-|------|---------|
-| `path/to/file` | [Description] |
-
-### Modified Files
-
-| File | Changes |
-|------|---------|
-| `path/to/file` | [What changes] |
-
----
-
-## Verification Checklist
-
-- [ ] [Verification step 1]
-- [ ] [Verification step 2]
-
-⏸️ **GATE**: Sub-PRD complete. Continue to next sub-PRD or `/dev-checkpoint`.
-```
-

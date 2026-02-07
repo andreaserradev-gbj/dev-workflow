@@ -1,8 +1,10 @@
 ---
-description: Resume work from a previous session checkpoint
+name: dev-resume
+description: >-
+  Resume work from a previous session checkpoint.
+  Loads checkpoint.md, verifies git state, and presents
+  a resumption summary before continuing.
 argument-hint: <feature name>
-version: 3
-reads: $PROJECT_ROOT/.dev/<feature-name>/checkpoint.md, $PROJECT_ROOT/.dev/<feature-name>/*.md
 ---
 
 ## Resume From Checkpoint
@@ -18,7 +20,7 @@ Store this as `$PROJECT_ROOT` and use it for all `.dev/` path references through
 
 ### Step 1: Identify Feature to Resume
 
-First, check if a `$PROJECT_ROOT/.dev/` directory exists. If it does not exist, inform me that no `$PROJECT_ROOT/.dev/` directory was found and ask what I'd like to work on. Do not proceed further.
+First, check if a `$PROJECT_ROOT/.dev/` directory exists. If it does not exist, inform the user that no `$PROJECT_ROOT/.dev/` directory was found and ask what to work on. Do not proceed further.
 
 If `$PROJECT_ROOT/.dev/` exists, find all available checkpoints:
 
@@ -30,12 +32,12 @@ find "$PROJECT_ROOT/.dev" -name "checkpoint.md" -type f
 - Filter the checkpoint list to those whose path contains the argument (case-insensitive match)
 - If exactly one match: use that checkpoint
 - If multiple matches: ask which of the matching features to resume
-- If no matches: inform me that no features match "$ARGUMENTS" and list all available features
+- If no matches: inform the user that no features match "$ARGUMENTS" and list all available features
 
 **If no argument was provided**:
-- If multiple checkpoints exist: ask me "Which feature would you like to resume?" and list the available features
+- If multiple checkpoints exist: ask "Which feature would you like to resume?" and list the available features
 - If only one checkpoint exists: use that one
-- If no checkpoints exist: ask me which task I'd like to work on
+- If no checkpoints exist: ask which task to work on
 
 ### Step 2: Gather Git State
 
@@ -78,7 +80,7 @@ Present the agent's summary in this format:
 **Start with**: [Concrete first action from next steps]
 ```
 
-**Wait for go-ahead** — do not proceed until I confirm.
+**Wait for go-ahead** — do not proceed until the user confirms.
 
 ### Step 6: Handling Discrepancies
 

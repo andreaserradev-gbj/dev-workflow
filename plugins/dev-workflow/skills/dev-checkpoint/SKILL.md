@@ -1,9 +1,10 @@
 ---
-description: Save progress and generate continuation prompt for next session
+name: dev-checkpoint
+description: >-
+  Save progress and generate a continuation prompt.
+  Updates PRD status markers, captures git state,
+  and writes checkpoint.md for the next session.
 argument-hint: <feature name>
-version: 2
-output: $PROJECT_ROOT/.dev/<feature-name>/checkpoint.md
-reads: $PROJECT_ROOT/.dev/<feature-name>/*.md, git state
 ---
 
 ## Checkpoint Current Session
@@ -30,7 +31,7 @@ Store this as `$PROJECT_ROOT` and use it for all `.dev/` path references through
 
 ### Step 1: Identify the Active Feature
 
-First, check if a `$PROJECT_ROOT/.dev/` directory exists. If it does not exist, ask me to specify the feature name and create the `$PROJECT_ROOT/.dev/<feature-name>/` directory before proceeding.
+First, check if a `$PROJECT_ROOT/.dev/` directory exists. If it does not exist, ask the user to specify the feature name and create the `$PROJECT_ROOT/.dev/<feature-name>/` directory before proceeding.
 
 If `$PROJECT_ROOT/.dev/` exists, find all available features:
 
@@ -42,12 +43,12 @@ find "$PROJECT_ROOT/.dev" -maxdepth 1 -type d ! -name .dev
 - Filter the feature list to those whose name contains the argument (case-insensitive match)
 - If exactly one match: use that feature
 - If multiple matches: ask which of the matching features to checkpoint
-- If no matches: inform me that no features match "$ARGUMENTS" and list all available features
+- If no matches: inform the user that no features match "$ARGUMENTS" and list all available features
 
 **If no argument was provided**:
-- If multiple features exist: ask me "Which feature would you like to checkpoint?" and list the available features
+- If multiple features exist: ask "Which feature would you like to checkpoint?" and list the available features
 - If only one feature exists: use that one
-- If no features exist: ask me to specify the feature name
+- If no features exist: ask the user to specify the feature name
 
 The checkpoint will be saved to `$PROJECT_ROOT/.dev/<feature-name>/checkpoint.md`.
 
@@ -101,70 +102,7 @@ If a category is empty, omit it.
 - Always include `<context>`, `<current_state>`, `<next_action>`, `<key_files>`. Omit `<decisions>`, `<blockers>`, `<notes>` if empty.
 - No absolute paths with usernames → use relative paths. No secrets/credentials → use placeholders.
 
-Create a continuation prompt following this format:
-
-```
----
-branch: [branch name from Step 3]
-last_commit: [last commit summary from Step 3]
-uncommitted_changes: [true/false]
-checkpointed: [ISO 8601 timestamp]
----
-
-Read the following PRD files in order:
-
-1. [path to master plan or main PRD]
-2. [path to relevant sub-PRDs if applicable]
-
-<context>
-## Context
-
-**Goal**: [Feature goal in one sentence]
-**Current phase**: [Phase name] — [current step]
-**Key completions**: [What's been done]
-</context>
-
-<current_state>
-## Current Progress
-
-- ✅ [Completed item 1]: [Brief description]
-- ✅ [Completed item 2]: [Brief description]
-- ⬜ [Next pending item]: Not Started/In Progress - [description]
-- ⬜ [Following item]: Not Started
-</current_state>
-
-<next_action>
-## Next Steps
-
-[Current Step] ([component]):
-- [Specific task 1]
-- [Specific task 2]
-
-[Subsequent steps with same format]
-</next_action>
-
-<key_files>
-## Key Files
-
-- [Role]: [full path]
-- [Role]: [full path]
-- [New file if any]: [full path]
-</key_files>
-
-<!-- Include each section below only if non-empty -->
-<decisions>## Decisions
-[Decisions from session]</decisions>
-
-<blockers>## Blockers / Gotchas
-[Blockers from session]</blockers>
-
-<notes>## Notes
-[Notes from session]</notes>
-
----
-
-Please continue with [Next Steps summary — adapt to the current phase: research, design, or implementation], following the specifications in the PRD.
-```
+Create a continuation prompt following the template in [checkpoint-template.md](references/checkpoint-template.md).
 
 ### Step 8: Save Checkpoint
 
@@ -172,7 +110,7 @@ Write the continuation prompt to `$PROJECT_ROOT/.dev/<feature-name>/checkpoint.m
 
 ### Step 9: Summary
 
-Tell me:
+Report:
 - Which feature was checkpointed
 - **PRD updates made** (list each file and what was changed, or state "No updates needed")
 - What the next steps are

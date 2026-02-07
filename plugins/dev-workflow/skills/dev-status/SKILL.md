@@ -1,8 +1,9 @@
 ---
-description: Show status of all features and offer to archive completed ones
-version: 1
-output: $PROJECT_ROOT/.dev/status-report-YYYY-MM-DD.md
-reads: $PROJECT_ROOT/.dev/**/00-master-plan.md, $PROJECT_ROOT/.dev/**/checkpoint.md
+name: dev-status
+description: >-
+  Show status of all features in .dev/.
+  Scans feature folders using parallel agents, generates
+  a status report, and offers to archive completed features.
 ---
 
 ## Dev Status Report
