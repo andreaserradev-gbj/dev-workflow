@@ -37,6 +37,18 @@ Return your findings in this exact structure (matching the PRD Research Findings
 |-----------|-----------|
 | `path/to/file` | [Why this is useful as a reference] |
 
+### Existing Utilities to Reuse
+
+| Utility | Location | Use Instead Of |
+|---------|----------|----------------|
+| [Function/module] | `file:line` | [What it replaces — building from scratch] |
+
+### Anti-Patterns to Avoid
+
+| Pattern | Why Avoid |
+|---------|-----------|
+| [What not to do] | [What to do instead] |
+
 ## Guidelines
 
 1. **Be specific** — Include `file:line` references for patterns

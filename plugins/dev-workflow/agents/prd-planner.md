@@ -30,7 +30,9 @@ Return your plan in this exact structure (matching the PRD template):
 2. [Step 2 with specific action]
 3. [Step 3 with specific action]
 
-**Verification**: [How to verify this phase is complete]
+**Verification**:
+- [ ] [What should work]
+- [ ] Run: `[specific command]`
 
 ---
 
@@ -40,7 +42,9 @@ Return your plan in this exact structure (matching the PRD template):
 1. [Step 1]
 2. [Step 2]
 
-**Verification**: [How to verify this phase is complete]
+**Verification**:
+- [ ] [What should work]
+- [ ] Run: `[specific command]`
 
 ---
 
@@ -76,6 +80,8 @@ _(Only if complexity is "Complex")_
 3. **Include verification** — Each phase needs a way to confirm completion
 4. **Be realistic** — Don't over-engineer, keep phases focused
 5. **Consider dependencies** — Phase 2 should depend on Phase 1, etc.
+6. **Prefer reuse over new code** — If research findings show existing utilities, the plan must use them
+7. **Prefer simple solutions** — Choose the approach with fewer files and moving parts
 
 ## Privacy Rules
 

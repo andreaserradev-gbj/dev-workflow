@@ -10,13 +10,14 @@ reads: $PROJECT_ROOT/.dev/<feature-name>/*.md, git state
 
 Review the current session and create a continuation prompt for the next session.
 
-### Agents
+### SAVE-ONLY MODE
 
-This command uses a specialized agent for progress analysis:
+This command analyzes and saves. It does NOT fix, investigate, or implement anything.
 
-- **checkpoint-analyzer** (orange) — Scans PRD files and extracts progress, decisions, and blockers
-
-Agent definition is in `plugins/dev-workflow/agents/`.
+- Do NOT investigate bugs or errors mentioned during the session
+- Do NOT start implementing fixes or next steps
+- Do NOT move to the next phase or task
+- If the user mentions bugs during confirmation (Step 6), note them in `<blockers>` or `<notes>` but do NOT attempt to fix them
 
 ### Step 0: Determine Project Root
 
@@ -71,53 +72,20 @@ After the agent returns:
 
 ### Step 4: Update PRD Status Markers (REQUIRED)
 
-**This step is REQUIRED. Do not skip it.**
+For each PRD file in `.dev/<feature-name>/`:
+1. Read the file
+2. Change `⬜` to `✅` for completed items; update "Status" fields
+3. Save changes
 
-Based on the agent's findings, update PRD files:
+Track what was updated (file + markers changed) — reported in Step 9.
 
-#### 4a. List all PRD files in the feature directory:
-
-```bash
-find "$PROJECT_ROOT/.dev/<feature-name>" -name "*.md" -type f
-```
-
-#### 4b. For each PRD file with updates needed (from agent analysis):
-
-1. **Read the file**
-2. **Update status markers**:
-   - Change `⬜` to `✅` for completed items identified by the agent
-   - Keep `⬜` for pending items
-   - Update any "Status" fields (e.g., "In Progress", "Complete")
-3. **Edit the file** to save changes
-
-#### 4c. Track your updates:
-
-Keep a record of:
-- Which files were updated
-- What specific markers were changed (e.g., "Changed ⬜ to ✅ for 'Set up database schema'")
-
-This record will be reported in Step 8.
-
-**If no updates are needed** (nothing was completed), explicitly state: "No PRD updates needed - no items were completed this session."
+If nothing was completed, state: "No PRD updates needed."
 
 ### Step 5: Capture Git State
 
-If this is a git repository, capture the current state:
+If git repo, run `git branch --show-current`, `git log --oneline -1`, and `git status --short`. Store for checkpoint frontmatter.
 
-```bash
-# Branch name
-git branch --show-current
-
-# Last commit (one-line summary)
-git log --oneline -1
-
-# Uncommitted changes
-git status --short
-```
-
-Store these values for the checkpoint YAML frontmatter.
-
-**If not a git repository**: Skip this step and omit `branch`, `last_commit`, and `uncommitted_changes` from the YAML frontmatter.
+If not a git repo, skip and omit `branch`, `last_commit`, `uncommitted_changes` from frontmatter.
 
 ### Step 6: Confirm Session Context
 
@@ -125,20 +93,13 @@ Present the agent's findings (decisions, blockers, notes) and ask: "I captured t
 
 If a category is empty, omit it.
 
-**STOP. Do not proceed to Step 7 until the user confirms these findings are correct or provides corrections. Wait for explicit confirmation.**
+**STOP. Wait for explicit confirmation before proceeding to Step 7. If the user mentions new bugs or issues during this step, add them to the checkpoint notes — do NOT investigate or fix them.**
 
 ### Step 7: Generate Continuation Prompt
 
-**Template rules**:
-- Always include `<context>`, `<current_state>`, `<next_action>`, and `<key_files>`.
-- Omit `<decisions>`, `<blockers>`, and `<notes>` sections entirely if empty.
-- If not a git repo, omit `branch`, `last_commit`, and `uncommitted_changes` from frontmatter.
-
-**Privacy rules** (MUST follow):
-- NEVER include absolute paths containing usernames (e.g., `/Users/username/...`)
-- NEVER include secrets, API keys, tokens, or credentials
-- Use relative paths from project root instead (e.g., `./src/`, `plugins/`)
-- Use generic descriptions for external references
+**Rules**:
+- Always include `<context>`, `<current_state>`, `<next_action>`, `<key_files>`. Omit `<decisions>`, `<blockers>`, `<notes>` if empty.
+- No absolute paths with usernames → use relative paths. No secrets/credentials → use placeholders.
 
 Create a continuation prompt following this format:
 
@@ -175,14 +136,11 @@ Read the following PRD files in order:
 <next_action>
 ## Next Steps
 
-[Current Step] Implementation ([component] side):
+[Current Step] ([component]):
 - [Specific task 1]
 - [Specific task 2]
-- [Specific task 3]
 
-[Next Step] Implementation ([component] side):
-- [Specific task 1]
-- [Specific task 2]
+[Subsequent steps with same format]
 </next_action>
 
 <key_files>
@@ -193,23 +151,15 @@ Read the following PRD files in order:
 - [New file if any]: [full path]
 </key_files>
 
-<decisions>
-## Decisions
+<!-- Include each section below only if non-empty -->
+<decisions>## Decisions
+[Decisions from session]</decisions>
 
-[Decisions captured in Step 4, or omit this section if none]
-</decisions>
+<blockers>## Blockers / Gotchas
+[Blockers from session]</blockers>
 
-<blockers>
-## Blockers / Gotchas
-
-[Blockers captured in Step 4, or omit this section if none]
-</blockers>
-
-<notes>
-## Notes
-
-[Custom notes from Step 4, or omit this section if none]
-</notes>
+<notes>## Notes
+[Notes from session]</notes>
 
 ---
 

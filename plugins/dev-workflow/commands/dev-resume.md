@@ -7,14 +7,6 @@ reads: $PROJECT_ROOT/.dev/<feature-name>/checkpoint.md, $PROJECT_ROOT/.dev/<feat
 
 ## Resume From Checkpoint
 
-### Agents
-
-This command uses a specialized agent for context loading:
-
-- **context-loader** (yellow) — Parses checkpoint, compares git state, and builds context summary
-
-Agent definition is in `plugins/dev-workflow/agents/`.
-
 ### Step 0: Determine Project Root
 
 Before proceeding, determine the project root directory:
@@ -47,16 +39,7 @@ find "$PROJECT_ROOT/.dev" -name "checkpoint.md" -type f
 
 ### Step 2: Gather Git State
 
-Before launching the agent, gather the current git state:
-
-```bash
-git branch --show-current
-git status --porcelain | head -1  # Check if there are uncommitted changes
-```
-
-Store these values:
-- `$CURRENT_BRANCH` — current branch name
-- `$HAS_UNCOMMITTED` — true if `git status --porcelain` has output, false otherwise
+Run `git branch --show-current` and `git status --porcelain | head -1`. Store as `$CURRENT_BRANCH` and `$HAS_UNCOMMITTED` (true if porcelain has output).
 
 ### Step 3: Load and Analyze Checkpoint with Agent
 
@@ -78,16 +61,9 @@ Use `subagent_type=dev-workflow:context-loader` and `model=haiku`.
 
 ### Step 4: Review Agent Findings
 
-After the agent returns:
-
-1. **Check context validity**:
-   - **Fresh**: Proceed normally
-   - **Stale**: Note the age but proceed unless significantly outdated
-   - **Drifted**: Warn about branch mismatch or significant changes
-
-2. **Handle warnings**:
-   - If branch mismatch: Ask "Checkpoint was on branch `X`, you're now on `Y`. Switch branch or continue?"
-   - If uncommitted changes resolved: Note "Uncommitted changes from the checkpoint appear to have been resolved."
+After the agent returns, check context validity:
+- **Fresh/Stale**: Proceed (note age if stale)
+- **Drifted**: Warn. If branch mismatch, ask: "Checkpoint was on `X`, you're on `Y`. Switch or continue?"
 
 ### Step 5: Present Resumption Summary
 
@@ -106,24 +82,21 @@ Present the agent's summary in this format:
 
 ### Step 6: Handling Discrepancies
 
-When resuming, you may find the codebase has drifted from the checkpoint. Follow these rules:
-
 | Situation | Action |
 |-----------|--------|
-| File differs from checkpoint description (based on `git diff` or content mismatch) | Proceed, note the drift in summary |
-| Key file missing or renamed | **STOP** — ask me how to proceed |
-| New files not mentioned in checkpoint | Proceed, mention them |
-| Branch mismatch | Ask (handled in Step 4) |
+| File differs from checkpoint | Proceed, note drift |
+| Key file missing or renamed | **STOP** — ask how to proceed |
+| New files not in checkpoint | Proceed, mention them |
 | PRD files missing | **STOP** — cannot resume without PRD |
 
-### Step 7: Read Key Files
+### Step 7: Read Key Files and Reference Patterns
 
-Before beginning work, read the key files identified by the agent:
-- Main PRD (`00-master-plan.md`)
-- Current sub-PRD (if applicable)
-- Any key implementation files mentioned
+Before beginning work:
+1. Read the main PRD (`00-master-plan.md`), current sub-PRD, and key implementation files
+2. Find 2-3 similar implementations from the PRD's "Reference Files" or "Codebase Patterns" sections
+3. Read those files and match their conventions (naming, structure, APIs, error handling) in new code
 
-This ensures full context before starting work.
+Never write new code from scratch when similar code already exists in the codebase.
 
 ### Step 8: Begin Work
 
@@ -131,18 +104,21 @@ After confirmation, proceed with the first action from the agent's summary. Foll
 
 **CRITICAL: PHASE GATE ENFORCEMENT**
 
-When you encounter a phase gate in the PRD (marked with `⏸️ **GATE**:`):
+At every `⏸️ **GATE**:` in the PRD — this is a HARD STOP:
+1. **STOP** — Do not proceed to the next phase
+2. **Report** what was accomplished
+3. **Ask**: "Phase [N] complete. Continue to Phase [N+1] or `/dev-checkpoint`?"
+4. **Wait** for explicit user response before continuing
 
-1. **STOP IMMEDIATELY** — Do not proceed to the next phase
-2. **Report completion** — Tell the user what was accomplished in this phase
-3. **Ask explicitly**: "Phase [N] complete. Continue to Phase [N+1] or run `/dev-checkpoint`?"
-4. **Wait for user response** — Do NOT proceed until the user explicitly says to continue
+**STEP-LEVEL STOPS**
 
-This is a HARD STOP, not a suggestion. Phase gates exist to give the user control over progress. Ignoring them defeats the purpose of the checkpoint system.
+After completing each implementation step within a phase:
+1. Report what was completed
+2. Ask: "Step done. Continue to next step?"
+3. Wait for confirmation before proceeding
+
+This prevents jumping ahead to the next task before the current one is tested.
 
 ## PRIVACY RULES
 
-When resuming, verify that checkpoint and PRD files do not contain sensitive information. If you find any of the following, warn the user:
-- Absolute paths containing usernames (e.g., `/Users/username/...`)
-- Secrets, API keys, tokens, or credentials
-- Personal information that shouldn't be stored
+Warn the user if checkpoint/PRD files contain: absolute paths with usernames, secrets/credentials, or personal information.

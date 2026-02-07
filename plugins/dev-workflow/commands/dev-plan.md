@@ -15,28 +15,11 @@ Store this as `$PROJECT_ROOT` and use it for all `.dev/` path references through
 ## PRIMARY DIRECTIVE
 
 Your sole deliverable is PRD files written to `$PROJECT_ROOT/.dev/<feature-name>/`.
-This command is part of a 3-command system that creates persistent memory across Claude sessions:
-- **`/dev-plan`** (this command) — produces the PRD documentation
-- **`/dev-checkpoint`** — saves progress and generates a continuation prompt
-- **`/dev-resume`** — loads a checkpoint and resumes work
-
 You produce documentation, not code. Every session must end with files on disk.
 
-**Note**: All `.dev/` references in this command refer to `$PROJECT_ROOT/.dev/`, where `$PROJECT_ROOT` is determined in Step 0.
+This is part of a 3-command system (`/dev-plan` → `/dev-checkpoint` → `/dev-resume`). The other commands parse your PRD files using status markers (`⬜`/`✅`), phase gates, file changes summary, and sub-PRD links.
 
-## PLAN MODE NOTE
-
-If plan mode is active: write a PRD summary to the plan file, call `ExitPlanMode`, then write the full PRD files after approval. You are still producing documentation, not code.
-
-## 3-COMMAND ECOSYSTEM
-
-`/dev-checkpoint` reads your PRD files and creates `$PROJECT_ROOT/.dev/<feature-name>/checkpoint.md` with a continuation prompt. It relies on:
-- **Status markers** (`⬜`/`✅`) in implementation steps to track progress
-- **Phase gates** with "Continue or `/dev-checkpoint`" to mark safe pause points
-- **File Changes Summary** to know which files will be modified
-- **Sub-PRD links** in the master plan to navigate the full plan
-
-`/dev-resume` reads the checkpoint and PRD files to resume work. It expects `$PROJECT_ROOT/.dev/<feature-name>/` to contain at minimum `00-master-plan.md`.
+**Plan mode**: If active, write a PRD summary to the plan file, call `ExitPlanMode`, then write full PRD files after approval.
 
 ## AGENTS
 
@@ -131,24 +114,15 @@ Use `subagent_type=dev-workflow:prd-planner`.
 
 ## RULES
 
-- ALWAYS produce at least `$PROJECT_ROOT/.dev/<feature-name>/00-master-plan.md`
-- Do NOT research endlessly — one round of research, then write
+- One round of research, then write — do NOT research endlessly
 - Fold research findings into the master plan's "Research Findings" section (no separate `findings.md`)
-- Use status markers (`⬜`/`✅`) and phase gates so `/dev-checkpoint` can parse progress
-- End by telling me what files were created and suggesting `/dev-checkpoint`
 
 ## PRIVACY RULES
 
-**NEVER include in PRD files:**
-- Absolute paths containing usernames (e.g., `/Users/username/...`, `/home/username/...`)
-- Secrets, API keys, tokens, or credentials
-- Personal information (names, emails, addresses)
-- Environment variables containing sensitive values
-
-**ALWAYS use instead:**
-- Relative paths from project root (e.g., `./src/`, `plugins/dev-workflow/`)
-- Generic references (e.g., "official Claude plugins marketplace" instead of full local path)
-- Placeholders for secrets (e.g., `<API_KEY>`, `$ENV_VAR`)
+**NEVER include in PRD files** — use safe alternatives:
+- Absolute paths with usernames → use relative paths from project root
+- Secrets, API keys, tokens, credentials → use placeholders (`<API_KEY>`, `$ENV_VAR`)
+- Personal information (names, emails) → use generic references
 
 ---
 
@@ -185,6 +159,12 @@ Use `subagent_type=dev-workflow:prd-planner`.
 |----------|-----------|------------------------|
 | [Choice] | [Why]     | [What else was considered] |
 
+### Constraints
+
+- **Reuse**: [Existing utilities/helpers to use instead of rebuilding]
+- **Patterns to follow**: [Conventions from reference implementations]
+- **Avoid**: [Known anti-patterns or approaches that won't work]
+
 ---
 
 ## Architecture Decision
@@ -218,21 +198,13 @@ _(Only for complex features. Remove this section for simple features.)_
 2. ⬜ [Step 2]
 3. ⬜ [Step 3]
 
-**Verification**: [How to verify this phase is complete]
+**Verification**:
+- [ ] [What should work after this phase]
+- [ ] Run: `[specific command, e.g. npm test, npm run build]`
 
 ⏸️ **GATE**: Phase complete. Continue or `/dev-checkpoint`.
 
----
-
-### Phase 2: [Phase Name]
-**Goal**: [What this phase accomplishes]
-
-1. ⬜ [Step 1]
-2. ⬜ [Step 2]
-
-**Verification**: [How to verify this phase is complete]
-
-⏸️ **GATE**: Phase complete. Continue or `/dev-checkpoint`.
+_(Repeat for additional phases. Each needs: Goal, numbered ⬜ steps, Verification checklist, and ⏸️ GATE.)_
 
 ---
 
@@ -328,22 +300,3 @@ _(Only for complex features. Remove this section for simple features.)_
 ⏸️ **GATE**: Sub-PRD complete. Continue to next sub-PRD or `/dev-checkpoint`.
 ```
 
----
-
-<details>
-<summary><strong>CHECKPOINT COMPATIBILITY</strong> (reference for maintainers)</summary>
-
-Your PRD files must be parseable by `/dev-checkpoint` and `/dev-resume`. The contract:
-
-| Element | Format | Used By |
-|---------|--------|---------|
-| Status markers | `⬜` (pending) / `✅` (done) | `/dev-checkpoint` updates these |
-| Phase gates | `⏸️ **GATE**: ... Continue or /dev-checkpoint.` | `/dev-checkpoint` identifies pause points |
-| File paths | Backtick-quoted in File Changes Summary | `/dev-resume` reads for context |
-| Sub-PRD links | Relative links in Sub-PRD Overview table | `/dev-resume` navigates the full plan |
-| Feature directory | `$PROJECT_ROOT/.dev/<feature-name>/` | Both commands locate files here |
-| YAML frontmatter | `branch`, `last_commit`, `uncommitted_changes`, `checkpointed` in checkpoint | `/dev-resume` verifies context (branch, staleness, drift) |
-| Semantic XML tags | `<context>`, `<current_state>`, `<next_action>`, `<key_files>`, `<decisions>`, `<blockers>`, `<notes>` | `/dev-resume` scans sections; `/dev-checkpoint` wraps content |
-| Decisions/Blockers | `<decisions>` and `<blockers>` sections (omitted if empty) | `/dev-checkpoint` captures; `/dev-resume` surfaces in summary |
-
-</details>
