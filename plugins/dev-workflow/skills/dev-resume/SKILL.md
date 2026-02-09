@@ -16,7 +16,7 @@ Before proceeding, determine the project root directory:
 1. If this is a git repository, use: `git rev-parse --show-toplevel`
 2. If not a git repository, use the initial working directory from the session context (shown in the environment info at session start)
 
-Store this as `$PROJECT_ROOT` and use it for all `.dev/` path references throughout this command.
+Store this as `$PROJECT_ROOT` and use it for all `.dev/` path references throughout this skill.
 
 ### Step 1: Identify Feature to Resume
 
@@ -50,7 +50,7 @@ Launch the **context-loader agent** to parse the checkpoint and compare state:
 ```
 "Parse the checkpoint at $PROJECT_ROOT/.dev/<feature-name>/checkpoint.md.
 
-Current git state (gathered by parent command):
+Current git state (gathered by parent skill):
 - Branch: $CURRENT_BRANCH
 - Uncommitted changes: $HAS_UNCOMMITTED
 

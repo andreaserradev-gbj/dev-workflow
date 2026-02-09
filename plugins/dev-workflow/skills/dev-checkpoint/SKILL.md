@@ -13,7 +13,7 @@ Review the current session and create a continuation prompt for the next session
 
 ### SAVE-ONLY MODE
 
-This command analyzes and saves. It does NOT fix, investigate, or implement anything.
+This skill analyzes and saves. It does NOT fix, investigate, or implement anything.
 
 - Do NOT investigate bugs or errors mentioned during the session
 - Do NOT start implementing fixes or next steps
@@ -27,7 +27,7 @@ Before proceeding, determine the project root directory:
 1. If this is a git repository, use: `git rev-parse --show-toplevel`
 2. If not a git repository, use the initial working directory from the session context (shown in the environment info at session start)
 
-Store this as `$PROJECT_ROOT` and use it for all `.dev/` path references throughout this command.
+Store this as `$PROJECT_ROOT` and use it for all `.dev/` path references throughout this skill.
 
 ### Step 1: Identify the Active Feature
 

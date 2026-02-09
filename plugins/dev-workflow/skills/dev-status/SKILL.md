@@ -12,7 +12,7 @@ Scan all features in the `.dev/` folder, generate a status report, and offer to 
 
 ### Agents
 
-This command uses a specialized agent for status scanning:
+This skill uses a specialized agent for status scanning:
 
 - **feature-batch-scanner** (blue) — Scans a batch of feature folders and extracts status for each
 
@@ -25,7 +25,7 @@ Before proceeding, determine the project root directory:
 1. If this is a git repository, use: `git rev-parse --show-toplevel`
 2. If not a git repository, use the initial working directory from the session context
 
-Store this as `$PROJECT_ROOT` and use it for all `.dev/` path references throughout this command.
+Store this as `$PROJECT_ROOT` and use it for all `.dev/` path references throughout this skill.
 
 ### Step 1: Discover Features
 

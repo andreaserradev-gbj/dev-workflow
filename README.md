@@ -23,7 +23,7 @@
 /plugin install dev-workflow
 ```
 
-Commands will be available as `/dev-workflow:dev-plan`, `/dev-workflow:dev-checkpoint`, `/dev-workflow:dev-resume`, `/dev-workflow:dev-status`.
+Skills will be available as `/dev-plan`, `/dev-checkpoint`, `/dev-resume`, `/dev-status`.
 
 <details>
 <summary><strong>Updating & Troubleshooting</strong></summary>
@@ -92,7 +92,7 @@ Plan a new feature with structured PRD documentation. Walks through three phases
 2. **Research** — explore the codebase using agents
 3. **Write** — produce `.dev/<feature-name>/00-master-plan.md` (and sub-PRDs for complex features)
 
-The PRD uses status markers (`⬜`/`✅`) and phase gates (`⏸️ GATE`) that the other two commands depend on.
+The PRD uses status markers (`⬜`/`✅`) and phase gates (`⏸️ GATE`) that the other two skills depend on.
 
 **Examples:**
 ```

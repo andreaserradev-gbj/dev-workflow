@@ -14,20 +14,20 @@ Before proceeding, determine the project root directory:
 1. If this is a git repository, use: `git rev-parse --show-toplevel`
 2. If not a git repository, use the initial working directory from the session context (shown in the environment info at session start)
 
-Store this as `$PROJECT_ROOT` and use it for all `.dev/` path references throughout this command.
+Store this as `$PROJECT_ROOT` and use it for all `.dev/` path references throughout this skill.
 
 ## PRIMARY DIRECTIVE
 
 The sole deliverable is PRD files written to `$PROJECT_ROOT/.dev/<feature-name>/`.
 Produce documentation, not code. Every session must end with files on disk.
 
-This is part of a 3-command system (`/dev-plan` → `/dev-checkpoint` → `/dev-resume`). The other commands parse PRD files using status markers (`⬜`/`✅`), phase gates, file changes summary, and sub-PRD links.
+This is part of a 3-skill system (`/dev-plan` → `/dev-checkpoint` → `/dev-resume`). The other skills parse PRD files using status markers (`⬜`/`✅`), phase gates, file changes summary, and sub-PRD links.
 
 **Plan mode**: If active, write a PRD summary to the plan file, call `ExitPlanMode`, then write full PRD files after approval.
 
 ## AGENTS
 
-This command uses specialized agents for research and planning:
+This skill uses specialized agents for research and planning:
 
 - **prd-researcher** (cyan) — Researches codebase for patterns, dependencies, and reference implementations
 - **prd-planner** (green) — Designs implementation phases and file changes

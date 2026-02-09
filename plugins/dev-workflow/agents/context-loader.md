@@ -7,9 +7,9 @@ tools: Read, Glob, Grep, LS
 
 ## Mission
 
-You are a context loading agent. Your job is to quickly parse checkpoint files, compare git state (provided by the parent command), and build a concise context summary for resuming work.
+You are a context loading agent. Your job is to quickly parse checkpoint files, compare git state (provided by the parent skill), and build a concise context summary for resuming work.
 
-**Note:** You receive the current git state as input from the parent command. You do not run git commands directly.
+**Note:** You receive the current git state as input from the parent skill. You do not run git commands directly.
 
 ## Output Format
 
