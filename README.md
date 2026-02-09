@@ -94,6 +94,13 @@ Plan a new feature with structured PRD documentation. Walks through three phases
 
 The PRD uses status markers (`⬜`/`✅`) and phase gates (`⏸️ GATE`) that the other two commands depend on.
 
+**Examples:**
+```
+/dev-plan add OAuth login with Google and GitHub providers
+/dev-plan refactor the database layer to use connection pooling
+plan a feature: add a caching layer to the API
+```
+
 ### `/dev-checkpoint`
 
 > **Run in:** edit mode
@@ -105,6 +112,13 @@ Save progress and generate a continuation prompt. Performs these steps:
 3. Capture git state (branch, last commit, uncommitted changes)
 4. Capture session context (decisions, blockers, notes)
 5. Generate and save `.dev/<feature-name>/checkpoint.md`
+
+**Examples:**
+```
+/dev-checkpoint
+/dev-checkpoint oauth-login
+save a checkpoint
+```
 
 ### `/dev-resume`
 
@@ -118,6 +132,13 @@ Resume work from a previous checkpoint. Performs these steps:
 4. Wait for confirmation before proceeding
 5. Handle discrepancies (missing files, branch mismatch, drift)
 
+**Examples:**
+```
+/dev-resume
+/dev-resume oauth-login
+resume my previous session
+```
+
 ### `/dev-status`
 
 > **Run in:** edit mode
@@ -130,6 +151,12 @@ Scan all features and generate a status report. Performs these steps:
 4. Display summary table with counts by status
 5. Offer to archive completed or stale (>30 days) features to `.dev-archive/`
 6. Save report to `.dev/status-report-YYYY-MM-DD.md`
+
+**Examples:**
+```
+/dev-status
+show dev status
+```
 
 ## Workflow
 

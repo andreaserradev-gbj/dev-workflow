@@ -67,6 +67,32 @@ Skills are discovered automatically. Codex activates them when:
 - The task matches a skill's description
 - You explicitly invoke a skill
 
+### Examples
+
+**dev-plan:**
+```
+use dev-plan to add OAuth login with Google and GitHub providers
+plan a feature: refactor the database layer to use connection pooling
+```
+
+**dev-checkpoint:**
+```
+use dev-checkpoint to save progress on oauth-login
+save a checkpoint
+```
+
+**dev-resume:**
+```
+use dev-resume to pick up where I left off on oauth-login
+resume my previous session
+```
+
+**dev-status:**
+```
+use dev-status to check progress across all features
+show dev status
+```
+
 ### Workflow
 
 The intended workflow is: **plan -> build -> checkpoint -> resume -> build -> checkpoint -> resume** ... until the feature is complete. See the [main README](../README.md) for a detailed explanation.
