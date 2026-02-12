@@ -5,6 +5,7 @@ description: >-
   Researches codebase patterns, designs implementation phases,
   and writes PRD files to .dev/.
 argument-hint: <feature description>
+allowed-tools: Bash(git rev-parse:*) Read
 ---
 
 ## Step 0: Determine Project Root

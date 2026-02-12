@@ -54,9 +54,9 @@ Restart Claude Code to pick up changes.
 
 Skills follow the [AgentSkills.io](https://agentskills.io) open standard.
 
-YAML frontmatter fields: `name`, `description`, `disable-model-invocation`, `argument-hint`
+YAML frontmatter fields: `name`, `description`, `disable-model-invocation`, `argument-hint`, `allowed-tools`
 
-Body contains structured instructions with phases, templates, and rules. Large templates are extracted into `references/` subdirectories.
+Body contains structured instructions with phases, templates, and rules. Large templates are extracted into `references/` subdirectories. The `allowed-tools` field pre-approves specific tools (e.g., `Bash(git rev-parse:*)`, `Read`) to avoid permission prompts.
 
 ## Key Conventions
 

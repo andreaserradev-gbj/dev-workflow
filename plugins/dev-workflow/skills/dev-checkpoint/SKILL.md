@@ -5,6 +5,7 @@ description: >-
   Updates PRD status markers, captures git state,
   and writes checkpoint.md for the next session.
 argument-hint: <feature name>
+allowed-tools: Bash(git rev-parse:*) Bash(git branch:*) Bash(git log:*) Bash(git status:*) Read
 ---
 
 ## Checkpoint Current Session
