@@ -9,7 +9,7 @@
     {
       "name": "dev-workflow",
       "description": "Plan features with structured PRDs, checkpoint progress, and resume across sessions.",
-      "version": "1.5.4",
+      "version": "1.5.5",
       "author": {
         "name": "Andrea Serra"
       },

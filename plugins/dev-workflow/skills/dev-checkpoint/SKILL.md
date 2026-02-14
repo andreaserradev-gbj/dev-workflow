@@ -5,7 +5,7 @@ description: >-
   Updates PRD status markers, captures git state,
   and writes checkpoint.md for the next session.
 argument-hint: <feature name>
-allowed-tools: Bash(git rev-parse:*) Bash(git branch:*) Bash(git log:*) Bash(git status:*) Read
+allowed-tools: Bash(git rev-parse:*) Bash(git branch:*) Bash(git log:*) Bash(git status:*) Bash(git worktree:*) Bash(git add:*) Bash(git commit:*) Bash(mv:*) Bash(mkdir:*) Read
 ---
 
 ## Checkpoint Current Session
@@ -116,3 +116,68 @@ Report:
 - **PRD updates made** (list each file and what was changed, or state "No updates needed")
 - What the next steps are
 - Confirm the checkpoint location
+
+### Step 9.5: Optional Worktree Setup (First Checkpoint Only)
+
+**Skip this step entirely** if ANY of these are true:
+- This is not a git repository
+- The current branch (from Step 5) is NOT `main` or `master`
+- `git branch --list "feature/<feature-name>"` returns a non-empty result (branch already exists)
+
+If all conditions pass, this is a first-time checkpoint on the default branch — offer worktree setup.
+
+**STOP.** Present the following to the user and wait for their response:
+
+> Would you like to set up a worktree-based workflow for `<feature-name>`?
+>
+> This will:
+> 1. Create branch `feature/<feature-name>` with a worktree in `../<project-basename>-<feature-name>/`
+> 2. Move `.dev/<feature-name>/` to the worktree
+> 3. Commit the PRD files in the new worktree
+>
+> After setup, you should **end this session** and start a new one from the worktree directory.
+
+**If the user declines**: End the skill normally — no further action.
+
+**If the user accepts**, run these commands:
+
+Derive `$PROJECT_BASENAME` from `$PROJECT_ROOT` (the directory name, e.g. `basename "$PROJECT_ROOT"`).
+
+1. **Create branch + worktree**:
+   ```bash
+   git worktree add -b "feature/<feature-name>" "$PROJECT_ROOT/../$PROJECT_BASENAME-<feature-name>"
+   ```
+
+2. **Move PRD files**:
+   ```bash
+   mkdir -p "$PROJECT_ROOT/../$PROJECT_BASENAME-<feature-name>/.dev"
+   mv "$PROJECT_ROOT/.dev/<feature-name>" "$PROJECT_ROOT/../$PROJECT_BASENAME-<feature-name>/.dev/<feature-name>"
+   ```
+
+3. **Commit in worktree**:
+   ```bash
+   git -C "$PROJECT_ROOT/../$PROJECT_BASENAME-<feature-name>" add .dev
+   git -C "$PROJECT_ROOT/../$PROJECT_BASENAME-<feature-name>" commit -m "Add PRD for <feature-name>"
+   ```
+
+4. **Update checkpoint frontmatter**: The checkpoint was written in Step 8 with the original branch (e.g. `main`). Now that the files live in the worktree on `feature/<feature-name>`, update the frontmatter so `/dev-resume` doesn't flag a branch mismatch:
+   - In `$PROJECT_ROOT/../$PROJECT_BASENAME-<feature-name>/.dev/<feature-name>/checkpoint.md`, change `branch: main` (or `master`) to `branch: feature/<feature-name>`
+   - Change `uncommitted_changes: true` to `uncommitted_changes: false` (if present, since we just committed)
+   - Amend the commit to include this update:
+     ```bash
+     git -C "$PROJECT_ROOT/../$PROJECT_BASENAME-<feature-name>" add .dev
+     git -C "$PROJECT_ROOT/../$PROJECT_BASENAME-<feature-name>" commit --amend --no-edit
+     ```
+
+After successful execution, report:
+
+> Worktree setup complete.
+>
+> - Branch: `feature/<feature-name>`
+> - Worktree: `../<project-basename>-<feature-name>/`
+> - PRD files moved and committed
+>
+> **Next**: End this session, then start a new one:
+> ```
+> cd ../<project-basename>-<feature-name> && claude
+> ```
