@@ -1,6 +1,6 @@
 # Worktree Setup - Master Plan
 
-**Status**: Phase 1 Implementation Complete — Pending Manual Test
+**Status**: Complete
 **Created**: 2026-02-14
 **Last Updated**: 2026-02-14
 
@@ -74,12 +74,12 @@ After execution, clearly tell the user:
    - **Post-execution message**: Clearly state files were moved, session should end, and where to continue
 
 **Verification**:
-- [ ] YAML frontmatter parses correctly
-- [ ] Step only appears on first checkpoint (branch doesn't exist yet)
-- [ ] Step is skipped when not on main/master
-- [ ] Step is skipped when not a git repo
-- [ ] STOP gate waits for user confirmation
-- [ ] Run: `claude --plugin-dir ./plugins/dev-workflow` and test `/dev-checkpoint`
+- [x] YAML frontmatter parses correctly
+- [x] Step only appears on first checkpoint (branch doesn't exist yet)
+- [x] Step is skipped when not on main/master
+- [x] Step is skipped when not a git repo
+- [x] STOP gate waits for user confirmation
+- [x] Run: `claude --plugin-dir ./plugins/dev-workflow` and test `/dev-checkpoint`
 
 ⏸️ **GATE**: Phase complete. Continue or `/dev-checkpoint`.
 

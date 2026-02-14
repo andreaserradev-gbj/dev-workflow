@@ -1,6 +1,6 @@
 ---
 branch: feature/worktree-setup
-last_commit: cce1511 Add PRD for worktree-setup
+last_commit: 1207e18 Bump version to 1.5.5 and archive completed features
 uncommitted_changes: true
 checkpointed: 2026-02-14T00:00:00Z
 ---
@@ -13,8 +13,8 @@ Read the following PRD files in order:
 ## Context
 
 **Goal**: Add optional worktree setup step to `/dev-checkpoint` that automates branch+worktree creation, PRD file move, and commit on first-ever checkpoint.
-**Current phase**: Phase 1 — Add Worktree Setup Step to dev-checkpoint
-**Key completions**: Phase 1 implementation complete (allowed-tools updated, Step 9.5 added with checkpoint frontmatter fix). Pending manual test.
+**Current phase**: Complete
+**Key completions**: Phase 1 fully implemented and manually verified. PR #4 created. Version bumped to 1.5.5. Completed features archived.
 </context>
 
 <current_state>
@@ -25,18 +25,17 @@ Read the following PRD files in order:
 - ✅ PRD written: `.dev/worktree-setup/00-master-plan.md`
 - ✅ Update `allowed-tools` frontmatter: Added `Bash(git worktree:*)`, `Bash(git add:*)`, `Bash(git commit:*)`, `Bash(mv:*)`, `Bash(mkdir:*)` to dev-checkpoint SKILL.md
 - ✅ Add Step 9.5 section: Implemented worktree setup flow with conditions, STOP gate, 3-command execution, checkpoint frontmatter fix, and post-execution message
-- ⬜ Manual verification: Test full flow with `claude --plugin-dir ./plugins/dev-workflow` and run `/dev-checkpoint`
+- ✅ Manual verification: Full flow tested and confirmed working
+- ✅ PR created: #4 — Add optional worktree setup step to dev-checkpoint
+- ✅ Version bumped to 1.5.5, completed features archived to `.dev-archive/`
 </current_state>
 
 <next_action>
 ## Next Steps
 
-Verification (dev-checkpoint/SKILL.md):
-- Run `claude --plugin-dir ./plugins/dev-workflow` and test `/dev-checkpoint` on a test feature while on `main`
-- Verify Step 9.5 triggers and offers worktree setup
-- Verify worktree is created, PRD files moved, commit made, checkpoint frontmatter updated
-- Verify Step 9.5 is skipped when on a feature branch (not main/master)
-- Commit changes and mark Phase 1 gate as complete
+Feature is complete. Remaining:
+- Merge PR #4 into main
+- Archive this feature's `.dev/worktree-setup/` to `.dev-archive/`
 </next_action>
 
 <key_files>
@@ -44,7 +43,7 @@ Verification (dev-checkpoint/SKILL.md):
 
 - Target file: plugins/dev-workflow/skills/dev-checkpoint/SKILL.md
 - PRD: .dev/worktree-setup/00-master-plan.md
-- Checkpoint template: plugins/dev-workflow/skills/dev-checkpoint/references/checkpoint-template.md
+- Marketplace config: .claude-plugin/marketplace.json
 </key_files>
 
 <decisions>## Decisions
@@ -56,10 +55,6 @@ Verification (dev-checkpoint/SKILL.md):
 - Added `Bash(mv:*)` and `Bash(mkdir:*)` to allowed-tools (needed for mkdir -p and mv commands)
 - Added step 4 to worktree flow: update checkpoint frontmatter branch and uncommitted_changes after move, then amend commit — fixes /dev-resume drift warning</decisions>
 
-<notes>## Notes
-- User reported branch mismatch warning when resuming from worktree — root cause was checkpoint frontmatter still showing `main` after worktree move. Fixed by adding step 4 to update frontmatter.
-- Verification checklist items confirmed via code review; manual plugin test still pending</notes>
-
 ---
 
-Please continue with verification: test the full `/dev-checkpoint` flow with `claude --plugin-dir ./plugins/dev-workflow`, then commit changes and mark Phase 1 as complete.
+Feature is complete. Merge PR #4 and archive this feature.
