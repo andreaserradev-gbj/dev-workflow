@@ -1,6 +1,6 @@
 # Worktree Setup - Master Plan
 
-**Status**: Not Started
+**Status**: Phase 1 Implementation Complete — Pending Manual Test
 **Created**: 2026-02-14
 **Last Updated**: 2026-02-14
 
@@ -65,8 +65,8 @@ After execution, clearly tell the user:
 ### Phase 1: Add Worktree Setup Step to dev-checkpoint
 **Goal**: Add the optional worktree setup flow as Step 9.5 in `dev-checkpoint/SKILL.md`
 
-1. ⬜ Update `allowed-tools` frontmatter to add `Bash(git worktree:*)` and `Bash(git add:*)` and `Bash(git commit:*)`
-2. ⬜ Add new "Step 9.5: Optional Worktree Setup" section after Step 9 with:
+1. ✅ Update `allowed-tools` frontmatter to add `Bash(git worktree:*)` and `Bash(git add:*)` and `Bash(git commit:*)`
+2. ✅ Add new "Step 9.5: Optional Worktree Setup" section after Step 9 with:
    - **Conditions**: git repo AND on `main`/`master` AND `git branch --list feature/<feature-name>` returns empty
    - **STOP gate**: Ask user if they want to create a worktree-based workflow, explain what will happen (files will be moved, session must end)
    - **If declined**: Skill ends normally
