@@ -1,6 +1,6 @@
 # Checkpoint Commit Step - Master Plan
 
-**Status**: Not Started
+**Status**: In Progress
 **Created**: 2026-02-15
 **Last Updated**: 2026-02-15
 
@@ -60,7 +60,7 @@ Placement after Step 9.5 ensures:
 ### Phase 1: Add Optional Commit Step
 **Goal**: Add Step 10 to SKILL.md that offers to commit changes after checkpoint is saved
 
-1. ⬜ Add Step 10 after Step 9.5 (line 184) with:
+1. ✅ Add Step 10 after Step 9.5 (line 184) with:
    - Skip conditions: not a git repo, or `git status --porcelain` is empty
    - Fresh `git status --porcelain` check (since worktree step may have moved files)
    - Generate commit message from feature name and checkpoint summary

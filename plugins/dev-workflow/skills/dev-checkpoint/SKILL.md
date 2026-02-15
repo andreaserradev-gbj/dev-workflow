@@ -181,3 +181,42 @@ After successful execution, report:
 > ```
 > cd ../<project-basename>-<feature-name> && claude
 > ```
+
+### Step 10: Optional Commit
+
+**Skip this step entirely** if ANY of these are true:
+- This is not a git repository
+- `git status --porcelain` output is empty (no uncommitted changes)
+
+Note: Run `git status --porcelain` fresh here — do NOT reuse Step 5's result, because Step 9.5 may have moved files.
+
+If there are uncommitted changes, generate a commit message from the checkpoint context:
+- Format: `<Summary of what was accomplished this session>`
+- Derive the summary from the checkpoint's `<context>` and `<current_state>` sections
+- Keep it to one concise sentence (under 72 characters if possible)
+
+**STOP.** Present the following to the user and wait for their response:
+
+> Ready to commit your changes:
+>
+> ```
+> <output of `git status --short`>
+> ```
+>
+> Proposed commit message:
+> ```
+> <generated commit message>
+> ```
+>
+> Commit these changes?
+
+**If the user declines**: End the skill normally — no further action.
+
+**If the user accepts**, run:
+
+```bash
+git add .
+git commit -m "<generated commit message>"
+```
+
+Confirm with `git log -1 --oneline` and report the commit hash.
