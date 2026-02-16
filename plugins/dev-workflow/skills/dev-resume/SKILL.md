@@ -5,7 +5,7 @@ description: >-
   Loads checkpoint.md, verifies git state, and presents
   a resumption summary before continuing.
 argument-hint: <feature name>
-allowed-tools: Bash(git rev-parse:*) Bash(git branch:*) Bash(git status:*) Bash(find:*) Bash(printf:*) Bash(basename:*) Bash(test:*) Read
+allowed-tools: Bash(git rev-parse:*) Bash(git branch:*) Bash(git status:*) Bash(find:*) Bash(grep:*) Bash(printf:*) Bash(basename:*) Bash(test:*) Read
 ---
 
 ## Resume From Checkpoint
@@ -51,12 +51,15 @@ After selection, derive and validate:
 ```bash
 FEATURE_NAME="$(basename "$(dirname "$CHECKPOINT_PATH")")"
 case "$CHECKPOINT_PATH" in
+  *".."*) echo "Invalid checkpoint path (traversal): $CHECKPOINT_PATH"; exit 1 ;;
   "$PROJECT_ROOT/.dev/"*) ;;
   *) echo "Invalid checkpoint path: $CHECKPOINT_PATH"; exit 1 ;;
 esac
 printf '%s' "$FEATURE_NAME" | grep -Eq '^[a-z0-9][a-z0-9-]*$' \
   || { echo "Invalid feature name slug: $FEATURE_NAME"; exit 1; }
 ```
+
+**If any of the above checks exit non-zero, STOP immediately. Report the validation error to the user and do not proceed to any subsequent step.**
 
 Rules:
 - Never construct checkpoint paths directly from raw `$ARGUMENTS`.

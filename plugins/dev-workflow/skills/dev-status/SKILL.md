@@ -4,7 +4,7 @@ description: >-
   Show status of all features in .dev/.
   Scans feature folders using parallel agents, generates
   a status report, and offers to archive completed features.
-allowed-tools: Bash(git rev-parse:*) Read
+allowed-tools: Bash(git rev-parse:*) Bash(find:*) Bash(grep:*) Bash(mkdir:*) Bash(mv:*) Bash(printf:*) Bash(test:*) Read
 ---
 
 ## Dev Status Report
@@ -151,12 +151,19 @@ Present options:
    mkdir -p "$PROJECT_ROOT/.dev-archive"
    ```
 
-2. Move each selected feature folder:
+2. For each selected feature, set `$FEATURE_PATH` to the matching path from Step 1's discovered list, then validate and move:
    ```bash
+   case "$FEATURE_PATH" in
+     *".."*) echo "Invalid feature path (traversal): $FEATURE_PATH"; exit 1 ;;
+     "$PROJECT_ROOT/.dev/"*) ;;
+     *) echo "Invalid feature path: $FEATURE_PATH"; exit 1 ;;
+   esac
    mv -- "$FEATURE_PATH" "$PROJECT_ROOT/.dev-archive/"
    ```
 
-   Where `$FEATURE_PATH` must be one of the discovered `.dev/*` directories selected by the user.
+   **If the validation exits non-zero, STOP immediately. Report the error to the user and do not archive any further features.**
+
+   `$FEATURE_PATH` must be one of the discovered `.dev/*` directories selected by the user. Never construct it from raw user input.
 
 3. Confirm what was archived.
 

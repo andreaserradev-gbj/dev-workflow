@@ -5,7 +5,7 @@ description: >-
   Updates PRD status markers, captures git state,
   and writes checkpoint.md for the next session.
 argument-hint: <feature name>
-allowed-tools: Bash(git rev-parse:*) Bash(git branch:*) Bash(git log:*) Bash(git status:*) Bash(git worktree:*) Bash(git add:*) Bash(git commit:*) Bash(mv:*) Bash(mkdir:*) Bash(printf:*) Bash(test:*) Read
+allowed-tools: Bash(git rev-parse:*) Bash(git branch:*) Bash(git log:*) Bash(git status:*) Bash(git worktree:*) Bash(git add:*) Bash(git commit:*) Bash(mv:*) Bash(mkdir:*) Bash(find:*) Bash(grep:*) Bash(basename:*) Bash(printf:*) Bash(test:*) Bash(tr:*) Bash(sed:*) Read
 ---
 
 ## Checkpoint Current Session
@@ -60,7 +60,12 @@ Set `$FEATURE_NAME` before continuing:
   ```bash
   FEATURE_NAME="$(basename "$FEATURE_PATH")"
   ```
-- If creating a new feature, normalize user input into a safe slug (lowercase letters, numbers, hyphens only), reject empty results, and require `^[a-z0-9][a-z0-9-]*$`.
+- If creating a new feature, normalize user input into a safe slug:
+  ```bash
+  FEATURE_NAME="$(printf '%s' "$USER_INPUT" \
+    | tr '[:upper:]' '[:lower:]' \
+    | sed -E 's/[^a-z0-9]+/-/g; s/^-+//; s/-+$//; s/-+/-/g')"
+  ```
 - Never use raw `$ARGUMENTS` directly in shell commands or paths.
 
 Enforce with shell checks before path use:
@@ -68,14 +73,16 @@ Enforce with shell checks before path use:
 ```bash
 if [ -n "${FEATURE_PATH:-}" ]; then
   case "$FEATURE_PATH" in
+    *".."*) echo "Invalid feature path (traversal): $FEATURE_PATH"; exit 1 ;;
     "$PROJECT_ROOT/.dev/"*) ;;
     *) echo "Invalid feature path: $FEATURE_PATH"; exit 1 ;;
   esac
 fi
 printf '%s' "$FEATURE_NAME" | grep -Eq '^[a-z0-9][a-z0-9-]*$' \
   || { echo "Invalid feature name slug: $FEATURE_NAME"; exit 1; }
-test -n "$FEATURE_NAME" || { echo "Feature name slug is empty"; exit 1; }
 ```
+
+**If any of the above checks exit non-zero, STOP immediately. Report the validation error to the user and do not proceed to any subsequent step.**
 
 The checkpoint will be saved to `$PROJECT_ROOT/.dev/$FEATURE_NAME/checkpoint.md`.
 

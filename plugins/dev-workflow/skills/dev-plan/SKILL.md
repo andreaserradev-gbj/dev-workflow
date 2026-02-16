@@ -5,7 +5,7 @@ description: >-
   Researches codebase patterns, designs implementation phases,
   and writes PRD files to .dev/.
 argument-hint: <feature description>
-allowed-tools: Bash(git rev-parse:*) Bash(printf:*) Bash(test:*) Read
+allowed-tools: Bash(git rev-parse:*) Bash(printf:*) Bash(test:*) Bash(grep:*) Bash(tr:*) Bash(sed:*) Read
 ---
 
 ## Step 0: Determine Project Root
@@ -76,8 +76,9 @@ FEATURE_NAME="$(printf '%s' "$CANDIDATE_FEATURE_NAME" \
   | sed -E 's/[^a-z0-9]+/-/g; s/^-+//; s/-+$//; s/-+/-/g')"
 printf '%s' "$FEATURE_NAME" | grep -Eq '^[a-z0-9][a-z0-9-]*$' \
   || { echo "Invalid feature name slug: $FEATURE_NAME"; exit 1; }
-test -n "$FEATURE_NAME" || { echo "Feature name slug is empty"; exit 1; }
 ```
+
+**If the above validation exits non-zero, STOP immediately. Report the validation error to the user and do not proceed to any subsequent step.**
 
 Rules:
 - Never use raw `$ARGUMENTS` directly in file paths.
