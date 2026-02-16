@@ -77,7 +77,7 @@ run_test "archived with no .dev-archive/ returns empty exit 0" \
   bash "$SCRIPT_DIR/discover.sh" archived /tmp
 
 run_test "invalid mode exits 1" \
-  1 "Usage: discover.sh {root|checkpoints|features|archived} ..." \
+  1 "Usage: discover.sh {root|checkpoints|features|archived|status-reports} ..." \
   bash "$SCRIPT_DIR/discover.sh" bogus
 
 echo ""

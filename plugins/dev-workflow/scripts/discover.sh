@@ -53,8 +53,15 @@ case "$MODE" in
     find "$ROOT/.dev-archive" -maxdepth 1 -type d ! -name .dev-archive 2>/dev/null | sort || true
     ;;
 
+  status-reports)
+    # Usage: discover.sh status-reports <root>
+    # stdout: existing status-report-*.md file paths (one per line, empty if none)
+    ROOT="${1:?root required}"
+    find "$ROOT/.dev" -maxdepth 1 -name "status-report-*.md" -type f 2>/dev/null | sort || true
+    ;;
+
   *)
-    echo "Usage: discover.sh {root|checkpoints|features|archived} ..." >&2
+    echo "Usage: discover.sh {root|checkpoints|features|archived|status-reports} ..." >&2
     exit 1
     ;;
 esac

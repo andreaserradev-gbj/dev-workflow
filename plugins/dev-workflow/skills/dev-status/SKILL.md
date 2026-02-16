@@ -4,7 +4,7 @@ description: >-
   Show status of all features in .dev/.
   Scans feature folders using parallel agents, generates
   a status report, and offers to archive completed features.
-allowed-tools: Bash(bash:*) Bash(mkdir:*) Bash(mv:*) Read
+allowed-tools: Bash(bash:*) Bash(mkdir:*) Bash(mv:*) Bash(rm:*) Read
 ---
 
 ## Dev Status Report
@@ -174,6 +174,14 @@ Present options:
 **If user skips**: Proceed to Step 7.
 
 ### Step 7: Save Report
+
+Remove any previous status reports before writing the new one:
+
+```bash
+bash "$DISCOVER" status-reports "$PROJECT_ROOT"
+```
+
+Delete each file path returned (if any). If the command fails, skip cleanup and continue.
 
 Write the status report to `$PROJECT_ROOT/.dev/status-report-YYYY-MM-DD.md`:
 
