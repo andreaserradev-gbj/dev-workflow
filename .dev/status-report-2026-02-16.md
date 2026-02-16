@@ -1,14 +1,14 @@
 # Dev Status Report
 
-**Generated**: 2026-02-15
+**Generated**: 2026-02-16T00:00:00Z
 **Project**: dev-workflow
-**Features Scanned**: 2
+**Features Scanned**: 1
 
 ## Summary
 
 | Status | Count |
 |--------|-------|
-| Active | 1 |
+| Active | 0 |
 | Complete | 1 |
 | Stale | 0 |
 | No PRD | 0 |
@@ -17,16 +17,15 @@
 
 | Feature | Status | Progress | Last Activity |
 |---------|--------|----------|---------------|
-| checkpoint-commit-step | Active | 5/6 steps | 2026-02-15 |
-| worktree-setup | Complete | 6/6 steps | 2026-02-14 |
+| checkpoint-commit-step | Complete | 1/1 phases | 2026-02-15 |
 
 ## Archive Candidates
 
 ### Complete (ready to archive)
-- worktree-setup (archived this session)
+- checkpoint-commit-step (archived)
 
 ### Stale (no activity > 30 days)
-- None
+- (none)
 
 ---
 

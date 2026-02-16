@@ -12,7 +12,7 @@ Refactor the dev-workflow repository to match the official Claude Code plugin ma
 
 Additionally, add `argument-hint` frontmatter to commands that accept `$ARGUMENTS` to improve the user experience.
 
-**Reference**: `/Users/andreaserra/.claude/plugins/marketplaces/claude-plugins-official/plugins/feature-dev/`
+**Reference**: `~/.claude/plugins/marketplaces/claude-plugins-official/plugins/feature-dev/`
 
 ---
 
@@ -186,6 +186,6 @@ dev-workflow/
 
 ## Reference Files
 
-- `/Users/andreaserra/.claude/plugins/marketplaces/claude-plugins-official/.claude-plugin/marketplace.json`: Official marketplace structure
-- `/Users/andreaserra/.claude/plugins/marketplaces/claude-plugins-official/plugins/feature-dev/`: Example plugin structure
-- `/Users/andreaserra/.claude/plugins/marketplaces/claude-plugins-official/plugins/feature-dev/commands/feature-dev.md`: Example with argument-hint
+- `~/.claude/plugins/marketplaces/claude-plugins-official/.claude-plugin/marketplace.json`: Official marketplace structure
+- `~/.claude/plugins/marketplaces/claude-plugins-official/plugins/feature-dev/`: Example plugin structure
+- `~/.claude/plugins/marketplaces/claude-plugins-official/plugins/feature-dev/commands/feature-dev.md`: Example with argument-hint

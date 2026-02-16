@@ -13,7 +13,7 @@ gemini skills install https://github.com/andreaserradev-gbj/dev-workflow.git --p
 Or tell Gemini:
 
 ```
-Fetch and follow instructions from https://raw.githubusercontent.com/andreaserradev-gbj/dev-workflow/refs/heads/main/.gemini/INSTALL.md
+Run gemini skills install https://github.com/andreaserradev-gbj/dev-workflow.git --path plugins/dev-workflow/skills
 ```
 
 ## Manual Installation

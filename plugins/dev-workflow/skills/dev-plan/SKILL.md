@@ -5,21 +5,24 @@ description: >-
   Researches codebase patterns, designs implementation phases,
   and writes PRD files to .dev/.
 argument-hint: <feature description>
-allowed-tools: Bash(git rev-parse:*) Read
+allowed-tools: Bash(bash:*) Read
 ---
 
-## Step 0: Determine Project Root
+## Step 0: Discover Project Root
 
-Before proceeding, determine the project root directory:
+Run the [discovery script](../../scripts/discover.sh):
 
-1. If this is a git repository, use: `git rev-parse --show-toplevel`
-2. If not a git repository, use the initial working directory from the session context (shown in the environment info at session start)
+```bash
+bash "$DISCOVER" root
+```
 
-Store this as `$PROJECT_ROOT` and use it for all `.dev/` path references throughout this skill.
+Where `$DISCOVER` is the absolute path to `scripts/discover.sh` within the plugin directory. Inline actual values — do not rely on shell variables persisting between calls.
+
+Store the output as `$PROJECT_ROOT`. If the command fails, inform the user and stop.
 
 ## PRIMARY DIRECTIVE
 
-The sole deliverable is PRD files written to `$PROJECT_ROOT/.dev/<feature-name>/`.
+The sole deliverable is PRD files written to `$PROJECT_ROOT/.dev/$FEATURE_NAME/`.
 Produce documentation, not code. Every session must end with files on disk.
 
 This is part of a 3-skill system (`/dev-plan` → `/dev-checkpoint` → `/dev-resume`). The other skills parse PRD files using status markers (`⬜`/`✅`), phase gates, file changes summary, and sub-PRD links.
@@ -61,6 +64,22 @@ If `$ARGUMENTS` above is empty (the user ran `/dev-plan` with no arguments):
 5. Do NOT move to Phase 2 until the user explicitly confirms.
 
 > **Guardrail**: Once confirmed (Path B) or summarized (Path A), move to research. Don't linger here.
+
+### Step 1.5: Derive and Validate `$FEATURE_NAME`
+
+Before creating any directories or files, set a safe feature slug in `$FEATURE_NAME`.
+
+Normalize and validate with the [validation script](../../scripts/validate.sh):
+
+```bash
+bash "$VALIDATE" normalize "<candidate-name>"
+```
+
+Where `$VALIDATE` is the absolute path to `scripts/validate.sh` within the plugin directory. Inline actual values. Outputs `$FEATURE_NAME` on success; on failure, STOP and report the error.
+
+Rules:
+- Never use raw `$ARGUMENTS` directly in file paths.
+- Use `$FEATURE_NAME` for all `.dev/` path references.
 
 ## PHASE 2: RESEARCH
 
@@ -108,7 +127,7 @@ Use `subagent_type=dev-workflow:prd-planner`.
 
 **STOP. Do not create any files until the user confirms the architecture approach or requests adjustments.**
 
-3. **Create files** under `$PROJECT_ROOT/.dev/<feature-name>/`:
+3. **Create files** under `$PROJECT_ROOT/.dev/$FEATURE_NAME/`:
    - Always create `00-master-plan.md` — use the Master Plan template in [prd-templates.md](references/prd-templates.md)
    - For complex features, create `01-sub-prd-[name].md` etc. — use the Sub-PRD template in [prd-templates.md](references/prd-templates.md)
    - Incorporate research findings (Phase 2) and implementation plan (agent output) into the PRD

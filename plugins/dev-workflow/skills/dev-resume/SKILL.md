@@ -5,51 +5,69 @@ description: >-
   Loads checkpoint.md, verifies git state, and presents
   a resumption summary before continuing.
 argument-hint: <feature name>
-allowed-tools: Bash(git rev-parse:*) Bash(git branch:*) Bash(git status:*) Read
+allowed-tools: Bash(bash:*) Read
 ---
 
 ## Resume From Checkpoint
 
-### Step 0: Determine Project Root
+### Step 0: Discover Project Root
 
-Before proceeding, determine the project root directory:
+Run the [discovery script](../../scripts/discover.sh):
 
-1. If this is a git repository, use: `git rev-parse --show-toplevel`
-2. If not a git repository, use the initial working directory from the session context (shown in the environment info at session start)
+```bash
+bash "$DISCOVER" root
+```
 
-Store this as `$PROJECT_ROOT` and use it for all `.dev/` path references throughout this skill.
+Where `$DISCOVER` is the absolute path to `scripts/discover.sh` within the plugin directory. Inline actual values — do not rely on shell variables persisting between calls.
+
+Store the output as `$PROJECT_ROOT`. If the command fails, inform the user and stop.
 
 ### Step 1: Identify Feature to Resume
 
-First, check if a `$PROJECT_ROOT/.dev/` directory exists. If it does not exist, inform the user that no `$PROJECT_ROOT/.dev/` directory was found and ask what to work on. Do not proceed further.
-
-If `$PROJECT_ROOT/.dev/` exists, find all available checkpoints:
+Run the [discovery script](../../scripts/discover.sh) to find checkpoints:
 
 ```bash
-find "$PROJECT_ROOT/.dev" -name "checkpoint.md" -type f
+bash "$DISCOVER" checkpoints "$PROJECT_ROOT" "$ARGUMENTS"
 ```
 
-**If an argument was provided** (`$ARGUMENTS`):
-- Filter the checkpoint list to those whose path contains the argument (case-insensitive match)
-- If exactly one match: use that checkpoint
-- If multiple matches: ask which of the matching features to resume
-- If no matches: inform the user that no features match "$ARGUMENTS" and list all available features
+Pass `$ARGUMENTS` as the third argument only if the user provided one; omit it otherwise.
 
-**If no argument was provided**:
-- If multiple checkpoints exist: ask "Which feature would you like to resume?" and list the available features
-- If only one checkpoint exists: use that one
-- If no checkpoints exist: ask which task to work on
+- If the script exits non-zero (no `.dev/` directory): inform the user, stop.
+- If output is empty: no checkpoints found, ask what to work on.
+- If one line: use as `$CHECKPOINT_PATH`.
+- If multiple lines: ask which feature to resume.
+
+Never construct paths from raw `$ARGUMENTS`. Use only paths from script output.
+
+After selection, validate with the [validation script](../../scripts/validate.sh):
+
+```bash
+bash "$VALIDATE" checkpoint-path "$CHECKPOINT_PATH" "$PROJECT_ROOT"
+```
+
+Where `$VALIDATE` is the absolute path to `scripts/validate.sh` within the plugin directory. Inline actual values. Outputs `$FEATURE_NAME` on success; on failure, STOP and report the error.
 
 ### Step 2: Gather Git State
 
-Run `git branch --show-current` and `git status --porcelain | head -1`. Store as `$CURRENT_BRANCH` and `$HAS_UNCOMMITTED` (true if porcelain has output).
+Run the [git state script](../../scripts/git-state.sh):
+
+```bash
+bash "$GIT_STATE" brief
+```
+
+Where `$GIT_STATE` is the absolute path to `scripts/git-state.sh` within the plugin directory. Inline actual values.
+
+Parse the output lines:
+- `git:false` → not a git repo, skip git-related checks
+- `branch:<name>` → store as `$CURRENT_BRANCH`
+- `uncommitted:<true|false>` → store as `$HAS_UNCOMMITTED`
 
 ### Step 3: Load and Analyze Checkpoint with Agent
 
 Launch the **context-loader agent** to parse the checkpoint and compare state:
 
 ```
-"Parse the checkpoint at $PROJECT_ROOT/.dev/<feature-name>/checkpoint.md.
+"Parse the checkpoint at $CHECKPOINT_PATH.
 
 Current git state (gathered by parent skill):
 - Branch: $CURRENT_BRANCH
