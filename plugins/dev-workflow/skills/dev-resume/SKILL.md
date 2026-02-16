@@ -5,7 +5,7 @@ description: >-
   Loads checkpoint.md, verifies git state, and presents
   a resumption summary before continuing.
 argument-hint: <feature name>
-allowed-tools: Bash(git rev-parse:*) Bash(git branch:*) Bash(git status:*) Bash(find:*) Bash(grep:*) Bash(printf:*) Bash(basename:*) Bash(test:*) Read
+allowed-tools: Bash(git rev-parse:*) Bash(git branch:*) Bash(git status:*) Bash(git -C:*) Bash(find:*) Bash(grep:*) Bash(printf:*) Bash(basename:*) Bash(test:*) Read
 ---
 
 ## Resume From Checkpoint
