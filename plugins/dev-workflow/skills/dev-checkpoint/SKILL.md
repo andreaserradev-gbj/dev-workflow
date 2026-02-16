@@ -130,7 +130,9 @@ If not a git repo, skip and omit `branch`, `last_commit`, `uncommitted_changes` 
 
 ### Step 6: Confirm Session Context
 
-Present the agent's findings (decisions, blockers, notes) and ask: "I captured these from our session—correct me if I missed anything or got something wrong."
+Present the agent's findings (decisions, blockers, notes) and end with an explicit question:
+
+> "Does this look right? Reply **yes** to continue, or tell me what to add or change."
 
 If a category is empty, omit it.
 
