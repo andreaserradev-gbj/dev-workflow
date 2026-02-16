@@ -5,7 +5,7 @@ description: >-
   Updates PRD status markers, captures git state,
   and writes checkpoint.md for the next session.
 argument-hint: <feature name>
-allowed-tools: Bash(git rev-parse:*) Bash(git branch:*) Bash(git log:*) Bash(git status:*) Bash(git worktree:*) Bash(git add:*) Bash(git commit:*) Bash(git -C:*) Bash(mv:*) Bash(mkdir:*) Bash(find:*) Bash(grep:*) Bash(basename:*) Bash(printf:*) Bash(test:*) Bash(tr:*) Bash(sed:*) Read
+allowed-tools: Bash(git rev-parse:*) Bash(git branch:*) Bash(git log:*) Bash(git status:*) Bash(git worktree:*) Bash(git add:*) Bash(git commit:*) Bash(git -C:*) Bash(mv:*) Bash(mkdir:*) Bash(find:*) Bash(grep:*) Bash(printf:*) Bash(bash:*) Read
 ---
 
 ## Checkpoint Current Session
@@ -55,34 +55,23 @@ printf '%s\n' "$FEATURE_DIRS"
 - If only one feature exists: use that feature path as `$FEATURE_PATH`
 - If no features exist: ask the user to specify the feature name
 
-Set `$FEATURE_NAME` before continuing:
-- If using an existing feature, derive it from the selected discovered path:
-  ```bash
-  FEATURE_NAME="$(basename "$FEATURE_PATH")"
-  ```
-- If creating a new feature, normalize user input into a safe slug:
-  ```bash
-  FEATURE_NAME="$(printf '%s' "$USER_INPUT" \
-    | tr '[:upper:]' '[:lower:]' \
-    | sed -E 's/[^a-z0-9]+/-/g; s/^-+//; s/-+$//; s/-+/-/g')"
-  ```
-- Never use raw `$ARGUMENTS` directly in shell commands or paths.
+Set `$FEATURE_NAME` before continuing. Never use raw `$ARGUMENTS` directly in shell commands or paths.
 
-Enforce with shell checks before path use:
+Validate and derive the feature name using the [validation script](../../scripts/validate.sh). Where `$SCRIPT_PATH` is the absolute path to `scripts/validate.sh` within the plugin directory. Inline actual values — do not rely on shell variables persisting between calls.
+
+**If using an existing feature** (a `$FEATURE_PATH` was matched):
 
 ```bash
-if [ -n "${FEATURE_PATH:-}" ]; then
-  case "$FEATURE_PATH" in
-    *".."*) echo "Invalid feature path (traversal): $FEATURE_PATH"; exit 1 ;;
-    "$PROJECT_ROOT/.dev/"*) ;;
-    *) echo "Invalid feature path: $FEATURE_PATH"; exit 1 ;;
-  esac
-fi
-printf '%s' "$FEATURE_NAME" | grep -Eq '^[a-z0-9][a-z0-9-]*$' \
-  || { echo "Invalid feature name slug: $FEATURE_NAME"; exit 1; }
+bash "$SCRIPT_PATH" feature-path "$FEATURE_PATH" "$PROJECT_ROOT"
 ```
 
-**If any of the above checks exit non-zero, STOP immediately. Report the validation error to the user and do not proceed to any subsequent step.**
+**If creating a new feature** (no match, normalizing user input):
+
+```bash
+bash "$SCRIPT_PATH" normalize "$USER_INPUT"
+```
+
+The script outputs the validated `$FEATURE_NAME` on success, or exits non-zero with an error on stderr. If the script fails, STOP and report the error to the user.
 
 The checkpoint will be saved to `$PROJECT_ROOT/.dev/$FEATURE_NAME/checkpoint.md`.
 

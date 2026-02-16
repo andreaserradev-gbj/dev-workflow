@@ -4,7 +4,7 @@ description: >-
   Show status of all features in .dev/.
   Scans feature folders using parallel agents, generates
   a status report, and offers to archive completed features.
-allowed-tools: Bash(git rev-parse:*) Bash(find:*) Bash(grep:*) Bash(mkdir:*) Bash(mv:*) Bash(printf:*) Bash(test:*) Read
+allowed-tools: Bash(git rev-parse:*) Bash(find:*) Bash(mkdir:*) Bash(mv:*) Bash(bash:*) Read
 ---
 
 ## Dev Status Report
@@ -151,17 +151,18 @@ Present options:
    mkdir -p "$PROJECT_ROOT/.dev-archive"
    ```
 
-2. For each selected feature, set `$FEATURE_PATH` to the matching path from Step 1's discovered list, then validate and move:
+2. For each selected feature, set `$FEATURE_PATH` to the matching path from Step 1's discovered list. Validate the path using the [validation script](../../scripts/validate.sh), then move. Inline actual values — do not rely on shell variables persisting between calls.
+
    ```bash
-   case "$FEATURE_PATH" in
-     *".."*) echo "Invalid feature path (traversal): $FEATURE_PATH"; exit 1 ;;
-     "$PROJECT_ROOT/.dev/"*) ;;
-     *) echo "Invalid feature path: $FEATURE_PATH"; exit 1 ;;
-   esac
-   mv -- "$FEATURE_PATH" "$PROJECT_ROOT/.dev-archive/"
+   bash "$SCRIPT_PATH" feature-path "$FEATURE_PATH" "$PROJECT_ROOT"
    ```
 
-   **If the validation exits non-zero, STOP immediately. Report the error to the user and do not archive any further features.**
+   Where `$SCRIPT_PATH` is the absolute path to `scripts/validate.sh` within the plugin directory. If the script fails, STOP and report the error — do not archive.
+
+   Then move:
+   ```bash
+   mv -- "$FEATURE_PATH" "$PROJECT_ROOT/.dev-archive/"
+   ```
 
    `$FEATURE_PATH` must be one of the discovered `.dev/*` directories selected by the user. Never construct it from raw user input.
 

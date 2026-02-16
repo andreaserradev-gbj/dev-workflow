@@ -5,7 +5,7 @@ description: >-
   Loads checkpoint.md, verifies git state, and presents
   a resumption summary before continuing.
 argument-hint: <feature name>
-allowed-tools: Bash(git rev-parse:*) Bash(git branch:*) Bash(git status:*) Bash(git -C:*) Bash(find:*) Bash(grep:*) Bash(printf:*) Bash(basename:*) Bash(test:*) Read
+allowed-tools: Bash(git rev-parse:*) Bash(git branch:*) Bash(git status:*) Bash(git -C:*) Bash(find:*) Bash(grep:*) Bash(printf:*) Bash(bash:*) Read
 ---
 
 ## Resume From Checkpoint
@@ -46,20 +46,15 @@ Store this list as `$CHECKPOINT_PATHS`.
 - If only one checkpoint exists: use that checkpoint path as `$CHECKPOINT_PATH`
 - If no checkpoints exist: ask which task to work on
 
-After selection, derive and validate:
+After selection, validate the path and derive the feature name using the [validation script](../../scripts/validate.sh):
 
 ```bash
-FEATURE_NAME="$(basename "$(dirname "$CHECKPOINT_PATH")")"
-case "$CHECKPOINT_PATH" in
-  *".."*) echo "Invalid checkpoint path (traversal): $CHECKPOINT_PATH"; exit 1 ;;
-  "$PROJECT_ROOT/.dev/"*) ;;
-  *) echo "Invalid checkpoint path: $CHECKPOINT_PATH"; exit 1 ;;
-esac
-printf '%s' "$FEATURE_NAME" | grep -Eq '^[a-z0-9][a-z0-9-]*$' \
-  || { echo "Invalid feature name slug: $FEATURE_NAME"; exit 1; }
+bash "$SCRIPT_PATH" checkpoint-path "$CHECKPOINT_PATH" "$PROJECT_ROOT"
 ```
 
-**If any of the above checks exit non-zero, STOP immediately. Report the validation error to the user and do not proceed to any subsequent step.**
+Where `$SCRIPT_PATH` is the absolute path to `scripts/validate.sh` within the plugin directory. Inline actual values — do not rely on shell variables persisting between calls.
+
+The script outputs the validated `$FEATURE_NAME` on success, or exits non-zero with an error on stderr. If the script fails, STOP and report the error to the user.
 
 Rules:
 - Never construct checkpoint paths directly from raw `$ARGUMENTS`.
