@@ -5,17 +5,20 @@ description: >-
   Researches codebase patterns, designs implementation phases,
   and writes PRD files to .dev/.
 argument-hint: <feature description>
-allowed-tools: Bash(git rev-parse:*) Bash(bash:*) Read
+allowed-tools: Bash(bash:*) Read
 ---
 
-## Step 0: Determine Project Root
+## Step 0: Discover Project Root
 
-Before proceeding, determine the project root directory:
+Run the [discovery script](../../scripts/discover.sh):
 
-1. If this is a git repository, use: `git rev-parse --show-toplevel`
-2. If not a git repository, use the initial working directory from the session context (shown in the environment info at session start)
+```bash
+bash "$DISCOVER" root
+```
 
-Store this as `$PROJECT_ROOT` and use it for all `.dev/` path references throughout this skill.
+Where `$DISCOVER` is the absolute path to `scripts/discover.sh` within the plugin directory. Inline actual values — do not rely on shell variables persisting between calls.
+
+Store the output as `$PROJECT_ROOT`. If the command fails, inform the user and stop.
 
 ## PRIMARY DIRECTIVE
 
@@ -66,15 +69,13 @@ If `$ARGUMENTS` above is empty (the user ran `/dev-plan` with no arguments):
 
 Before creating any directories or files, set a safe feature slug in `$FEATURE_NAME`.
 
-Normalize and validate the candidate name using the [validation script](../../scripts/validate.sh):
+Normalize and validate with the [validation script](../../scripts/validate.sh):
 
 ```bash
-bash "$SCRIPT_PATH" normalize "<candidate-name>"
+bash "$VALIDATE" normalize "<candidate-name>"
 ```
 
-Where `$SCRIPT_PATH` is the absolute path to `scripts/validate.sh` within the plugin directory. Inline actual values — do not rely on shell variables persisting between calls.
-
-The script outputs the validated `$FEATURE_NAME` on success, or exits non-zero with an error on stderr. If the script fails, STOP and report the error to the user.
+Where `$VALIDATE` is the absolute path to `scripts/validate.sh` within the plugin directory. Inline actual values. Outputs `$FEATURE_NAME` on success; on failure, STOP and report the error.
 
 Rules:
 - Never use raw `$ARGUMENTS` directly in file paths.

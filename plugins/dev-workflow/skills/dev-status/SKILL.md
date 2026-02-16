@@ -4,7 +4,7 @@ description: >-
   Show status of all features in .dev/.
   Scans feature folders using parallel agents, generates
   a status report, and offers to archive completed features.
-allowed-tools: Bash(git rev-parse:*) Bash(find:*) Bash(mkdir:*) Bash(mv:*) Bash(bash:*) Read
+allowed-tools: Bash(bash:*) Bash(mkdir:*) Bash(mv:*) Read
 ---
 
 ## Dev Status Report
@@ -19,34 +19,37 @@ This skill uses a specialized agent for status scanning:
 
 Agent definition is in `plugins/dev-workflow/agents/`.
 
-### Step 0: Determine Project Root
+### Step 0: Discover Project Root
 
-Before proceeding, determine the project root directory:
+Run the [discovery script](../../scripts/discover.sh):
 
-1. If this is a git repository, use: `git rev-parse --show-toplevel`
-2. If not a git repository, use the initial working directory from the session context
+```bash
+bash "$DISCOVER" root
+```
 
-Store this as `$PROJECT_ROOT` and use it for all `.dev/` path references throughout this skill.
+Where `$DISCOVER` is the absolute path to `scripts/discover.sh` within the plugin directory. Inline actual values — do not rely on shell variables persisting between calls.
+
+Store the output as `$PROJECT_ROOT`. If the command fails, inform the user and stop.
 
 ### Step 1: Discover Features
 
-Find all feature directories, excluding the archive folder:
+Run the [discovery script](../../scripts/discover.sh) to find features:
 
 ```bash
-find "$PROJECT_ROOT/.dev" -maxdepth 1 -type d ! -name ".dev" ! -name ".dev-archive" | sort
+bash "$DISCOVER" features "$PROJECT_ROOT"
 ```
 
-Also check for archived features:
+- If the script exits non-zero (no `.dev/` directory): inform the user "No `.dev/` directory found. Use `/dev-plan` to start a new feature."
+- If output is empty: inform the user "No features found in `.dev/`. Use `/dev-plan` to start a new feature."
+- Otherwise: store the list of feature folder paths for the next step.
+
+Also check for archived features using the [discovery script](../../scripts/discover.sh):
 
 ```bash
-find "$PROJECT_ROOT/.dev-archive" -maxdepth 1 -type d ! -name ".dev-archive" 2>/dev/null | sort
+bash "$DISCOVER" archived "$PROJECT_ROOT"
 ```
 
-**If no `.dev/` directory exists**: Inform the user "No `.dev/` directory found. Use `/dev-plan` to start a new feature."
-
-**If `.dev/` exists but has no feature folders**: Inform the user "No features found in `.dev/`. Use `/dev-plan` to start a new feature."
-
-Store the list of feature folder paths for the next step.
+Store any archived paths for the report.
 
 Security rule: only use exact folder paths returned by discovery commands. Never build archive/move paths from raw user input.
 
@@ -151,13 +154,13 @@ Present options:
    mkdir -p "$PROJECT_ROOT/.dev-archive"
    ```
 
-2. For each selected feature, set `$FEATURE_PATH` to the matching path from Step 1's discovered list. Validate the path using the [validation script](../../scripts/validate.sh), then move. Inline actual values — do not rely on shell variables persisting between calls.
+2. For each selected feature, set `$FEATURE_PATH` to the matching path from Step 1's discovered list. Validate with the [validation script](../../scripts/validate.sh):
 
    ```bash
-   bash "$SCRIPT_PATH" feature-path "$FEATURE_PATH" "$PROJECT_ROOT"
+   bash "$VALIDATE" feature-path "$FEATURE_PATH" "$PROJECT_ROOT"
    ```
 
-   Where `$SCRIPT_PATH` is the absolute path to `scripts/validate.sh` within the plugin directory. If the script fails, STOP and report the error — do not archive.
+   Where `$VALIDATE` is the absolute path to `scripts/validate.sh` within the plugin directory. Inline actual values. On failure, STOP and report the error — do not archive.
 
    Then move:
    ```bash
