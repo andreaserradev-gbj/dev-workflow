@@ -1,0 +1,35 @@
+#!/bin/sh
+#
+# Pre-push hook: block pushes if plugins/ changed without a
+# marketplace.json version bump (compared to main).
+
+remote="$1"
+
+while read local_ref local_oid remote_ref remote_oid; do
+  # Compare the full branch diff against main, not just the new commits
+  merge_base=$(git merge-base "$local_oid" main 2>/dev/null)
+  if [ -z "$merge_base" ]; then
+    continue
+  fi
+
+  # Skip if pushing main itself (no comparison needed)
+  case "$remote_ref" in
+    refs/heads/main) continue ;;
+  esac
+
+  range="$merge_base..$local_oid"
+
+  plugins_changed=$(git diff --name-only "$range" -- 'plugins/' 2>/dev/null)
+  version_changed=$(git diff --name-only "$range" -- '.claude-plugin/marketplace.json' 2>/dev/null)
+
+  if [ -n "$plugins_changed" ] && [ -z "$version_changed" ]; then
+    echo "ERROR: Files under plugins/ were modified but .claude-plugin/marketplace.json was not updated."
+    echo "Bump the version in marketplace.json before pushing."
+    echo ""
+    echo "Changed plugin files:"
+    echo "$plugins_changed" | sed 's/^/  /'
+    exit 1
+  fi
+done
+
+exit 0

@@ -38,9 +38,24 @@ docs/
   README.gemini.md              # Gemini CLI usage documentation
 .claude-plugin/
   marketplace.json              # Marketplace metadata
+.githooks/                      # Git hooks (activate with scripts/setup.sh)
+  pre-commit                    # Runs tests before commit
+  pre-push                      # Enforces version bumps
+scripts/
+  setup.sh                      # One-time contributor setup
+tests/
+  test-scripts.sh               # Script edge-case tests
 ```
 
 ## Development
+
+### Setup
+
+After cloning, run the setup script to activate git hooks:
+
+```bash
+bash scripts/setup.sh
+```
 
 Test plugin changes locally:
 
@@ -50,9 +65,22 @@ claude --plugin-dir ./plugins/dev-workflow
 
 Restart Claude Code to pick up changes.
 
+### Tests
+
+```bash
+bash tests/test-scripts.sh
+```
+
+Runs automatically via the pre-commit hook.
+
+### Git Hooks (`.githooks/`)
+
+- **pre-commit** — runs `tests/test-scripts.sh`, blocks commit on failure
+- **pre-push** — blocks push if `plugins/` changed without a version bump in `marketplace.json`
+
 ### Version Bumps
 
-When any file under `plugins/` is modified, bump the `version` in `.claude-plugin/marketplace.json` before pushing to main (or opening a PR targeting main). A pre-push hook enforces this automatically.
+When any file under `plugins/` is modified, bump the `version` in `.claude-plugin/marketplace.json` before pushing to main (or opening a PR targeting main).
 
 ## Skill File Format
 

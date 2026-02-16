@@ -50,7 +50,7 @@ case "$MODE" in
     # Usage: discover.sh archived <root>
     # stdout: archived feature dir paths (one per line, empty if none)
     ROOT="${1:?root required}"
-    find "$ROOT/.dev-archive" -maxdepth 1 -type d ! -name .dev-archive 2>/dev/null | sort
+    find "$ROOT/.dev-archive" -maxdepth 1 -type d ! -name .dev-archive 2>/dev/null | sort || true
     ;;
 
   *)

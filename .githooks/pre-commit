@@ -1,0 +1,9 @@
+#!/bin/sh
+#
+# Pre-commit hook: run script tests before every commit.
+
+if ! bash tests/test-scripts.sh; then
+  echo ""
+  echo "ERROR: Script tests failed. Fix the issues before committing."
+  exit 1
+fi
