@@ -118,7 +118,13 @@ If nothing was completed, state: "No PRD updates needed."
 
 ### Step 5: Capture Git State
 
-If git repo, run `git branch --show-current`, `git log --oneline -1`, and `git status --short`. Store for checkpoint frontmatter.
+If git repo, run these as **separate** Bash calls (do NOT combine with `&&`):
+
+1. `git branch --show-current`
+2. `git log --oneline -1`
+3. `git status --short`
+
+Store results for checkpoint frontmatter.
 
 If not a git repo, skip and omit `branch`, `last_commit`, `uncommitted_changes` from frontmatter.
 

@@ -67,7 +67,10 @@ Rules:
 
 ### Step 2: Gather Git State
 
-Run `git branch --show-current` and `git status --porcelain | head -1`. Store as `$CURRENT_BRANCH` and `$HAS_UNCOMMITTED` (true if porcelain has output).
+Run these as **separate** Bash calls (do NOT combine with `&&`):
+
+1. `git branch --show-current` → store as `$CURRENT_BRANCH`
+2. `git status --porcelain` → store `$HAS_UNCOMMITTED` (true if output is non-empty)
 
 ### Step 3: Load and Analyze Checkpoint with Agent
 
