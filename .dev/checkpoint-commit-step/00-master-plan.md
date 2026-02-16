@@ -46,7 +46,7 @@ This reduces friction by letting users checkpoint and commit in one flow instead
 
 **Approach**: Add a new Step 10 at the end of the skill, following Step 9.5's exact structure.
 
-The step checks for uncommitted changes, proposes a commit message derived from the checkpoint context (feature name + summary of what was done), presents a STOP gate for user approval, then executes `git add . && git commit -m "<message>"` if accepted.
+The step checks for uncommitted changes, proposes a commit message derived from the checkpoint context (feature name + summary of what was done), presents a STOP gate for user approval, then stages tracked edits (`git add -u`) plus any user-approved new files and runs `git commit -m "<message>"` if accepted.
 
 Placement after Step 9.5 ensures:
 1. Dev files are already handled by worktree (if applicable)
@@ -65,7 +65,7 @@ Placement after Step 9.5 ensures:
    - Fresh `git status --porcelain` check (since worktree step may have moved files)
    - Generate commit message from feature name and checkpoint summary
    - STOP gate presenting: proposed commit message + summary of what will be committed
-   - "If user accepts": run `git add . && git commit -m "<message>"`, confirm with `git log -1 --oneline`
+   - "If user accepts": run `git add -u`, stage any user-approved new files explicitly, then `git commit -m "<message>"`; confirm with `git log -1 --oneline`
    - "If user declines": end normally
 
 **Verification**:

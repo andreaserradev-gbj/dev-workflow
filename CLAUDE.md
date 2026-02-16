@@ -50,6 +50,10 @@ claude --plugin-dir ./plugins/dev-workflow
 
 Restart Claude Code to pick up changes.
 
+### Version Bumps
+
+When any file under `plugins/` is modified, bump the `version` in `.claude-plugin/marketplace.json` before pushing to main (or opening a PR targeting main). A pre-push hook enforces this automatically.
+
 ## Skill File Format
 
 Skills follow the [AgentSkills.io](https://agentskills.io) open standard.

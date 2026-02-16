@@ -48,6 +48,8 @@ find "$PROJECT_ROOT/.dev-archive" -maxdepth 1 -type d ! -name ".dev-archive" 2>/
 
 Store the list of feature folder paths for the next step.
 
+Security rule: only use exact folder paths returned by discovery commands. Never build archive/move paths from raw user input.
+
 ### Step 2: Calculate Batches
 
 Distribute feature folders across agents (maximum 5 agents):
@@ -151,8 +153,10 @@ Present options:
 
 2. Move each selected feature folder:
    ```bash
-   mv "$PROJECT_ROOT/.dev/[feature-name]" "$PROJECT_ROOT/.dev-archive/"
+   mv -- "$FEATURE_PATH" "$PROJECT_ROOT/.dev-archive/"
    ```
+
+   Where `$FEATURE_PATH` must be one of the discovered `.dev/*` directories selected by the user.
 
 3. Confirm what was archived.
 

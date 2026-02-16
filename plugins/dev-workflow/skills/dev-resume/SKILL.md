@@ -5,7 +5,7 @@ description: >-
   Loads checkpoint.md, verifies git state, and presents
   a resumption summary before continuing.
 argument-hint: <feature name>
-allowed-tools: Bash(git rev-parse:*) Bash(git branch:*) Bash(git status:*) Read
+allowed-tools: Bash(git rev-parse:*) Bash(git branch:*) Bash(git status:*) Bash(find:*) Bash(printf:*) Bash(basename:*) Bash(test:*) Read
 ---
 
 ## Resume From Checkpoint
@@ -26,19 +26,41 @@ First, check if a `$PROJECT_ROOT/.dev/` directory exists. If it does not exist, 
 If `$PROJECT_ROOT/.dev/` exists, find all available checkpoints:
 
 ```bash
-find "$PROJECT_ROOT/.dev" -name "checkpoint.md" -type f
+CHECKPOINT_PATHS="$(find "$PROJECT_ROOT/.dev" -name "checkpoint.md" -type f | sort)"
+printf '%s\n' "$CHECKPOINT_PATHS"
 ```
 
+Store this list as `$CHECKPOINT_PATHS`.
+
 **If an argument was provided** (`$ARGUMENTS`):
-- Filter the checkpoint list to those whose path contains the argument (case-insensitive match)
-- If exactly one match: use that checkpoint
+- Filter the checkpoint list with a fixed-string, case-insensitive match:
+  ```bash
+  MATCHES="$(printf '%s\n' "$CHECKPOINT_PATHS" | grep -iF -- "$ARGUMENTS" || true)"
+  ```
+- If exactly one match: use that checkpoint path as `$CHECKPOINT_PATH`
 - If multiple matches: ask which of the matching features to resume
 - If no matches: inform the user that no features match "$ARGUMENTS" and list all available features
 
 **If no argument was provided**:
 - If multiple checkpoints exist: ask "Which feature would you like to resume?" and list the available features
-- If only one checkpoint exists: use that one
+- If only one checkpoint exists: use that checkpoint path as `$CHECKPOINT_PATH`
 - If no checkpoints exist: ask which task to work on
+
+After selection, derive and validate:
+
+```bash
+FEATURE_NAME="$(basename "$(dirname "$CHECKPOINT_PATH")")"
+case "$CHECKPOINT_PATH" in
+  "$PROJECT_ROOT/.dev/"*) ;;
+  *) echo "Invalid checkpoint path: $CHECKPOINT_PATH"; exit 1 ;;
+esac
+printf '%s' "$FEATURE_NAME" | grep -Eq '^[a-z0-9][a-z0-9-]*$' \
+  || { echo "Invalid feature name slug: $FEATURE_NAME"; exit 1; }
+```
+
+Rules:
+- Never construct checkpoint paths directly from raw `$ARGUMENTS`.
+- Use only `$CHECKPOINT_PATH` values discovered from `find`.
 
 ### Step 2: Gather Git State
 
@@ -49,7 +71,7 @@ Run `git branch --show-current` and `git status --porcelain | head -1`. Store as
 Launch the **context-loader agent** to parse the checkpoint and compare state:
 
 ```
-"Parse the checkpoint at $PROJECT_ROOT/.dev/<feature-name>/checkpoint.md.
+"Parse the checkpoint at $CHECKPOINT_PATH.
 
 Current git state (gathered by parent skill):
 - Branch: $CURRENT_BRANCH

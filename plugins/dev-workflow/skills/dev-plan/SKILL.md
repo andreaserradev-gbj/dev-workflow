@@ -5,7 +5,7 @@ description: >-
   Researches codebase patterns, designs implementation phases,
   and writes PRD files to .dev/.
 argument-hint: <feature description>
-allowed-tools: Bash(git rev-parse:*) Read
+allowed-tools: Bash(git rev-parse:*) Bash(printf:*) Bash(test:*) Read
 ---
 
 ## Step 0: Determine Project Root
@@ -19,7 +19,7 @@ Store this as `$PROJECT_ROOT` and use it for all `.dev/` path references through
 
 ## PRIMARY DIRECTIVE
 
-The sole deliverable is PRD files written to `$PROJECT_ROOT/.dev/<feature-name>/`.
+The sole deliverable is PRD files written to `$PROJECT_ROOT/.dev/$FEATURE_NAME/`.
 Produce documentation, not code. Every session must end with files on disk.
 
 This is part of a 3-skill system (`/dev-plan` → `/dev-checkpoint` → `/dev-resume`). The other skills parse PRD files using status markers (`⬜`/`✅`), phase gates, file changes summary, and sub-PRD links.
@@ -61,6 +61,27 @@ If `$ARGUMENTS` above is empty (the user ran `/dev-plan` with no arguments):
 5. Do NOT move to Phase 2 until the user explicitly confirms.
 
 > **Guardrail**: Once confirmed (Path B) or summarized (Path A), move to research. Don't linger here.
+
+### Step 1.5: Derive and Validate `$FEATURE_NAME`
+
+Before creating any directories or files, set a safe feature slug in `$FEATURE_NAME`.
+
+Example command sequence:
+
+```bash
+# Set from the confirmed feature intent (short human-readable candidate name)
+CANDIDATE_FEATURE_NAME="<feature-intent-slug-source>"
+FEATURE_NAME="$(printf '%s' "$CANDIDATE_FEATURE_NAME" \
+  | tr '[:upper:]' '[:lower:]' \
+  | sed -E 's/[^a-z0-9]+/-/g; s/^-+//; s/-+$//; s/-+/-/g')"
+printf '%s' "$FEATURE_NAME" | grep -Eq '^[a-z0-9][a-z0-9-]*$' \
+  || { echo "Invalid feature name slug: $FEATURE_NAME"; exit 1; }
+test -n "$FEATURE_NAME" || { echo "Feature name slug is empty"; exit 1; }
+```
+
+Rules:
+- Never use raw `$ARGUMENTS` directly in file paths.
+- Use `$FEATURE_NAME` for all `.dev/` path references.
 
 ## PHASE 2: RESEARCH
 
@@ -108,7 +129,7 @@ Use `subagent_type=dev-workflow:prd-planner`.
 
 **STOP. Do not create any files until the user confirms the architecture approach or requests adjustments.**
 
-3. **Create files** under `$PROJECT_ROOT/.dev/<feature-name>/`:
+3. **Create files** under `$PROJECT_ROOT/.dev/$FEATURE_NAME/`:
    - Always create `00-master-plan.md` — use the Master Plan template in [prd-templates.md](references/prd-templates.md)
    - For complex features, create `01-sub-prd-[name].md` etc. — use the Sub-PRD template in [prd-templates.md](references/prd-templates.md)
    - Incorporate research findings (Phase 2) and implementation plan (agent output) into the PRD

@@ -54,7 +54,7 @@ Then in Claude Code:
 
 Tell Codex:
 
-> Fetch and follow instructions from https://raw.githubusercontent.com/andreaserradev-gbj/dev-workflow/refs/heads/main/.codex/INSTALL.md
+> Clone `https://github.com/andreaserradev-gbj/dev-workflow.git` and follow `.codex/INSTALL.md` from the local checkout.
 
 Or see [docs/README.codex.md](docs/README.codex.md) for manual installation and usage details.
 

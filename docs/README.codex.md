@@ -7,7 +7,7 @@ Guide for using dev-workflow skills with OpenAI Codex via native skill discovery
 Tell Codex:
 
 ```
-Fetch and follow instructions from https://raw.githubusercontent.com/andreaserradev-gbj/dev-workflow/refs/heads/main/.codex/INSTALL.md
+Clone https://github.com/andreaserradev-gbj/dev-workflow.git and follow .codex/INSTALL.md from the local checkout.
 ```
 
 ## Manual Installation

@@ -5,7 +5,7 @@ description: >-
   Updates PRD status markers, captures git state,
   and writes checkpoint.md for the next session.
 argument-hint: <feature name>
-allowed-tools: Bash(git rev-parse:*) Bash(git branch:*) Bash(git log:*) Bash(git status:*) Bash(git worktree:*) Bash(git add:*) Bash(git commit:*) Bash(mv:*) Bash(mkdir:*) Read
+allowed-tools: Bash(git rev-parse:*) Bash(git branch:*) Bash(git log:*) Bash(git status:*) Bash(git worktree:*) Bash(git add:*) Bash(git commit:*) Bash(mv:*) Bash(mkdir:*) Bash(printf:*) Bash(test:*) Read
 ---
 
 ## Checkpoint Current Session
@@ -32,33 +32,59 @@ Store this as `$PROJECT_ROOT` and use it for all `.dev/` path references through
 
 ### Step 1: Identify the Active Feature
 
-First, check if a `$PROJECT_ROOT/.dev/` directory exists. If it does not exist, ask the user to specify the feature name and create the `$PROJECT_ROOT/.dev/<feature-name>/` directory before proceeding.
+First, check if a `$PROJECT_ROOT/.dev/` directory exists. If it does not exist, ask the user to specify the feature name and create the `$PROJECT_ROOT/.dev/<safe-feature-slug>/` directory before proceeding.
 
 If `$PROJECT_ROOT/.dev/` exists, find all available features:
 
 ```bash
-find "$PROJECT_ROOT/.dev" -maxdepth 1 -type d ! -name .dev
+FEATURE_DIRS="$(find "$PROJECT_ROOT/.dev" -maxdepth 1 -type d ! -name .dev | sort)"
+printf '%s\n' "$FEATURE_DIRS"
 ```
 
 **If an argument was provided** (`$ARGUMENTS`):
-- Filter the feature list to those whose name contains the argument (case-insensitive match)
-- If exactly one match: use that feature
+- Filter the discovered feature list with a fixed-string, case-insensitive match:
+  ```bash
+  MATCHES="$(printf '%s\n' "$FEATURE_DIRS" | grep -iF -- "$ARGUMENTS" || true)"
+  ```
+- If exactly one match: use that feature path as `$FEATURE_PATH`
 - If multiple matches: ask which of the matching features to checkpoint
 - If no matches: inform the user that no features match "$ARGUMENTS" and list all available features
 
 **If no argument was provided**:
 - If multiple features exist: ask "Which feature would you like to checkpoint?" and list the available features
-- If only one feature exists: use that one
+- If only one feature exists: use that feature path as `$FEATURE_PATH`
 - If no features exist: ask the user to specify the feature name
 
-The checkpoint will be saved to `$PROJECT_ROOT/.dev/<feature-name>/checkpoint.md`.
+Set `$FEATURE_NAME` before continuing:
+- If using an existing feature, derive it from the selected discovered path:
+  ```bash
+  FEATURE_NAME="$(basename "$FEATURE_PATH")"
+  ```
+- If creating a new feature, normalize user input into a safe slug (lowercase letters, numbers, hyphens only), reject empty results, and require `^[a-z0-9][a-z0-9-]*$`.
+- Never use raw `$ARGUMENTS` directly in shell commands or paths.
+
+Enforce with shell checks before path use:
+
+```bash
+if [ -n "${FEATURE_PATH:-}" ]; then
+  case "$FEATURE_PATH" in
+    "$PROJECT_ROOT/.dev/"*) ;;
+    *) echo "Invalid feature path: $FEATURE_PATH"; exit 1 ;;
+  esac
+fi
+printf '%s' "$FEATURE_NAME" | grep -Eq '^[a-z0-9][a-z0-9-]*$' \
+  || { echo "Invalid feature name slug: $FEATURE_NAME"; exit 1; }
+test -n "$FEATURE_NAME" || { echo "Feature name slug is empty"; exit 1; }
+```
+
+The checkpoint will be saved to `$PROJECT_ROOT/.dev/$FEATURE_NAME/checkpoint.md`.
 
 ### Step 2: Analyze Session with Agent
 
 Launch the **checkpoint-analyzer agent** to scan PRD files and the current session:
 
 ```
-"Analyze the PRD files in $PROJECT_ROOT/.dev/<feature-name>/ and the current session.
+"Analyze the PRD files in $PROJECT_ROOT/.dev/$FEATURE_NAME/ and the current session.
 Find: completed items (⬜ → ✅), pending items, decisions made, blockers encountered.
 Determine current phase and next step."
 ```
@@ -74,7 +100,7 @@ After the agent returns:
 
 ### Step 4: Update PRD Status Markers (REQUIRED)
 
-For each PRD file in `.dev/<feature-name>/`:
+For each PRD file in `.dev/$FEATURE_NAME/`:
 1. Read the file
 2. Change `⬜` to `✅` for completed items; update "Status" fields
 3. Save changes
@@ -107,7 +133,7 @@ Create a continuation prompt following the template in [checkpoint-template.md](
 
 ### Step 8: Save Checkpoint
 
-Write the continuation prompt to `$PROJECT_ROOT/.dev/<feature-name>/checkpoint.md`. Create the file if it doesn't exist, or overwrite it completely if it does.
+Write the continuation prompt to `$PROJECT_ROOT/.dev/$FEATURE_NAME/checkpoint.md`. Create the file if it doesn't exist, or overwrite it completely if it does.
 
 ### Step 9: Summary
 
@@ -122,17 +148,17 @@ Report:
 **Skip this step entirely** if ANY of these are true:
 - This is not a git repository
 - The current branch (from Step 5) is NOT `main` or `master`
-- `git branch --list "feature/<feature-name>"` returns a non-empty result (branch already exists)
+- `git branch --list "feature/$FEATURE_NAME"` returns a non-empty result (branch already exists)
 
 If all conditions pass, this is a first-time checkpoint on the default branch — offer worktree setup.
 
 **STOP.** Present the following to the user and wait for their response:
 
-> Would you like to set up a worktree-based workflow for `<feature-name>`?
+> Would you like to set up a worktree-based workflow for `$FEATURE_NAME`?
 >
 > This will:
-> 1. Create branch `feature/<feature-name>` with a worktree in `../<project-basename>-<feature-name>/`
-> 2. Move `.dev/<feature-name>/` to the worktree
+> 1. Create branch `feature/$FEATURE_NAME` with a worktree in `../<project-basename>-$FEATURE_NAME/`
+> 2. Move `.dev/$FEATURE_NAME/` to the worktree
 > 3. Commit the PRD files in the new worktree
 >
 > After setup, you should **end this session** and start a new one from the worktree directory.
@@ -145,41 +171,41 @@ Derive `$PROJECT_BASENAME` from `$PROJECT_ROOT` (the directory name, e.g. `basen
 
 1. **Create branch + worktree**:
    ```bash
-   git worktree add -b "feature/<feature-name>" "$PROJECT_ROOT/../$PROJECT_BASENAME-<feature-name>"
+   git worktree add -b "feature/$FEATURE_NAME" "$PROJECT_ROOT/../$PROJECT_BASENAME-$FEATURE_NAME"
    ```
 
 2. **Move PRD files**:
    ```bash
-   mkdir -p "$PROJECT_ROOT/../$PROJECT_BASENAME-<feature-name>/.dev"
-   mv "$PROJECT_ROOT/.dev/<feature-name>" "$PROJECT_ROOT/../$PROJECT_BASENAME-<feature-name>/.dev/<feature-name>"
+   mkdir -p "$PROJECT_ROOT/../$PROJECT_BASENAME-$FEATURE_NAME/.dev"
+   mv "$PROJECT_ROOT/.dev/$FEATURE_NAME" "$PROJECT_ROOT/../$PROJECT_BASENAME-$FEATURE_NAME/.dev/$FEATURE_NAME"
    ```
 
 3. **Commit in worktree**:
    ```bash
-   git -C "$PROJECT_ROOT/../$PROJECT_BASENAME-<feature-name>" add .dev
-   git -C "$PROJECT_ROOT/../$PROJECT_BASENAME-<feature-name>" commit -m "Add PRD for <feature-name>"
+   git -C "$PROJECT_ROOT/../$PROJECT_BASENAME-$FEATURE_NAME" add .dev
+   git -C "$PROJECT_ROOT/../$PROJECT_BASENAME-$FEATURE_NAME" commit -m "Add PRD for $FEATURE_NAME"
    ```
 
-4. **Update checkpoint frontmatter**: The checkpoint was written in Step 8 with the original branch (e.g. `main`). Now that the files live in the worktree on `feature/<feature-name>`, update the frontmatter so `/dev-resume` doesn't flag a branch mismatch:
-   - In `$PROJECT_ROOT/../$PROJECT_BASENAME-<feature-name>/.dev/<feature-name>/checkpoint.md`, change `branch: main` (or `master`) to `branch: feature/<feature-name>`
+4. **Update checkpoint frontmatter**: The checkpoint was written in Step 8 with the original branch (e.g. `main`). Now that the files live in the worktree on `feature/$FEATURE_NAME`, update the frontmatter so `/dev-resume` doesn't flag a branch mismatch:
+   - In `$PROJECT_ROOT/../$PROJECT_BASENAME-$FEATURE_NAME/.dev/$FEATURE_NAME/checkpoint.md`, change `branch: main` (or `master`) to `branch: feature/$FEATURE_NAME`
    - Change `uncommitted_changes: true` to `uncommitted_changes: false` (if present, since we just committed)
    - Amend the commit to include this update:
      ```bash
-     git -C "$PROJECT_ROOT/../$PROJECT_BASENAME-<feature-name>" add .dev
-     git -C "$PROJECT_ROOT/../$PROJECT_BASENAME-<feature-name>" commit --amend --no-edit
+     git -C "$PROJECT_ROOT/../$PROJECT_BASENAME-$FEATURE_NAME" add .dev
+     git -C "$PROJECT_ROOT/../$PROJECT_BASENAME-$FEATURE_NAME" commit --amend --no-edit
      ```
 
 After successful execution, report:
 
 > Worktree setup complete.
 >
-> - Branch: `feature/<feature-name>`
-> - Worktree: `../<project-basename>-<feature-name>/`
+> - Branch: `feature/$FEATURE_NAME`
+> - Worktree: `../<project-basename>-$FEATURE_NAME/`
 > - PRD files moved and committed
 >
 > **Next**: End this session, then start a new one:
 > ```
-> cd ../<project-basename>-<feature-name> && claude
+> cd "../$PROJECT_BASENAME-$FEATURE_NAME" && claude
 > ```
 
 ### Step 10: Optional Commit
@@ -215,7 +241,9 @@ If there are uncommitted changes, generate a commit message from the checkpoint 
 **If the user accepts**, run:
 
 ```bash
-git add .
+git add -u
+# If there are user-approved untracked files from `git status --short`, add them explicitly:
+# git add -- "<path>"
 git commit -m "<generated commit message>"
 ```
 
