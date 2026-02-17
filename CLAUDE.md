@@ -29,6 +29,11 @@ plugins/dev-workflow/           # Plugin package
       SKILL.md
     dev-status/
       SKILL.md
+  scripts/                      # Deterministic helper scripts called by skills
+    discover.sh                 # Project root, feature/checkpoint discovery
+    git-state.sh                # Branch and uncommitted-changes detection
+    validate.sh                 # Slug normalization and path validation
+    worktree-setup.sh           # Worktree eligibility check and creation
 .codex/
   INSTALL.md                    # Installation instructions for Codex
 docs/

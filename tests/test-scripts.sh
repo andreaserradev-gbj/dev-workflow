@@ -114,11 +114,11 @@ echo "--- worktree-setup.sh ---"
 
 run_test "check on non-default branch returns skip" \
   0 "skip:not-default-branch" \
-  bash "$SCRIPT_DIR/worktree-setup.sh" check test-feature "$PROJECT_ROOT" "$CURRENT_BRANCH"
+  bash "$SCRIPT_DIR/worktree-setup.sh" check test-feature "$PROJECT_ROOT" "feature/some-branch"
 
-run_test "check with empty branch falls back to current" \
-  0 "skip:not-default-branch" \
-  bash "$SCRIPT_DIR/worktree-setup.sh" check test-feature "$PROJECT_ROOT" ""
+run_test "check on main branch returns offer" \
+  0 "offer" \
+  bash "$SCRIPT_DIR/worktree-setup.sh" check "nonexistent-worktree-test" "$PROJECT_ROOT" "main"
 
 TMPDIR_NOGIT2="$(mktemp -d)"
 run_test "check outside git repo returns skip" \
