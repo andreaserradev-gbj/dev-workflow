@@ -58,16 +58,6 @@ Tell Codex:
 
 Or see [docs/README.codex.md](docs/README.codex.md) for manual installation and usage details.
 
-### For Gemini CLI
-
-Install directly:
-
-```bash
-gemini skills install https://github.com/andreaserradev-gbj/dev-workflow.git --path plugins/dev-workflow/skills
-```
-
-Or see [docs/README.gemini.md](docs/README.gemini.md) for alternative methods and usage details.
-
 ## How It Works
 
 1. **Plan** — Run `/dev-plan` in edit mode (not plan mode, which would skip saving the detailed PRD)

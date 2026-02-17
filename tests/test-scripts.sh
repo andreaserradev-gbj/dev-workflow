@@ -96,11 +96,13 @@ run_test "full outputs branch line" \
 TMPDIR_NOGIT="$(mktemp -d)"
 run_test "brief outside git repo outputs git:false" \
   0 "git:false" \
-  bash -c "cd '$TMPDIR_NOGIT' && bash '$SCRIPT_DIR/git-state.sh' brief"
+  env -u GIT_DIR -u GIT_WORK_TREE -u GIT_INDEX_FILE -u GIT_PREFIX -u GIT_COMMON_DIR \
+    bash -c "cd '$TMPDIR_NOGIT' && bash '$SCRIPT_DIR/git-state.sh' brief"
 
 run_test "full outside git repo outputs git:false" \
   0 "git:false" \
-  bash -c "cd '$TMPDIR_NOGIT' && bash '$SCRIPT_DIR/git-state.sh' full"
+  env -u GIT_DIR -u GIT_WORK_TREE -u GIT_INDEX_FILE -u GIT_PREFIX -u GIT_COMMON_DIR \
+    bash -c "cd '$TMPDIR_NOGIT' && bash '$SCRIPT_DIR/git-state.sh' full"
 rmdir "$TMPDIR_NOGIT"
 
 run_test "invalid mode exits 1" \
@@ -121,7 +123,8 @@ run_test "check with empty branch falls back to current" \
 TMPDIR_NOGIT2="$(mktemp -d)"
 run_test "check outside git repo returns skip" \
   0 "skip:not-a-git-repo" \
-  bash -c "cd '$TMPDIR_NOGIT2' && bash '$SCRIPT_DIR/worktree-setup.sh' check test-feature '$TMPDIR_NOGIT2' main"
+  env -u GIT_DIR -u GIT_WORK_TREE -u GIT_INDEX_FILE -u GIT_PREFIX -u GIT_COMMON_DIR \
+    bash -c "cd '$TMPDIR_NOGIT2' && bash '$SCRIPT_DIR/worktree-setup.sh' check test-feature '$TMPDIR_NOGIT2' main"
 rmdir "$TMPDIR_NOGIT2"
 
 run_test "invalid mode exits 1" \
