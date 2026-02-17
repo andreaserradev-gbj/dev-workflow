@@ -120,6 +120,15 @@ run_test "check on main branch returns offer" \
   0 "offer" \
   bash "$SCRIPT_DIR/worktree-setup.sh" check "nonexistent-worktree-test" "$PROJECT_ROOT" "main"
 
+if [ "$CURRENT_BRANCH" = "main" ] || [ "$CURRENT_BRANCH" = "master" ]; then
+  EMPTY_BRANCH_EXPECTED="offer"
+else
+  EMPTY_BRANCH_EXPECTED="skip:not-default-branch"
+fi
+run_test "check with empty branch falls back to current" \
+  0 "$EMPTY_BRANCH_EXPECTED" \
+  bash "$SCRIPT_DIR/worktree-setup.sh" check "nonexistent-worktree-test" "$PROJECT_ROOT" ""
+
 TMPDIR_NOGIT2="$(mktemp -d)"
 run_test "check outside git repo returns skip" \
   0 "skip:not-a-git-repo" \
