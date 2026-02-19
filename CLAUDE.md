@@ -16,6 +16,7 @@ plugins/dev-workflow/           # Plugin package
     feature-batch-scanner.md
     prd-planner.md
     prd-researcher.md
+    session-analyzer.md
   skills/                       # Skill definitions (AgentSkills.io format)
     dev-plan/
       SKILL.md
@@ -28,6 +29,8 @@ plugins/dev-workflow/           # Plugin package
     dev-resume/
       SKILL.md
     dev-status/
+      SKILL.md
+    dev-wrapup/
       SKILL.md
   scripts/                      # Deterministic helper scripts called by skills
     discover.sh                 # Project root, feature/checkpoint discovery
