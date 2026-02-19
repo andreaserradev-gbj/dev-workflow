@@ -1,8 +1,8 @@
 ---
 branch: feature/wrap-up-integration
-last_commit: 3e95210 Integrate dev-wrapup into checkpoint flow and bump to v1.8.0
-uncommitted_changes: false
-checkpointed: 2026-02-19T19:00:00Z
+last_commit: 1c91e0b Update checkpoint for integration testing phase
+uncommitted_changes: true
+checkpointed: 2026-02-19T20:30:00Z
 ---
 
 Read the following PRD files in order:
@@ -13,20 +13,21 @@ Read the following PRD files in order:
 ## Context
 
 **Goal**: Add a `/dev-wrapup` skill for end-of-session memory review and self-improvement, invoked via prose suggestion from `/dev-checkpoint`
-**Current phase**: All implementation complete — entering integration testing
-**Key completions**: Session-analyzer agent, dev-wrapup skill, checkpoint integration, version bump to 1.8.0, documentation updates
+**Current phase**: Enhancement complete — auto memory support added, ready for integration testing
+**Key completions**: All 3 implementation phases, auto memory routing framework, model upgrade haiku→sonnet
 </context>
 
 <current_state>
 ## Current Progress
 
-- ✅ Phase 1: Created `plugins/dev-workflow/agents/session-analyzer.md` — read-only agent with two output modes (Memory Candidates, Self-Improvement Signals)
-- ✅ Phase 2: Created `plugins/dev-workflow/skills/dev-wrapup/SKILL.md` — two phases with STOP gates, REVIEW-ONLY MODE guard
-- ✅ Phase 3 Step 1: Added wrap-up suggestion to dev-checkpoint SKILL.md
-- ✅ Phase 3 Step 2: Bumped version to 1.8.0 in marketplace.json
-- ✅ Phase 3 Step 3: Updated CLAUDE.md repository structure
-- ✅ Phase 3 Step 4: Updated README.md with /dev-wrapup docs and Acknowledgments section
-- ✅ Phase 3 Step 5: All 24 tests pass
+- ✅ Phase 1: Created session-analyzer agent with two output modes
+- ✅ Phase 2: Created dev-wrapup skill with two phases and STOP gates
+- ✅ Phase 3: Checkpoint integration, version bump to 1.8.0, docs
+- ✅ Auto memory enhancement: Added auto memory as default destination with prompt-based delegation
+- ✅ Model upgrade: session-analyzer agent model changed from haiku to sonnet
+- ✅ Cost-aware routing: Destination guidelines with startup cost table and decision tree
+- ✅ Self-improvement routing: Added Destination column to self-improvement signals table
+- ✅ All 24 tests pass
 - ⬜ Integration testing: Test /dev-wrapup on real projects
 </current_state>
 
@@ -35,9 +36,10 @@ Read the following PRD files in order:
 
 Integration testing:
 - Test `/dev-wrapup` on a real project with meaningful session history
-- Verify session-analyzer agent produces useful memory candidates and self-improvement signals
+- Verify session-analyzer routes items to auto memory by default (not CLAUDE.md)
+- Verify auto memory items use prompt-based delegation ("save to your auto memory")
 - Verify confirmation gates work correctly (nothing applied without user approval)
-- Verify file writes go to the correct destinations (CLAUDE.md, .claude/rules/, CLAUDE.local.md)
+- Verify file writes go to the correct destinations (auto memory, CLAUDE.md, .claude/rules/, CLAUDE.local.md)
 - Test edge cases: empty sessions, sessions with no learnings, sessions with many findings
 </next_action>
 
@@ -56,8 +58,11 @@ Integration testing:
 - One agent invoked twice (memory + self-improvement) rather than two separate agents
 - Prose suggestion pattern to chain skills (follows dev-plan precedent)
 - User confirms every proposed change before it's applied
+- Prompt-based delegation for auto memory — portable across CLI implementations (Claude Code, Codex, future tools)
+- Auto memory as default destination — zero startup cost vs HIGH for CLAUDE.md/rules/CLAUDE.local.md
+- Model upgrade haiku → sonnet — session-analyzer does nuanced conversational analysis, not simple lookups
 </decisions>
 
 ---
 
-Please continue with integration testing: run `/dev-wrapup` on real projects and verify the skill produces useful output with correct confirmation gates.
+Please continue with integration testing: run `/dev-wrapup` on real projects and verify the skill produces useful output with auto memory as the default routing destination.

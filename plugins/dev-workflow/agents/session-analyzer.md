@@ -26,7 +26,11 @@ Return your analysis in this exact structure:
 
 **Categories**: `convention` (coding style, naming, architecture), `preference` (user workflow choices), `fact` (project-specific knowledge), `gotcha` (pitfall or workaround discovered)
 
-**Destinations**: `CLAUDE.md` (project-wide conventions), `.claude/rules/<topic>.md` (domain-specific rules), `CLAUDE.local.md` (personal preferences, local-only)
+**Destinations** (ordered by cost — prefer the cheapest option that fits):
+- `auto memory` — patterns, insights, debugging knowledge, project facts. **Default choice.**
+- `.claude/rules/<topic>.md` — hard rules enforced every session
+- `CLAUDE.local.md` — personal/ephemeral context
+- `CLAUDE.md` — major architectural decisions only. **Last resort — keep minimal.**
 
 If no candidates found, return:
 
@@ -38,9 +42,9 @@ Return your analysis in this exact structure:
 
 ### Self-Improvement Signals
 
-| # | Signal Type | Observation | Proposed Action |
-|---|-------------|-------------|-----------------|
-| 1 | [See types below] | [What happened in the session] | [Concrete next step] |
+| # | Signal Type | Observation | Proposed Action | Destination |
+|---|-------------|-------------|-----------------|-------------|
+| 1 | [See types below] | [What happened in the session] | [Concrete next step] | [Target — see routing] |
 
 **Signal Types**: `friction` (repeated manual steps or slowdowns), `mistake` (errors made and corrected), `skill-gap` (knowledge the assistant lacked), `automation` (task that could be scripted or turned into a skill)
 
@@ -49,6 +53,8 @@ Return your analysis in this exact structure:
 - For `mistake`: a rule to prevent recurrence
 - For `skill-gap`: a note to add to memory or a reference to read
 - For `automation`: a script or skill spec to create
+
+Use the same destination routing framework from Memory Mode to decide where each proposed action should land. Include the destination in your recommendation.
 
 If no signals found, return:
 
@@ -70,17 +76,24 @@ If no signals found, return:
 
 - **Be selective** — Only surface items that would genuinely help in future sessions
 - **Be specific** — "Use snake_case for database columns" is useful; "follow naming conventions" is not
-- **Avoid duplicates** — Do not surface items already documented in CLAUDE.md or existing rules
+- **Avoid duplicates** — Do not surface items already documented in CLAUDE.md, existing rules, or auto memory
 - **Skip session-specific context** — Do not record details about the current task that won't generalize
 - **Verify before recording** — Only include patterns confirmed by the user or observed multiple times
 
 ### Destination Guidelines
 
-| Destination | When to use |
-|-------------|-------------|
-| `CLAUDE.md` | Project-wide conventions that all contributors should follow |
-| `.claude/rules/<topic>.md` | Domain-specific rules (e.g., `testing.md`, `api-design.md`) |
-| `CLAUDE.local.md` | Personal preferences not relevant to other contributors |
+| Destination | Startup Cost | When to Use |
+|---|---|---|
+| `auto memory` | ZERO (on-demand) | Patterns, insights, debugging knowledge, project facts. **Default.** |
+| `.claude/rules/<topic>.md` | HIGH (all load) | Hard rules enforced every session |
+| `CLAUDE.local.md` | HIGH (full load) | Personal/ephemeral context |
+| `CLAUDE.md` | HIGH (full load) | Major architectural decisions. **Last resort — keep minimal.** |
+
+**Decision tree:**
+1. Pattern/insight/debugging knowledge? → `auto memory`
+2. Hard rule enforced every session? → `.claude/rules/<topic>.md`
+3. Personal/ephemeral? → `CLAUDE.local.md`
+4. Major architectural change? → `CLAUDE.md`
 
 ## Privacy Rules
 

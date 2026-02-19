@@ -52,7 +52,7 @@ surfacing items that are already documented.
 If .claude/rules/ exists at $PROJECT_ROOT, read those files too."
 ```
 
-Use `subagent_type=dev-workflow:session-analyzer` and `model=haiku`.
+Use `subagent_type=dev-workflow:session-analyzer` and `model=sonnet`.
 
 ### Step 2: Present Memory Candidates
 
@@ -91,6 +91,14 @@ For each confirmed item, apply based on its **Destination**:
 2. Append the new content
 3. Present the proposed content before writing
 
+**auto memory** items:
+1. Present the confirmed item content to the user
+2. After confirmation, save the content to your auto memory
+   - Use concise, specific phrasing (e.g., "Project uses pnpm, not npm")
+   - For detailed items, specify a topic file name (e.g., "save to debugging topic")
+   - Index entries in MEMORY.md should be brief pointers; details go in topic files
+3. Confirm: "Saved to auto memory: [brief description]"
+
 After applying, confirm: "Applied [N] memory items."
 
 ⏸️ **GATE**: Phase 1 complete. Continue to Phase 2 or stop here?
@@ -113,7 +121,7 @@ knowledge gaps the assistant had, and tasks that could be automated.
 Focus on patterns that would improve future sessions, not one-off issues."
 ```
 
-Use `subagent_type=dev-workflow:session-analyzer` and `model=haiku`.
+Use `subagent_type=dev-workflow:session-analyzer` and `model=sonnet`.
 
 ### Step 5: Present Self-Improvement Signals
 
@@ -121,9 +129,9 @@ After the agent returns, present the findings table to the user:
 
 > **Self-Improvement Signals from this session:**
 >
-> | # | Signal Type | Observation | Proposed Action |
-> |---|-------------|-------------|-----------------|
-> | ... | ... | ... | ... |
+> | # | Signal Type | Observation | Proposed Action | Destination |
+> |---|-------------|-------------|-----------------|-------------|
+> | ... | ... | ... | ... | ... |
 >
 > **Which items would you like to act on?** Reply with the numbers (e.g., "1, 3"), "all", or "none" to skip.
 
@@ -133,23 +141,25 @@ If the agent found no signals, state: "No self-improvement signals found." and s
 
 ### Step 6: Apply Confirmed Improvements
 
-For each confirmed item, apply based on its **Signal Type**:
+For each confirmed item, apply based on its **Signal Type** and the agent-specified **Destination**:
 
 **friction** items:
-- Add a rule to `CLAUDE.md` or `.claude/rules/<topic>.md` to prevent the friction
-- Present the proposed rule before writing
+- Route to the agent-specified destination (auto memory, rules, or CLAUDE.md)
+- Present the proposed content before writing
 
 **mistake** items:
-- Add a preventive rule to the appropriate memory file
-- Present the proposed rule before writing
+- Route to the agent-specified destination
+- Present the proposed preventive rule before writing
 
 **skill-gap** items:
-- Add a note to `CLAUDE.md` or `.claude/rules/<topic>.md` with the learned knowledge
+- Route to the agent-specified destination (typically auto memory)
 - Present the proposed content before writing
 
 **automation** items:
 - Present the automation idea as a suggested next step (do not create scripts in this skill)
 - Format: "Consider creating a script or skill for: [description]"
+
+For each destination, follow the same application process as Step 3 (including the auto memory prompt-based approach).
 
 After applying, confirm: "Applied [N] improvement items. [M] automation suggestions noted for future work."
 
@@ -162,6 +172,7 @@ Report what was accomplished:
 > **Session wrap-up complete.**
 >
 > - **Memory items applied**: [N] items written to [list of files touched]
+> - **Auto memory items saved**: [N] items (or "none")
 > - **Improvements applied**: [N] rules added, [M] automation ideas noted
 > - **Files modified**: [list each file that was changed]
 >
@@ -169,7 +180,7 @@ Report what was accomplished:
 
 ## PRIVACY RULES
 
-**NEVER include in memory files or rules:**
+**NEVER include in memory files, rules, or auto memory:**
 - Absolute paths with usernames — use relative paths from project root
 - Secrets, API keys, tokens, credentials — use placeholders (`<API_KEY>`, `$ENV_VAR`)
 - Personal information (names, emails) — use generic references

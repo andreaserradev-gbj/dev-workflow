@@ -39,7 +39,7 @@ The skill has two phases: **Remember It** (route session learnings to the right 
 | One agent invoked twice | Memory candidates and self-improvement signals draw on same source material; avoids maintaining two nearly-identical agents | Two separate agents (rejected: duplication) |
 | Prose suggestion from checkpoint | Simplest, most testable approach; follows existing pattern | Hooks (fragile — no SkillCompleted event), REQUIRED SUB-SKILL directive (harder to test incrementally) |
 | User confirms every item | Core dev-workflow philosophy: user is always in control | Auto-apply (rejected: user didn't want it) |
-| Auto memory as suggested commands | `/memory` is not an available tool inside skills | Direct memory writes (not possible) |
+| Auto memory via prompt-based delegation | Instruct Claude to "save to your auto memory" — each CLI implementation (Claude Code, Codex, future tools) decides how to store. Portable across implementations. | Direct file writes to memory dir (fragile — path/format may change) |
 
 ### Constraints
 
