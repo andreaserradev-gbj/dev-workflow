@@ -1,6 +1,6 @@
 # Wrap-Up Integration - Master Plan
 
-**Status**: In Progress
+**Status**: Complete
 **Created**: 2026-02-19
 **Last Updated**: 2026-02-19
 
@@ -117,18 +117,18 @@ The skill has two phases: **Remember It** (route session learnings to the right 
 ### Phase 3: Update dev-checkpoint and bump version
 **Goal**: Connect the skills and prepare for release.
 
-1. ⬜ Add prose suggestion to `plugins/dev-workflow/skills/dev-checkpoint/SKILL.md` at end of Step 10 (after optional commit, as final line of the skill)
-2. ⬜ Bump version in `.claude-plugin/marketplace.json` from `1.7.0` to `1.8.0`
-3. ⬜ Update `CLAUDE.md` repository structure to include new files
-4. ⬜ Add "Acknowledgments" section to `README.md` crediting the [original Reddit post](https://www.reddit.com/r/ClaudeCode/comments/1r89084/selfimprovement_loop_my_favorite_claude_code_skill) that inspired `/dev-wrapup`
-5. ⬜ Run tests: `bash tests/test-scripts.sh`
+1. ✅ Add prose suggestion to `plugins/dev-workflow/skills/dev-checkpoint/SKILL.md` at end of Step 10 (after optional commit, as final line of the skill)
+2. ✅ Bump version in `.claude-plugin/marketplace.json` from `1.7.0` to `1.8.0`
+3. ✅ Update `CLAUDE.md` repository structure to include new files
+4. ✅ Add "Acknowledgments" section to `README.md` crediting the [original Reddit post](https://www.reddit.com/r/ClaudeCode/comments/1r89084/selfimprovement_loop_my_favorite_claude_code_skill) that inspired `/dev-wrapup`
+5. ✅ Run tests: `bash tests/test-scripts.sh`
 
 **Verification**:
-- [ ] dev-checkpoint ends with wrap-up suggestion
-- [ ] Version bumped in marketplace.json
-- [ ] CLAUDE.md structure reflects new files
-- [ ] README.md has Acknowledgments section with link to original post
-- [ ] All tests pass
+- [x] dev-checkpoint ends with wrap-up suggestion
+- [x] Version bumped in marketplace.json
+- [x] CLAUDE.md structure reflects new files
+- [x] README.md has Acknowledgments section with link to original post
+- [x] All tests pass
 
 ⏸️ **GATE**: Phase complete. Continue or `/dev-checkpoint`.
 

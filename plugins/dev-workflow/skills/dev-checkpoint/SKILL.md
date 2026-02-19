@@ -229,3 +229,9 @@ git commit -m "<generated commit message>"
 ```
 
 Confirm with `git log -1 --oneline` and report the commit hash.
+
+### Wrap-Up Suggestion
+
+After the checkpoint is complete (whether or not a commit was made), suggest:
+
+> Before ending your session, consider running `/dev-wrapup` to review learnings worth persisting and identify self-improvement signals.
