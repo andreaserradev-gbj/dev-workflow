@@ -1,6 +1,6 @@
 # Wrap-Up Integration - Master Plan
 
-**Status**: Not Started
+**Status**: In Progress
 **Created**: 2026-02-19
 **Last Updated**: 2026-02-19
 
@@ -77,7 +77,7 @@ The skill has two phases: **Remember It** (route session learnings to the right 
 ### Phase 1: Create the session-analyzer agent
 **Goal**: Establish the read-only analysis agent that reviews conversation history.
 
-1. ⬜ Create `plugins/dev-workflow/agents/session-analyzer.md` with:
+1. ✅ Create `plugins/dev-workflow/agents/session-analyzer.md` with:
    - Frontmatter: `name: session-analyzer`, `color: purple`, `description`, `tools: Read`
    - Mission: read-only analysis of session conversation
    - Two output modes (selected by prompt):
@@ -87,17 +87,17 @@ The skill has two phases: **Remember It** (route session learnings to the right 
    - Privacy rules block
 
 **Verification**:
-- [ ] File exists at correct path with valid YAML frontmatter
-- [ ] Output format matches what SKILL.md will expect
-- [ ] Tools list is minimal (`Read` only)
+- [x] File exists at correct path with valid YAML frontmatter
+- [x] Output format matches what SKILL.md will expect
+- [x] Tools list is minimal (`Read` only)
 
 ⏸️ **GATE**: Phase complete. Continue or `/dev-checkpoint`.
 
 ### Phase 2: Create the dev-wrapup skill
 **Goal**: Write the full SKILL.md with two phases and confirmation gates.
 
-1. ⬜ Create directory `plugins/dev-workflow/skills/dev-wrapup/`
-2. ⬜ Create `plugins/dev-workflow/skills/dev-wrapup/SKILL.md` with:
+1. ✅ Create directory `plugins/dev-workflow/skills/dev-wrapup/`
+2. ✅ Create `plugins/dev-workflow/skills/dev-wrapup/SKILL.md` with:
    - Frontmatter: `name: dev-wrapup`, `description`, `allowed-tools: Bash(bash:*) Read Write`
    - REVIEW-ONLY MODE guard (parallel to checkpoint's SAVE-ONLY MODE)
    - Step 0: Discover Project Root (standard pattern)
@@ -107,10 +107,10 @@ The skill has two phases: **Remember It** (route session learnings to the right 
    - Privacy rules block
 
 **Verification**:
-- [ ] SKILL.md exists with valid frontmatter
-- [ ] Both phases have STOP gates before applying changes
-- [ ] Agent invocations use `subagent_type=dev-workflow:session-analyzer`
-- [ ] No auto-apply — every write requires user confirmation
+- [x] SKILL.md exists with valid frontmatter
+- [x] Both phases have STOP gates before applying changes
+- [x] Agent invocations use `subagent_type=dev-workflow:session-analyzer`
+- [x] No auto-apply — every write requires user confirmation
 
 ⏸️ **GATE**: Phase complete. Continue or `/dev-checkpoint`.
 

@@ -1,8 +1,8 @@
 ---
 branch: feature/wrap-up-integration
-last_commit: ec15a48 Restore empty-branch fallback test with branch-aware expectation
-uncommitted_changes: false
-checkpointed: 2026-02-19T12:00:00Z
+last_commit: 811ebb5 Add PRD for wrap-up-integration
+uncommitted_changes: true
+checkpointed: 2026-02-19T18:00:00Z
 ---
 
 Read the following PRD files in order:
@@ -13,65 +13,64 @@ Read the following PRD files in order:
 ## Context
 
 **Goal**: Add a `/dev-wrapup` skill for end-of-session memory review and self-improvement, invoked via prose suggestion from `/dev-checkpoint`
-**Current phase**: Phase 1 — Create the session-analyzer agent (not yet started)
-**Key completions**: Research complete, architecture decided, PRD written
+**Current phase**: Phase 3 — Update dev-checkpoint and bump version
+**Key completions**: Session-analyzer agent created, dev-wrapup skill created with two phases and confirmation gates
 </context>
 
 <current_state>
 ## Current Progress
 
-- ✅ Research: Explored skill-to-skill invocation patterns, hooks, superpowers reference, existing codebase
-- ✅ Architecture: Decided on standalone skill + dedicated agent + prose suggestion from checkpoint
-- ✅ PRD: Written 00-master-plan.md with 3 implementation phases
-- ⬜ Phase 1: Create session-analyzer agent — Not Started
-- ⬜ Phase 2: Create dev-wrapup SKILL.md — Not Started
-- ⬜ Phase 3: Update dev-checkpoint, bump version, update docs, add credits — Not Started
+- ✅ Phase 1: Created `plugins/dev-workflow/agents/session-analyzer.md` — read-only agent with two output modes (Memory Candidates, Self-Improvement Signals), quality filters, privacy rules
+- ✅ Phase 2: Created `plugins/dev-workflow/skills/dev-wrapup/SKILL.md` — REVIEW-ONLY MODE guard, Step 0 discovery, Phase 1 Remember It + Phase 2 Review & Apply, STOP gates before every write, summary step
+- ⬜ Phase 3 Step 1: Add prose suggestion to dev-checkpoint SKILL.md at end of Step 10
+- ⬜ Phase 3 Step 2: Bump version in `.claude-plugin/marketplace.json` from `1.7.0` to `1.8.0`
+- ⬜ Phase 3 Step 3: Update `CLAUDE.md` repository structure to include new files
+- ⬜ Phase 3 Step 4: Update `README.md` — document `/dev-wrapup` skill and add Acknowledgments section crediting original Reddit post
+- ⬜ Phase 3 Step 5: Run tests: `bash tests/test-scripts.sh`
 </current_state>
 
 <next_action>
 ## Next Steps
 
-Phase 1 (session-analyzer agent):
-- Create `plugins/dev-workflow/agents/session-analyzer.md`
-- Frontmatter: name, color (purple), description, tools (Read only)
-- Two output modes: Memory Candidates table and Self-Improvement table
-- Guidelines for scanning session conversation
-- Privacy rules block
-- Follow pattern from `plugins/dev-workflow/agents/checkpoint-analyzer.md`
+Phase 3 Step 1 (dev-checkpoint update):
+- Add prose suggestion line at the end of `plugins/dev-workflow/skills/dev-checkpoint/SKILL.md` after Step 10
+- Follow the pattern from dev-plan SKILL.md line 135: "Suggest running `/dev-wrapup`"
 
-Phase 2 (dev-wrapup skill):
-- Create `plugins/dev-workflow/skills/dev-wrapup/SKILL.md`
-- Two phases with STOP gates for user confirmation at each
-- Phase 1 "Remember It": memory candidates with destination confirmation
-- Phase 2 "Review & Apply": self-improvement signals with action confirmation
-- No auto-apply — user confirms every item
+Phase 3 Step 2 (version bump):
+- Update `version` in `.claude-plugin/marketplace.json` from `1.7.0` to `1.8.0`
+
+Phase 3 Step 3 (CLAUDE.md):
+- Add `session-analyzer.md` to agents list in repository structure
+- Add `dev-wrapup/` with `SKILL.md` to skills list
+
+Phase 3 Step 4 (README.md):
+- Document `/dev-wrapup` skill usage alongside existing skills
+- Add Acknowledgments section with link to Reddit post
+
+Phase 3 Step 5 (tests):
+- Run `bash tests/test-scripts.sh` and verify all pass
 </next_action>
 
 <key_files>
 ## Key Files
 
 - PRD: .dev/wrap-up-integration/00-master-plan.md
-- Agent pattern: plugins/dev-workflow/agents/checkpoint-analyzer.md
-- Skill pattern: plugins/dev-workflow/skills/dev-checkpoint/SKILL.md
-- Suggestion pattern: plugins/dev-workflow/skills/dev-plan/SKILL.md (Phase 3 Step 5)
-- New agent: plugins/dev-workflow/agents/session-analyzer.md (to create)
-- New skill: plugins/dev-workflow/skills/dev-wrapup/SKILL.md (to create)
+- New agent: plugins/dev-workflow/agents/session-analyzer.md
+- New skill: plugins/dev-workflow/skills/dev-wrapup/SKILL.md
+- To modify: plugins/dev-workflow/skills/dev-checkpoint/SKILL.md
+- To modify: .claude-plugin/marketplace.json
+- To modify: CLAUDE.md
+- To modify: README.md
 </key_files>
 
-<decisions>## Decisions
-- Only phases 2 and 3 from original post (Remember It, Review & Apply) — Ship It already in checkpoint, Publish It out of scope
-- One agent invoked twice (not two separate agents) — same source material
-- Prose suggestion from checkpoint (not hooks or REQUIRED SUB-SKILL) — simplest, most testable
-- User confirms every item — no auto-apply, follows dev-workflow philosophy
-- Auto-memory items surfaced as suggested commands (tool not available inside skills)
-- Credit OP in README Acknowledgments section with link to Reddit post</decisions>
+<notes>
+## Notes
 
-<notes>## Notes
-- OP gave explicit permission to integrate the idea ("please do!")
-- Reddit post URL: https://www.reddit.com/r/ClaudeCode/comments/1r89084/selfimprovement_loop_my_favorite_claude_code_skill
-- Future consideration: agents may move into skill-specific folders
-- Superpowers codebase at ~/code/superpowers has useful reference patterns (REQUIRED SUB-SKILL, Integration sections)</notes>
+- README.md update should document the new `/dev-wrapup` skill (usage, what it does) in addition to adding the Acknowledgments section
+- The agent uses `tools: Read` only — intentionally minimal
+- Both skill phases use the same agent with different prompts (memory mode vs self-improvement mode)
+</notes>
 
 ---
 
-Please continue with Phase 1 implementation — create the session-analyzer agent following the specifications in the PRD.
+Please continue with Phase 3: update dev-checkpoint with prose suggestion, bump version, update CLAUDE.md and README.md (including /dev-wrapup documentation), and run tests.
