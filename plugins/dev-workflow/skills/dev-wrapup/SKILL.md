@@ -64,6 +64,7 @@ Review the full conversation history for findings worth persisting or acting on.
 - **Be specific** — "Use snake_case for database columns" is useful; "follow naming conventions" is not
 - **Skip duplicates** — Do not surface items already in CLAUDE.md, rules, or auto memory (read in Step 1)
 - **Skip session-specific context** — Do not record task details that won't generalize
+- **Skip general knowledge** — Do not record standard language/library behavior that any experienced developer knows. Hitting a quirk, fixing it, and moving on is normal coding — not everything learned is worth persisting. Only record it if the quirk is non-obvious AND project-specific or likely to recur in this codebase.
 - **Prefer confirmed patterns** — Patterns confirmed by the user or observed multiple times are stronger candidates
 
 ### Step 3: Classify and Route Findings
@@ -83,20 +84,22 @@ For each finding, assign a **type** and a **destination**.
 | `skill-gap` | Knowledge the assistant lacked |
 | `automation` | Repetitive patterns that could become scripts or skills |
 
-**Destination routing** (prefer the cheapest option that fits):
+**Destination routing:**
 
-| Destination | Startup Cost | When to Use |
-|---|---|---|
-| `auto memory` | ZERO (on-demand) | Patterns, insights, debugging knowledge, project facts. **Default.** |
-| `.claude/rules/<topic>.md` | HIGH (all load) | Hard rules enforced every session. Use `paths:` frontmatter to scope to relevant files. |
-| `CLAUDE.local.md` | HIGH (full load) | Personal/ephemeral context |
-| `CLAUDE.md` | HIGH (full load) | Major architectural decisions. **Last resort — keep minimal.** |
+| Destination | When to Use |
+|---|---|
+| `CLAUDE.md` (update) | Finding corrects or improves an existing CLAUDE.md section (e.g., a missing flag in a documented command). Edit the existing entry — do not create a new one elsewhere. |
+| `CLAUDE.md` (add) | New operational instruction (how to build, test, run, deploy) or major architectural decision not yet documented. Keep minimal. |
+| `.claude/rules/<topic>.md` | Knowledge tied to specific files where forgetting it causes silent breakage. Use `paths:` frontmatter to scope. |
+| `CLAUDE.local.md` | Personal/ephemeral context not shared with the team. |
+| `auto memory` | Patterns, insights, and project facts that add useful context but are not prescriptive instructions. |
 
-**Decision tree:**
-1. Pattern/insight/debugging knowledge? → `auto memory`
-2. Hard rule enforced every session? → `.claude/rules/<topic>.md`
-3. Personal/ephemeral? → `CLAUDE.local.md`
-4. Major architectural change? → `CLAUDE.md`
+**Decision tree** (evaluate in order, stop at first match):
+1. Does this correct or extend something already documented in CLAUDE.md or rules? → **update the existing entry**
+2. Is this an operational instruction (how to run, test, build, deploy)? → `CLAUDE.md`
+3. Is this tied to specific files and forgetting it risks silent breakage? → `.claude/rules/<topic>.md`
+4. Is this personal/ephemeral? → `CLAUDE.local.md`
+5. Is this a useful pattern or insight that adds context? → `auto memory`
 
 ### Step 4: Present Findings
 
@@ -118,8 +121,8 @@ Present findings in two parts:
 
 > | # | Type | Finding | Destination |
 > |---|------|---------|-------------|
-> | 1 | convention | [Short description] | auto memory |
-> | 2 | friction | [Short description] | .claude/rules/ |
+> | 1 | gotcha | [Short description] | CLAUDE.md (update) |
+> | 2 | convention | [Short description] | .claude/rules/testing.md |
 >
 > **Which items would you like to apply?** Reply with the numbers (e.g., "1, 3"), "all", or "none" to skip.
 
@@ -129,29 +132,40 @@ Present findings in two parts:
 
 For each confirmed item, apply based on its **Destination**:
 
-**auto memory** items:
-1. Save the content to your auto memory
-   - Use concise, specific phrasing (e.g., "Project uses pnpm, not npm")
-   - For detailed items, specify a topic file name (e.g., "save to debugging topic")
-   - Index entries in MEMORY.md should be brief pointers; details go in topic files
-2. Confirm: "Saved to auto memory: [brief description]"
-
-**CLAUDE.md** items:
+**CLAUDE.md (update)** items:
 1. Read `$PROJECT_ROOT/CLAUDE.md`
-2. Find the most appropriate section for the new content
+2. Locate the existing section that needs correction
+3. Present the proposed diff to the user: "I'll change `[old]` to `[new]` in [section]"
+4. Write the change after confirmation
+
+**CLAUDE.md (add)** items:
+1. Read `$PROJECT_ROOT/CLAUDE.md`
+2. Find the most appropriate existing section for the new content
 3. Present the proposed edit to the user: "I'll add this under [section]: `[content]`"
 4. Write the change after confirmation
 
 **.claude/rules/\<topic\>.md** items:
 1. Check if the target file exists at `$PROJECT_ROOT/.claude/rules/<topic>.md`
 2. If it exists, read it and append the new rule
-3. If it doesn't exist, create it with the new rule
+3. If it doesn't exist, create it with the new rule (include `paths:` frontmatter scoped to relevant files)
 4. Present the proposed content before writing
+
+**.claude/rules/ (update)** items:
+1. Read the existing rule file
+2. Present the proposed diff
+3. Write the change after confirmation
 
 **CLAUDE.local.md** items:
 1. Read `$PROJECT_ROOT/CLAUDE.local.md` (create if missing)
 2. Append the new content
 3. Present the proposed content before writing
+
+**auto memory** items:
+1. Save the content to your auto memory
+   - Use concise, specific phrasing (e.g., "Project uses pnpm, not npm")
+   - For detailed items, specify a topic file name (e.g., "save to debugging topic")
+   - Index entries in MEMORY.md should be brief pointers; details go in topic files
+2. Confirm: "Saved to auto memory: [brief description]"
 
 **automation** items:
 - Present the automation idea as a suggested next step (do not create scripts in this skill)
