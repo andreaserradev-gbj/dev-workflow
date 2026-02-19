@@ -16,7 +16,7 @@ plugins/dev-workflow/           # Plugin package
     feature-batch-scanner.md
     prd-planner.md
     prd-researcher.md
-    session-analyzer.md
+
   skills/                       # Skill definitions (AgentSkills.io format)
     dev-plan/
       SKILL.md

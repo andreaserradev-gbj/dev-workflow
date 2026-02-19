@@ -33,46 +33,100 @@ Store the output as `$PROJECT_ROOT`. If the command fails, inform the user and s
 
 ---
 
-## Phase 1 — Remember It
+## Analyze Session
 
-Surface facts, preferences, conventions, and gotchas from this session that are worth persisting to project memory.
+### Step 1: Read Existing Memory
 
-### Step 1: Analyze Session for Memory Candidates
+Before analyzing, read these files to avoid surfacing items already documented:
 
-Launch the **session-analyzer agent** in memory mode:
+1. `$PROJECT_ROOT/CLAUDE.md`
+2. `$PROJECT_ROOT/.claude/rules/` — if it exists, read all files in the directory
+3. `$PROJECT_ROOT/CLAUDE.local.md` — if it exists
 
-```
-"Review the current session conversation in memory mode.
-Find: corrections the user made, stated preferences, project conventions discovered,
-gotchas or workarounds encountered.
+### Step 2: Scan Conversation
 
-Before reporting, read the project's CLAUDE.md at $PROJECT_ROOT/CLAUDE.md to avoid
-surfacing items that are already documented.
+Review the full conversation history for findings worth persisting or acting on. If the session was short or routine with nothing notable, state "Nothing to report from this session." and stop.
 
-If .claude/rules/ exists at $PROJECT_ROOT, read those files too."
-```
+**What to scan for:**
 
-Use `subagent_type=dev-workflow:session-analyzer` and `model=sonnet`.
+1. **Corrections** — Places where the user corrected the assistant's approach, naming, or assumptions
+2. **Stated preferences** — "Always do X", "Never do Y", "I prefer Z"
+3. **Project conventions** — Patterns discovered during implementation (naming, file structure, API style)
+4. **Gotchas** — Pitfalls or workarounds encountered
+5. **Friction** — Repeated manual steps, things the user had to ask for explicitly
+6. **Mistakes** — Errors the assistant made and corrected
+7. **Skill gaps** — Knowledge the assistant lacked or got wrong
+8. **Automation opportunities** — Repetitive patterns that could become scripts or skills
 
-### Step 2: Present Memory Candidates
+**Quality filters:**
 
-After the agent returns, present the findings table to the user:
+- **Be selective** — Only surface items that would genuinely help in future sessions
+- **Be specific** — "Use snake_case for database columns" is useful; "follow naming conventions" is not
+- **Skip duplicates** — Do not surface items already in CLAUDE.md, rules, or auto memory (read in Step 1)
+- **Skip session-specific context** — Do not record task details that won't generalize
+- **Prefer confirmed patterns** — Patterns confirmed by the user or observed multiple times are stronger candidates
 
-> **Memory Candidates from this session:**
+### Step 3: Classify and Route Findings
+
+For each finding, assign a **type** and a **destination**.
+
+**Finding types:**
+
+| Type | Description |
+|------|-------------|
+| `convention` | Coding style, naming, architecture patterns discovered |
+| `preference` | User workflow choices, stated preferences |
+| `fact` | Project-specific knowledge worth remembering |
+| `gotcha` | Pitfalls or workarounds encountered |
+| `friction` | Repeated manual steps or slowdowns |
+| `mistake` | Errors made and corrected |
+| `skill-gap` | Knowledge the assistant lacked |
+| `automation` | Repetitive patterns that could become scripts or skills |
+
+**Destination routing** (prefer the cheapest option that fits):
+
+| Destination | Startup Cost | When to Use |
+|---|---|---|
+| `auto memory` | ZERO (on-demand) | Patterns, insights, debugging knowledge, project facts. **Default.** |
+| `.claude/rules/<topic>.md` | HIGH (all load) | Hard rules enforced every session. Use `paths:` frontmatter to scope to relevant files. |
+| `CLAUDE.local.md` | HIGH (full load) | Personal/ephemeral context |
+| `CLAUDE.md` | HIGH (full load) | Major architectural decisions. **Last resort — keep minimal.** |
+
+**Decision tree:**
+1. Pattern/insight/debugging knowledge? → `auto memory`
+2. Hard rule enforced every session? → `.claude/rules/<topic>.md`
+3. Personal/ephemeral? → `CLAUDE.local.md`
+4. Major architectural change? → `CLAUDE.md`
+
+### Step 4: Present Findings
+
+Present all findings in a single table:
+
+> **Session Findings:**
 >
-> | # | Finding | Category | Destination | Rationale |
-> |---|---------|----------|-------------|-----------|
+> | # | Type | Finding | Proposed Action | Destination |
+> |---|------|---------|-----------------|-------------|
+> | 1 | convention | [What was discovered] | [What to persist or do] | auto memory |
+> | 2 | friction | [What caused friction] | [Rule or change to reduce it] | .claude/rules/ |
 > | ... | ... | ... | ... | ... |
 >
 > **Which items would you like to apply?** Reply with the numbers (e.g., "1, 3"), "all", or "none" to skip.
 
-If the agent found no candidates, state: "No memory candidates found. Moving to Phase 2." and skip to Phase 2.
+If no findings, state: "Nothing to report from this session." and skip to the summary.
 
 **STOP. Wait for the user to select items before proceeding.**
 
-### Step 3: Apply Confirmed Memory Items
+### Step 5: Apply Confirmed Items
 
 For each confirmed item, apply based on its **Destination**:
+
+**auto memory** items:
+1. Present the confirmed item content to the user
+2. After confirmation, save the content to your auto memory
+   - Use concise, specific phrasing (e.g., "Project uses pnpm, not npm")
+   - For detailed items, specify a topic file name (e.g., "save to debugging topic")
+   - Index entries in MEMORY.md should be brief pointers; details go in topic files
+3. Confirm: "Saved to auto memory: [brief description]"
 
 **CLAUDE.md** items:
 1. Read `$PROJECT_ROOT/CLAUDE.md`
@@ -91,77 +145,11 @@ For each confirmed item, apply based on its **Destination**:
 2. Append the new content
 3. Present the proposed content before writing
 
-**auto memory** items:
-1. Present the confirmed item content to the user
-2. After confirmation, save the content to your auto memory
-   - Use concise, specific phrasing (e.g., "Project uses pnpm, not npm")
-   - For detailed items, specify a topic file name (e.g., "save to debugging topic")
-   - Index entries in MEMORY.md should be brief pointers; details go in topic files
-3. Confirm: "Saved to auto memory: [brief description]"
-
-After applying, confirm: "Applied [N] memory items."
-
-⏸️ **GATE**: Phase 1 complete. Continue to Phase 2 or stop here?
-
----
-
-## Phase 2 — Review & Apply
-
-Identify friction, mistakes, skill gaps, and automation opportunities from this session.
-
-### Step 4: Analyze Session for Self-Improvement Signals
-
-Launch the **session-analyzer agent** in self-improvement mode:
-
-```
-"Review the current session conversation in self-improvement mode.
-Find: friction points (repeated manual steps), mistakes that were corrected,
-knowledge gaps the assistant had, and tasks that could be automated.
-
-Focus on patterns that would improve future sessions, not one-off issues."
-```
-
-Use `subagent_type=dev-workflow:session-analyzer` and `model=sonnet`.
-
-### Step 5: Present Self-Improvement Signals
-
-After the agent returns, present the findings table to the user:
-
-> **Self-Improvement Signals from this session:**
->
-> | # | Signal Type | Observation | Proposed Action | Destination |
-> |---|-------------|-------------|-----------------|-------------|
-> | ... | ... | ... | ... | ... |
->
-> **Which items would you like to act on?** Reply with the numbers (e.g., "1, 3"), "all", or "none" to skip.
-
-If the agent found no signals, state: "No self-improvement signals found." and skip to the summary.
-
-**STOP. Wait for the user to select items before proceeding.**
-
-### Step 6: Apply Confirmed Improvements
-
-For each confirmed item, apply based on its **Signal Type** and the agent-specified **Destination**:
-
-**friction** items:
-- Route to the agent-specified destination (auto memory, rules, or CLAUDE.md)
-- Present the proposed content before writing
-
-**mistake** items:
-- Route to the agent-specified destination
-- Present the proposed preventive rule before writing
-
-**skill-gap** items:
-- Route to the agent-specified destination (typically auto memory)
-- Present the proposed content before writing
-
 **automation** items:
 - Present the automation idea as a suggested next step (do not create scripts in this skill)
 - Format: "Consider creating a script or skill for: [description]"
 
-For each destination, follow the same application process as Step 3 (including the auto memory prompt-based approach).
-
-After applying, confirm: "Applied [N] improvement items. [M] automation suggestions noted for future work."
+After applying, confirm: "Applied [N] items. [M] automation suggestions noted for future work."
 
 ---
 
@@ -171,10 +159,9 @@ Report what was accomplished:
 
 > **Session wrap-up complete.**
 >
-> - **Memory items applied**: [N] items written to [list of files touched]
-> - **Auto memory items saved**: [N] items (or "none")
-> - **Improvements applied**: [N] rules added, [M] automation ideas noted
-> - **Files modified**: [list each file that was changed]
+> - **Items applied**: [N] items to [list destinations touched]
+> - **Automation ideas**: [M] noted for future work (or "none")
+> - **Files modified**: [list each file that was changed, or "none"]
 >
 > _Run `/dev-checkpoint` if you haven't already saved your session progress._
 

@@ -1,8 +1,8 @@
 ---
 branch: feature/wrap-up-integration
-last_commit: 1c91e0b Update checkpoint for integration testing phase
+last_commit: 20b965f Add auto memory support to dev-wrapup with model upgrade
 uncommitted_changes: true
-checkpointed: 2026-02-19T20:30:00Z
+checkpointed: 2026-02-19T09:00:00Z
 ---
 
 Read the following PRD files in order:
@@ -12,57 +12,59 @@ Read the following PRD files in order:
 <context>
 ## Context
 
-**Goal**: Add a `/dev-wrapup` skill for end-of-session memory review and self-improvement, invoked via prose suggestion from `/dev-checkpoint`
-**Current phase**: Enhancement complete — auto memory support added, ready for integration testing
-**Key completions**: All 3 implementation phases, auto memory routing framework, model upgrade haiku→sonnet
+**Goal**: Add a `/dev-wrapup` skill for end-of-session memory review and self-improvement routing
+**Current phase**: Integration Testing — rewrite complete, ready to test on real sessions
+**Key completions**: Rewrote SKILL.md to use inline analysis (single pass, no subagent), deleted session-analyzer agent, updated PRD and docs
 </context>
 
 <current_state>
 ## Current Progress
 
-- ✅ Phase 1: Created session-analyzer agent with two output modes
-- ✅ Phase 2: Created dev-wrapup skill with two phases and STOP gates
-- ✅ Phase 3: Checkpoint integration, version bump to 1.8.0, docs
-- ✅ Auto memory enhancement: Added auto memory as default destination with prompt-based delegation
-- ✅ Model upgrade: session-analyzer agent model changed from haiku to sonnet
-- ✅ Cost-aware routing: Destination guidelines with startup cost table and decision tree
-- ✅ Self-improvement routing: Added Destination column to self-improvement signals table
-- ✅ All 24 tests pass
-- ⬜ Integration testing: Test /dev-wrapup on real projects
+- ✅ Phase 1: Created session-analyzer agent (later removed)
+- ✅ Phase 2: Created dev-wrapup skill with confirmation gates and cost-aware routing
+- ✅ Phase 3: Connected to dev-checkpoint, bumped version, updated docs
+- ✅ Architectural rewrite: Collapsed two-phase agent-based flow into single-pass inline analysis
+- ✅ Deleted session-analyzer.md — subagents cannot access parent conversation history
+- ⬜ Integration testing: Test /dev-wrapup on a real session with meaningful work history
 </current_state>
 
 <next_action>
 ## Next Steps
 
 Integration testing:
-- Test `/dev-wrapup` on a real project with meaningful session history
-- Verify session-analyzer routes items to auto memory by default (not CLAUDE.md)
-- Verify auto memory items use prompt-based delegation ("save to your auto memory")
-- Verify confirmation gates work correctly (nothing applied without user approval)
-- Verify file writes go to the correct destinations (auto memory, CLAUDE.md, .claude/rules/, CLAUDE.local.md)
-- Test edge cases: empty sessions, sessions with no learnings, sessions with many findings
+- Run `/dev-wrapup` at the end of a real work session (not a fresh/empty session)
+- Verify the orchestrator correctly scans conversation for findings
+- Verify the combined findings table presents memory candidates and improvement signals together
+- Verify confirmation gates work (nothing applied without user approval)
+- Verify destination routing applies items to correct targets (auto memory, CLAUDE.md, rules, etc.)
+- Test edge cases: session with no learnings, session with many findings
+
+After testing passes:
+- Bump version if needed
+- Commit and prepare PR
 </next_action>
 
 <key_files>
 ## Key Files
 
-- PRD: .dev/wrap-up-integration/00-master-plan.md
-- Agent: plugins/dev-workflow/agents/session-analyzer.md
 - Skill: plugins/dev-workflow/skills/dev-wrapup/SKILL.md
 - Checkpoint integration: plugins/dev-workflow/skills/dev-checkpoint/SKILL.md
+- PRD: .dev/wrap-up-integration/00-master-plan.md
+- Docs: CLAUDE.md, README.md
+- Version: .claude-plugin/marketplace.json
 </key_files>
 
-<decisions>
-## Decisions
+<decisions>## Decisions
+- Inline analysis (no subagent): Subagents launched via Task tool cannot access parent conversation history. The orchestrator must do the analysis itself since it has the full context.
+- Single analysis pass: Memory candidates and self-improvement signals draw on same source material. One pass with a combined findings table is simpler than two separate phases.
+- Keep confirmation gates: User confirms every item before applying — core dev-workflow philosophy.
+- Auto memory as default destination: Zero startup cost. Decision tree routes to higher-cost destinations only when needed.
+- Prompt-based delegation for auto memory: Portable across CLI implementations.</decisions>
 
-- One agent invoked twice (memory + self-improvement) rather than two separate agents
-- Prose suggestion pattern to chain skills (follows dev-plan precedent)
-- User confirms every proposed change before it's applied
-- Prompt-based delegation for auto memory — portable across CLI implementations (Claude Code, Codex, future tools)
-- Auto memory as default destination — zero startup cost vs HIGH for CLAUDE.md/rules/CLAUDE.local.md
-- Model upgrade haiku → sonnet — session-analyzer does nuanced conversational analysis, not simple lookups
-</decisions>
+<notes>## Notes
+- The original implementation used a session-analyzer subagent invoked twice (memory mode + self-improvement mode). Testing revealed the agent couldn't see the conversation because Task tool subagents start with fresh context. The fix was to move all analysis inline into the SKILL.md.
+- PRD Phase 1 (session-analyzer agent) is historically complete but the artifact was later removed. The PRD reflects this with a ~~Removed~~ note.</notes>
 
 ---
 
-Please continue with integration testing: run `/dev-wrapup` on real projects and verify the skill produces useful output with auto memory as the default routing destination.
+Please continue with integration testing — run `/dev-wrapup` at the end of a real work session and verify it produces useful findings with proper routing and confirmation behavior.

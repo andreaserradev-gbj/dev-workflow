@@ -10,7 +10,7 @@
 
 Add a `/dev-wrapup` skill that reviews the current session for learnings worth persisting and self-improvement signals. Inspired by a community "self-improvement loop" concept, adapted to the dev-workflow philosophy where the user is always in control — nothing is applied without explicit confirmation.
 
-The skill has two phases: **Remember It** (route session learnings to the right memory location) and **Review & Apply** (identify skill gaps, friction, and automation opportunities). It runs as a standalone skill, suggested by `/dev-checkpoint` at the end of its flow.
+The skill scans the conversation in a single pass for both memory candidates and self-improvement signals, presents a combined findings table, and applies user-confirmed items. It runs as a standalone skill, suggested by `/dev-checkpoint` at the end of its flow. Analysis is performed inline by the orchestrator (not a subagent) because subagents cannot access parent conversation history.
 
 **Inspiration**: Reddit post by community member describing a 4-phase wrap-up skill. We adapt phases 2 and 3 (Remember It, Review & Apply), skip Ship It (already handled by checkpoint) and Publish It (out of scope).
 
@@ -36,7 +36,8 @@ The skill has two phases: **Remember It** (route session learnings to the right 
 
 | Decision | Rationale | Alternatives Considered |
 |----------|-----------|------------------------|
-| One agent invoked twice | Memory candidates and self-improvement signals draw on same source material; avoids maintaining two nearly-identical agents | Two separate agents (rejected: duplication) |
+| Inline analysis (no subagent) | Subagents launched via Task tool cannot access parent conversation history — the orchestrator must do the analysis itself since it has the full context | Session-analyzer subagent (rejected: no context access) |
+| Single analysis pass | Memory candidates and self-improvement signals draw on same source material; one pass is simpler and avoids redundant scanning | Two separate phases with gate between them (rejected: unnecessary complexity) |
 | Prose suggestion from checkpoint | Simplest, most testable approach; follows existing pattern | Hooks (fragile — no SkillCompleted event), REQUIRED SUB-SKILL directive (harder to test incrementally) |
 | User confirms every item | Core dev-workflow philosophy: user is always in control | Auto-apply (rejected: user didn't want it) |
 | Auto memory via prompt-based delegation | Instruct Claude to "save to your auto memory" — each CLI implementation (Claude Code, Codex, future tools) decides how to store. Portable across implementations. | Direct file writes to memory dir (fragile — path/format may change) |
@@ -51,22 +52,20 @@ The skill has two phases: **Remember It** (route session learnings to the right 
 
 ## Architecture Decision
 
-**Approach**: Standalone skill + dedicated agent, connected by prose suggestion
+**Approach**: Standalone skill with inline analysis, connected by prose suggestion
 
 ```
 /dev-checkpoint (existing)
   └── Step 9 summary now ends with: "Suggest running /dev-wrapup"
 
 /dev-wrapup (new)
-  ├── Phase 1: Remember It
-  │   ├── Launch session-analyzer agent (memory focus)
-  │   ├── Present findings table → STOP for confirmation
-  │   └── Apply confirmed items (Write to CLAUDE.md, rules, CLAUDE.local.md)
-  └── Phase 2: Review & Apply
-      ├── Launch session-analyzer agent (self-improvement focus)
-      ├── Present findings table → STOP for confirmation
-      └── Apply confirmed items (edit files, create rule stubs, save specs)
+  ├── Read existing memory (CLAUDE.md, rules, CLAUDE.local.md)
+  ├── Scan conversation for findings (single pass, done by orchestrator)
+  ├── Present combined findings table → STOP for confirmation
+  └── Apply confirmed items (Write to CLAUDE.md, rules, auto memory, etc.)
 ```
+
+**Key insight**: Subagents launched via Task tool start with a fresh context and cannot access the parent conversation history. Since session analysis requires the full conversation, the orchestrator must perform it directly.
 
 **Future consideration**: Agents may move into skill-specific folders (e.g., `skills/dev-wrapup/agents/`). For now, follows the existing convention of `plugins/dev-workflow/agents/`.
 
@@ -140,7 +139,7 @@ The skill has two phases: **Remember It** (route session learnings to the right 
 
 | File | Purpose |
 |------|---------|
-| `plugins/dev-workflow/agents/session-analyzer.md` | Read-only agent that analyzes session for memory candidates and self-improvement signals |
+| `plugins/dev-workflow/agents/session-analyzer.md` | ~~Removed~~ — subagents cannot access parent conversation; analysis moved inline to SKILL.md |
 | `plugins/dev-workflow/skills/dev-wrapup/SKILL.md` | Two-phase session wrap-up skill with user-confirmed application |
 
 ### Modified Files
