@@ -100,19 +100,28 @@ For each finding, assign a **type** and a **destination**.
 
 ### Step 4: Present Findings
 
-Present all findings in a single table:
+If no findings, state: "Nothing to report from this session." and skip to the summary.
+
+Present findings in two parts:
+
+**Part A — Detailed Analysis**: For each finding, write a short paragraph explaining what happened, why it matters, and the proposed action. Number each finding.
 
 > **Session Findings:**
 >
-> | # | Type | Finding | Proposed Action | Destination |
-> |---|------|---------|-----------------|-------------|
-> | 1 | convention | [What was discovered] | [What to persist or do] | auto memory |
-> | 2 | friction | [What caused friction] | [Rule or change to reduce it] | .claude/rules/ |
-> | ... | ... | ... | ... | ... |
+> **1. [Title]** (`type` → `destination`)
+> [2-3 sentence explanation of what happened, why it matters, and what to persist or do.]
+>
+> **2. [Title]** (`type` → `destination`)
+> [2-3 sentence explanation...]
+
+**Part B — Recap Table**: After the detailed analysis, present a summary table:
+
+> | # | Type | Finding | Destination |
+> |---|------|---------|-------------|
+> | 1 | convention | [Short description] | auto memory |
+> | 2 | friction | [Short description] | .claude/rules/ |
 >
 > **Which items would you like to apply?** Reply with the numbers (e.g., "1, 3"), "all", or "none" to skip.
-
-If no findings, state: "Nothing to report from this session." and skip to the summary.
 
 **STOP. Wait for the user to select items before proceeding.**
 
@@ -121,12 +130,11 @@ If no findings, state: "Nothing to report from this session." and skip to the su
 For each confirmed item, apply based on its **Destination**:
 
 **auto memory** items:
-1. Present the confirmed item content to the user
-2. After confirmation, save the content to your auto memory
+1. Save the content to your auto memory
    - Use concise, specific phrasing (e.g., "Project uses pnpm, not npm")
    - For detailed items, specify a topic file name (e.g., "save to debugging topic")
    - Index entries in MEMORY.md should be brief pointers; details go in topic files
-3. Confirm: "Saved to auto memory: [brief description]"
+2. Confirm: "Saved to auto memory: [brief description]"
 
 **CLAUDE.md** items:
 1. Read `$PROJECT_ROOT/CLAUDE.md`
@@ -162,8 +170,6 @@ Report what was accomplished:
 > - **Items applied**: [N] items to [list destinations touched]
 > - **Automation ideas**: [M] noted for future work (or "none")
 > - **Files modified**: [list each file that was changed, or "none"]
->
-> _Run `/dev-checkpoint` if you haven't already saved your session progress._
 
 ## PRIVACY RULES
 
