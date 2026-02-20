@@ -95,6 +95,8 @@ YAML frontmatter fields: `name`, `description`, `disable-model-invocation`, `arg
 
 Body contains structured instructions with phases, templates, and rules. Large templates are extracted into `references/` subdirectories. The `allowed-tools` field pre-approves specific tools (e.g., `Bash(git rev-parse:*)`, `Read`) to avoid permission prompts.
 
+When skills target cross-tool destinations (e.g., project docs, scoped rules), reference file paths via variables resolved at runtime from discovery (e.g., `$PROJECT_DOCS`, `$SCOPED_RULES_DIR`), not hardcoded tool-specific names like `CLAUDE.md` or `.claude/rules/`.
+
 ## Key Conventions
 
 ### Status Markers
