@@ -1,8 +1,8 @@
 ---
 branch: feature/wrap-up-integration
-last_commit: 4b2cce4 Update checkpoint for routing fix retest phase
-uncommitted_changes: true
-checkpointed: 2026-02-20T12:00:00Z
+last_commit: b27fdc6 Make dev-wrapup routing tool-agnostic after retest
+uncommitted_changes: false
+checkpointed: 2026-02-20T15:30:00Z
 ---
 
 Read the following PRD files in order:
@@ -13,8 +13,8 @@ Read the following PRD files in order:
 ## Context
 
 **Goal**: Add a `/dev-wrapup` skill for end-of-session memory review and self-improvement routing with user-controlled confirmation.
-**Current phase**: Integration Testing — retest after routing refinement
-**Key completions**: All 3 implementation phases done. SKILL.md rewritten with general-purpose destination taxonomy, 7-step decision tree, routing guard rails, and cross-tool mapping (Claude Code / Codex / Gemini CLI).
+**Current phase**: Integration Testing — retest after tool-agnostic routing refinement
+**Key completions**: All 3 implementation phases done. SKILL.md rewritten with general-purpose destination taxonomy, 7-step decision tree, routing guard rails, cross-tool mapping, and tool-agnostic file references. First real-world test completed and routing issues fixed.
 </context>
 
 <current_state>
@@ -27,24 +27,25 @@ Read the following PRD files in order:
 - ✅ Routing bias fix: rewrote decision tree to eliminate auto-memory bias
 - ✅ Research: memory types across Claude Code, Codex, Gemini CLI
 - ✅ Second routing refinement: general-purpose taxonomy, 7-step tree, guard rails, examples
-- ⬜ Retest: run `/dev-wrapup` on a real session to verify routing distribution
-- ⬜ Final PR: prepare PR targeting main
+- ✅ Real-world retest: tested on Atlassian migration session, identified 3 routing issues
+- ✅ Retest fixes: PRD dedup rule, Target column in recap table, routing self-check, tool-agnostic file references
+- ⬜ Follow-up retest: verify routing refinements produce diverse destinations
+- ⬜ Final PR: push and update PR targeting main
 </current_state>
 
 <next_action>
 ## Next Steps
 
-Retest (SKILL.md):
-- Run `/dev-wrapup` at end of a meaningful development session
-- Verify findings route to diverse destinations (not mostly auto memory)
-- Verify "Skip general knowledge" filter excludes trivial items
-- Verify Step 4 shows detailed analysis (Part A) + recap table (Part B)
-- Verify Step 5 applies confirmed items directly without double-confirm
+Follow-up retest:
+- Run `/dev-wrapup` on a new meaningful development session
+- Verify findings route to diverse destinations (not mostly personal memory)
+- Verify the self-check step catches >50% personal memory distribution
+- Verify Target column shows resolved file paths in recap table
 
 Final PR:
+- Push commits to feature/wrap-up-integration
+- Update PR description if needed
 - Verify version bump is in place (1.8.0)
-- Commit all changes
-- Open PR targeting main
 </next_action>
 
 <key_files>
@@ -57,21 +58,18 @@ Final PR:
 </key_files>
 
 <decisions>## Decisions
-- General-purpose destination taxonomy: 6 destinations mapped across Claude Code, Codex, Gemini CLI
-- 7-step decision tree (was 5): prioritizes team-shared project docs, narrows personal memory to "non-instructional observations only"
-- Routing guard rails: "if phrasable as instruction → not personal memory", "if helps new team member → project docs", "if >50% routes to personal memory → re-evaluate"
-- Added "User global" destination for cross-project preferences (~/.claude/CLAUDE.md)
-- Added routing examples table (6 concrete examples) to guide LLM behavior
-- Step 1 now reads ~/.claude/CLAUDE.md to avoid duplicating user-global items
-- Added Edit to allowed-tools for editing existing docs</decisions>
+- PRD deduplication rule: PRDs count as existing docs only when git-tracked (not gitignored); gitignored PRDs are transient
+- Tool-agnostic file references: all destination paths use variables resolved from Step 1 discovery ($PROJECT_DOCS, $SCOPED_RULES_DIR, $PERSONAL_PROJECT_DOCS, $USER_GLOBAL_DOCS)
+- Routing self-check: explicit post-routing step re-applies guard rails if >50% routes to personal memory
+- Recap table Target column: shows resolved file path so user knows exactly which file will be modified</decisions>
 
 <notes>## Notes
-- User tested previous version: "suggestions are better, still heavier toward auto memory"
-- User requested cross-tool research before refining: Claude Code, Codex, Gemini CLI memory systems
-- User wants production quality matching other skills in the plugin
+- Real-world test on Atlassian migration session showed 3/5 findings (60%) routing to personal memory — triggered >50% guard rail
+- "Already in PRD" reasoning was valid for git-tracked PRDs but created a loophole for gitignored ones
+- User had to ask "what is the location of project docs?" — Target column fix addresses this
 - All tests pass (24/24)
 </notes>
 
 ---
 
-Please continue with retesting `/dev-wrapup` on a real session to verify the routing refinements work correctly, then prepare the final PR.
+Please continue with a follow-up retest of `/dev-wrapup` on a meaningful development session to verify routing refinements, then push and finalize the PR.
