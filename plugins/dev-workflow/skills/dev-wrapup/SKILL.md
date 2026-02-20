@@ -39,10 +39,10 @@ Store the output as `$PROJECT_ROOT`. If the command fails, inform the user and s
 
 Before analyzing, read these files to avoid surfacing items already documented:
 
-1. `$PROJECT_ROOT/CLAUDE.md` (or equivalent project docs: `AGENTS.md`, `GEMINI.md`)
-2. `$PROJECT_ROOT/.claude/rules/` — if it exists, read all files in the directory
-3. `$PROJECT_ROOT/CLAUDE.local.md` — if it exists
-4. `~/.claude/CLAUDE.md` — user global preferences, if it exists
+1. `$PROJECT_ROOT/CLAUDE.md` (or equivalent project docs: `AGENTS.md`, `GEMINI.md`) — whichever exists, store its name as `$PROJECT_DOCS` for use in routing targets later
+2. `$PROJECT_ROOT/.claude/rules/` (or equivalent scoped rules directory) — if it exists, read all files in the directory; store the path as `$SCOPED_RULES_DIR`
+3. `$PROJECT_ROOT/CLAUDE.local.md` (or equivalent personal project docs) — if it exists, store its path as `$PERSONAL_PROJECT_DOCS`
+4. `~/.claude/CLAUDE.md` (or equivalent user global docs) — if it exists, store its path as `$USER_GLOBAL_DOCS`
 
 ### Step 2: Scan Conversation
 
@@ -63,7 +63,7 @@ Review the full conversation history for findings worth persisting or acting on.
 
 - **Be selective** — Only surface items that would genuinely change behavior in future sessions. If the finding wouldn't alter how you approach a task, skip it.
 - **Be specific** — "Use snake_case for database columns" beats "follow naming conventions"
-- **Skip duplicates** — Do not surface items already in project docs, rules, user global, or auto memory (read in Step 1)
+- **Skip duplicates** — Do not surface items already in project docs, rules, user global, or auto memory (read in Step 1). PRD files (e.g., `.dev/`) count as existing documentation only if they are git-tracked (not gitignored). If the PRD directory is gitignored, findings documented there are transient and should still be routed to persistent project docs.
 - **Skip session-specific context** — Do not record task details, in-progress state, or temporary debugging notes
 - **Skip general knowledge** — Standard language/library/framework behavior that any experienced developer knows is not worth persisting. Only persist if the behavior is non-obvious AND project-specific or likely to recur in this codebase.
 - **Prefer team-shared destinations** — When in doubt about where something belongs, default to project docs over personal memory. Most valuable findings are things the team should know.
@@ -114,6 +114,11 @@ Every AI coding tool offers similar tiers of persistent documentation. This skil
 - If the finding would help a new team member onboard, it belongs in project docs.
 - If more than half your findings route to personal memory, re-evaluate — you are likely under-using project docs.
 
+**Self-check** — After routing all findings, review before presenting:
+
+1. Count destinations. Does >50% go to personal memory? If yes, re-route: for each personal memory item, re-apply the "phrasable as instruction" test and the decision tree from step 1.
+2. For each personal memory item, verify it truly fails all earlier decision tree steps (1–5). If it matches an earlier step, re-route it there.
+
 **Routing examples:**
 
 | Finding | Correct | Why |
@@ -143,10 +148,10 @@ Present findings in two parts:
 
 **Part B — Recap Table**: After the detailed analysis, present a summary table:
 
-> | # | Type | Finding | Destination |
-> |---|------|---------|-------------|
-> | 1 | gotcha | [Short description] | Project docs (update) |
-> | 2 | convention | [Short description] | Scoped rules |
+> | # | Type | Finding | Destination | Target |
+> |---|------|---------|-------------|--------|
+> | 1 | gotcha | [Short description] | Project docs (update) | `$PROJECT_DOCS` |
+> | 2 | convention | [Short description] | Scoped rules | `$SCOPED_RULES_DIR/naming.md` |
 >
 > **Which items would you like to apply?** Reply with the numbers (e.g., "1, 3"), "all", or "none" to skip.
 
@@ -157,19 +162,19 @@ Present findings in two parts:
 For each confirmed item, apply based on its **destination**:
 
 **Project docs (update)** items:
-1. Read `$PROJECT_ROOT/CLAUDE.md`
+1. Read `$PROJECT_DOCS`
 2. Locate the existing section that needs correction
 3. Present the proposed diff: "I'll change `[old]` to `[new]` in [section]"
 4. Apply after confirmation
 
 **Project docs (add)** items:
-1. Read `$PROJECT_ROOT/CLAUDE.md`
+1. Read `$PROJECT_DOCS`
 2. Find the most appropriate existing section for the new content
 3. Present the proposed addition: "I'll add this under [section]: `[content]`"
 4. Apply after confirmation
 
 **Scoped rules** items:
-1. Check if `$PROJECT_ROOT/.claude/rules/<topic>.md` exists
+1. Check if `$SCOPED_RULES_DIR/<topic>.md` exists
 2. If it exists, read it and present the proposed append
 3. If it doesn't exist, present the new file content (include `paths:` frontmatter scoped to relevant files/directories)
 4. Apply after confirmation
@@ -180,13 +185,13 @@ For each confirmed item, apply based on its **destination**:
 3. Apply after confirmation
 
 **User global** items:
-1. Read `~/.claude/CLAUDE.md` (create if missing)
+1. Read `$USER_GLOBAL_DOCS` (create if missing)
 2. Find or create an appropriate section
 3. Present the proposed addition — note that this affects ALL projects
 4. Apply after confirmation
 
 **Personal project** items:
-1. Read `$PROJECT_ROOT/CLAUDE.local.md` (create if missing)
+1. Read `$PERSONAL_PROJECT_DOCS` (create if missing)
 2. Present the proposed content
 3. Apply after confirmation
 
