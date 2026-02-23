@@ -46,6 +46,8 @@ Before analyzing, read these files to avoid surfacing items already documented:
 
 ### Step 2: Scan Conversation
 
+Verify the conversation contains substantive exchanges (at least one user message and one assistant response beyond the skill invocation itself). If the conversation history appears empty or contains only the skill invocation, state: "No conversation history available to review. Run this skill at the end of a working session, not at the start." and **STOP**.
+
 Review the full conversation history for findings worth persisting or acting on. If the session was short or routine with nothing notable, state "Nothing to report from this session." and stop.
 
 **What to scan for:**
@@ -114,10 +116,11 @@ Every AI coding tool offers similar tiers of persistent documentation. This skil
 - If the finding would help a new team member onboard, it belongs in project docs.
 - If more than half your findings route to personal memory, re-evaluate — you are likely under-using project docs.
 
-**Self-check** — After routing all findings, review before presenting:
+**Self-check** — After routing all findings, review once before presenting:
 
 1. Count destinations. Does >50% go to personal memory? If yes, re-route: for each personal memory item, re-apply the "phrasable as instruction" test and the decision tree from step 1.
 2. For each personal memory item, verify it truly fails all earlier decision tree steps (1–5). If it matches an earlier step, re-route it there.
+3. This is a single pass. If after re-evaluation the distribution still exceeds 50% personal memory, accept it — the findings are genuinely personal memory items. Do not re-check more than once.
 
 **Routing examples:**
 
@@ -185,15 +188,19 @@ For each confirmed item, apply based on its **destination**:
 3. Apply after confirmation
 
 **User global** items:
-1. Read `$USER_GLOBAL_DOCS` (create if missing)
-2. Find or create an appropriate section
-3. Present the proposed addition — note that this affects ALL projects
-4. Apply after confirmation
+1. Check if `$USER_GLOBAL_DOCS` exists
+   - If it does NOT exist, inform the user: "`[path]` does not exist. This item requires creating it. Proceed?" Wait for confirmation before creating.
+2. Read `$USER_GLOBAL_DOCS`
+3. Find or create an appropriate section
+4. Present the proposed addition — note that this affects ALL projects
+5. Apply after confirmation
 
 **Personal project** items:
-1. Read `$PERSONAL_PROJECT_DOCS` (create if missing)
-2. Present the proposed content
-3. Apply after confirmation
+1. Check if `$PERSONAL_PROJECT_DOCS` exists
+   - If it does NOT exist, inform the user: "`[path]` does not exist. This item requires creating it. Proceed?" Wait for confirmation before creating.
+2. Read `$PERSONAL_PROJECT_DOCS`
+3. Present the proposed content
+4. Apply after confirmation
 
 **Personal memory** items:
 1. Save the content to your auto memory

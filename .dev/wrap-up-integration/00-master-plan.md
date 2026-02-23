@@ -73,42 +73,34 @@ The skill scans the conversation in a single pass for both memory candidates and
 
 ## Implementation Order
 
-### Phase 1: Create the session-analyzer agent
-**Goal**: Establish the read-only analysis agent that reviews conversation history.
+### Phase 1: ~~Create the session-analyzer agent~~ (Removed — analysis moved inline)
+**Goal**: ~~Establish the read-only analysis agent~~ — Removed because subagents cannot access parent conversation history. Analysis is performed inline by the orchestrator in SKILL.md. See File Changes Summary.
 
-1. ✅ Create `plugins/dev-workflow/agents/session-analyzer.md` with:
-   - Frontmatter: `name: session-analyzer`, `color: purple`, `description`, `tools: Read`
-   - Mission: read-only analysis of session conversation
-   - Two output modes (selected by prompt):
-     - **Memory Candidates table**: Finding | Category | Proposed Destination | Rationale
-     - **Self-Improvement table**: Signal Type | Observation | Proposed Action
-   - Guidelines for what to scan (corrections, stated facts, friction moments, project quirks)
-   - Privacy rules block
+1. ✅ ~~Create `plugins/dev-workflow/agents/session-analyzer.md`~~ — Created then removed (commit c53a537)
 
-**Verification**:
-- [x] File exists at correct path with valid YAML frontmatter
-- [x] Output format matches what SKILL.md will expect
-- [x] Tools list is minimal (`Read` only)
+**Verification** (N/A — agent removed, analysis inlined):
+- [ ] ~~File exists at correct path with valid YAML frontmatter~~
+- [ ] ~~Output format matches what SKILL.md will expect~~
+- [ ] ~~Tools list is minimal (`Read` only)~~
 
 ⏸️ **GATE**: Phase complete. Continue or `/dev-checkpoint`.
 
 ### Phase 2: Create the dev-wrapup skill
-**Goal**: Write the full SKILL.md with two phases and confirmation gates.
+**Goal**: Write the full SKILL.md with single-pass analysis and confirmation gates.
 
 1. ✅ Create directory `plugins/dev-workflow/skills/dev-wrapup/`
 2. ✅ Create `plugins/dev-workflow/skills/dev-wrapup/SKILL.md` with:
-   - Frontmatter: `name: dev-wrapup`, `description`, `allowed-tools: Bash(bash:*) Read Write`
+   - Frontmatter: `name: dev-wrapup`, `description`, `allowed-tools: Bash(bash:*) Read Write Edit`
    - REVIEW-ONLY MODE guard (parallel to checkpoint's SAVE-ONLY MODE)
    - Step 0: Discover Project Root (standard pattern)
-   - Phase 1 — Remember It: agent launch → findings table → STOP gate → apply confirmed
-   - Phase 2 — Review & Apply: agent launch → findings table → STOP gate → apply confirmed
+   - Single-pass inline analysis: scan → classify/route → present → apply confirmed
    - Summary step
    - Privacy rules block
 
 **Verification**:
 - [x] SKILL.md exists with valid frontmatter
-- [x] Both phases have STOP gates before applying changes
-- [x] Agent invocations use `subagent_type=dev-workflow:session-analyzer`
+- [x] STOP gate before applying changes
+- [x] ~~Agent invocations use `subagent_type=dev-workflow:session-analyzer`~~ — N/A, analysis inlined
 - [x] No auto-apply — every write requires user confirmation
 
 ⏸️ **GATE**: Phase complete. Continue or `/dev-checkpoint`.

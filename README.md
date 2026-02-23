@@ -133,10 +133,11 @@ resume my previous session
 
 > **Run in:** edit mode
 
-Review the current session for learnings worth persisting and self-improvement signals. Runs two phases:
+Review the current session for learnings worth persisting and self-improvement signals. Performs a single-pass analysis that:
 
-1. **Remember It** — identifies session learnings (corrections, conventions, project quirks) and routes them to the right memory location (CLAUDE.md, rules, CLAUDE.local.md)
-2. **Review & Apply** — surfaces self-improvement signals (skill gaps, friction points, automation opportunities) and proposes concrete actions
+1. **Scans** the conversation for memory candidates (corrections, conventions, project quirks) and improvement signals (friction points, skill gaps, automation opportunities)
+2. **Routes** each finding to the appropriate destination (project docs, scoped rules, user global, personal memory)
+3. **Applies** user-confirmed items to their target files
 
 Every proposed change requires explicit user confirmation before being applied. Suggested by `/dev-checkpoint` at the end of its flow.
 
@@ -216,7 +217,7 @@ For very complex features where the context requirements are substantial, I foun
 
 ## Acknowledgments
 
-The `/dev-wrapup` skill was inspired by a [community post on r/ClaudeCode](https://www.reddit.com/r/ClaudeCode/comments/1r89084/selfimprovement_loop_my_favorite_claude_code_skill) describing a "self-improvement loop" skill. We adapted phases 2 (Remember It) and 3 (Review & Apply) to fit the dev-workflow philosophy where nothing is applied without explicit user confirmation.
+The `/dev-wrapup` skill was inspired by a [community post on r/ClaudeCode](https://www.reddit.com/r/ClaudeCode/comments/1r89084/selfimprovement_loop_my_favorite_claude_code_skill) describing a "self-improvement loop" skill. We adapted the memory and self-improvement phases to fit the dev-workflow philosophy where nothing is applied without explicit user confirmation.
 
 ## Credits
 
