@@ -1,6 +1,6 @@
 # Dev Status Report
 
-**Generated**: 2026-02-16T00:00:00Z
+**Generated**: 2026-02-23T12:00:00Z
 **Project**: dev-workflow
 **Features Scanned**: 1
 
@@ -17,15 +17,15 @@
 
 | Feature | Status | Progress | Last Activity |
 |---------|--------|----------|---------------|
-| checkpoint-commit-step | Complete | 1/1 phases | 2026-02-15 |
+| wrap-up-integration | Complete (archived) | 3/3 phases | 2026-02-23 |
 
 ## Archive Candidates
 
 ### Complete (ready to archive)
-- checkpoint-commit-step (archived)
+- None (already archived)
 
 ### Stale (no activity > 30 days)
-- (none)
+- None
 
 ---
 
