@@ -23,7 +23,7 @@
 /plugin install dev-workflow
 ```
 
-Skills will be available as `/dev-plan`, `/dev-checkpoint`, `/dev-resume`, `/dev-status`.
+Skills will be available as `/dev-plan`, `/dev-checkpoint`, `/dev-resume`, `/dev-status`, `/dev-wrapup`.
 
 <details>
 <summary><strong>Updating & Troubleshooting</strong></summary>
@@ -129,6 +129,24 @@ Resume work from a previous checkpoint. Performs these steps:
 resume my previous session
 ```
 
+### `/dev-wrapup`
+
+> **Run in:** edit mode
+
+Review the current session for learnings worth persisting and self-improvement signals. Performs a single-pass analysis that:
+
+1. **Scans** the conversation for memory candidates (corrections, conventions, project quirks) and improvement signals (friction points, skill gaps, automation opportunities)
+2. **Routes** each finding to the appropriate destination (project docs, scoped rules, user global, personal memory)
+3. **Applies** user-confirmed items to their target files
+
+Every proposed change requires explicit user confirmation before being applied. Suggested by `/dev-checkpoint` at the end of its flow.
+
+**Examples:**
+```
+/dev-wrapup
+wrap up this session
+```
+
 ### `/dev-status`
 
 > **Run in:** edit mode
@@ -196,6 +214,10 @@ Then I clear the context, and the cycle repeats.
 ### A Note on Master and Sub-PRDs
 
 For very complex features where the context requirements are substantial, I found that a single PRD becomes too long and cluttered. This ties back to the same principle: you want Claude to start with the least context possible to avoid drift or hallucination. So when needed, I ask Claude during the `/dev-plan` phase to break the PRD into sub-tasks, each with its own focused document. Claude usually doesn't do this by itself, so you have to be explicit about it.
+
+## Acknowledgments
+
+The `/dev-wrapup` skill was inspired by a [community post on r/ClaudeCode](https://www.reddit.com/r/ClaudeCode/comments/1r89084/selfimprovement_loop_my_favorite_claude_code_skill) describing a "self-improvement loop" skill. We adapted the memory and self-improvement phases to fit the dev-workflow philosophy where nothing is applied without explicit user confirmation.
 
 ## Credits
 

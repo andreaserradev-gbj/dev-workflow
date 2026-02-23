@@ -16,6 +16,7 @@ plugins/dev-workflow/           # Plugin package
     feature-batch-scanner.md
     prd-planner.md
     prd-researcher.md
+
   skills/                       # Skill definitions (AgentSkills.io format)
     dev-plan/
       SKILL.md
@@ -28,6 +29,8 @@ plugins/dev-workflow/           # Plugin package
     dev-resume/
       SKILL.md
     dev-status/
+      SKILL.md
+    dev-wrapup/
       SKILL.md
   scripts/                      # Deterministic helper scripts called by skills
     discover.sh                 # Project root, feature/checkpoint discovery
@@ -91,6 +94,8 @@ Skills follow the [AgentSkills.io](https://agentskills.io) open standard.
 YAML frontmatter fields: `name`, `description`, `disable-model-invocation`, `argument-hint`, `allowed-tools`
 
 Body contains structured instructions with phases, templates, and rules. Large templates are extracted into `references/` subdirectories. The `allowed-tools` field pre-approves specific tools (e.g., `Bash(git rev-parse:*)`, `Read`) to avoid permission prompts.
+
+When skills target cross-tool destinations (e.g., project docs, scoped rules), reference file paths via variables resolved at runtime from discovery (e.g., `$PROJECT_DOCS`, `$SCOPED_RULES_DIR`), not hardcoded tool-specific names like `CLAUDE.md` or `.claude/rules/`.
 
 ## Key Conventions
 
