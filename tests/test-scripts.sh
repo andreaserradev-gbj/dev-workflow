@@ -185,11 +185,11 @@ check_sync() {
   shift
   local canonical="$SKILLS_DIR/dev-checkpoint/scripts/$script"
   local canonical_hash
-  canonical_hash="$(shasum -a 256 "$canonical" | cut -d' ' -f1)"
+  canonical_hash="$(cksum "$canonical" | cut -d' ' -f1)"
   for skill in "$@"; do
     local copy="$SKILLS_DIR/$skill/scripts/$script"
     local copy_hash
-    copy_hash="$(shasum -a 256 "$copy" | cut -d' ' -f1)"
+    copy_hash="$(cksum "$copy" | cut -d' ' -f1)"
     if [ "$canonical_hash" != "$copy_hash" ]; then
       echo "FAIL: $script in $skill differs from dev-checkpoint (canonical)"
       FAIL=$((FAIL + 1))
