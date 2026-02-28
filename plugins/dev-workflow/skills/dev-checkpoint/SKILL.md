@@ -135,7 +135,7 @@ Create a continuation prompt following the template in [checkpoint-template.md](
 
 ### Step 8: Save Checkpoint
 
-Write the continuation prompt to `$PROJECT_ROOT/.dev/$FEATURE_NAME/checkpoint.md`. Create the file if it doesn't exist, or overwrite it completely if it does.
+If `$PROJECT_ROOT/.dev/$FEATURE_NAME/checkpoint.md` already exists, read it first (the Write tool requires reading before overwriting). Then write the continuation prompt to that path.
 
 ### Step 9: Summary
 
