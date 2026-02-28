@@ -54,10 +54,10 @@ case "$MODE" in
     # 4. Update checkpoint frontmatter
     CHECKPOINT="$WORKTREE/.dev/$FEATURE/checkpoint.md"
     if [ -f "$CHECKPOINT" ]; then
-      sed -i '' -e 's/^branch: main$/branch: feature\/'"$FEATURE"'/' \
-                -e 's/^branch: master$/branch: feature\/'"$FEATURE"'/' \
-                -e 's/^uncommitted_changes: true$/uncommitted_changes: false/' \
-                "$CHECKPOINT"
+      sed -e 's/^branch: main$/branch: feature\/'"$FEATURE"'/' \
+          -e 's/^branch: master$/branch: feature\/'"$FEATURE"'/' \
+          -e 's/^uncommitted_changes: true$/uncommitted_changes: false/' \
+          "$CHECKPOINT" > "$CHECKPOINT.tmp" && mv "$CHECKPOINT.tmp" "$CHECKPOINT"
 
       # 5. Amend commit with updated checkpoint
       git -C "$WORKTREE" add .dev

@@ -4,19 +4,20 @@ description: >-
   Plan a new feature with structured PRD documentation.
   Researches codebase patterns, designs implementation phases,
   and writes PRD files to .dev/.
+  Use when starting a new feature, spike, or major task.
 argument-hint: <feature description>
 allowed-tools: Bash(bash:*) Read
 ---
 
 ## Step 0: Discover Project Root
 
-Run the [discovery script](../../scripts/discover.sh):
+Run the [discovery script](scripts/discover.sh):
 
 ```bash
 bash "$DISCOVER" root
 ```
 
-Where `$DISCOVER` is the absolute path to `scripts/discover.sh` within the plugin directory. Inline actual values — do not rely on shell variables persisting between calls.
+Where `$DISCOVER` is the absolute path to `scripts/discover.sh` within this skill's directory. Inline actual values — do not rely on shell variables persisting between calls.
 
 Store the output as `$PROJECT_ROOT`. If the command fails, inform the user and stop.
 
@@ -36,7 +37,7 @@ This skill uses specialized agents for research and planning:
 - **prd-researcher** (cyan) — Researches codebase for patterns, dependencies, and reference implementations
 - **prd-planner** (green) — Designs implementation phases and file changes
 
-Agent definitions are in `plugins/dev-workflow/agents/`.
+Agent definitions are in `agents/` within this skill's directory.
 
 ## PHASE 1: UNDERSTAND
 
@@ -69,13 +70,13 @@ If `$ARGUMENTS` above is empty (the user ran `/dev-plan` with no arguments):
 
 Before creating any directories or files, set a safe feature slug in `$FEATURE_NAME`.
 
-Normalize and validate with the [validation script](../../scripts/validate.sh):
+Normalize and validate with the [validation script](scripts/validate.sh):
 
 ```bash
 bash "$VALIDATE" normalize "<candidate-name>"
 ```
 
-Where `$VALIDATE` is the absolute path to `scripts/validate.sh` within the plugin directory. Inline actual values. Outputs `$FEATURE_NAME` on success; on failure, STOP and report the error.
+Where `$VALIDATE` is the absolute path to `scripts/validate.sh` within this skill's directory. Inline actual values. Outputs `$FEATURE_NAME` on success; on failure, STOP and report the error.
 
 Rules:
 - Never use raw `$ARGUMENTS` directly in file paths.

@@ -4,6 +4,7 @@ description: >-
   Review the current session for learnings and self-improvement signals.
   Surfaces memory candidates and improvement opportunities
   for user-confirmed application.
+  Use after completing work to review the session for learnings and improvement signals.
 allowed-tools: Bash(bash:*) Read Write Edit
 ---
 
@@ -21,13 +22,13 @@ This skill analyzes and suggests. It does NOT apply changes without explicit use
 
 ### Step 0: Discover Project Root
 
-Run the [discovery script](../../scripts/discover.sh):
+Run the [discovery script](scripts/discover.sh):
 
 ```bash
 bash "$DISCOVER" root
 ```
 
-Where `$DISCOVER` is the absolute path to `scripts/discover.sh` within the plugin directory. Inline actual values — do not rely on shell variables persisting between calls.
+Where `$DISCOVER` is the absolute path to `scripts/discover.sh` within this skill's directory. Inline actual values — do not rely on shell variables persisting between calls.
 
 Store the output as `$PROJECT_ROOT`. If the command fails, inform the user and stop.
 

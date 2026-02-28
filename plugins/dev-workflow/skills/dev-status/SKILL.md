@@ -4,6 +4,7 @@ description: >-
   Show status of all features in .dev/.
   Scans feature folders using parallel agents, generates
   a status report, and offers to archive completed features.
+  Use to get an overview of all in-progress features and their completion status.
 allowed-tools: Bash(bash:*) Bash(mkdir:*) Bash(mv:*) Bash(rm:*) Read
 ---
 
@@ -17,23 +18,23 @@ This skill uses a specialized agent for status scanning:
 
 - **feature-batch-scanner** (blue) — Scans a batch of feature folders and extracts status for each
 
-Agent definition is in `plugins/dev-workflow/agents/`.
+Agent definition is in `agents/` within this skill's directory.
 
 ### Step 0: Discover Project Root
 
-Run the [discovery script](../../scripts/discover.sh):
+Run the [discovery script](scripts/discover.sh):
 
 ```bash
 bash "$DISCOVER" root
 ```
 
-Where `$DISCOVER` is the absolute path to `scripts/discover.sh` within the plugin directory. Inline actual values — do not rely on shell variables persisting between calls.
+Where `$DISCOVER` is the absolute path to `scripts/discover.sh` within this skill's directory. Inline actual values — do not rely on shell variables persisting between calls.
 
 Store the output as `$PROJECT_ROOT`. If the command fails, inform the user and stop.
 
 ### Step 1: Discover Features
 
-Run the [discovery script](../../scripts/discover.sh) to find features:
+Run the [discovery script](scripts/discover.sh) to find features:
 
 ```bash
 bash "$DISCOVER" features "$PROJECT_ROOT"
@@ -43,7 +44,7 @@ bash "$DISCOVER" features "$PROJECT_ROOT"
 - If output is empty: inform the user "No features found in `.dev/`. Use `/dev-plan` to start a new feature."
 - Otherwise: store the list of feature folder paths for the next step.
 
-Also check for archived features using the [discovery script](../../scripts/discover.sh):
+Also check for archived features using the [discovery script](scripts/discover.sh):
 
 ```bash
 bash "$DISCOVER" archived "$PROJECT_ROOT"
@@ -154,13 +155,13 @@ Present options:
    mkdir -p "$PROJECT_ROOT/.dev-archive"
    ```
 
-2. For each selected feature, set `$FEATURE_PATH` to the matching path from Step 1's discovered list. Validate with the [validation script](../../scripts/validate.sh):
+2. For each selected feature, set `$FEATURE_PATH` to the matching path from Step 1's discovered list. Validate with the [validation script](scripts/validate.sh):
 
    ```bash
    bash "$VALIDATE" feature-path "$FEATURE_PATH" "$PROJECT_ROOT"
    ```
 
-   Where `$VALIDATE` is the absolute path to `scripts/validate.sh` within the plugin directory. Inline actual values. On failure, STOP and report the error — do not archive.
+   Where `$VALIDATE` is the absolute path to `scripts/validate.sh` within this skill's directory. Inline actual values. On failure, STOP and report the error — do not archive.
 
    Then move:
    ```bash
