@@ -170,11 +170,11 @@ Bump `version` from `1.8.0` to `1.9.0`.
 
 ## Verification Checklist
 
-- [ ] Run: `bash tests/test-scripts.sh` — all tests pass including sync checks
-- [ ] `ls plugins/dev-workflow/scripts/` — directory does not exist
-- [ ] `ls plugins/dev-workflow/agents/` — directory does not exist
-- [ ] Manually corrupt one script copy (e.g., add a comment to `dev-plan/scripts/discover.sh`), run tests, confirm sync test fails, then restore
-- [ ] `grep "1.9.0" .claude-plugin/marketplace.json` — returns a match
-- [ ] CLAUDE.md repository structure matches the new layout
+- [x] Run: `bash tests/test-scripts.sh` — all tests pass including sync checks
+- [x] `ls plugins/dev-workflow/scripts/` — directory does not exist
+- [x] `ls plugins/dev-workflow/agents/` — directory does not exist
+- [x] Manually corrupt one script copy (e.g., add a comment to `dev-plan/scripts/discover.sh`), run tests, confirm sync test fails, then restore
+- [x] `grep "1.9.0" .claude-plugin/marketplace.json` — returns a match
+- [x] CLAUDE.md repository structure matches the new layout
 
 ⏸️ **GATE**: Sub-PRD complete. Continue to next sub-PRD or `/dev-checkpoint`.

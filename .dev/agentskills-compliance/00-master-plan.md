@@ -80,8 +80,8 @@ skill-name/
 2. ✅ Copy agents into each skill's `agents/` directory
 
 **Verification**:
-- [ ] Each skill has exactly the scripts/agents it needs
-- [ ] Run: `bash tests/test-scripts.sh` — passes (still using shared dir)
+- [x] Each skill has exactly the scripts/agents it needs
+- [x] Run: `bash tests/test-scripts.sh` — passes (still using shared dir)
 
 ⏸️ **GATE**: Phase complete. Continue or `/dev-checkpoint`.
 
@@ -92,9 +92,9 @@ skill-name/
 2. ✅ Add `agents` array to `plugin.json`
 
 **Verification**:
-- [ ] `grep -r "../../scripts" plugins/dev-workflow/skills/` returns nothing
-- [ ] `plugin.json` is valid JSON with all 5 agent paths
-- [ ] Run: `bash tests/test-scripts.sh` — passes
+- [x] `grep -r "../../scripts" plugins/dev-workflow/skills/` returns nothing
+- [x] `plugin.json` is valid JSON with all 5 agent paths
+- [x] Run: `bash tests/test-scripts.sh` — passes
 
 ⏸️ **GATE**: Phase complete. Continue or `/dev-checkpoint`.
 
@@ -108,9 +108,9 @@ skill-name/
 5. ✅ Bump version in `marketplace.json` to 1.9.0
 
 **Verification**:
-- [ ] Run: `bash tests/test-scripts.sh` — all tests pass including sync
-- [ ] Shared `scripts/` and `agents/` directories no longer exist
-- [ ] `marketplace.json` version is 1.9.0
+- [x] Run: `bash tests/test-scripts.sh` — all tests pass including sync
+- [x] Shared `scripts/` and `agents/` directories no longer exist
+- [x] `marketplace.json` version is 1.9.0
 
 ⏸️ **GATE**: Phase complete. Continue or `/dev-checkpoint`.
 

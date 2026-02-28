@@ -114,11 +114,11 @@ Add `agents` array listing all 5 per-skill agent paths:
 
 ## Verification Checklist
 
-- [ ] `grep -r "../../scripts" plugins/dev-workflow/skills/` returns no output
-- [ ] `grep -r "plugins/dev-workflow/agents/" plugins/dev-workflow/skills/` returns no output
-- [ ] All 5 SKILL.md descriptions contain a "Use when" or similar trigger phrase
-- [ ] `python3 -m json.tool plugins/dev-workflow/.claude-plugin/plugin.json` validates successfully
-- [ ] All 5 paths in the `agents` array exist on disk relative to `plugins/dev-workflow/`
-- [ ] Run: `bash tests/test-scripts.sh` — still passes
+- [x] `grep -r "../../scripts" plugins/dev-workflow/skills/` returns no output
+- [x] `grep -r "plugins/dev-workflow/agents/" plugins/dev-workflow/skills/` returns no output
+- [x] All 5 SKILL.md descriptions contain a "Use when" or similar trigger phrase
+- [x] `python3 -m json.tool plugins/dev-workflow/.claude-plugin/plugin.json` validates successfully
+- [x] All 5 paths in the `agents` array exist on disk relative to `plugins/dev-workflow/`
+- [x] Run: `bash tests/test-scripts.sh` — still passes
 
 ⏸️ **GATE**: Sub-PRD complete. Continue to next sub-PRD or `/dev-checkpoint`.

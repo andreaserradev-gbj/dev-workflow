@@ -100,17 +100,17 @@ plugins/dev-workflow/skills/dev-status/agents/
 
 ## Verification Checklist
 
-- [ ] `ls plugins/dev-workflow/skills/dev-plan/scripts/` shows `discover.sh validate.sh`
-- [ ] `ls plugins/dev-workflow/skills/dev-checkpoint/scripts/` shows `discover.sh git-state.sh validate.sh worktree-setup.sh`
-- [ ] `ls plugins/dev-workflow/skills/dev-resume/scripts/` shows `discover.sh git-state.sh validate.sh`
-- [ ] `ls plugins/dev-workflow/skills/dev-status/scripts/` shows `discover.sh validate.sh`
-- [ ] `ls plugins/dev-workflow/skills/dev-wrapup/scripts/` shows `discover.sh`
-- [ ] `ls plugins/dev-workflow/skills/dev-plan/agents/` shows `prd-planner.md prd-researcher.md`
-- [ ] `ls plugins/dev-workflow/skills/dev-checkpoint/agents/` shows `checkpoint-analyzer.md`
-- [ ] `ls plugins/dev-workflow/skills/dev-resume/agents/` shows `context-loader.md`
-- [ ] `ls plugins/dev-workflow/skills/dev-status/agents/` shows `feature-batch-scanner.md`
-- [ ] `dev-wrapup/` has no `agents/` directory
-- [ ] All copied scripts have execute permission
-- [ ] Run: `bash tests/test-scripts.sh` — still passes (shared dir unchanged)
+- [x] `ls plugins/dev-workflow/skills/dev-plan/scripts/` shows `discover.sh validate.sh`
+- [x] `ls plugins/dev-workflow/skills/dev-checkpoint/scripts/` shows `discover.sh git-state.sh validate.sh worktree-setup.sh`
+- [x] `ls plugins/dev-workflow/skills/dev-resume/scripts/` shows `discover.sh git-state.sh validate.sh`
+- [x] `ls plugins/dev-workflow/skills/dev-status/scripts/` shows `discover.sh validate.sh`
+- [x] `ls plugins/dev-workflow/skills/dev-wrapup/scripts/` shows `discover.sh`
+- [x] `ls plugins/dev-workflow/skills/dev-plan/agents/` shows `prd-planner.md prd-researcher.md`
+- [x] `ls plugins/dev-workflow/skills/dev-checkpoint/agents/` shows `checkpoint-analyzer.md`
+- [x] `ls plugins/dev-workflow/skills/dev-resume/agents/` shows `context-loader.md`
+- [x] `ls plugins/dev-workflow/skills/dev-status/agents/` shows `feature-batch-scanner.md`
+- [x] `dev-wrapup/` has no `agents/` directory
+- [x] All copied scripts have execute permission
+- [x] Run: `bash tests/test-scripts.sh` — still passes (shared dir unchanged)
 
 ⏸️ **GATE**: Sub-PRD complete. Continue to next sub-PRD or `/dev-checkpoint`.
