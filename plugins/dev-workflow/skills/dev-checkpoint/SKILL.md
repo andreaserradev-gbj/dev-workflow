@@ -4,6 +4,7 @@ description: >-
   Save progress and generate a continuation prompt.
   Updates PRD status markers, captures git state,
   and writes checkpoint.md for the next session.
+  Use at the end of a session or before switching context.
 argument-hint: <feature name>
 allowed-tools: Bash(bash:*) Bash(git add:*) Bash(git commit:*) Bash(git log:*) Bash(git status:*) Read
 ---
@@ -23,19 +24,19 @@ This skill analyzes and saves. It does NOT fix, investigate, or implement anythi
 
 ### Step 0: Discover Project Root
 
-Run the [discovery script](../../scripts/discover.sh):
+Run the [discovery script](scripts/discover.sh):
 
 ```bash
 bash "$DISCOVER" root
 ```
 
-Where `$DISCOVER` is the absolute path to `scripts/discover.sh` within the plugin directory. Inline actual values — do not rely on shell variables persisting between calls.
+Where `$DISCOVER` is the absolute path to `scripts/discover.sh` within this skill's directory. Inline actual values — do not rely on shell variables persisting between calls.
 
 Store the output as `$PROJECT_ROOT`. If the command fails, inform the user and stop.
 
 ### Step 1: Identify the Active Feature
 
-Run the [discovery script](../../scripts/discover.sh) to find features:
+Run the [discovery script](scripts/discover.sh) to find features:
 
 ```bash
 bash "$DISCOVER" features "$PROJECT_ROOT" "$ARGUMENTS"
@@ -50,7 +51,7 @@ Pass `$ARGUMENTS` as the third argument only if the user provided one; omit it o
 
 Never use raw `$ARGUMENTS` directly in shell commands or paths.
 
-Validate with the [validation script](../../scripts/validate.sh). Where `$VALIDATE` is the absolute path to `scripts/validate.sh` within the plugin directory. Inline actual values.
+Validate with the [validation script](scripts/validate.sh). Where `$VALIDATE` is the absolute path to `scripts/validate.sh` within this skill's directory. Inline actual values.
 
 **If using an existing feature** (a `$FEATURE_PATH` was matched):
 
@@ -100,13 +101,13 @@ If nothing was completed, state: "No PRD updates needed."
 
 ### Step 5: Capture Git State
 
-Run the [git state script](../../scripts/git-state.sh):
+Run the [git state script](scripts/git-state.sh):
 
 ```bash
 bash "$GIT_STATE" full
 ```
 
-Where `$GIT_STATE` is the absolute path to `scripts/git-state.sh` within the plugin directory. Inline actual values.
+Where `$GIT_STATE` is the absolute path to `scripts/git-state.sh` within this skill's directory. Inline actual values.
 
 Parse the output lines:
 - `git:false` → not a git repo; omit `branch`, `last_commit`, `uncommitted_changes` from frontmatter.
@@ -146,13 +147,13 @@ Report:
 
 ### Step 9.5: Optional Worktree Setup (First Checkpoint Only)
 
-Check whether to offer worktree setup using the [worktree script](../../scripts/worktree-setup.sh):
+Check whether to offer worktree setup using the [worktree script](scripts/worktree-setup.sh):
 
 ```bash
 bash "$WORKTREE" check "$FEATURE_NAME" "$PROJECT_ROOT" "$BRANCH"
 ```
 
-Where `$WORKTREE` is the absolute path to `scripts/worktree-setup.sh` within the plugin directory. `$BRANCH` is the branch from Step 5 (or empty if not a git repo). Inline actual values.
+Where `$WORKTREE` is the absolute path to `scripts/worktree-setup.sh` within this skill's directory. `$BRANCH` is the branch from Step 5 (or empty if not a git repo). Inline actual values.
 
 - If output starts with `skip:` → skip this step entirely.
 - If output is `offer` → present the following to the user and wait for their response:

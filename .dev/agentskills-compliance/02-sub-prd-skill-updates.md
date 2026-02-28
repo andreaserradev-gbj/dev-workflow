@@ -1,7 +1,7 @@
 # Sub-PRD: SKILL.md & plugin.json Updates
 
 **Parent**: [00-master-plan.md](./00-master-plan.md)
-**Status**: Not Started
+**Status**: Complete
 **Dependency**: 01-sub-prd-distribution.md
 **Last Updated**: 2026-02-28
 
@@ -11,12 +11,12 @@
 
 | Step | Description | Status |
 |------|-------------|--------|
-| **1** | Update dev-plan/SKILL.md | ⬜ Not Started |
-| **2** | Update dev-checkpoint/SKILL.md | ⬜ Not Started |
-| **3** | Update dev-resume/SKILL.md | ⬜ Not Started |
-| **4** | Update dev-status/SKILL.md | ⬜ Not Started |
-| **5** | Update dev-wrapup/SKILL.md | ⬜ Not Started |
-| **6** | Update plugin.json with agent paths | ⬜ Not Started |
+| **1** | Update dev-plan/SKILL.md | ✅ Done |
+| **2** | Update dev-checkpoint/SKILL.md | ✅ Done |
+| **3** | Update dev-resume/SKILL.md | ✅ Done |
+| **4** | Update dev-status/SKILL.md | ✅ Done |
+| **5** | Update dev-wrapup/SKILL.md | ✅ Done |
+| **6** | Update plugin.json with agent paths | ✅ Done |
 
 ---
 

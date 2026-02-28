@@ -1,6 +1,6 @@
 # AgentSkills Compliance - Master Plan
 
-**Status**: Not Started
+**Status**: Complete
 **Created**: 2026-02-28
 **Last Updated**: 2026-02-28
 
@@ -65,9 +65,9 @@ skill-name/
 
 | Sub-PRD | Title | Dependency | Status | Document |
 |---------|-------|------------|--------|----------|
-| **1** | Script & Agent Distribution | None | Not Started | [01-sub-prd-distribution.md](./01-sub-prd-distribution.md) |
-| **2** | SKILL.md & plugin.json Updates | 1 | Not Started | [02-sub-prd-skill-updates.md](./02-sub-prd-skill-updates.md) |
-| **3** | Test Migration & Cleanup | 2 | Not Started | [03-sub-prd-test-cleanup.md](./03-sub-prd-test-cleanup.md) |
+| **1** | Script & Agent Distribution | None | ✅ Done | [01-sub-prd-distribution.md](./01-sub-prd-distribution.md) |
+| **2** | SKILL.md & plugin.json Updates | 1 | ✅ Done | [02-sub-prd-skill-updates.md](./02-sub-prd-skill-updates.md) |
+| **3** | Test Migration & Cleanup | 2 | ✅ Done | [03-sub-prd-test-cleanup.md](./03-sub-prd-test-cleanup.md) |
 
 ---
 
@@ -76,8 +76,8 @@ skill-name/
 ### Phase 1: Script & Agent Distribution
 **Goal**: Copy all scripts and agents into their owning skill directories. No deletions, no reference changes.
 
-1. ⬜ Copy scripts into each skill's `scripts/` directory
-2. ⬜ Copy agents into each skill's `agents/` directory
+1. ✅ Copy scripts into each skill's `scripts/` directory
+2. ✅ Copy agents into each skill's `agents/` directory
 
 **Verification**:
 - [ ] Each skill has exactly the scripts/agents it needs
@@ -88,8 +88,8 @@ skill-name/
 ### Phase 2: SKILL.md & plugin.json Updates
 **Goal**: Repoint all path references and register agent paths.
 
-1. ⬜ Update all 5 SKILL.md files: `../../scripts/` → `scripts/`, agent prose, description triggers
-2. ⬜ Add `agents` array to `plugin.json`
+1. ✅ Update all 5 SKILL.md files: `../../scripts/` → `scripts/`, agent prose, description triggers
+2. ✅ Add `agents` array to `plugin.json`
 
 **Verification**:
 - [ ] `grep -r "../../scripts" plugins/dev-workflow/skills/` returns nothing
@@ -101,11 +101,11 @@ skill-name/
 ### Phase 3: Test Migration & Cleanup
 **Goal**: Repoint tests, add sync guard, delete shared directories, update docs, bump version.
 
-1. ⬜ Repoint `SCRIPT_DIR` in `test-scripts.sh` to `skills/dev-checkpoint/scripts/`
-2. ⬜ Add checksum sync test
-3. ⬜ Delete `plugins/dev-workflow/scripts/` and `plugins/dev-workflow/agents/`
-4. ⬜ Update CLAUDE.md repository structure
-5. ⬜ Bump version in `marketplace.json` to 1.9.0
+1. ✅ Repoint `SCRIPT_DIR` in `test-scripts.sh` to `skills/dev-checkpoint/scripts/`
+2. ✅ Add checksum sync test
+3. ✅ Delete `plugins/dev-workflow/scripts/` and `plugins/dev-workflow/agents/`
+4. ✅ Update CLAUDE.md repository structure
+5. ✅ Bump version in `marketplace.json` to 1.9.0
 
 **Verification**:
 - [ ] Run: `bash tests/test-scripts.sh` — all tests pass including sync

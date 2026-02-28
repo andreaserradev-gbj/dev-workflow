@@ -1,7 +1,7 @@
 # Sub-PRD: Test Migration & Cleanup
 
 **Parent**: [00-master-plan.md](./00-master-plan.md)
-**Status**: Not Started
+**Status**: Complete
 **Dependency**: 02-sub-prd-skill-updates.md
 **Last Updated**: 2026-02-28
 
@@ -11,12 +11,12 @@
 
 | Step | Description | Status |
 |------|-------------|--------|
-| **1** | Repoint SCRIPT_DIR in test-scripts.sh | ⬜ Not Started |
-| **2** | Add checksum sync test | ⬜ Not Started |
-| **3** | Delete shared scripts/ directory | ⬜ Not Started |
-| **4** | Delete shared agents/ directory | ⬜ Not Started |
-| **5** | Update CLAUDE.md repository structure | ⬜ Not Started |
-| **6** | Bump version in marketplace.json | ⬜ Not Started |
+| **1** | Repoint SCRIPT_DIR in test-scripts.sh | ✅ Done |
+| **2** | Add checksum sync test | ✅ Done |
+| **3** | Delete shared scripts/ directory | ✅ Done |
+| **4** | Delete shared agents/ directory | ✅ Done |
+| **5** | Update CLAUDE.md repository structure | ✅ Done |
+| **6** | Bump version in marketplace.json | ✅ Done |
 
 ---
 

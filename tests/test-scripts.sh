@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-SCRIPT_DIR="$(cd "$(dirname "$0")/../plugins/dev-workflow/scripts" && pwd)"
+SCRIPT_DIR="$(cd "$(dirname "$0")/../plugins/dev-workflow/skills/dev-checkpoint/scripts" && pwd)"
 PASS=0
 FAIL=0
 
@@ -174,6 +174,35 @@ run_test "invalid slug rejected" \
 run_test "invalid mode exits 1" \
   1 "Usage: validate.sh {checkpoint-path|feature-path|normalize|slug} ..." \
   bash "$SCRIPT_DIR/validate.sh" bogus
+
+echo ""
+echo "--- script sync ---"
+
+SKILLS_DIR="$(cd "$(dirname "$0")/../plugins/dev-workflow/skills" && pwd)"
+
+check_sync() {
+  local script="$1"
+  shift
+  local canonical="$SKILLS_DIR/dev-checkpoint/scripts/$script"
+  local canonical_hash
+  canonical_hash="$(shasum -a 256 "$canonical" | cut -d' ' -f1)"
+  for skill in "$@"; do
+    local copy="$SKILLS_DIR/$skill/scripts/$script"
+    local copy_hash
+    copy_hash="$(shasum -a 256 "$copy" | cut -d' ' -f1)"
+    if [ "$canonical_hash" != "$copy_hash" ]; then
+      echo "FAIL: $script in $skill differs from dev-checkpoint (canonical)"
+      FAIL=$((FAIL + 1))
+    else
+      echo "PASS: $script in sync ($skill)"
+      PASS=$((PASS + 1))
+    fi
+  done
+}
+
+check_sync discover.sh dev-plan dev-resume dev-status dev-wrapup
+check_sync validate.sh dev-plan dev-resume dev-status
+check_sync git-state.sh dev-resume
 
 echo ""
 echo "=== Results: $PASS passed, $FAIL failed ==="

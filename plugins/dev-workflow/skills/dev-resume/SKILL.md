@@ -4,6 +4,7 @@ description: >-
   Resume work from a previous session checkpoint.
   Loads checkpoint.md, verifies git state, and presents
   a resumption summary before continuing.
+  Use at the start of a new session to restore context from a previous checkpoint.
 argument-hint: <feature name>
 allowed-tools: Bash(bash:*) Read
 ---
@@ -12,19 +13,19 @@ allowed-tools: Bash(bash:*) Read
 
 ### Step 0: Discover Project Root
 
-Run the [discovery script](../../scripts/discover.sh):
+Run the [discovery script](scripts/discover.sh):
 
 ```bash
 bash "$DISCOVER" root
 ```
 
-Where `$DISCOVER` is the absolute path to `scripts/discover.sh` within the plugin directory. Inline actual values — do not rely on shell variables persisting between calls.
+Where `$DISCOVER` is the absolute path to `scripts/discover.sh` within this skill's directory. Inline actual values — do not rely on shell variables persisting between calls.
 
 Store the output as `$PROJECT_ROOT`. If the command fails, inform the user and stop.
 
 ### Step 1: Identify Feature to Resume
 
-Run the [discovery script](../../scripts/discover.sh) to find checkpoints:
+Run the [discovery script](scripts/discover.sh) to find checkpoints:
 
 ```bash
 bash "$DISCOVER" checkpoints "$PROJECT_ROOT" "$ARGUMENTS"
@@ -39,23 +40,23 @@ Pass `$ARGUMENTS` as the third argument only if the user provided one; omit it o
 
 Never construct paths from raw `$ARGUMENTS`. Use only paths from script output.
 
-After selection, validate with the [validation script](../../scripts/validate.sh):
+After selection, validate with the [validation script](scripts/validate.sh):
 
 ```bash
 bash "$VALIDATE" checkpoint-path "$CHECKPOINT_PATH" "$PROJECT_ROOT"
 ```
 
-Where `$VALIDATE` is the absolute path to `scripts/validate.sh` within the plugin directory. Inline actual values. Outputs `$FEATURE_NAME` on success; on failure, STOP and report the error.
+Where `$VALIDATE` is the absolute path to `scripts/validate.sh` within this skill's directory. Inline actual values. Outputs `$FEATURE_NAME` on success; on failure, STOP and report the error.
 
 ### Step 2: Gather Git State
 
-Run the [git state script](../../scripts/git-state.sh):
+Run the [git state script](scripts/git-state.sh):
 
 ```bash
 bash "$GIT_STATE" brief
 ```
 
-Where `$GIT_STATE` is the absolute path to `scripts/git-state.sh` within the plugin directory. Inline actual values.
+Where `$GIT_STATE` is the absolute path to `scripts/git-state.sh` within this skill's directory. Inline actual values.
 
 Parse the output lines:
 - `git:false` → not a git repo, skip git-related checks

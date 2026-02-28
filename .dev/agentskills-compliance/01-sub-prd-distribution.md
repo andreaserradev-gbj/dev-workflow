@@ -1,7 +1,7 @@
 # Sub-PRD: Script & Agent Distribution
 
 **Parent**: [00-master-plan.md](./00-master-plan.md)
-**Status**: Not Started
+**Status**: Complete
 **Dependency**: None
 **Last Updated**: 2026-02-28
 
@@ -11,10 +11,10 @@
 
 | Step | Description | Status |
 |------|-------------|--------|
-| **1** | Create `scripts/` directories in each skill | ⬜ Not Started |
-| **2** | Copy scripts into skill directories | ⬜ Not Started |
-| **3** | Create `agents/` directories in applicable skills | ⬜ Not Started |
-| **4** | Copy agents into skill directories | ⬜ Not Started |
+| **1** | Create `scripts/` directories in each skill | ✅ Done |
+| **2** | Copy scripts into skill directories | ✅ Done |
+| **3** | Create `agents/` directories in applicable skills | ✅ Done |
+| **4** | Copy agents into skill directories | ✅ Done |
 
 ---
 

@@ -9,34 +9,29 @@ Claude Code plugin for multi-session development workflows. See [README.md](READ
 ```
 plugins/dev-workflow/           # Plugin package
   .claude-plugin/
-    plugin.json                 # Plugin metadata
-  agents/                       # Subagent definitions for Task tool
-    checkpoint-analyzer.md
-    context-loader.md
-    feature-batch-scanner.md
-    prd-planner.md
-    prd-researcher.md
-
-  skills/                       # Skill definitions (AgentSkills.io format)
+    plugin.json                 # Plugin metadata (includes agents array)
+  skills/                       # Self-contained skills (AgentSkills.io format)
     dev-plan/
       SKILL.md
-      references/
-        prd-templates.md
+      references/prd-templates.md
+      scripts/discover.sh, validate.sh
+      agents/prd-researcher.md, prd-planner.md
     dev-checkpoint/
       SKILL.md
-      references/
-        checkpoint-template.md
+      references/checkpoint-template.md
+      scripts/discover.sh, validate.sh, git-state.sh, worktree-setup.sh
+      agents/checkpoint-analyzer.md
     dev-resume/
       SKILL.md
+      scripts/discover.sh, validate.sh, git-state.sh
+      agents/context-loader.md
     dev-status/
       SKILL.md
+      scripts/discover.sh, validate.sh
+      agents/feature-batch-scanner.md
     dev-wrapup/
       SKILL.md
-  scripts/                      # Deterministic helper scripts called by skills
-    discover.sh                 # Project root, feature/checkpoint discovery
-    git-state.sh                # Branch and uncommitted-changes detection
-    validate.sh                 # Slug normalization and path validation
-    worktree-setup.sh           # Worktree eligibility check and creation
+      scripts/discover.sh
 .codex/
   INSTALL.md                    # Installation instructions for Codex
 docs/
