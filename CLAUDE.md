@@ -34,8 +34,11 @@ plugins/dev-workflow/           # Plugin package
       scripts/discover.sh
 .codex/
   INSTALL.md                    # Installation instructions for Codex
+.gemini/
+  INSTALL.md                    # Installation instructions for Gemini CLI
 docs/
   README.codex.md               # Codex usage documentation
+  README.gemini.md              # Gemini CLI usage documentation
 .claude-plugin/
   marketplace.json              # Marketplace metadata
 .githooks/                      # Git hooks (activate with scripts/setup.sh)
