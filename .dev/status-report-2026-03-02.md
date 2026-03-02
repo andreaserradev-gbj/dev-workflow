@@ -1,7 +1,7 @@
 # Dev Status Report
 
-**Generated**: 2026-02-28T20:30:00Z
-**Project**: dev-workflow-agentskills-compliance
+**Generated**: 2026-03-02T22:00:00Z
+**Project**: dev-workflow-dev-board
 **Features Scanned**: 1
 
 ## Summary
@@ -17,15 +17,15 @@
 
 | Feature | Status | Progress | Last Activity |
 |---------|--------|----------|---------------|
-| agentskills-compliance | Complete | 3/3 phases | 2026-02-28 |
+| dev-board | Complete | 3/3 phases (17/17 steps) | 2026-03-02 |
 
 ## Archive Candidates
 
 ### Complete (ready to archive)
-- agentskills-compliance (archived)
+- dev-board (archived)
 
 ### Stale (no activity > 30 days)
-- None
+- (none)
 
 ---
 

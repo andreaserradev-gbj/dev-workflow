@@ -1,0 +1,478 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dev Board</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        mono: ['"JetBrains Mono"', 'ui-monospace', 'SFMono-Regular', 'monospace'],
+                        sans: ['"Outfit"', 'system-ui', '-apple-system', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            background: #060b18;
+            background-image: radial-gradient(ellipse at top center, rgba(56, 189, 248, 0.03) 0%, transparent 50%);
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(6px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .card-enter { animation: fadeIn 0.35s ease-out both; }
+        details summary { list-style: none; cursor: pointer; user-select: none; }
+        details summary::-webkit-details-marker { display: none; }
+        details summary::marker { display: none; }
+        details[open] .chevron { transform: rotate(90deg); }
+        .chevron { transition: transform 0.15s ease; }
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #1e293b; border-radius: 3px; }
+    </style>
+    <script>const BOARD_DATA = {"projectName":"dev-workflow-dev-board","generatedAt":"2026-03-02T21:04:30Z","summary":{"total":1,"active":0,"complete":1,"stale":0,"noPrd":0},"features":[{"name":"dev-board","status":"complete","created":"2026-03-02","lastUpdated":"2026-03-02","lastCheckpoint":"2026-03-02","summary":"A dev-workflow skill that generates a visual project dashboard and stakeholder summary from .dev/ PRD files.","progress":{"phasesComplete":3,"phasesTotal":3,"stepsComplete":11,"stepsTotal":11},"nextAction":null,"phases":[{"number":1,"title":"Parser and Integration","stepsDone":5,"stepsTotal":5,"status":"complete"},{"number":2,"title":"HTML Board","stepsDone":3,"stepsTotal":3,"status":"complete"},{"number":3,"title":"Stakeholder Markdown","stepsDone":3,"stepsTotal":3,"status":"complete"}],"subPrds":[{"id":"01","title":"Parser and Integration","stepsDone":5,"stepsTotal":5,"status":"complete","steps":[{"number":1,"description":"Scaffold skill directory and copy discover.sh","status":"done"},{"number":2,"description":"Create board-generator agent","status":"done"},{"number":3,"description":"Write SKILL.md orchestration","status":"done"},{"number":4,"description":"Register agent in plugin.json","status":"done"},{"number":5,"description":"Test against real PRD data","status":"done"}]},{"id":"02","title":"HTML Board","stepsDone":4,"stepsTotal":4,"status":"complete","steps":[{"number":1,"description":"Design the board layout and information hierarchy","status":"done"},{"number":2,"description":"Build board-template.html","status":"done"},{"number":3,"description":"Implement JSON injection in SKILL.md","status":"done"},{"number":4,"description":"Test with real project data","status":"done"}]},{"id":"03","title":"Stakeholder Markdown","stepsDone":4,"stepsTotal":4,"status":"complete","steps":[{"number":1,"description":"Define information hierarchy for stakeholders","status":"done"},{"number":2,"description":"Design the markdown format","status":"done"},{"number":3,"description":"Implement generation in SKILL.md","status":"done"},{"number":4,"description":"Test across platforms","status":"done"}]}]}]};</script>
+    <script>
+        if (typeof BOARD_DATA === 'undefined') {
+            var BOARD_DATA = {
+                projectName: "dev-workflow",
+                generatedAt: "2026-03-02T14:30:00Z",
+                summary: { total: 4, active: 2, complete: 1, stale: 1, noPrd: 0 },
+                features: [
+                    {
+                        name: "dev-board",
+                        status: "active",
+                        created: "2026-03-01",
+                        lastUpdated: "2026-03-02",
+                        lastCheckpoint: "2026-03-02",
+                        summary: "Visual dashboard and stakeholder summary from .dev/ PRD files.",
+                        progress: { phasesComplete: 1, phasesTotal: 3, stepsComplete: 5, stepsTotal: 11 },
+                        nextAction: "Design and build board-template.html",
+                        phases: [
+                            { number: 1, title: "Parser and Integration", stepsDone: 5, stepsTotal: 5, status: "complete" },
+                            { number: 2, title: "HTML Board", stepsDone: 0, stepsTotal: 3, status: "not-started" },
+                            { number: 3, title: "Stakeholder Markdown", stepsDone: 0, stepsTotal: 3, status: "not-started" }
+                        ],
+                        subPrds: [
+                            { id: "01", title: "Parser", stepsDone: 4, stepsTotal: 4, status: "complete", steps: [
+                                { number: 1, description: "Define parsing rules for master plan phases", status: "done" },
+                                { number: 2, description: "Implement sub-PRD table scanner", status: "done" },
+                                { number: 3, description: "Add checkpoint date extraction", status: "done" },
+                                { number: 4, description: "Test against real PRD data", status: "done" }
+                            ]},
+                            { id: "02", title: "HTML Board", stepsDone: 0, stepsTotal: 4, status: "not-started", steps: [
+                                { number: 1, description: "Design the board layout and information hierarchy", status: "pending" },
+                                { number: 2, description: "Build board-template.html", status: "pending" },
+                                { number: 3, description: "Implement JSON injection in SKILL.md", status: "pending" },
+                                { number: 4, description: "Test with real project data", status: "pending" }
+                            ]},
+                            { id: "03", title: "Stakeholder MD", stepsDone: 0, stepsTotal: 3, status: "not-started", steps: [
+                                { number: 1, description: "Define stakeholder markdown format", status: "pending" },
+                                { number: 2, description: "Implement markdown generation in SKILL.md", status: "pending" },
+                                { number: 3, description: "Test copy-paste into different platforms", status: "pending" }
+                            ]}
+                        ]
+                    },
+                    {
+                        name: "auth-system",
+                        status: "active",
+                        created: "2026-02-15",
+                        lastUpdated: "2026-02-28",
+                        lastCheckpoint: "2026-02-27",
+                        summary: "Multi-provider authentication with OAuth2 and JWT token management.",
+                        progress: { phasesComplete: 2, phasesTotal: 4, stepsComplete: 14, stepsTotal: 22 },
+                        nextAction: "Implement token refresh middleware",
+                        phases: [
+                            { number: 1, title: "Provider Setup", stepsDone: 5, stepsTotal: 5, status: "complete" },
+                            { number: 2, title: "Token Management", stepsDone: 6, stepsTotal: 6, status: "complete" },
+                            { number: 3, title: "Middleware", stepsDone: 3, stepsTotal: 7, status: "in-progress" },
+                            { number: 4, title: "Testing & Hardening", stepsDone: 0, stepsTotal: 4, status: "not-started" }
+                        ],
+                        subPrds: []
+                    },
+                    {
+                        name: "api-v2",
+                        status: "complete",
+                        created: "2026-01-10",
+                        lastUpdated: "2026-02-20",
+                        lastCheckpoint: "2026-02-20",
+                        summary: "RESTful API redesign with versioned endpoints and rate limiting.",
+                        progress: { phasesComplete: 3, phasesTotal: 3, stepsComplete: 15, stepsTotal: 15 },
+                        nextAction: null,
+                        phases: [
+                            { number: 1, title: "Schema Design", stepsDone: 5, stepsTotal: 5, status: "complete" },
+                            { number: 2, title: "Implementation", stepsDone: 7, stepsTotal: 7, status: "complete" },
+                            { number: 3, title: "Migration", stepsDone: 3, stepsTotal: 3, status: "complete" }
+                        ],
+                        subPrds: []
+                    },
+                    {
+                        name: "notification-service",
+                        status: "stale",
+                        created: "2026-01-05",
+                        lastUpdated: "2026-01-20",
+                        lastCheckpoint: "2026-01-18",
+                        summary: "Event-driven notification system with email, SMS, and push channels.",
+                        progress: { phasesComplete: 1, phasesTotal: 3, stepsComplete: 4, stepsTotal: 12 },
+                        nextAction: "Define SMS provider integration interface",
+                        phases: [
+                            { number: 1, title: "Email Channel", stepsDone: 4, stepsTotal: 4, status: "complete" },
+                            { number: 2, title: "SMS Channel", stepsDone: 0, stepsTotal: 4, status: "not-started" },
+                            { number: 3, title: "Push Notifications", stepsDone: 0, stepsTotal: 4, status: "not-started" }
+                        ],
+                        subPrds: [
+                            { id: "01", title: "Email Templates", stepsDone: 3, stepsTotal: 3, status: "complete", steps: [
+                                { number: 1, description: "Create base email template engine", status: "done" },
+                                { number: 2, description: "Build welcome and reset password templates", status: "done" },
+                                { number: 3, description: "Add template variable injection", status: "done" }
+                            ]},
+                            { id: "02", title: "SMS Integration", stepsDone: 0, stepsTotal: 4, status: "not-started", steps: [
+                                { number: 1, description: "Define SMS provider integration interface", status: "pending" },
+                                { number: 2, description: "Implement Twilio adapter", status: "pending" },
+                                { number: 3, description: "Add message queuing and rate limiting", status: "pending" },
+                                { number: 4, description: "Test delivery and failure handling", status: "pending" }
+                            ]}
+                        ]
+                    }
+                ]
+            };
+        }
+    </script>
+</head>
+<body class="text-slate-200 font-sans min-h-screen antialiased">
+    <div id="app"></div>
+
+    <script>
+        /* ── Status configuration ── */
+
+        const STATUS = {
+            active: {
+                label: 'Active',
+                badge: 'bg-sky-500/10 text-sky-400 ring-1 ring-inset ring-sky-500/20',
+                bar: 'bg-sky-500',
+                dot: 'bg-sky-400',
+                border: 'border-l-sky-500',
+                accent: 'text-sky-400',
+            },
+            complete: {
+                label: 'Complete',
+                badge: 'bg-emerald-500/10 text-emerald-400 ring-1 ring-inset ring-emerald-500/20',
+                bar: 'bg-emerald-500',
+                dot: 'bg-emerald-400',
+                border: 'border-l-emerald-500',
+                accent: 'text-emerald-400',
+            },
+            stale: {
+                label: 'Stale',
+                badge: 'bg-amber-500/10 text-amber-400 ring-1 ring-inset ring-amber-500/20',
+                bar: 'bg-amber-500',
+                dot: 'bg-amber-400',
+                border: 'border-l-amber-500',
+                accent: 'text-amber-400',
+            },
+            'no-prd': {
+                label: 'No PRD',
+                badge: 'bg-slate-500/10 text-slate-400 ring-1 ring-inset ring-slate-500/20',
+                bar: 'bg-slate-600',
+                dot: 'bg-slate-500',
+                border: 'border-l-slate-600',
+                accent: 'text-slate-400',
+            },
+        };
+
+        const PHASE_STATUS = {
+            'complete': { dot: 'bg-emerald-400', bar: 'bg-emerald-500' },
+            'in-progress': { dot: 'bg-sky-400', bar: 'bg-sky-500' },
+            'not-started': { dot: 'bg-slate-600', bar: 'bg-slate-700' },
+        };
+
+        const STATUS_ORDER = { active: 0, stale: 1, 'no-prd': 2, complete: 3 };
+
+        /* ── Helpers ── */
+
+        function esc(str) {
+            if (!str) return '';
+            return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+        }
+
+        function getStatus(key) {
+            return STATUS[key] || STATUS['no-prd'];
+        }
+
+        function getPhaseStatus(key) {
+            return PHASE_STATUS[key] || PHASE_STATUS['not-started'];
+        }
+
+        function pct(done, total) {
+            return total > 0 ? Math.round((done / total) * 100) : 0;
+        }
+
+        function formatDate(str) {
+            if (!str) return '\u2014';
+            const d = new Date(str);
+            if (isNaN(d)) return str;
+            return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+        }
+
+        function formatTimestamp(str) {
+            if (!str) return '';
+            const d = new Date(str);
+            if (isNaN(d)) return str;
+            return d.toLocaleString('en-US', {
+                month: 'short', day: 'numeric', year: 'numeric',
+                hour: 'numeric', minute: '2-digit'
+            });
+        }
+
+        function chevronSvg() {
+            return `<svg class="chevron w-3.5 h-3.5 text-slate-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>`;
+        }
+
+        /* ── Render functions ── */
+
+        function renderSummaryStats(summary) {
+            const stats = [
+                { count: summary.total, label: 'features', colorClass: 'text-white' },
+                { count: summary.active, label: 'active', colorClass: 'text-sky-400' },
+                { count: summary.complete, label: 'complete', colorClass: 'text-emerald-400' },
+                { count: summary.stale, label: 'stale', colorClass: 'text-amber-400' },
+            ];
+            if (summary.noPrd > 0) {
+                stats.push({ count: summary.noPrd, label: 'no prd', colorClass: 'text-slate-400' });
+            }
+
+            return stats.map((s, i) => `
+                ${i > 0 ? '<div class="w-px h-5 bg-slate-800"></div>' : ''}
+                <div class="flex items-center gap-2">
+                    <span class="font-mono text-lg font-semibold ${s.colorClass}">${s.count}</span>
+                    <span class="text-xs text-slate-500 uppercase tracking-wider">${s.label}</span>
+                </div>
+            `).join('');
+        }
+
+        function renderProgressBar(done, total, statusKey, height = 'h-1.5') {
+            const p = pct(done, total);
+            const s = getStatus(statusKey);
+            return `
+                <div class="flex items-center gap-3">
+                    <div class="flex-1 ${height} bg-slate-800/80 rounded-full overflow-hidden">
+                        <div class="${s.bar} ${height} rounded-full transition-all duration-500" style="width: ${p}%"></div>
+                    </div>
+                    <div class="flex items-baseline gap-1.5 shrink-0">
+                        <span class="font-mono text-xs font-medium text-slate-300 tabular-nums">${p}%</span>
+                        <span class="font-mono text-[10px] text-slate-600 tabular-nums">${done}/${total}</span>
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderPhaseRow(phase) {
+            const ps = getPhaseStatus(phase.status);
+            const p = pct(phase.stepsDone, phase.stepsTotal);
+            const isDone = phase.status === 'complete';
+            return `
+                <div class="flex items-center gap-2.5 py-1.5 group">
+                    <div class="w-1.5 h-1.5 rounded-full ${ps.dot} shrink-0"></div>
+                    <span class="font-mono text-[11px] text-slate-600 w-4 shrink-0">${phase.number}</span>
+                    <span class="text-sm ${isDone ? 'text-slate-500' : 'text-slate-300'} flex-1 truncate">${esc(phase.title)}</span>
+                    <div class="w-14 h-1 bg-slate-800 rounded-full overflow-hidden shrink-0">
+                        <div class="${ps.bar} h-full rounded-full" style="width: ${p}%"></div>
+                    </div>
+                    <span class="font-mono text-[11px] text-slate-500 tabular-nums w-7 text-right shrink-0">${phase.stepsDone}/${phase.stepsTotal}</span>
+                </div>
+            `;
+        }
+
+        function renderPhasesList(phases, featureStatus) {
+            if (!phases || phases.length === 0) return '';
+            const isOpen = featureStatus !== 'complete';
+            return `
+                <details ${isOpen ? 'open' : ''} class="mt-3">
+                    <summary class="flex items-center gap-2 py-1 hover:bg-slate-800/30 -mx-1 px-1 rounded transition-colors">
+                        ${chevronSvg()}
+                        <span class="text-xs font-medium text-slate-400 uppercase tracking-wider">${phases.length} Phase${phases.length !== 1 ? 's' : ''}</span>
+                    </summary>
+                    <div class="ml-1 mt-1 border-l border-slate-800/60 pl-2">
+                        ${phases.map(renderPhaseRow).join('')}
+                    </div>
+                </details>
+            `;
+        }
+
+        function renderStepRow(step) {
+            const isDone = step.status === 'done';
+            return `
+                <div class="flex items-start gap-2 py-1 pl-1">
+                    <span class="text-[11px] mt-px shrink-0 ${isDone ? 'text-emerald-500' : 'text-slate-700'}">${isDone ? '\u2713' : '\u25CB'}</span>
+                    <span class="text-xs leading-relaxed ${isDone ? 'text-slate-500 line-through decoration-slate-700' : 'text-slate-400'}">${esc(step.description)}</span>
+                </div>
+            `;
+        }
+
+        function renderSubPrdRow(subPrd) {
+            const ps = getPhaseStatus(subPrd.status);
+            const p = pct(subPrd.stepsDone, subPrd.stepsTotal);
+            const isDone = subPrd.status === 'complete';
+            const hasSteps = subPrd.steps && subPrd.steps.length > 0;
+
+            const headerRow = `
+                <div class="flex items-center gap-2.5 py-1.5">
+                    <div class="w-1.5 h-1.5 rounded-full ${ps.dot} shrink-0"></div>
+                    <span class="font-mono text-[11px] text-slate-600 w-4 shrink-0">${subPrd.id}</span>
+                    <span class="text-sm ${isDone ? 'text-slate-500' : 'text-slate-300'} flex-1 truncate">${esc(subPrd.title)}</span>
+                    <div class="w-14 h-1 bg-slate-800 rounded-full overflow-hidden shrink-0">
+                        <div class="${ps.bar} h-full rounded-full" style="width: ${p}%"></div>
+                    </div>
+                    <span class="font-mono text-[11px] text-slate-500 tabular-nums w-7 text-right shrink-0">${subPrd.stepsDone}/${subPrd.stepsTotal}</span>
+                    ${hasSteps ? chevronSvg() : '<div class="w-3.5"></div>'}
+                </div>
+            `;
+
+            if (!hasSteps) return `<div>${headerRow}</div>`;
+
+            return `
+                <details>
+                    <summary class="hover:bg-slate-800/30 -mx-1 px-1 rounded transition-colors">
+                        ${headerRow}
+                    </summary>
+                    <div class="ml-6 mb-1 border-l border-slate-800/40 pl-3">
+                        ${subPrd.steps.map(renderStepRow).join('')}
+                    </div>
+                </details>
+            `;
+        }
+
+        function renderSubPrdsList(subPrds, featureStatus) {
+            if (!subPrds || subPrds.length === 0) return '';
+            return `
+                <details class="mt-1">
+                    <summary class="flex items-center gap-2 py-1 hover:bg-slate-800/30 -mx-1 px-1 rounded transition-colors">
+                        ${chevronSvg()}
+                        <span class="text-xs font-medium text-slate-400 uppercase tracking-wider">${subPrds.length} Sub-PRD${subPrds.length !== 1 ? 's' : ''}</span>
+                    </summary>
+                    <div class="ml-1 mt-1 border-l border-slate-800/60 pl-2">
+                        ${subPrds.map(renderSubPrdRow).join('')}
+                    </div>
+                </details>
+            `;
+        }
+
+        function renderNextAction(feature) {
+            if (!feature.nextAction || feature.status === 'complete') return '';
+            const s = getStatus(feature.status);
+            return `
+                <div class="flex items-start gap-2 mt-3 pt-3 border-t border-slate-800/50">
+                    <span class="${s.accent} text-sm shrink-0 mt-px">\u2192</span>
+                    <span class="text-sm text-slate-300 leading-relaxed">${esc(feature.nextAction)}</span>
+                </div>
+            `;
+        }
+
+        function renderFeatureCard(feature, index) {
+            const s = getStatus(feature.status);
+            const delay = index * 0.06;
+            const p = feature.progress;
+
+            return `
+                <div class="card-enter bg-[#0d1425] border border-slate-800/60 border-l-2 ${s.border} rounded-lg p-5 hover:border-slate-700/80 transition-colors"
+                     style="animation-delay: ${delay}s">
+
+                    <!-- Header -->
+                    <div class="flex items-start justify-between gap-3 mb-2">
+                        <h3 class="font-mono text-base font-semibold text-white truncate">${esc(feature.name)}</h3>
+                        <span class="text-[11px] font-mono font-medium px-2 py-0.5 rounded-full shrink-0 ${s.badge}">${s.label}</span>
+                    </div>
+
+                    <!-- Summary -->
+                    <p class="text-sm text-slate-400 leading-relaxed mb-4 line-clamp-2">${esc(feature.summary)}</p>
+
+                    <!-- Overall progress -->
+                    <div class="mb-1">
+                        ${renderProgressBar(p.stepsComplete, p.stepsTotal, feature.status)}
+                    </div>
+                    <div class="text-[11px] text-slate-600 font-mono mb-2">
+                        ${p.phasesComplete}/${p.phasesTotal} phases
+                    </div>
+
+                    <!-- Phases -->
+                    ${renderPhasesList(feature.phases, feature.status)}
+
+                    <!-- Sub-PRDs -->
+                    ${renderSubPrdsList(feature.subPrds, feature.status)}
+
+                    <!-- Next action -->
+                    ${renderNextAction(feature)}
+
+                    <!-- Footer -->
+                    <div class="mt-3 pt-3 border-t border-slate-800/30 flex items-center justify-between">
+                        <span class="text-[11px] text-slate-600">Updated ${formatDate(feature.lastUpdated)}</span>
+                        ${feature.lastCheckpoint ? `<span class="text-[11px] text-slate-600 font-mono">ckpt ${formatDate(feature.lastCheckpoint)}</span>` : ''}
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderEmptyState() {
+            return `
+                <div class="text-center py-20">
+                    <p class="text-slate-500 text-lg font-light">No features found</p>
+                    <p class="text-slate-600 text-sm mt-2">Use <span class="font-mono text-slate-500">/dev-plan</span> to start a new feature</p>
+                </div>
+            `;
+        }
+
+        function renderBoard(data) {
+            const features = [...data.features].sort(
+                (a, b) => (STATUS_ORDER[a.status] ?? 9) - (STATUS_ORDER[b.status] ?? 9)
+            );
+
+            const app = document.getElementById('app');
+            app.innerHTML = `
+                <div class="max-w-6xl mx-auto px-6 py-10">
+
+                    <!-- Header -->
+                    <div class="mb-8">
+                        <div class="flex items-baseline justify-between flex-wrap gap-4 mb-5">
+                            <h1 class="font-mono text-2xl font-bold text-white tracking-tight">${data.projectName}</h1>
+                            <span class="text-xs text-slate-600 font-mono">${formatTimestamp(data.generatedAt)}</span>
+                        </div>
+                        <div class="flex items-center gap-5 flex-wrap">
+                            ${renderSummaryStats(data.summary)}
+                        </div>
+                    </div>
+
+                    <!-- Divider -->
+                    <div class="h-px bg-gradient-to-r from-slate-800 via-slate-700/50 to-slate-800 mb-8"></div>
+
+                    <!-- Feature cards -->
+                    ${features.length > 0
+                        ? `<div class="grid grid-cols-1 lg:grid-cols-2 gap-4">${features.map((f, i) => renderFeatureCard(f, i)).join('')}</div>`
+                        : renderEmptyState()
+                    }
+
+                    <!-- Footer -->
+                    <div class="mt-10 pt-6 border-t border-slate-800/40 text-center">
+                        <p class="text-[11px] text-slate-700 font-mono">
+                            Generated ${formatTimestamp(data.generatedAt)}
+                        </p>
+                    </div>
+                </div>
+            `;
+        }
+
+        /* ── Init ── */
+
+        document.addEventListener('DOMContentLoaded', function() {
+            renderBoard(BOARD_DATA);
+        });
+    </script>
+</body>
+</html>
