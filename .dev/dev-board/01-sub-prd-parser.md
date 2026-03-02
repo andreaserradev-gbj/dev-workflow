@@ -74,27 +74,7 @@ The agent receives a list of feature folder paths and must:
    - YAML frontmatter `checkpointed:` field for last activity date
    - `<next_action>` section for the next step
 
-4. Return structured output per feature:
-   ```
-   ## Feature: [name]
-   - **Status**: Active | Complete | Stale | No PRD
-   - **Created**: [date]
-   - **Last Updated**: [date]
-   - **Last Checkpoint**: [date or "None"]
-   - **Summary**: [first sentence of executive summary]
-   - **Progress**: [completed phases]/[total phases] phases, [completed steps]/[total steps] steps
-   - **Next Action**: [first ⬜ step description, or from checkpoint]
-
-   ### Phases
-   | Phase | Title | Steps Done | Steps Total | Status |
-   |-------|-------|------------|-------------|--------|
-   | 1     | ...   | 3          | 5           | In Progress |
-
-   ### Sub-PRDs (if any)
-   | Sub-PRD | Title | Steps Done | Steps Total | Status |
-   |---------|-------|------------|-------------|--------|
-   | 01      | ...   | 2          | 4           | In Progress |
-   ```
+4. Return a JSON array (no markdown, no code fences) with one object per feature matching the data contract in `board-generator.md`. Fields use camelCase (`lastUpdated`, `phasesComplete`, `stepsTotal`, `subPrds`, etc.) and lowercase status values (`"active"`, `"complete"`, `"stale"`, `"no-prd"`).
 
 Status definitions (same as dev-status):
 - **Complete**: All phases have all steps `✅`
@@ -119,7 +99,7 @@ Orchestration steps:
 
 - **Step 0**: Discover project root (`discover.sh root`)
 - **Step 1**: Discover features (`discover.sh features "$PROJECT_ROOT"`). If no `.dev/` or no features, inform user and stop.
-- **Step 2**: Launch `board-generator` agent with the list of feature paths. Use `subagent_type=dev-workflow:board-generator` and `model=sonnet`.
+- **Step 2**: Launch `board-generator` agent with the list of feature paths. Use `subagent_type=dev-workflow:board-generator` and `model=haiku`.
 - **Step 3**: Generate HTML board (detailed in Sub-PRD 2 — placeholder step for now: "HTML generation — see Sub-PRD 2")
 - **Step 4**: Generate stakeholder markdown (detailed in Sub-PRD 3 — placeholder step for now: "Markdown generation — see Sub-PRD 3")
 - **Step 5**: Report what was generated — file paths and feature summary counts

@@ -58,7 +58,14 @@ For each folder, extract: Status, Created/Updated dates, Last Checkpoint, Summar
 
 Use `subagent_type=dev-workflow:board-generator` and `model=haiku`.
 
-After the agent returns, present a summary of the parsed data to the user:
+After the agent returns, validate the JSON before proceeding:
+
+1. Parse the agent's response as JSON. If it's wrapped in code fences, strip them first.
+2. Verify the result is an array where each object has the required fields: `name` (string), `status` (string), `progress` (object with `phasesComplete`, `phasesTotal`, `stepsComplete`, `stepsTotal`), `phases` (array), `subPrds` (array).
+3. Verify field naming is camelCase (not snake_case) and status values are lowercase (`"active"`, `"complete"`, `"stale"`, `"no-prd"`).
+4. If validation fails, inform the user and stop — do not inject malformed data into the HTML template.
+
+Then present a summary of the parsed data to the user:
 
 ```markdown
 ## Parsed Feature Data

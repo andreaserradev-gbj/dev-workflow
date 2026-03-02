@@ -179,14 +179,13 @@ Update SKILL.md Step 3 (from Sub-PRD 1) to:
 
 ## Verification Checklist
 
-- [ ] `board-template.html` is valid HTML5, self-contained, no external deps
+- [ ] `board-template.html` is valid HTML5 (uses Tailwind CDN + Google Fonts — requires network on first load)
 - [ ] Template renders correctly with sample data before integration
 - [ ] `.dev/board.html` generated with correct data from real PRDs
 - [ ] Feature cards show accurate progress bars and phase breakdowns
 - [ ] Status badges display correct colors
 - [ ] Phase details are expandable/collapsible
 - [ ] Dark theme is clean and readable
-- [ ] File works offline (no network requests in DevTools)
 - [ ] File size under 100KB
 
 ⏸️ **GATE**: Sub-PRD complete. Continue to next sub-PRD or `/dev-checkpoint`.
