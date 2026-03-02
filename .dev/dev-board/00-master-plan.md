@@ -89,10 +89,10 @@ Each sub-PRD owns one layer. The parser (Sub-PRD 1) must be correct before the r
 ### Phase 1: Parser and Integration
 **Goal**: Create the skill skeleton, agent, and discovery integration. The agent can parse all PRDs in `.dev/` and return structured data.
 
-1. ⬜ Scaffold skill directory structure and scripts
-2. ⬜ Create board-generator agent with PRD parsing rules
-3. ⬜ Write SKILL.md with discovery and agent orchestration steps
-4. ⬜ Register agent in plugin.json
+1. ✅ Scaffold skill directory structure and scripts
+2. ✅ Create board-generator agent with PRD parsing rules
+3. ✅ Write SKILL.md with discovery and agent orchestration steps
+4. ✅ Register agent in plugin.json
 5. ⬜ Test parsing against real PRD files
 
 **Verification**:

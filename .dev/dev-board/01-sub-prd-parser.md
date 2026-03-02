@@ -1,7 +1,7 @@
 # Sub-PRD: Parser and Integration
 
 **Parent**: [00-master-plan.md](./00-master-plan.md)
-**Status**: Not Started
+**Status**: In Progress
 **Dependency**: None
 **Last Updated**: 2026-03-02
 
@@ -11,10 +11,10 @@
 
 | Step | Description | Status |
 |------|-------------|--------|
-| **1** | Scaffold skill directory and copy discover.sh | ⬜ Not Started |
-| **2** | Create board-generator agent | ⬜ Not Started |
-| **3** | Write SKILL.md orchestration | ⬜ Not Started |
-| **4** | Register agent in plugin.json | ⬜ Not Started |
+| **1** | Scaffold skill directory and copy discover.sh | ✅ Done |
+| **2** | Create board-generator agent | ✅ Done |
+| **3** | Write SKILL.md orchestration | ✅ Done |
+| **4** | Register agent in plugin.json | ✅ Done |
 | **5** | Test against real PRD data | ⬜ Not Started |
 
 ---

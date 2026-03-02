@@ -1,8 +1,8 @@
 ---
 branch: feature/dev-board
-last_commit: 7a21527 Restore Gemini CLI support
-uncommitted_changes: false
-checkpointed: 2026-03-02T06:30:00Z
+last_commit: 3d705c6 Add PRD for dev-board
+uncommitted_changes: true
+checkpointed: 2026-03-02T21:00:00Z
 ---
 
 Read the following PRD files in order:
@@ -16,8 +16,8 @@ Read the following PRD files in order:
 ## Context
 
 **Goal**: Create a `/dev-board` skill that generates a visual HTML dashboard and stakeholder markdown summary from `.dev/` PRD files.
-**Current phase**: Phase 1 (Parser and Integration) — Step 1 (Scaffold skill directory)
-**Key completions**: Planning complete — master plan and all 3 sub-PRDs written and cleaned for public repo.
+**Current phase**: Phase 1 (Parser and Integration) — Step 5 (Test against real PRD data)
+**Key completions**: Skill directory scaffolded, board-generator agent created, SKILL.md written, agent registered in plugin.json.
 </context>
 
 <current_state>
@@ -27,28 +27,29 @@ Read the following PRD files in order:
 - ✅ Sub-PRD 1: Parser and Integration (5 steps defined)
 - ✅ Sub-PRD 2: HTML Board (4 steps defined)
 - ✅ Sub-PRD 3: Stakeholder Markdown (4 steps defined)
-- ✅ PRD cleanup: removed all references to external private repositories and personal info
-- ⬜ Phase 1 Step 1: Scaffold skill directory and copy discover.sh — Not Started
-- ⬜ Phase 1 Step 2: Create board-generator agent — Not Started
-- ⬜ Phase 1 Step 3: Write SKILL.md orchestration — Not Started
-- ⬜ Phase 1 Step 4: Register agent in plugin.json — Not Started
+- ✅ Phase 1 Step 1: Scaffolded `plugins/dev-workflow/skills/dev-board/` with `agents/`, `references/`, `scripts/` subdirs; copied `discover.sh` from dev-status
+- ✅ Phase 1 Step 2: Created `agents/board-generator.md` with parsing rules for phases, steps (⬜/✅/⏭️), sub-PRDs, checkpoints, and structured output format
+- ✅ Phase 1 Step 3: Created `SKILL.md` with discovery, agent orchestration, placeholder output steps (3-4), privacy rules
+- ✅ Phase 1 Step 4: Registered board-generator agent in repo `plugin.json` and installed cache copy
 - ⬜ Phase 1 Step 5: Test against real PRD data — Not Started
+- ⬜ Phase 2: HTML Board — Not Started
+- ⬜ Phase 3: Stakeholder Markdown — Not Started
 </current_state>
 
 <next_action>
 ## Next Steps
 
-Phase 1, Step 1 (Scaffold):
-- Create `plugins/dev-workflow/skills/dev-board/` with `agents/`, `references/`, `scripts/` subdirectories
-- Copy `discover.sh` from `plugins/dev-workflow/skills/dev-status/scripts/discover.sh`
+Phase 1, Step 5 (Test parsing):
+- Run `/dev-board` against a project with real `.dev/` data (this repo has `.dev/dev-board/`)
+- Verify phase/step counts match manual inspection
+- Verify checkpoint dates are parsed correctly
+- Verify sub-PRD detection and progress extraction works
+- Check that the board-generator agent returns structured data matching the specified output format
 
-Phase 1, Step 2 (Agent):
-- Create `agents/board-generator.md` with PRD parsing rules per Sub-PRD 1 Step 2 spec
-- Frontmatter: name, color, tools (Read, Glob, Grep, LS)
-- Parsing: phases, steps (⬜/✅/⏭️), sub-PRDs, checkpoints
-
-Phase 1, Step 3 (SKILL.md):
-- Write orchestration: discover root → discover features → launch agent → placeholder outputs → report
+After Step 5, Phase 1 verification checklist:
+- `discover.sh root` and `discover.sh features` work from the skill
+- Agent returns structured per-feature data with correct phase/step counts
+- SKILL.md follows dev-workflow conventions (frontmatter, privacy rules)
 </next_action>
 
 <key_files>
@@ -58,9 +59,9 @@ Phase 1, Step 3 (SKILL.md):
 - Parser spec: .dev/dev-board/01-sub-prd-parser.md
 - HTML board spec: .dev/dev-board/02-sub-prd-html-board.md
 - Stakeholder spec: .dev/dev-board/03-sub-prd-stakeholder-md.md
-- Closest analog skill: plugins/dev-workflow/skills/dev-status/SKILL.md
-- Agent template: plugins/dev-workflow/skills/dev-status/agents/feature-batch-scanner.md
-- Discovery script to copy: plugins/dev-workflow/skills/dev-plan/scripts/discover.sh
+- Skill definition: plugins/dev-workflow/skills/dev-board/SKILL.md
+- Agent definition: plugins/dev-workflow/skills/dev-board/agents/board-generator.md
+- Discovery script: plugins/dev-workflow/skills/dev-board/scripts/discover.sh
 - Plugin registry: plugins/dev-workflow/.claude-plugin/plugin.json
 </key_files>
 
@@ -74,4 +75,4 @@ Phase 1, Step 3 (SKILL.md):
 
 ---
 
-Please continue with Phase 1 implementation (scaffolding the skill directory, creating the board-generator agent, and writing SKILL.md), following the specifications in Sub-PRD 1.
+Please continue with Phase 1, Step 5 (testing the parser against real PRD data), then complete the Phase 1 verification checklist, following the specifications in Sub-PRD 1.
