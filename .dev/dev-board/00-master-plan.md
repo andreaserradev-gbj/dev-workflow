@@ -105,7 +105,7 @@ Each sub-PRD owns one layer. The parser (Sub-PRD 1) must be correct before the r
 ### Phase 2: HTML Board
 **Goal**: Create a self-contained HTML template and integrate it with the skill to produce `.dev/board.html`.
 
-1. ⬜ Design and build board-template.html (dark theme, feature cards, progress bars, phase breakdowns)
+1. ✅ Design and build board-template.html (dark theme, feature cards, progress bars, phase breakdowns)
 2. ⬜ Implement JSON injection in SKILL.md (data placeholder → script block)
 3. ⬜ Test with real project data — verify visual output
 

@@ -1,8 +1,8 @@
 ---
 branch: feature/dev-board
-last_commit: 5d43bd4 Scaffold dev-board skill with agent, SKILL.md, and plugin registration
+last_commit: 9c5f1be Complete Phase 1 parser testing and update checkpoint for Phase 2
 uncommitted_changes: true
-checkpointed: 2026-03-02T22:00:00Z
+checkpointed: 2026-03-02T23:00:00Z
 ---
 
 Read the following PRD files in order:
@@ -14,38 +14,39 @@ Read the following PRD files in order:
 ## Context
 
 **Goal**: Create a `/dev-board` skill that generates a visual HTML dashboard and stakeholder markdown summary from `.dev/` PRD files.
-**Current phase**: Phase 2 (HTML Board) — Step 1 (Design the board layout)
-**Key completions**: Phase 1 complete — skill scaffolded, board-generator agent created and tested, SKILL.md written, agent registered. Parser verified against real PRD data with all counts matching manual inspection.
+**Current phase**: Phase 2 (HTML Board) — Step 3 (Implement JSON injection in SKILL.md)
+**Key completions**: Phase 1 complete. Phase 2 Steps 1-2 complete — board-template.html built with Tailwind CSS, dark theme, feature cards, progress bars, collapsible phases, and expandable sub-PRD step details.
 </context>
 
 <current_state>
 ## Current Progress
 
 - ✅ Phase 1: Parser and Integration (5/5 steps complete)
-  - Skill directory scaffolded with agents/, references/, scripts/
-  - Board-generator agent with PRD parsing rules (phases, steps, sub-PRDs, checkpoints)
-  - SKILL.md with discovery and agent orchestration
-  - Agent registered in plugin.json (source + cache)
-  - Parser tested against real `.dev/dev-board/` data — all counts verified correct
-- ✅ Sub-PRD 1: Parser and Integration — Complete
-- ⬜ Phase 2: HTML Board — Not Started (Sub-PRD 2: 0/4 steps)
-- ⬜ Phase 3: Stakeholder Markdown — Not Started (Sub-PRD 3: 0/4 steps)
+- ✅ Sub-PRD 1: Parser — Complete (4/4 steps)
+- ✅ Phase 2, Step 1: Design board layout and information hierarchy
+- ✅ Phase 2, Step 2: Build board-template.html
+- ⬜ Phase 2, Step 3: Implement JSON injection in SKILL.md
+- ⬜ Phase 2, Step 4: Test with real project data
+- ⬜ Sub-PRD 2: HTML Board — In Progress (2/4 steps done)
+- ⬜ Phase 3: Stakeholder Markdown — Not Started (Sub-PRD 3: 0/3 steps)
 </current_state>
 
 <next_action>
 ## Next Steps
 
-Phase 2, Step 1 (Design the board layout):
-- Define information hierarchy (feature counts, per-feature progress, per-phase breakdown)
-- Design layout: summary header, feature cards (status badge, progress bar, phase list), collapsible phase details
-- Apply constraints: dark theme, system fonts, responsive, self-contained, no external deps
-- Produce a mockup or wireframe description before building
+Phase 2, Step 3 (Implement JSON injection in SKILL.md):
+- Read `references/board-template.html`
+- Construct JSON object from board-generator agent's structured output, mapping markdown tables to the data contract
+- Replace `<!-- BOARD_DATA -->` with `<script>const BOARD_DATA = {json};</script>`
+- Derive project name from git repo name or folder name
+- Add generation timestamp (ISO 8601)
+- Write result to `$PROJECT_ROOT/.dev/board.html`
 
-Phase 2, Step 2 (Build board-template.html):
-- Create `references/board-template.html` with inline CSS + JS
-- Implement the JSON data contract from Sub-PRD 2
-- Dark theme (#1a1a2e), status colors (green/blue/amber/gray), progress bars
-- `const BOARD_DATA = {...}` placeholder for JSON injection
+Phase 2, Step 4 (Test with real project data):
+- Generate board for the current project
+- Verify all features render with correct progress
+- Verify phase expansion and sub-PRD step detail expansion work
+- Check browser rendering
 </next_action>
 
 <key_files>
@@ -56,6 +57,7 @@ Phase 2, Step 2 (Build board-template.html):
 - Stakeholder spec: .dev/dev-board/03-sub-prd-stakeholder-md.md
 - Skill definition: plugins/dev-workflow/skills/dev-board/SKILL.md
 - Agent definition: plugins/dev-workflow/skills/dev-board/agents/board-generator.md
+- HTML template: plugins/dev-workflow/skills/dev-board/references/board-template.html
 - Discovery script: plugins/dev-workflow/skills/dev-board/scripts/discover.sh
 - Plugin registry: plugins/dev-workflow/.claude-plugin/plugin.json
 </key_files>
@@ -66,12 +68,17 @@ Phase 2, Step 2 (Build board-template.html):
 - JSON data injection into HTML template (separation of data and presentation)
 - Parse canonical dev-workflow format only (⬜/✅/⏭️)
 - Separate stakeholder markdown output (different audience, platform-neutral)
-- Test markdown rendering on GitHub, Notion/Linear, Confluence/Jira, Slack, plain text</decisions>
+- Tailwind CSS (CDN play script) + Google Fonts (JetBrains Mono, Outfit) per user request — overrides original "no external deps" constraint
+- Sub-PRD step details added to data contract: each sub-PRD includes a `steps` array with `{number, description, status}`
+- Features sorted by status priority (active > stale > no-prd > complete)
+- Phases default-open for active features, closed for complete</decisions>
 
 <notes>## Notes
-- Plugin cache fix: dev-board skill files were missing from `~/.claude/plugins/cache/`. Copied them manually. The `dev-workflow:board-generator` agent type requires a Claude Code restart to become available.
-- SKILL.md convention check passed: frontmatter, step structure, privacy rules all match dev-status pattern. Missing `references/board-template.html` is expected (Phase 2 deliverable). No `validate.sh` needed (read-only skill).</notes>
+- Plugin cache: dev-board skill files need to be copied to `~/.claude/plugins/cache/` after changes. Requires Claude Code restart for agent type registration.
+- Board-generator agent updated to extract individual step descriptions from sub-PRD Implementation Progress tables.
+- Data contract in 02-sub-prd-html-board.md updated with `steps` field for sub-PRDs.
+- Template includes sample data fallback for standalone preview when `BOARD_DATA` is not injected.</notes>
 
 ---
 
-Please continue with Phase 2, Step 1 (designing the HTML board layout and information hierarchy), following the specifications in Sub-PRD 2.
+Please continue with Phase 2, Step 3 (implementing JSON injection in SKILL.md), following the specifications in Sub-PRD 2.

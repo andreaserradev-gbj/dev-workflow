@@ -1,7 +1,7 @@
 # Sub-PRD: HTML Board
 
 **Parent**: [00-master-plan.md](./00-master-plan.md)
-**Status**: Not Started
+**Status**: In Progress
 **Dependency**: 01-sub-prd-parser
 **Last Updated**: 2026-03-02
 
@@ -11,8 +11,8 @@
 
 | Step | Description | Status |
 |------|-------------|--------|
-| **1** | Design the board layout and information hierarchy | ⬜ Not Started |
-| **2** | Build board-template.html | ⬜ Not Started |
+| **1** | Design the board layout and information hierarchy | ✅ Done |
+| **2** | Build board-template.html | ✅ Done |
 | **3** | Implement JSON injection in SKILL.md | ⬜ Not Started |
 | **4** | Test with real project data | ⬜ Not Started |
 
@@ -127,7 +127,11 @@ A complete HTML file with:
           "title": "Parser",
           "stepsDone": 3,
           "stepsTotal": 5,
-          "status": "in-progress"
+          "status": "in-progress",
+          "steps": [
+            { "number": 1, "description": "Step description text", "status": "done" },
+            { "number": 2, "description": "Step description text", "status": "pending" }
+          ]
         }
       ]
     }

@@ -38,6 +38,13 @@ Return your analysis in this exact structure for each feature:
 |---------|-------|------------|-------------|--------|
 | 01      | ...   | 2          | 4           | In Progress |
 
+#### Sub-PRD 01 Steps
+
+| Step | Description | Status |
+|------|-------------|--------|
+| 1    | Step description text | Done |
+| 2    | Step description text | Pending |
+
 ---
 ```
 
@@ -80,12 +87,16 @@ From `00-master-plan.md`, extract:
 
 For each `[0-9][0-9]-sub-prd-*.md` file, extract:
 
-**Implementation Progress table**: Look for the table after `## Implementation Progress` heading. Each row has a status cell:
+**Implementation Progress table**: Look for the table after `## Implementation Progress` heading. Each row has a step number, description, and status cell:
 - `⬜ Not Started` — Pending
 - `✅ Done` — Complete
 - `⏭️ Skipped` — Skipped (counts as complete)
 
+Extract each row as a step with its number, description text, and status (Done/Pending/Skipped).
+
 **Title**: From the `# Sub-PRD: [Title]` heading.
+
+Include each sub-PRD's individual steps in a "Sub-PRD NN Steps" table (see Output Format above).
 
 ### 4. Parse Checkpoint
 
