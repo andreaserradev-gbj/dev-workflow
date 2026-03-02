@@ -79,7 +79,7 @@ Each sub-PRD owns one layer. The parser (Sub-PRD 1) must be correct before the r
 | Sub-PRD | Title | Dependency | Status | Document |
 |---------|-------|------------|--------|----------|
 | **1** | Parser and Integration | None | Complete | [01-sub-prd-parser.md](./01-sub-prd-parser.md) |
-| **2** | HTML Board | 1 | Not Started | [02-sub-prd-html-board.md](./02-sub-prd-html-board.md) |
+| **2** | HTML Board | 1 | Complete | [02-sub-prd-html-board.md](./02-sub-prd-html-board.md) |
 | **3** | Stakeholder Markdown | 1 | Not Started | [03-sub-prd-stakeholder-md.md](./03-sub-prd-stakeholder-md.md) |
 
 ---
@@ -106,8 +106,8 @@ Each sub-PRD owns one layer. The parser (Sub-PRD 1) must be correct before the r
 **Goal**: Create a self-contained HTML template and integrate it with the skill to produce `.dev/board.html`.
 
 1. ✅ Design and build board-template.html (dark theme, feature cards, progress bars, phase breakdowns)
-2. ⬜ Implement JSON injection in SKILL.md (data placeholder → script block)
-3. ⬜ Test with real project data — verify visual output
+2. ✅ Implement JSON injection in SKILL.md (data placeholder → script block)
+3. ✅ Test with real project data — verify visual output
 
 **Verification**:
 - [ ] `.dev/board.html` opens in a browser and renders correctly

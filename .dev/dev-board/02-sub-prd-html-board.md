@@ -1,7 +1,7 @@
 # Sub-PRD: HTML Board
 
 **Parent**: [00-master-plan.md](./00-master-plan.md)
-**Status**: In Progress
+**Status**: Complete
 **Dependency**: 01-sub-prd-parser
 **Last Updated**: 2026-03-02
 
@@ -13,8 +13,8 @@
 |------|-------------|--------|
 | **1** | Design the board layout and information hierarchy | ✅ Done |
 | **2** | Build board-template.html | ✅ Done |
-| **3** | Implement JSON injection in SKILL.md | ⬜ Not Started |
-| **4** | Test with real project data | ⬜ Not Started |
+| **3** | Implement JSON injection in SKILL.md | ✅ Done |
+| **4** | Test with real project data | ✅ Done |
 
 ---
 

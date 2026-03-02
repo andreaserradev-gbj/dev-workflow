@@ -56,7 +56,7 @@ Provide a prompt like:
 For each folder, extract: Status, Created/Updated dates, Last Checkpoint, Summary, Phase progress (phases and steps), Sub-PRD progress, and Next Action."
 ```
 
-Use `subagent_type=dev-workflow:board-generator` and `model=sonnet`.
+Use `subagent_type=dev-workflow:board-generator` and `model=haiku`.
 
 After the agent returns, present a summary of the parsed data to the user:
 
@@ -72,9 +72,42 @@ After the agent returns, present a summary of the parsed data to the user:
 
 ### Step 3: Generate HTML Board
 
-_HTML dashboard generation — see Sub-PRD 2._
+Build `$PROJECT_ROOT/.dev/board.html` from the agent's output and the HTML template.
 
-Read the HTML template from `references/board-template.html` within this skill's directory. Inject the agent's structured data as JSON into the template's data placeholder. Write the result to `$PROJECT_ROOT/.dev/board.html`.
+#### 3a. Derive metadata
+
+- **Project name**: Run `basename $(git rev-parse --show-toplevel 2>/dev/null || pwd)`.
+- **Timestamp**: Use the current date/time in ISO 8601 format (e.g., `2026-03-02T14:30:00Z`).
+
+#### 3b. Build the BOARD_DATA object
+
+The agent returns a JSON array of feature objects. Wrap it into the full data contract:
+
+```json
+{
+  "projectName": "<from 3a>",
+  "generatedAt": "<from 3a>",
+  "summary": { "total": N, "active": N, "complete": N, "stale": N, "noPrd": N },
+  "features": <agent JSON array>
+}
+```
+
+Compute `summary` by counting feature statuses across the array:
+- `total`: array length
+- `active`: features with `status === "active"`
+- `complete`: features with `status === "complete"`
+- `stale`: features with `status === "stale"`
+- `noPrd`: features with `status === "no-prd"`
+
+#### 3c. Inject into template and write
+
+1. Read `references/board-template.html` within this skill's directory.
+2. Serialize the JSON object (no indentation needed, compact is fine).
+3. Replace the `<!-- BOARD_DATA -->` comment in the template with:
+   ```html
+   <script>const BOARD_DATA = <JSON>;</script>
+   ```
+4. Write the result to `$PROJECT_ROOT/.dev/board.html`.
 
 ### Step 4: Generate Stakeholder Markdown
 

@@ -13,42 +13,54 @@ You will receive a list of feature folder paths to scan. For each folder, analyz
 
 ## Output Format
 
-Return your analysis in this exact structure for each feature:
+Return a single JSON array containing one object per feature. Use this exact shape:
 
-```markdown
-## Feature: [feature-name]
-
-- **Status**: [Active | Complete | Stale | No PRD]
-- **Created**: [date or "Unknown"]
-- **Last Updated**: [date or "Unknown"]
-- **Last Checkpoint**: [date or "None"]
-- **Summary**: [first sentence of executive summary]
-- **Progress**: [completed phases]/[total phases] phases, [completed steps]/[total steps] steps
-- **Next Action**: [first pending step description, or from checkpoint, or "N/A"]
-
-### Phases
-
-| Phase | Title | Steps Done | Steps Total | Status |
-|-------|-------|------------|-------------|--------|
-| 1     | ...   | 3          | 5           | In Progress |
-
-### Sub-PRDs
-
-| Sub-PRD | Title | Steps Done | Steps Total | Status |
-|---------|-------|------------|-------------|--------|
-| 01      | ...   | 2          | 4           | In Progress |
-
-#### Sub-PRD 01 Steps
-
-| Step | Description | Status |
-|------|-------------|--------|
-| 1    | Step description text | Done |
-| 2    | Step description text | Pending |
-
----
+```json
+[
+  {
+    "name": "feature-name",
+    "status": "active",
+    "created": "2026-01-15",
+    "lastUpdated": "2026-02-28",
+    "lastCheckpoint": "2026-02-28",
+    "summary": "First sentence of executive summary.",
+    "progress": {
+      "phasesComplete": 2,
+      "phasesTotal": 4,
+      "stepsComplete": 12,
+      "stepsTotal": 20
+    },
+    "nextAction": "Description of next pending step",
+    "phases": [
+      { "number": 1, "title": "Setup", "stepsDone": 5, "stepsTotal": 5, "status": "complete" }
+    ],
+    "subPrds": [
+      {
+        "id": "01",
+        "title": "Parser",
+        "stepsDone": 3,
+        "stepsTotal": 5,
+        "status": "in-progress",
+        "steps": [
+          { "number": 1, "description": "Step description", "status": "done" },
+          { "number": 2, "description": "Step description", "status": "pending" }
+        ]
+      }
+    ]
+  }
+]
 ```
 
-Repeat for each feature folder. Omit the "Sub-PRDs" section if a feature has no sub-PRDs.
+**Field value conventions:**
+- `status`: lowercase with hyphens — `"active"`, `"complete"`, `"stale"`, `"no-prd"`
+- `phases[].status`: `"complete"`, `"in-progress"`, `"not-started"`
+- `subPrds[].status`: `"complete"`, `"in-progress"`, `"not-started"`
+- `subPrds[].steps[].status`: `"done"`, `"pending"`
+- `lastCheckpoint`: date string or `null` (not the string `"None"`)
+- `nextAction`: description string or `null`
+- `subPrds`: empty array `[]` if no sub-PRDs exist
+
+Output **only** the JSON array — no markdown, no explanation, no code fences. The JSON must be valid and parseable.
 
 ## Parsing Rules
 
