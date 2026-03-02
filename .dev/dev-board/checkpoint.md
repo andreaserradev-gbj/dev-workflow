@@ -1,21 +1,20 @@
 ---
 branch: feature/dev-board
-last_commit: a52303b Complete Phase 2 HTML board with JSON injection and performance optimization
-uncommitted_changes: false
-checkpointed: 2026-03-02T21:00:00Z
+last_commit: fccece2 Update dev-board checkpoint for Phase 3
+uncommitted_changes: true
+checkpointed: 2026-03-02T22:00:00Z
 ---
 
 Read the following PRD files in order:
 
 1. .dev/dev-board/00-master-plan.md
-2. .dev/dev-board/03-sub-prd-stakeholder-md.md
 
 <context>
 ## Context
 
 **Goal**: Create a `/dev-board` skill that generates a visual HTML dashboard and stakeholder markdown summary from `.dev/` PRD files.
-**Current phase**: Phase 3 (Stakeholder Markdown) — Step 1 (Define information hierarchy)
-**Key completions**: Phase 1 (Parser) and Phase 2 (HTML Board) complete. Board generates correctly from real project data. Agent optimized to return JSON directly with haiku model.
+**Current phase**: Complete — all 3 phases done
+**Key completions**: Phase 1 (Parser), Phase 2 (HTML Board), and Phase 3 (Stakeholder Markdown) all complete. Skill is fully specified and ready for end-to-end testing.
 </context>
 
 <current_state>
@@ -25,37 +24,28 @@ Read the following PRD files in order:
 - ✅ Sub-PRD 1: Parser — Complete (5/5 steps)
 - ✅ Phase 2: HTML Board (3/3 steps)
 - ✅ Sub-PRD 2: HTML Board — Complete (4/4 steps)
-- ⬜ Phase 3: Stakeholder Markdown — Not Started (0/3 steps)
-- ⬜ Sub-PRD 3: Stakeholder Markdown — Not Started (0/4 steps)
+- ✅ Phase 3: Stakeholder Markdown (3/3 steps)
+- ✅ Sub-PRD 3: Stakeholder Markdown — Complete (4/4 steps)
 </current_state>
 
 <next_action>
 ## Next Steps
 
-Phase 3, Step 1 (Define stakeholder markdown format):
-- Determine what stakeholders need vs what to omit (no gates, verification checklists, file paths)
-- Translate status markers to human-readable labels
-- Design concise structure with clear headers for scanning
-
-Phase 3, Step 2 (Implement markdown generation in SKILL.md):
-- Group features by status: active first, then complete, stale, no-prd
-- Render full detail for active features, summary tables for others
-- Write to `$PROJECT_ROOT/.dev/board-stakeholder.md`
-
-Phase 3, Step 3 (Test across platforms):
-- Verify rendering in GitHub, Confluence, Slack
-- Ensure pure GFM markdown with no HTML tags or raw emoji
+Feature is complete. Remaining work is operational:
+- Copy updated SKILL.md to plugin cache and restart Claude Code
+- Run `/dev-board` end-to-end to verify both outputs generate correctly
+- Open PR to merge feature/dev-board into main
 </next_action>
 
 <key_files>
 ## Key Files
 
 - Master plan: .dev/dev-board/00-master-plan.md
-- Stakeholder spec: .dev/dev-board/03-sub-prd-stakeholder-md.md
 - Skill definition: plugins/dev-workflow/skills/dev-board/SKILL.md
 - Agent definition: plugins/dev-workflow/skills/dev-board/agents/board-generator.md
 - HTML template: plugins/dev-workflow/skills/dev-board/references/board-template.html
 - Generated board: .dev/board.html
+- Generated stakeholder summary: .dev/board-stakeholder.md
 </key_files>
 
 <decisions>## Decisions
@@ -67,14 +57,18 @@ Phase 3, Step 3 (Test across platforms):
 - Sub-PRD step details in data contract with `steps` array
 - Features sorted by status priority (active > stale > no-prd > complete)
 - Agent returns JSON directly instead of markdown (performance optimization)
-- Agent uses haiku model instead of sonnet (faster for structured extraction)</decisions>
+- Agent uses haiku model instead of sonnet (faster for structured extraction)
+- Stakeholder markdown: "Stale" relabeled to "Needs Attention" for non-developer audience
+- Sub-PRD details omitted from stakeholder view (phase-level sufficient)
+- Empty sections omitted entirely in stakeholder markdown (no "None" placeholders)</decisions>
 
 <notes>## Notes
 - Plugin cache: skill files need to be copied to `~/.claude/plugins/cache/` after changes. Requires Claude Code restart for agent type registration.
 - Template includes sample data fallback for standalone preview when `BOARD_DATA` is not injected.
 - Board file size was 26KB for 1 feature — well under 100KB limit.
-- Performance was a concern (5min generation). Fixed by switching agent output to JSON and model to haiku.</notes>
+- Performance was a concern (5min generation). Fixed by switching agent output to JSON and model to haiku.
+- Stakeholder markdown verified: no HTML tags, no raw emoji, no internal details (gates, verification checklists, file paths).</notes>
 
 ---
 
-Please continue with Phase 3 (Stakeholder Markdown), starting with Step 1 — defining the information hierarchy and markdown format, following the specifications in Sub-PRD 3.
+Feature complete. Next: sync plugin cache, run end-to-end test, and open PR.

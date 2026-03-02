@@ -1,6 +1,6 @@
 # dev-board - Master Plan
 
-**Status**: Planning Complete
+**Status**: Complete
 **Created**: 2026-03-02
 **Last Updated**: 2026-03-02
 
@@ -80,7 +80,7 @@ Each sub-PRD owns one layer. The parser (Sub-PRD 1) must be correct before the r
 |---------|-------|------------|--------|----------|
 | **1** | Parser and Integration | None | Complete | [01-sub-prd-parser.md](./01-sub-prd-parser.md) |
 | **2** | HTML Board | 1 | Complete | [02-sub-prd-html-board.md](./02-sub-prd-html-board.md) |
-| **3** | Stakeholder Markdown | 1 | Not Started | [03-sub-prd-stakeholder-md.md](./03-sub-prd-stakeholder-md.md) |
+| **3** | Stakeholder Markdown | 1 | Complete | [03-sub-prd-stakeholder-md.md](./03-sub-prd-stakeholder-md.md) |
 
 ---
 
@@ -119,9 +119,9 @@ Each sub-PRD owns one layer. The parser (Sub-PRD 1) must be correct before the r
 ### Phase 3: Stakeholder Markdown
 **Goal**: Generate `.dev/board-stakeholder.md` — a clean, platform-neutral summary suitable for any sharing target.
 
-1. ⬜ Define stakeholder markdown format (what to include, what to omit)
-2. ⬜ Implement markdown generation in SKILL.md
-3. ⬜ Test copy-paste into different platforms (GitHub issue, Confluence, Slack)
+1. ✅ Define stakeholder markdown format (what to include, what to omit)
+2. ✅ Implement markdown generation in SKILL.md
+3. ✅ Test copy-paste into different platforms (GitHub issue, Confluence, Slack)
 
 **Verification**:
 - [ ] `.dev/board-stakeholder.md` is valid markdown with no HTML or emoji

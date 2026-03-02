@@ -111,9 +111,96 @@ Compute `summary` by counting feature statuses across the array:
 
 ### Step 4: Generate Stakeholder Markdown
 
-_Stakeholder markdown generation — see Sub-PRD 3._
+Generate a platform-neutral markdown summary from the agent's structured data. The output must be pure GitHub-flavored markdown — no HTML tags, no raw emoji, text labels only.
 
-Generate a platform-neutral markdown summary from the agent's structured data. Write to `$PROJECT_ROOT/.dev/board-stakeholder.md`.
+#### 4a. Group features by status
+
+From the agent's JSON array, partition features into four groups:
+- **active**: `status === "active"`
+- **complete**: `status === "complete"`
+- **stale**: `status === "stale"`
+- **noPrd**: `status === "no-prd"`
+
+#### 4b. Build the markdown
+
+Construct the markdown string following this structure. Omit any section entirely if its group is empty.
+
+**Header:**
+
+```markdown
+# {projectName} - Status Update
+
+**Date**: {generatedAt as YYYY-MM-DD}
+**Features**: {total} total | {active count} active | {complete count} complete[ | {stale count} needs attention]
+```
+
+Only include the "needs attention" count if stale > 0.
+
+**Active Features section** (if any active features):
+
+For each active feature, render:
+
+```markdown
+## Active Features
+
+### {feature.name}
+
+{feature.summary}
+
+**Progress**: {phasesComplete}/{phasesTotal} phases ({stepsComplete}/{stepsTotal} steps)
+**Last Activity**: {lastCheckpoint, or lastUpdated if lastCheckpoint is null}
+**Next**: {nextAction, or "No next action defined" if null}
+
+| Phase | Status | Progress |
+|-------|--------|----------|
+| {number}. {title} | {status label} | {stepsDone}/{stepsTotal} |
+```
+
+Phase status labels: `"complete"` → "Done", `"in-progress"` → "In Progress", `"not-started"` → "Not Started".
+
+If a feature has no phases, show the progress line but skip the phase table.
+
+Place a `---` separator between multiple active features (not after the last one).
+
+**Completed Features section** (if any complete features):
+
+```markdown
+---
+
+## Completed Features
+
+| Feature | Completed |
+|---------|-----------|
+| {name} | {lastUpdated} |
+```
+
+**Needs Attention section** (if any stale features):
+
+```markdown
+---
+
+## Needs Attention
+
+| Feature | Last Activity | Progress |
+|---------|---------------|----------|
+| {name} | {lastCheckpoint or lastUpdated} | {stepsComplete}/{stepsTotal} steps |
+```
+
+**Other section** (if any no-prd features):
+
+```markdown
+---
+
+## Other
+
+| Feature | Note |
+|---------|------|
+| {name} | No PRD found |
+```
+
+#### 4c. Write output
+
+Write the constructed markdown to `$PROJECT_ROOT/.dev/board-stakeholder.md`.
 
 ### Step 5: Report
 
