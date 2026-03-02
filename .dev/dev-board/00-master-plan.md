@@ -78,7 +78,7 @@ Each sub-PRD owns one layer. The parser (Sub-PRD 1) must be correct before the r
 
 | Sub-PRD | Title | Dependency | Status | Document |
 |---------|-------|------------|--------|----------|
-| **1** | Parser and Integration | None | Not Started | [01-sub-prd-parser.md](./01-sub-prd-parser.md) |
+| **1** | Parser and Integration | None | Complete | [01-sub-prd-parser.md](./01-sub-prd-parser.md) |
 | **2** | HTML Board | 1 | Not Started | [02-sub-prd-html-board.md](./02-sub-prd-html-board.md) |
 | **3** | Stakeholder Markdown | 1 | Not Started | [03-sub-prd-stakeholder-md.md](./03-sub-prd-stakeholder-md.md) |
 
@@ -93,7 +93,7 @@ Each sub-PRD owns one layer. The parser (Sub-PRD 1) must be correct before the r
 2. ✅ Create board-generator agent with PRD parsing rules
 3. ✅ Write SKILL.md with discovery and agent orchestration steps
 4. ✅ Register agent in plugin.json
-5. ⬜ Test parsing against real PRD files
+5. ✅ Test parsing against real PRD files
 
 **Verification**:
 - [ ] `discover.sh root` and `discover.sh features` work from the skill
