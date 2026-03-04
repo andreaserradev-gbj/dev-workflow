@@ -110,6 +110,9 @@ When skills target cross-tool destinations (e.g., project docs, scoped rules), r
 Required: `<context>`, `<current_state>`, `<next_action>`, `<key_files>`
 Optional: `<decisions>`, `<blockers>`, `<notes>`
 
+### Public Repo — No Private References
+`.dev/` PRD files and all generated output (checkpoints, summaries, commit messages) must not contain references to external private repositories, personal folder paths, absolute paths with usernames, or user-specific tooling. Use relative paths and generic descriptions.
+
 ### Project Root Detection
 1. `git rev-parse --show-toplevel` for git repos
 2. Initial working directory otherwise
