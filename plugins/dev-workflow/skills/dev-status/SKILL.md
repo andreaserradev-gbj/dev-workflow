@@ -28,7 +28,13 @@ Run the [discovery script](scripts/discover.sh):
 bash "$DISCOVER" root
 ```
 
-Where `$DISCOVER` is the absolute path to `scripts/discover.sh` within this skill's directory. Inline actual values — do not rely on shell variables persisting between calls.
+Where `$DISCOVER` is the absolute path to `scripts/discover.sh` within this skill's directory.
+
+**Path safety** — shell state does not persist between tool calls, so you must provide full script paths on each call:
+- **Use `$HOME`** instead of the literal home directory (e.g., `bash "$HOME/code/…/discover.sh"`, not `bash "/Users/name/…/discover.sh"`). This prevents username hallucination.
+- **Copy values from tool output.** When reusing a value returned by a previous command (like `$PROJECT_ROOT`), copy it verbatim from that command's output. Never retype a path from memory.
+- **Verify on first call**: if a script call fails with "No such file", the path is wrong — STOP and re-derive from the skill-loading context.
+- **Never ignore a non-zero exit.** If any script in this skill fails, stop and report the error before continuing.
 
 Store the output as `$PROJECT_ROOT`. If the command fails, inform the user and stop.
 
@@ -161,7 +167,7 @@ Present options:
    bash "$VALIDATE" feature-path "$FEATURE_PATH" "$PROJECT_ROOT"
    ```
 
-   Where `$VALIDATE` is the absolute path to `scripts/validate.sh` within this skill's directory. Inline actual values. On failure, STOP and report the error — do not archive.
+   Where `$VALIDATE` is the absolute path to `scripts/validate.sh` within this skill's directory. Apply the path safety rules from Step 0 (`$HOME`, copy from output). On failure, **STOP immediately** — do not archive or continue with an unvalidated path.
 
    Then move:
    ```bash
