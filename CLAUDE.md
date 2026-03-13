@@ -18,7 +18,7 @@ plugins/dev-workflow/           # Plugin package
       agents/prd-researcher.md, prd-planner.md
     dev-checkpoint/
       SKILL.md
-      references/checkpoint-template.md
+      references/checkpoint-template.md, worktree-guide.md
       scripts/discover.sh, validate.sh, git-state.sh, worktree-setup.sh
       agents/checkpoint-analyzer.md
     dev-resume/

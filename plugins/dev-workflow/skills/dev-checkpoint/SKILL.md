@@ -141,7 +141,9 @@ Create a continuation prompt following the template in [checkpoint-template.md](
 
 ### Step 8: Save Checkpoint
 
-If `$PROJECT_ROOT/.dev/$FEATURE_NAME/checkpoint.md` already exists, read it first (the Write tool requires reading before overwriting). Then write the continuation prompt to that path.
+Check if `$PROJECT_ROOT/.dev/$FEATURE_NAME/checkpoint.md` already exists. Remember whether the file existed as `$IS_FIRST_CHECKPOINT` (true if the file did NOT exist, false if it did).
+
+If it exists, read it first (the Write tool requires reading before overwriting). Then write the continuation prompt to that path.
 
 ### Step 9: Summary
 
@@ -151,50 +153,15 @@ Report:
 - What the next steps are
 - Confirm the checkpoint location
 
-### Step 9.5: Optional Worktree Setup (First Checkpoint Only)
+### Step 9.5: Optional Workflow Setup (First Checkpoint Only)
 
-Check whether to offer worktree setup using the [worktree script](scripts/worktree-setup.sh):
+**Skip this step entirely** if `$IS_FIRST_CHECKPOINT` is false (checkpoint.md existed before Step 8).
 
-```bash
-bash "$WORKTREE" check "$FEATURE_NAME" "$PROJECT_ROOT" "$BRANCH"
-```
+Check whether to offer workflow setup and, if accepted, create either a worktree or branch for the feature.
 
-Where `$WORKTREE` is the absolute path to `scripts/worktree-setup.sh` within this skill's directory. `$BRANCH` is the branch from Step 5 (or empty if not a git repo). Apply the path safety rules from Step 0 (`$HOME`, copy from output).
+Follow the instructions in [worktree-guide.md](references/worktree-guide.md).
 
-- If output starts with `skip:` → skip this step entirely.
-- If output is `offer` → present the following to the user and wait for their response:
-
-> Would you like to set up a worktree-based workflow for `$FEATURE_NAME`?
->
-> This will:
-> 1. Create branch `feature/$FEATURE_NAME` with a worktree in `../<project-basename>-$FEATURE_NAME/`
-> 2. Move `.dev/$FEATURE_NAME/` to the worktree
-> 3. Commit the PRD files in the new worktree
->
-> After setup, you should **end this session** and start a new one from the worktree directory.
-
-**If the user declines**: End the skill normally — no further action.
-
-**If the user accepts**:
-
-```bash
-bash "$WORKTREE" execute "$FEATURE_NAME" "$PROJECT_ROOT"
-```
-
-Parse output: `worktree:<path>` gives the worktree location.
-
-Report:
-
-> Worktree setup complete.
->
-> - Branch: `feature/$FEATURE_NAME`
-> - Worktree: `<path from output>`
-> - PRD files moved and committed
->
-> **Next**: End this session, then start a new one:
-> ```
-> cd "<path from output>" && claude
-> ```
+Use `$WORKTREE` as the absolute path to `scripts/worktree-setup.sh` within this skill's directory. Apply the path safety rules from Step 0.
 
 ### Step 10: Optional Commit
 

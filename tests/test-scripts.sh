@@ -137,7 +137,7 @@ run_test "check outside git repo returns skip" \
 rmdir "$TMPDIR_NOGIT2"
 
 run_test "invalid mode exits 1" \
-  1 "Usage: worktree-setup.sh {check|execute} ..." \
+  1 "Usage: worktree-setup.sh {check|branch|execute} ..." \
   bash "$SCRIPT_DIR/worktree-setup.sh" bogus
 
 echo ""

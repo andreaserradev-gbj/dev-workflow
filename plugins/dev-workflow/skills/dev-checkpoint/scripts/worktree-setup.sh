@@ -32,6 +32,16 @@ case "$MODE" in
     echo "offer"
     ;;
 
+  branch)
+    # Usage: worktree-setup.sh branch <feature> <root>
+    # stdout: branch:<name> on success
+    FEATURE="${1:?feature required}"
+    ROOT="${2:?root required}"
+
+    git -C "$ROOT" checkout -b "feature/$FEATURE"
+    echo "branch:feature/$FEATURE"
+    ;;
+
   execute)
     # Usage: worktree-setup.sh execute <feature> <root>
     # stdout: worktree:<path> on success
@@ -68,7 +78,7 @@ case "$MODE" in
     ;;
 
   *)
-    echo "Usage: worktree-setup.sh {check|execute} ..." >&2
+    echo "Usage: worktree-setup.sh {check|branch|execute} ..." >&2
     exit 1
     ;;
 esac
