@@ -29,6 +29,11 @@ plugins/dev-workflow/           # Plugin package
       SKILL.md
       scripts/discover.sh, validate.sh
       agents/feature-batch-scanner.md
+    dev-board/
+      SKILL.md
+      references/board-template.html, stakeholder-template.md
+      scripts/discover.sh, validate.sh
+      agents/board-generator.md
     dev-wrapup/
       SKILL.md
       scripts/discover.sh

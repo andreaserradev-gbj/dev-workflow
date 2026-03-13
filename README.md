@@ -23,7 +23,7 @@
 /plugin install dev-workflow
 ```
 
-Skills will be available as `/dev-plan`, `/dev-checkpoint`, `/dev-resume`, `/dev-status`, `/dev-wrapup`.
+Skills will be available as `/dev-plan`, `/dev-checkpoint`, `/dev-resume`, `/dev-status`, `/dev-board`, `/dev-wrapup`.
 
 <details>
 <summary><strong>Updating & Troubleshooting</strong></summary>
@@ -174,6 +174,21 @@ Scan all features and generate a status report. Performs these steps:
 ```
 /dev-status
 show dev status
+```
+
+### `/dev-board`
+
+> **Run in:** edit mode
+
+Generate a project dashboard from `.dev/` feature data. Produces two outputs:
+
+1. **HTML board** — visual dashboard with feature cards, progress bars, and status indicators
+2. **Stakeholder summary** — markdown report suitable for sharing with team leads or stakeholders
+
+**Examples:**
+```
+/dev-board
+generate a project board
 ```
 
 ## Workflow
