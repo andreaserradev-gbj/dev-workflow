@@ -151,6 +151,8 @@ Review the current session for learnings worth persisting and self-improvement s
 
 Every proposed change requires explicit user confirmation before being applied. Suggested by `/dev-checkpoint` at the end of its flow.
 
+**Feedback learning:** Your accept/skip/reroute decisions are recorded to `.dev/wrapup-feedback.json` and used to improve future suggestions. Over time, the skill learns which finding types you value, which you skip, and where you prefer to route them. The feedback file auto-compacts after 30 sessions to keep it lean.
+
 **Examples:**
 ```
 /dev-wrapup

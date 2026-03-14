@@ -51,6 +51,72 @@ Before analyzing, read these files to avoid surfacing items already documented:
 3. `$PROJECT_ROOT/CLAUDE.local.md` (or equivalent personal project docs) — if it exists, store its path as `$PERSONAL_PROJECT_DOCS`
 4. `~/.claude/CLAUDE.md` (or equivalent user global docs) — if it exists, store its path as `$USER_GLOBAL_DOCS`
 
+### Step 1b: Read Feedback History
+
+Check if `$PROJECT_ROOT/.dev/wrapup-feedback.json` exists. If it does, read it and analyze the patterns before scanning the conversation.
+
+The feedback file contains records from previous wrapup sessions. It can exist in two formats:
+
+**Simple format** (early sessions) — a flat array of session records:
+```json
+[ { "session": "...", "findings": [...] }, ... ]
+```
+
+**Compacted format** (after 30+ sessions) — aggregate stats plus recent raw records:
+```json
+{
+  "aggregate": {
+    "sessions_summarized": 35,
+    "total_findings": 142,
+    "skip_rates": { "convention": 0.82, "friction": 0.65, "gotcha": 0.25 },
+    "accept_rates": { "preference": 0.88, "gotcha": 0.70 },
+    "reroute_map": {
+      "gotcha→scoped_rules": { "actual": "user_global", "frequency": 0.85 },
+      "convention→project_docs_add": { "actual": "personal_memory", "frequency": 0.60 }
+    }
+  },
+  "recent": [ /* last 20 raw records */ ]
+}
+```
+
+**If the file has ≥30 raw records (simple format), compact it before proceeding:**
+
+1. Compute aggregate stats from all records except the most recent 20:
+   - `skip_rates`: for each finding type, count skips ÷ total proposals
+   - `accept_rates`: for each finding type, count accepts ÷ total proposals
+   - `reroute_map`: for each `type→proposed_dest` pair that was rerouted more than once, record the most common `actual_dest` and its frequency
+   - `sessions_summarized`: number of sessions folded into the aggregate
+   - `total_findings`: total findings across summarized sessions
+2. Keep the 20 most recent raw records in `recent`
+3. Write the compacted format back to the file
+4. Log: "Compacted wrapup feedback: [N] older sessions summarized, [20] recent sessions preserved."
+
+**If already in compacted format and `recent` has ≥30 records**, re-compact:
+
+1. Take the oldest 10 records from `recent` (first 10 in the array)
+2. Merge their stats into the existing `aggregate`:
+   - Recompute `skip_rates` and `accept_rates` as weighted averages: `(old_rate × old_total + new_count) / (old_total + new_total)` for each finding type
+   - Update `reroute_map` — if a new reroute pattern emerges or an existing frequency changes, update it
+   - Increment `sessions_summarized` and `total_findings`
+3. Remove those 10 records from `recent`, leaving the 20 most recent
+4. Write back to the file
+5. Log: "Re-compacted wrapup feedback: merged [10] sessions into aggregate ([N] total summarized), [20] recent sessions preserved."
+
+**If already in compacted format and `recent` has <30 records**, no compaction needed — use as-is.
+
+**Extract these patterns** (from whichever format is present):
+
+- **Skip patterns** — Which finding types does this user consistently skip? If a type has been skipped in ≥70% of past proposals (from aggregate `skip_rates` or computed from raw records), treat it as low-value and raise the bar significantly before proposing that type again. Only propose it if the finding is exceptionally specific and actionable.
+- **Reroute patterns** — Which type→destination pairs get rerouted, and where do they actually end up? Use `reroute_map` from aggregate or compute from raw records. If `gotcha → scoped_rules` gets rerouted to `user_global` most of the time, default to `user_global` for that type going forward.
+- **Accept patterns** — Which type→destination pairs does the user consistently accept? These are your strongest signal — lean into more proposals that match these patterns.
+- **Trend detection** — When both aggregate and recent records exist, compare them. If a type's skip rate in recent records differs significantly from the aggregate (e.g., was 80% skipped historically but only 30% in recent), favor the recent pattern — the user's preferences have shifted.
+
+Store the extracted patterns as `$FEEDBACK_PATTERNS` for use in Step 3.
+
+If the feedback file does not exist, proceed normally — this is the first wrapup session or feedback tracking hasn't started yet.
+
+---
+
 ### Step 2: Scan Conversation
 
 Verify the conversation contains substantive exchanges (at least one user message and one assistant response beyond the skill invocation itself). If the conversation history appears empty or contains only the skill invocation, state: "No conversation history available to review. Run this skill at the end of a working session, not at the start." and **STOP**.
@@ -122,6 +188,13 @@ Every AI coding tool offers similar tiers of persistent documentation. This skil
 - If you can phrase it as an instruction ("do X", "avoid Y", "use Z when W"), it is NOT personal memory — route to project docs, scoped rules, or config instead.
 - If the finding would help a new team member onboard, it belongs in project docs.
 - If more than half your findings route to personal memory, re-evaluate — you are likely under-using project docs.
+
+**Feedback-adjusted routing** — If `$FEEDBACK_PATTERNS` exist from Step 1b, apply them now:
+
+1. For each finding, check if its `type → destination` pair matches a known reroute pattern. If so, use the user's historical preferred destination instead.
+2. For findings whose type has a ≥70% skip rate, remove them unless they are significantly more specific or actionable than the typical skipped examples in the feedback history.
+3. For findings matching high-accept patterns, keep them with confidence.
+4. If in doubt between two destinations and feedback history shows a clear preference, follow the history.
 
 **Self-check** — After routing all findings, review once before presenting:
 
@@ -221,6 +294,54 @@ For each confirmed item, apply based on its **destination**:
 - Format: "Consider creating a script or skill for: [description]"
 
 After applying, confirm: "Applied [N] items. [M] automation suggestions noted for future work."
+
+### Step 6: Record Feedback
+
+After the user has made all their decisions (accept, skip, reroute, or "none"), append a feedback record to `$PROJECT_ROOT/.dev/wrapup-feedback.json`.
+
+If the file doesn't exist, create it with an empty array `[]` first.
+
+**Feedback record schema:**
+
+```json
+{
+  "session": "YYYY-MM-DD",
+  "findings": [
+    {
+      "type": "convention",
+      "summary": "Short description of the finding",
+      "proposed_dest": "project_docs_add",
+      "decision": "accept",
+      "actual_dest": "project_docs_add"
+    },
+    {
+      "type": "gotcha",
+      "summary": "Short description of the finding",
+      "proposed_dest": "scoped_rules",
+      "decision": "reroute",
+      "actual_dest": "user_global"
+    },
+    {
+      "type": "friction",
+      "summary": "Short description of the finding",
+      "proposed_dest": "project_docs_add",
+      "decision": "skip",
+      "actual_dest": null
+    }
+  ]
+}
+```
+
+**Field values:**
+
+- `decision`: one of `accept`, `skip`, `reroute`
+- `proposed_dest`: the destination the skill originally proposed, using these keys: `project_docs_update`, `project_docs_add`, `scoped_rules`, `user_global`, `personal_project`, `personal_memory`, `automation`
+- `actual_dest`: the destination the user confirmed (same keys), or `null` if skipped
+- `summary`: a brief description of the finding (no sensitive data, no absolute paths)
+
+Append the new record to the existing array. Do not overwrite previous records — the history is the learning signal.
+
+If the user replied "none" (skipped all findings), still record the feedback with all findings marked as `skip`. This is valuable negative signal.
 
 ---
 

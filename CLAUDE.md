@@ -37,6 +37,8 @@ plugins/dev-workflow/           # Plugin package
     dev-wrapup/
       SKILL.md
       scripts/discover.sh
+# Generated in user's project (not in plugin repo)
+.dev/wrapup-feedback.json        # Wrapup feedback history (auto-compacting)
 .codex/
   INSTALL.md                    # Installation instructions for Codex
 .gemini/
