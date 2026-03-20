@@ -6,16 +6,58 @@
 [![Version](https://img.shields.io/badge/version-1.11.0-green.svg)](.claude-plugin/marketplace.json)
 [![AgentSkills.io](https://img.shields.io/badge/standard-AgentSkills.io-purple.svg)](https://agentskills.io)
 
-**Multi-session development workflows for Claude Code.**
-Plan features with structured PRDs, checkpoint progress, and resume across sessions.
+**Claude forgets everything between sessions. This fixes that.**
 
-> **Before:** *"Here's where I left off: I was working on the auth feature, finished the login endpoint, the tests are passing, next step is adding the refresh token logic, oh and I decided to use Redis for session storage because..."*
->
-> **After:** `/dev-resume`
+Context fills up. You restart. Twenty minutes re-explaining what you were building, what you decided, where you left off. Or:
 
-**[Installation](#installation) · [How It Works](#how-it-works) · [Skills](#skills) · [Why This Workflow?](#why-this-workflow)**
+`/dev-resume`
+
+<img src="docs/demo-resume.svg" alt="dev-resume reconstructs full context from a 2KB checkpoint" width="520"/>
 
 </div>
+
+---
+
+**Three commands. That's it.** `/dev-plan` once to create a plan. `/dev-checkpoint` when you stop. `/dev-resume` when you come back. Everything comes back — decisions, progress, blockers, the exact next step. Try it once.
+
+---
+
+## The Problem
+
+LLM performance degrades as context fills up. This isn't a theoretical concern — after ~200K tokens of accumulated conversation, tool outputs, and debugging tangents, responses get slower, details get missed, and earlier decisions get contradicted. Even with 1M context windows, **more context means worse output**.
+
+Every developer using AI coding agents hits the same wall:
+
+- **Session 1:** Great output. Claude is sharp, follows the plan, remembers everything.
+- **Session 1 (continued):** Context filling up. Responses slower. Starts forgetting things you discussed 30 minutes ago.
+- **Session 2:** Fresh start. But now you're the one who has to remember everything and re-explain it. Poorly.
+
+The common workaround? Manually copy plans into files, paste fragments back into new sessions, hope you didn't forget anything important. It works. It's also tedious, error-prone, and doesn't scale past one feature.
+
+**dev-workflow automates this.** It saves structured progress to disk — not conversation dumps, but the specific state needed to resume: what's done, what's next, what was decided, and what to watch out for. Each new session starts clean with minimal context and full continuity.
+
+---
+
+## How It Works
+
+```
+  Plan          Build         Checkpoint      New Session     Resume
+  ─────         ─────         ──────────      ───────────     ──────
+  /dev-plan  →  implement  →  /dev-checkpoint  →  restart  →  /dev-resume
+                                                                  │
+                                                                  ▼
+                                                            build again...
+```
+
+| Step | What you do | What happens |
+|------|-------------|--------------|
+| **1. Plan** | `/dev-plan` | Generates a structured PRD in `.dev/` with phases and gates |
+| **2. Build** | Implement | Work until context gets heavy |
+| **3. Checkpoint** | `/dev-checkpoint` | Saves progress, git state, decisions, next steps |
+| **4. Restart** | Close and reopen Claude | Fresh context window, clean slate |
+| **5. Resume** | `/dev-resume` | Loads ~2KB checkpoint, rebuilds context, picks up where you left off |
+
+**Repeat steps 2–5** until the feature is complete. Each session starts fresh with high-quality context.
 
 ---
 
@@ -64,62 +106,30 @@ Or see [docs/README.gemini.md](docs/README.gemini.md) for alternatives.
 
 ---
 
-## How It Works
-
-```
-  Plan          Build         Checkpoint      New Session     Resume
-  ─────         ─────         ──────────      ───────────     ──────
-  /dev-plan  →  implement  →  /dev-checkpoint  →  restart  →  /dev-resume
-                                                                  │
-                                                                  ▼
-                                                            build again...
-```
-
-| Step | What you do | Why |
-|------|-------------|-----|
-| **1. Plan** | `/dev-plan` | Generates a structured PRD in `.dev/` |
-| **2. Iterate** | Refine the PRD | Get the plan right before building |
-| **3. Build** | Implement | Work until context gets heavy |
-| **4. Checkpoint** | `/dev-checkpoint` | Saves progress, git state, decisions |
-| **5. Restart** | Exit & reopen Claude | Fresh context window |
-| **6. Resume** | `/dev-resume` | Claude rebuilds its own implementation plan |
-| **7. Build** | Clear context, implement | Focused work with minimal context |
-
-**Repeat steps 3–7** until the feature is complete.
-
----
-
 ## Skills
 
-| Skill | Purpose |
-|-------|---------|
-| [`/dev-plan`](#dev-plan) | Create a structured PRD for a new feature |
-| [`/dev-checkpoint`](#dev-checkpoint) | Save progress and generate a continuation prompt |
-| [`/dev-resume`](#dev-resume) | Resume from a previous checkpoint |
-| [`/dev-wrapup`](#dev-wrapup) | Review session for learnings and self-improvement |
-| [`/dev-status`](#dev-status) | Scan all features and generate a status report |
-| [`/dev-board`](#dev-board) | Generate a visual project dashboard |
+### `/dev-plan` — Plan a feature
 
-### `/dev-plan`
-
-Plan a new feature with structured PRD documentation. Three phases:
+Creates a structured PRD with phases, status markers, and gates. Three phases:
 
 1. **Understand** — gather requirements (or infer from inline arguments)
 2. **Research** — explore the codebase using parallel agents
-3. **Write** — produce `.dev/<feature-name>/00-master-plan.md` with status markers and phase gates
+3. **Write** — produce `.dev/<feature-name>/00-master-plan.md`
 
 ```
 /dev-plan add OAuth login with Google and GitHub providers
 /dev-plan refactor the database layer to use connection pooling
 ```
 
-### `/dev-checkpoint`
+### `/dev-checkpoint` — Save progress
 
-Save progress and generate a continuation prompt:
+<img src="docs/demo-checkpoint.svg" alt="dev-checkpoint saves progress, decisions, and blockers" width="520"/>
+
+Captures everything needed to resume later:
 
 - Updates PRD status markers (`⬜` → `✅`)
 - Captures git state (branch, last commit, uncommitted changes)
-- Records session context (decisions, blockers, notes)
+- Records decisions, blockers, and next steps
 - Writes `.dev/<feature-name>/checkpoint.md`
 
 ```
@@ -127,55 +137,63 @@ Save progress and generate a continuation prompt:
 /dev-checkpoint oauth-login
 ```
 
-### `/dev-resume`
+### `/dev-resume` — Pick up where you left off
 
-Resume work from a previous checkpoint:
+Reconstructs context from a checkpoint:
 
-- Loads the checkpoint and verifies context (branch, staleness, drift)
+- Loads the checkpoint and verifies state (branch, staleness, drift)
 - Builds a focused summary with a concrete "Start with" action
-- Handles discrepancies (missing files, branch mismatch)
+- Enforces phase gates — won't skip ahead without your approval
 
 ```
 /dev-resume
 /dev-resume oauth-login
 ```
 
-### `/dev-wrapup`
+### `/dev-wrapup` — Extract session learnings
 
-Review the current session for learnings worth persisting. Single-pass analysis that:
+Reviews the conversation for insights worth keeping:
 
-- **Scans** for memory candidates (corrections, conventions, project quirks) and improvement signals
-- **Routes** findings to the appropriate destination (project docs, scoped rules, user memory)
-- **Applies** only after explicit user confirmation
-
-Your accept/skip/reroute decisions are recorded to `.dev/wrapup-feedback.json` — the skill learns your preferences over time. Auto-compacts after 30 sessions.
+- Scans for corrections, conventions, and project quirks
+- Routes findings to the right place (project docs, scoped rules, user memory)
+- Applies nothing without explicit confirmation
+- Learns your preferences over time via `.dev/wrapup-feedback.json`
 
 ```
 /dev-wrapup
 ```
 
-### `/dev-status`
+### `/dev-status` — See all features at a glance
 
-Scan all features in `.dev/` and generate a status report:
+Scans `.dev/` with parallel agents and generates a status report:
 
-- Launches parallel agents (batched, max 5) to analyze PRD files
-- Displays a summary table with progress and status counts
-- Offers to archive completed or stale (>30 days) features to `.dev-archive/`
+- Progress and status counts across all features
+- Offers to archive completed or stale features to `.dev-archive/`
 
 ```
 /dev-status
 ```
 
-### `/dev-board`
+### `/dev-board` — Project dashboard
 
-Generate a project dashboard from `.dev/` feature data:
+Generates a visual dashboard from `.dev/` data:
 
-- **HTML board** — visual dashboard with feature cards, progress bars, and status indicators
-- **Stakeholder summary** — markdown report for sharing with team leads
+- **HTML board** (`.dev/board.html`) — feature cards with progress bars
+- **Stakeholder summary** (`.dev/board-stakeholder.md`) — markdown for sharing
 
 ```
 /dev-board
 ```
+
+---
+
+## Design Principles
+
+**Composable, not prescribed.** Each skill is independent. Use `/dev-plan` without `/dev-checkpoint`. Use `/dev-resume` alongside `/code-review`, Jira, Slack, or any other tool. Start a session without any plan at all. The skills work together but never force a sequence.
+
+**Plans are living documents.** PRDs have status markers (`⬜` / `✅` / `⏭️`) and phase gates (`⏸️ GATE`). They're meant to be edited mid-flight — add phases, skip steps, rewrite sections when requirements change. Checkpoints capture the decisions behind those changes.
+
+**Context quality over context quantity.** Checkpoints are structured compression — they preserve what matters (state, decisions, next actions) and deliberately discard what doesn't (debugging tangents, tool output, failed attempts). Each resumed session starts lean.
 
 ---
 
@@ -191,32 +209,11 @@ Generate a project dashboard from `.dev/` feature data:
 
 ---
 
-## Why This Workflow?
-
-Complex features overflow context windows. This workflow saves structured progress to disk so you can clear context and resume without re-explaining everything.
-
-The pattern emerged from a recurring problem: planning a complex feature consumes most of the context window before you even start building. Then the build phase spans multiple sessions. Without structure, each restart requires re-explaining the plan, the decisions made, and where you left off.
-
-**The solution is a cycle:**
-
-1. **Plan to disk** — `/dev-plan` persists a structured PRD so the plan survives context resets
-2. **Checkpoint progress** — `/dev-checkpoint` captures just enough state (git, decisions, next steps) for the next session to pick up efficiently
-3. **Resume with minimal context** — `/dev-resume` loads only the checkpoint, not the full PRD, keeping context lean
-
-### Tips
+## Tips
 
 - **Checkpoint before context fills up** — don't wait until you're forced to restart
-- For complex features, explicitly ask Claude to **break the PRD into sub-documents** during `/dev-plan`
-
-## Acknowledgments
-
-The `/dev-wrapup` skill was inspired by a [community post on r/ClaudeCode](https://www.reddit.com/r/ClaudeCode/comments/1r89084/selfimprovement_loop_my_favorite_claude_code_skill) describing a "self-improvement loop" skill. We adapted the concept to fit the dev-workflow philosophy where nothing is applied without explicit user confirmation.
-
-## Credits
-
-Inspired by:
-- [get-shit-done](https://github.com/glittercowboy/get-shit-done)
-- [ai-dev-tasks](https://github.com/snarktank/ai-dev-tasks)
+- **Use `/dev-plan` for complex features** — for quick fixes, just work directly
+- For large features, ask Claude to **break the PRD into sub-documents** during `/dev-plan`
 
 ## License
 

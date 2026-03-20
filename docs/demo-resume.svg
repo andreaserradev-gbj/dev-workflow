@@ -1,0 +1,50 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 520 340" font-family="'SF Mono', 'Menlo', 'Monaco', 'Courier New', monospace">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#1a1b2e"/>
+      <stop offset="100%" style="stop-color:#16172b"/>
+    </linearGradient>
+    <linearGradient id="term" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#1e1f35"/>
+      <stop offset="100%" style="stop-color:#191a30"/>
+    </linearGradient>
+  </defs>
+
+  <rect width="520" height="340" rx="12" fill="url(#bg)"/>
+
+  <g transform="translate(20, 16)">
+    <rect width="480" height="308" rx="10" fill="url(#term)" stroke="#2d2e4a" stroke-width="1"/>
+    <rect width="480" height="32" rx="10" fill="#252640"/>
+    <rect y="22" width="480" height="10" fill="#252640"/>
+    <circle cx="16" cy="16" r="5" fill="#ff5f57"/>
+    <circle cx="34" cy="16" r="5" fill="#febc2e"/>
+    <circle cx="52" cy="16" r="5" fill="#28c840"/>
+    <text x="240" y="20" fill="#6b6d8a" font-size="11" text-anchor="middle">Next day — picking up where you left off</text>
+
+    <g transform="translate(16, 48)" font-size="11.5">
+      <text y="0" fill="#7aa2f7">&#x276F;</text>
+      <text x="14" y="0" fill="#c0caf5">/dev-resume user-auth-migration</text>
+
+      <text y="32" fill="#7aa2f7" font-weight="bold">Status:</text>
+      <text x="62" y="32" fill="#c0c2d6">Phase 2 &#x2014; Update Test Fixtures (Step 1)</text>
+      <text y="56" fill="#7aa2f7" font-weight="bold">Last session:</text>
+      <text x="110" y="56" fill="#c0c2d6">Completed Phase 1 &#x2014; all 5 source</text>
+      <text x="14" y="74" fill="#c0c2d6">code changes for v3 compatibility. Lint passes.</text>
+      <text y="98" fill="#7aa2f7" font-weight="bold">Decisions:</text>
+      <text x="94" y="98" fill="#c0c2d6">Skip v2, jump directly to v3; phase</text>
+      <text x="14" y="116" fill="#c0c2d6">code changes before version bump.</text>
+
+      <text y="144" fill="#e0af68" font-weight="bold">Drift:</text>
+      <text x="50" y="144" fill="#e0af68">Branch is clean &#x2014; changes were committed</text>
+      <text x="14" y="162" fill="#e0af68">since checkpoint was saved.</text>
+
+      <!-- Start with -->
+      <rect x="-6" y="182" width="456" height="38" rx="5" fill="#1a2a1a" stroke="#2d4a2d" stroke-width="1"/>
+      <text x="6" y="200" fill="#9ece6a" font-weight="bold">Start with:</text>
+      <text x="104" y="200" fill="#9ece6a">Write migration script for the 4</text>
+      <text x="6" y="216" fill="#9ece6a">userAuth*.json test fixtures, then update mocks.</text>
+
+      <text y="248" fill="#c0c2d6">Ready to proceed?</text>
+    </g>
+  </g>
+</svg>
