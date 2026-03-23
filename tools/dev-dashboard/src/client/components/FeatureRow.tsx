@@ -1,8 +1,12 @@
 import type { Feature, FeatureStatus } from '@shared/types.js';
+import { PrimaryActionButton } from './ActionButton.js';
 
 interface Props {
   feature: Feature;
+  projectPath: string;
   id?: string;
+  expanded?: boolean;
+  onClick?: () => void;
 }
 
 const STATUS_CONFIG: Record<FeatureStatus, { label: string; badge: string; bar: string }> = {
@@ -48,11 +52,15 @@ function formatTimeAgo(dateStr: string): string {
   return `${days}d ago`;
 }
 
-export function FeatureRow({ feature, id }: Props) {
+export function FeatureRow({ feature, projectPath, id, expanded, onClick }: Props) {
   const config = STATUS_CONFIG[feature.status] ?? STATUS_CONFIG['no-prd'];
 
   return (
-    <div id={id} class="px-5 py-3.5 flex items-center gap-4">
+    <div
+      id={id}
+      class={`px-5 py-3.5 flex items-center gap-4 cursor-pointer transition-colors hover:bg-slate-800/30 ${expanded ? 'bg-slate-800/20' : ''}`}
+      onClick={onClick}
+    >
       {/* Name + branch */}
       <div class="min-w-0 flex-1">
         <div class="flex items-center gap-2">
@@ -113,6 +121,12 @@ export function FeatureRow({ feature, id }: Props) {
       >
         {config.label}
       </span>
+
+      {/* Primary action */}
+      <PrimaryActionButton
+        status={feature.status}
+        context={{ projectPath, featureName: feature.name }}
+      />
     </div>
   );
 }

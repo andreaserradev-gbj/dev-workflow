@@ -71,6 +71,21 @@ async function validateScanDirs(dirs: string[]): Promise<void> {
   }
 }
 
+export async function updateConfig(patch: Partial<DashboardConfig>): Promise<DashboardConfig> {
+  let existing: Partial<DashboardConfig> = {};
+  try {
+    const raw = await readFile(CONFIG_PATH, 'utf-8');
+    existing = JSON.parse(raw);
+  } catch {
+    // Start from defaults if file doesn't exist
+  }
+
+  const updated = { ...DEFAULTS, ...existing, ...patch };
+  await mkdir(CONFIG_DIR, { recursive: true });
+  await writeFile(CONFIG_PATH, JSON.stringify(updated, null, 2) + '\n', 'utf-8');
+  return updated;
+}
+
 export function parseCliArgs(args: string[]): CliOverrides {
   const overrides: CliOverrides = {};
   let i = 0;

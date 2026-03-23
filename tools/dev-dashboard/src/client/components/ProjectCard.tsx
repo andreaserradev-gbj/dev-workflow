@@ -1,13 +1,17 @@
+import { useState } from 'preact/hooks';
 import type { Project } from '@shared/types.js';
 import { FeatureRow } from './FeatureRow.js';
+import { FeaturePanel } from './FeaturePanel.js';
 
 interface Props {
   project: Project;
 }
 
 export function ProjectCard({ project }: Props) {
+  const [expandedFeature, setExpandedFeature] = useState<string | null>(null);
+
   const activeCount = project.features.filter(
-    (f) => f.status === 'active' || f.status === 'gate'
+    (f) => f.status === 'active'
   ).length;
 
   return (
@@ -31,11 +35,27 @@ export function ProjectCard({ project }: Props) {
 
       <div class="divide-y divide-slate-800/30">
         {project.features.map((feature) => (
-          <FeatureRow
-            key={feature.name}
-            feature={feature}
-            id={`feature-${project.name}-${feature.name}`}
-          />
+          <div key={feature.name}>
+            <FeatureRow
+              feature={feature}
+              projectPath={project.path}
+              id={`feature-${project.name}-${feature.name}`}
+              expanded={expandedFeature === feature.name}
+              onClick={() =>
+                setExpandedFeature((prev) =>
+                  prev === feature.name ? null : feature.name
+                )
+              }
+            />
+            {expandedFeature === feature.name && (
+              <FeaturePanel
+                project={project.name}
+                projectPath={project.path}
+                featureName={feature.name}
+                feature={feature}
+              />
+            )}
+          </div>
         ))}
       </div>
     </div>

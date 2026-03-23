@@ -2,6 +2,10 @@ import { useState, useEffect, useRef, useCallback } from 'preact/hooks';
 import type { Project, WsEvent } from '@shared/types.js';
 import { STATUS_ORDER } from '@shared/types.js';
 
+export interface UseWebSocketOptions {
+  onFeatureUpdated?: (project: string, feature: string) => void;
+}
+
 interface UseWebSocketResult {
   projects: Project[];
   connected: boolean;
@@ -16,13 +20,15 @@ function sortFeatures(projects: Project[]): void {
   }
 }
 
-export function useWebSocket(): UseWebSocketResult {
+export function useWebSocket(options: UseWebSocketOptions = {}): UseWebSocketResult {
   const [projects, setProjects] = useState<Project[]>([]);
   const [connected, setConnected] = useState(false);
   const [loading, setLoading] = useState(true);
   const wsRef = useRef<WebSocket | null>(null);
   const reconnectTimer = useRef<ReturnType<typeof setTimeout>>();
   const reconnectDelay = useRef(1000);
+  const onFeatureUpdatedRef = useRef(options.onFeatureUpdated);
+  onFeatureUpdatedRef.current = options.onFeatureUpdated;
 
   const handleEvent = useCallback((event: WsEvent) => {
     switch (event.type) {
@@ -33,6 +39,7 @@ export function useWebSocket(): UseWebSocketResult {
         break;
 
       case 'feature_updated':
+        onFeatureUpdatedRef.current?.(event.project, event.feature);
         setProjects((prev) =>
           prev.map((p) => {
             if (p.path !== event.project && p.name !== event.project) return p;
