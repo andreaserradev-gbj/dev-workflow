@@ -145,6 +145,22 @@ Check if `$PROJECT_ROOT/.dev/$FEATURE_NAME/checkpoint.md` already exists. Rememb
 
 If it exists, read it first (the Write tool requires reading before overwriting). Then write the continuation prompt to that path.
 
+### Step 8b: Write Session State
+
+After saving the checkpoint, write the session-state file to signal the session is idle:
+
+Write `$PROJECT_ROOT/.dev/$FEATURE_NAME/session-state.json`:
+```json
+{
+  "status": "idle",
+  "phase": null,
+  "gate_label": null,
+  "since": "<current ISO 8601 timestamp>"
+}
+```
+
+Generate the timestamp via `date -u +"%Y-%m-%dT%H:%M:%SZ"`.
+
 ### Step 9: Summary
 
 Report:
@@ -153,17 +169,17 @@ Report:
 - What the next steps are
 - Confirm the checkpoint location
 
-### Step 9.5: Optional Workflow Setup (First Checkpoint Only)
+### Step 10: Workflow Setup (First Checkpoint Only)
 
-**Skip this step entirely** if `$IS_FIRST_CHECKPOINT` is false (checkpoint.md existed before Step 8).
+> **REQUIRED CHECK**: Evaluate `$IS_FIRST_CHECKPOINT` (set in Step 8).
+> - If `$IS_FIRST_CHECKPOINT` is **true** (this is a NEW checkpoint — no checkpoint.md existed before Step 8): **execute this step**.
+> - If `$IS_FIRST_CHECKPOINT` is **false** (checkpoint.md already existed): skip to Step 11.
 
-Check whether to offer workflow setup and, if accepted, create either a worktree or branch for the feature.
-
-Follow the instructions in [worktree-guide.md](references/worktree-guide.md).
+This step offers the user a worktree or branch for the feature. Follow the instructions in [worktree-guide.md](references/worktree-guide.md).
 
 Use `$WORKTREE` as the absolute path to `scripts/worktree-setup.sh` within this skill's directory. Apply the path safety rules from Step 0.
 
-### Step 10: Optional Commit
+### Step 11: Optional Commit
 
 **Skip this step entirely** if ANY of these are true:
 - This is not a git repository
