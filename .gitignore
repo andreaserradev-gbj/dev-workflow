@@ -2,3 +2,7 @@
 .envrc
 .dev/
 .dev-archive/
+
+# dev-dashboard
+tools/dev-dashboard/node_modules/
+tools/dev-dashboard/dist/

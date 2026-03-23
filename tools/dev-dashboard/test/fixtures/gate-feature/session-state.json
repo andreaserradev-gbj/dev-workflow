@@ -1,0 +1,6 @@
+{
+  "status": "gate",
+  "phase": 1,
+  "gate_label": "Phase 1 complete. Continue to Phase 2 or /dev-checkpoint.",
+  "since": "2026-03-22T16:45:00Z"
+}
