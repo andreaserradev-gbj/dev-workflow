@@ -178,6 +178,14 @@
                 border: 'border-l-amber-500',
                 accent: 'text-amber-400',
             },
+            gate: {
+                label: 'Gate',
+                badge: 'bg-amber-500/10 text-amber-400 ring-1 ring-inset ring-amber-500/20',
+                bar: 'bg-amber-500',
+                dot: 'bg-amber-400',
+                border: 'border-l-amber-500',
+                accent: 'text-amber-400',
+            },
             'no-prd': {
                 label: 'No PRD',
                 badge: 'bg-slate-500/10 text-slate-400 ring-1 ring-inset ring-slate-500/20',
@@ -194,7 +202,7 @@
             'not-started': { dot: 'bg-slate-600', bar: 'bg-slate-700' },
         };
 
-        const STATUS_ORDER = { active: 0, stale: 1, 'no-prd': 2, complete: 3 };
+        const STATUS_ORDER = { gate: 0, active: 1, stale: 2, 'no-prd': 3, complete: 4 };
 
         /* ── Helpers ── */
 

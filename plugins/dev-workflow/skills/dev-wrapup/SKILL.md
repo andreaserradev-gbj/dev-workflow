@@ -345,6 +345,28 @@ If the user replied "none" (skipped all findings), still record the feedback wit
 
 ---
 
+### Step 7: Write Session State (Conditional)
+
+Check if `$PROJECT_ROOT/.dev/` contains any `session-state.json` file for the feature that was active during this session. Only write if one already exists (meaning a session was previously started via dev-resume).
+
+If a `session-state.json` exists, overwrite it:
+```json
+{
+  "status": "idle",
+  "phase": null,
+  "gate_label": null,
+  "since": "<current ISO 8601 timestamp>"
+}
+```
+
+Generate the timestamp via `date -u +"%Y-%m-%dT%H:%M:%SZ"`.
+
+If no `session-state.json` exists, skip this step — do not create the file.
+
+To find the active feature: check the conversation history for which `.dev/<feature>/` was being worked on. If ambiguous or no feature was active, skip this step.
+
+---
+
 ## Summary
 
 Report what was accomplished:
