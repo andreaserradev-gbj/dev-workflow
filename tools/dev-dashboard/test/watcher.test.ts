@@ -256,6 +256,29 @@ describe('createWatcher', () => {
     expect(featureRemoved[0].featureName).toBe('stale-feature');
   });
 
+  it('ignores .md files placed directly in .dev/ (not in a feature subdirectory)', async () => {
+    const projectDir = join(tempDir, 'project-loose');
+    const devDir = join(projectDir, '.dev');
+    // Create a feature subdir so the .dev dir gets watched
+    await mkdir(join(devDir, 'real-feature'), { recursive: true });
+    await writeFile(join(devDir, 'real-feature', '00-master-plan.md'), MASTER_PLAN);
+
+    watcher = await createWatcher([tempDir], callbacks);
+    await waitForEvents(300);
+    featureAdded.length = 0;
+    featureUpdated.length = 0;
+
+    // Drop a loose .md file directly in .dev/
+    await writeFile(join(devDir, 'status-report-2026-03-23.md'), '# Status Report\nAll good.');
+    await waitForEvents(500);
+
+    // Should NOT create a phantom feature from the loose file
+    const phantomAdd = featureAdded.find((e) => e.featureName === 'status-report-2026-03-23.md');
+    const phantomUpdate = featureUpdated.find((e) => e.featureName === 'status-report-2026-03-23.md');
+    expect(phantomAdd).toBeUndefined();
+    expect(phantomUpdate).toBeUndefined();
+  });
+
   it('close() stops watching', async () => {
     const projectDir = join(tempDir, 'project-g');
     const featureDir = join(projectDir, '.dev', 'closeable');

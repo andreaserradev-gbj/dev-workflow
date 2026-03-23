@@ -33,7 +33,9 @@ const DEFAULT_RESCAN_INTERVAL_MS = 30_000;
 function parsePath(filePath: string): ParsedPath | null {
   const parts = filePath.split(sep);
   const devIdx = parts.lastIndexOf('.dev');
-  if (devIdx === -1 || devIdx + 1 >= parts.length) return null;
+  // Need at least 2 segments after .dev: feature-dir/file.md
+  // This rejects files sitting directly in .dev/ (e.g. status reports)
+  if (devIdx === -1 || devIdx + 2 >= parts.length) return null;
 
   const projectPath = parts.slice(0, devIdx).join(sep);
   const featureName = parts[devIdx + 1];
