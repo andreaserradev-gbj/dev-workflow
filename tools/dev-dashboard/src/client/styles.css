@@ -1,0 +1,33 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Outfit", system-ui, -apple-system, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
+}
+
+body {
+  background: #060b18;
+  background-image: radial-gradient(ellipse at top center, rgba(56, 189, 248, 0.03) 0%, transparent 50%);
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.card-enter {
+  animation: fadeIn 0.35s ease-out both;
+}
+
+@keyframes pulse-gate {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.6; }
+}
+
+.gate-pulse {
+  animation: pulse-gate 2s ease-in-out infinite;
+}
+
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: #1e293b; border-radius: 3px; }

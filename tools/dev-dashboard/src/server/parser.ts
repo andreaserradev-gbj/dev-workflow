@@ -1,0 +1,418 @@
+import { readFile, readdir, access } from 'fs/promises';
+import { resolve, basename } from 'path';
+import matter from 'gray-matter';
+import type {
+  Feature,
+  FeatureStatus,
+  Phase,
+  Progress,
+  SessionState,
+  SubPrd,
+  SubPrdStep,
+} from '../shared/types.js';
+
+// ─── Master Plan ───────────────────────────────────────────────────
+
+export interface MasterPlanResult {
+  summary: string | null;
+  phases: Phase[];
+  progress: Progress;
+  lastUpdated: string | null;
+}
+
+export async function parseMasterPlan(filePath: string): Promise<MasterPlanResult | null> {
+  let content: string;
+  try {
+    content = await readFile(filePath, 'utf-8');
+  } catch {
+    return null;
+  }
+
+  const summary = extractSummary(content);
+  const lastUpdated = extractFrontmatterField(content, 'Last Updated');
+  const phases = extractPhases(content);
+
+  let done = 0;
+  let total = 0;
+  for (const phase of phases) {
+    done += phase.done;
+    total += phase.total;
+  }
+
+  const percent = total > 0 ? Math.round((done / total) * 100) : 0;
+
+  return { summary, phases, progress: { done, total, percent }, lastUpdated };
+}
+
+function extractSummary(content: string): string | null {
+  const match = content.match(/## Executive Summary\s*\n\s*\n([^\n]+)/);
+  if (!match) return null;
+  return match[1].trim();
+}
+
+function extractFrontmatterField(content: string, field: string): string | null {
+  const regex = new RegExp(`\\*\\*${field}\\*\\*:\\s*(.+)`);
+  const match = content.match(regex);
+  return match ? match[1].trim() : null;
+}
+
+function extractPhases(content: string): Phase[] {
+  const phases: Phase[] = [];
+
+  // Split by phase headers: ### Phase N: Title  or  ## Phase N — Title
+  const phaseRegex = /###?\s*Phase\s+(\d+)[:\s—–-]+\s*(.+)/g;
+  const headers: { number: number; title: string; index: number }[] = [];
+
+  let match: RegExpExecArray | null;
+  while ((match = phaseRegex.exec(content)) !== null) {
+    headers.push({
+      number: parseInt(match[1], 10),
+      title: match[2].trim(),
+      index: match.index,
+    });
+  }
+
+  for (let i = 0; i < headers.length; i++) {
+    const start = headers[i].index;
+    const end = i + 1 < headers.length ? headers[i + 1].index : content.length;
+    const section = content.slice(start, end);
+
+    const { done, total } = countSteps(section);
+    const status: Phase['status'] =
+      total === 0 ? 'not-started' : done === total ? 'complete' : done > 0 ? 'in-progress' : 'not-started';
+
+    phases.push({
+      number: headers[i].number,
+      title: headers[i].title,
+      done,
+      total,
+      status,
+    });
+  }
+
+  return phases;
+}
+
+function countSteps(section: string): { done: number; total: number } {
+  let done = 0;
+  let total = 0;
+
+  const lines = section.split('\n');
+  for (const line of lines) {
+    const trimmed = line.trim();
+
+    // Skip verification items (- [ ] or - [x])
+    if (/^-\s*\[[ x]\]/.test(trimmed)) continue;
+
+    // Skip GATE lines
+    if (trimmed.includes('⏸️') && trimmed.includes('GATE')) continue;
+
+    // Skip non-step lines — steps are numbered: "1. ✅ ..." or "1. ⬜ ..."
+    const stepMatch = trimmed.match(/^\d+\.\s*(✅|⬜|⏭️)/);
+    if (!stepMatch) continue;
+
+    total++;
+    if (stepMatch[1] === '✅' || stepMatch[1] === '⏭️') {
+      done++;
+    }
+  }
+
+  return { done, total };
+}
+
+// ─── Checkpoint ────────────────────────────────────────────────────
+
+export interface CheckpointResult {
+  branch: string | null;
+  lastCommit: string | null;
+  uncommittedChanges: boolean | null;
+  checkpointed: string | null;
+  nextAction: string | null;
+  decisions: string[];
+  blockers: string[];
+  notes: string[];
+  context: string | null;
+}
+
+export async function parseCheckpoint(filePath: string): Promise<CheckpointResult | null> {
+  let content: string;
+  try {
+    content = await readFile(filePath, 'utf-8');
+  } catch {
+    return null;
+  }
+
+  let frontmatter: Record<string, unknown> = {};
+  try {
+    const parsed = matter(content);
+    frontmatter = parsed.data;
+  } catch {
+    // Malformed YAML — continue with empty frontmatter
+  }
+
+  const branch = typeof frontmatter.branch === 'string' ? frontmatter.branch : null;
+  const lastCommit = typeof frontmatter.last_commit === 'string' ? frontmatter.last_commit : null;
+  const uncommittedChanges =
+    typeof frontmatter.uncommitted_changes === 'boolean' ? frontmatter.uncommitted_changes : null;
+  const checkpointed = typeof frontmatter.checkpointed === 'string'
+    ? frontmatter.checkpointed
+    : frontmatter.checkpointed instanceof Date
+      ? frontmatter.checkpointed.toISOString()
+      : null;
+
+  const nextAction = extractXmlTag(content, 'next_action');
+  const decisions = extractXmlListItems(content, 'decisions');
+  const blockers = extractXmlListItems(content, 'blockers');
+  const notes = extractXmlListItems(content, 'notes');
+  const context = extractXmlTag(content, 'context');
+
+  return {
+    branch,
+    lastCommit,
+    uncommittedChanges,
+    checkpointed,
+    nextAction,
+    decisions,
+    blockers,
+    notes,
+    context,
+  };
+}
+
+function extractXmlTag(content: string, tag: string): string | null {
+  const regex = new RegExp(`<${tag}>([\\s\\S]*?)</${tag}>`, 'i');
+  const match = content.match(regex);
+  if (!match) return null;
+  return match[1].trim();
+}
+
+function extractXmlListItems(content: string, tag: string): string[] {
+  const block = extractXmlTag(content, tag);
+  if (!block) return [];
+
+  const items: string[] = [];
+  const lines = block.split('\n');
+  for (const line of lines) {
+    const trimmed = line.trim();
+    // Match list items: "- item text"
+    const listMatch = trimmed.match(/^-\s+(.+)/);
+    if (listMatch) {
+      items.push(listMatch[1].trim());
+    }
+  }
+
+  return items;
+}
+
+// ─── Sub-PRD ───────────────────────────────────────────────────────
+
+export interface SubPrdResult {
+  id: string;
+  title: string;
+  done: number;
+  total: number;
+  status: 'complete' | 'in-progress' | 'not-started';
+  steps: SubPrdStep[];
+}
+
+export async function parseSubPrd(filePath: string): Promise<SubPrdResult | null> {
+  let content: string;
+  try {
+    content = await readFile(filePath, 'utf-8');
+  } catch {
+    return null;
+  }
+
+  const id = basename(filePath, '.md');
+
+  // Extract title from "# Sub-PRD: Title" heading
+  const titleMatch = content.match(/^#\s+Sub-PRD:\s*(.+)/m);
+  const title = titleMatch ? titleMatch[1].trim() : id;
+
+  // Extract steps from Implementation Progress table
+  const steps: SubPrdStep[] = [];
+  const tableRegex = /## Implementation Progress[\s\S]*?\|[\s\S]*?\|[\s\S]*?\|([\s\S]*?)(?=\n---|\n##|$)/;
+  const tableMatch = content.match(tableRegex);
+
+  if (tableMatch) {
+    const tableBody = tableMatch[1];
+    const rowRegex = /\|\s*\*\*(\d+)\*\*\s*\|[^|]*\|\s*(✅|⬜|⏭️)[^|]*\|/g;
+    let rowMatch: RegExpExecArray | null;
+    while ((rowMatch = rowRegex.exec(tableBody)) !== null) {
+      const stepNum = parseInt(rowMatch[1], 10);
+      const marker = rowMatch[2];
+      steps.push({
+        number: stepNum,
+        description: '', // Not needed for status
+        status: marker === '✅' || marker === '⏭️' ? 'done' : 'pending',
+      });
+    }
+  }
+
+  // Also extract step descriptions
+  if (steps.length > 0) {
+    // Re-parse to get descriptions from the table
+    const rowDescRegex = /\|\s*\*\*(\d+)\*\*\s*\|\s*([^|]+)\|/g;
+    let descMatch: RegExpExecArray | null;
+    while ((descMatch = rowDescRegex.exec(content)) !== null) {
+      const num = parseInt(descMatch[1], 10);
+      const step = steps.find((s) => s.number === num);
+      if (step) {
+        step.description = descMatch[2].trim();
+      }
+    }
+  }
+
+  const done = steps.filter((s) => s.status === 'done').length;
+  const total = steps.length;
+  const status: SubPrdResult['status'] =
+    total === 0 ? 'not-started' : done === total ? 'complete' : done > 0 ? 'in-progress' : 'not-started';
+
+  return { id, title, done, total, status, steps };
+}
+
+// ─── Session State ─────────────────────────────────────────────────
+
+export async function parseSessionState(filePath: string): Promise<SessionState | null> {
+  let content: string;
+  try {
+    content = await readFile(filePath, 'utf-8');
+  } catch {
+    return null;
+  }
+
+  try {
+    const data = JSON.parse(content);
+
+    if (!data.status || !data.since) return null;
+    if (!['active', 'gate', 'idle'].includes(data.status)) return null;
+
+    return {
+      status: data.status,
+      phase: data.phase ?? null,
+      gateLabel: data.gate_label ?? null,
+      since: data.since,
+    };
+  } catch {
+    return null;
+  }
+}
+
+// ─── Status Determination ──────────────────────────────────────────
+
+const THIRTY_MINUTES_MS = 30 * 60 * 1000;
+const THIRTY_DAYS_MS = 30 * 24 * 60 * 60 * 1000;
+
+export interface StatusInput {
+  hasMasterPlan: boolean;
+  allComplete: boolean;
+  session: SessionState | null;
+  checkpointDate: string | null;
+  lastUpdated: string | null;
+  now: Date;
+  isEmpty?: boolean;
+}
+
+export function determineFeatureStatus(input: StatusInput): FeatureStatus {
+  const { hasMasterPlan, allComplete, session, checkpointDate, lastUpdated, now, isEmpty } = input;
+
+  // Empty directory
+  if (isEmpty) return 'empty';
+
+  // Session-state priority
+  if (session) {
+    if (session.status === 'gate') return 'gate';
+
+    if (session.status === 'active') {
+      const sinceMs = new Date(session.since).getTime();
+      const ageMs = now.getTime() - sinceMs;
+      if (ageMs <= THIRTY_MINUTES_MS) return 'active';
+      // Stale active session — fall through to markdown heuristics
+    }
+    // idle → fall through to markdown heuristics
+  }
+
+  // No master plan
+  if (!hasMasterPlan) {
+    if (checkpointDate) return 'checkpoint-only';
+    return 'no-prd';
+  }
+
+  // All steps complete
+  if (allComplete) return 'complete';
+
+  // Staleness check
+  const referenceDate = checkpointDate || lastUpdated;
+  if (referenceDate) {
+    const refMs = new Date(referenceDate).getTime();
+    const ageMs = now.getTime() - refMs;
+    if (ageMs > THIRTY_DAYS_MS) return 'stale';
+    return 'active';
+  }
+
+  // No date reference available — treat as stale
+  return 'stale';
+}
+
+// ─── Full Feature Parser ──────────────────────────────────────────
+
+export async function parseFeature(featureDir: string, name: string): Promise<Feature> {
+  // Check if directory is empty (only .gitkeep or truly empty)
+  const isEmpty = await isEmptyFeatureDir(featureDir);
+
+  const masterPlan = await parseMasterPlan(resolve(featureDir, '00-master-plan.md'));
+  const checkpoint = await parseCheckpoint(resolve(featureDir, 'checkpoint.md'));
+  const session = await parseSessionState(resolve(featureDir, 'session-state.json'));
+
+  const allComplete =
+    masterPlan !== null &&
+    masterPlan.progress.total > 0 &&
+    masterPlan.progress.done === masterPlan.progress.total;
+
+  const status = determineFeatureStatus({
+    hasMasterPlan: masterPlan !== null,
+    allComplete,
+    session,
+    checkpointDate: checkpoint?.checkpointed ?? null,
+    lastUpdated: masterPlan?.lastUpdated ?? null,
+    now: new Date(),
+    isEmpty: isEmpty && masterPlan === null && checkpoint === null,
+  });
+
+  // Find current phase (first in-progress, or first not-started)
+  let currentPhase: Feature['currentPhase'] = null;
+  if (masterPlan) {
+    const inProgress = masterPlan.phases.find((p) => p.status === 'in-progress');
+    const notStarted = masterPlan.phases.find((p) => p.status === 'not-started');
+    const active = inProgress || notStarted;
+    if (active) {
+      currentPhase = {
+        number: active.number,
+        total: masterPlan.phases.length,
+        title: active.title,
+      };
+    }
+  }
+
+  return {
+    name,
+    status,
+    progress: masterPlan?.progress ?? null,
+    currentPhase,
+    lastCheckpoint: checkpoint?.checkpointed ?? null,
+    nextAction: checkpoint?.nextAction ?? null,
+    branch: checkpoint?.branch ?? null,
+    session,
+    summary: masterPlan?.summary ?? null,
+  };
+}
+
+async function isEmptyFeatureDir(dirPath: string): Promise<boolean> {
+  try {
+    const entries = await readdir(dirPath);
+    // Consider empty if only .gitkeep
+    return entries.length === 0 || (entries.length === 1 && entries[0] === '.gitkeep');
+  } catch {
+    return true;
+  }
+}
