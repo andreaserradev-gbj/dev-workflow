@@ -75,13 +75,32 @@ function extractPhases(content: string): Phase[] {
     const end = i + 1 < headers.length ? headers[i + 1].index : content.length;
     const section = content.slice(start, end);
 
+    // Detect phase-level status marker from the title (e.g., "### Phase 1: Title ✅")
+    let title = headers[i].title;
+    let titleMarker: '✅' | '⬜' | null = null;
+    if (title.includes('✅')) {
+      titleMarker = '✅';
+      title = title.replace(/\s*✅\s*/, '').trim();
+    } else if (title.includes('⬜')) {
+      titleMarker = '⬜';
+      title = title.replace(/\s*⬜\s*/, '').trim();
+    }
+
     const { done, total } = countSteps(section);
-    const status: Phase['status'] =
-      total === 0 ? 'not-started' : done === total ? 'complete' : done > 0 ? 'in-progress' : 'not-started';
+    let status: Phase['status'];
+    if (total > 0) {
+      // Use step counts when available
+      status = done === total ? 'complete' : done > 0 ? 'in-progress' : 'not-started';
+    } else if (titleMarker) {
+      // Fall back to phase-level marker when no individual steps found
+      status = titleMarker === '✅' ? 'complete' : 'not-started';
+    } else {
+      status = 'not-started';
+    }
 
     phases.push({
       number: headers[i].number,
-      title: headers[i].title,
+      title,
       done,
       total,
       status,
@@ -94,24 +113,51 @@ function extractPhases(content: string): Phase[] {
 function countSteps(section: string): { done: number; total: number } {
   let done = 0;
   let total = 0;
+  let inVerification = false;
 
   const lines = section.split('\n');
   for (const line of lines) {
     const trimmed = line.trim();
 
-    // Skip verification items (- [ ] or - [x])
-    if (/^-\s*\[[ x]\]/.test(trimmed)) continue;
+    // Track verification sections — checkboxes here are not steps
+    if (/^\*\*Verification\*\*/.test(trimmed)) {
+      inVerification = true;
+      continue;
+    }
+    // Exit verification section on blank line, heading, or non-list content
+    if (inVerification && (trimmed === '' || trimmed.startsWith('#') || trimmed.startsWith('⏸️'))) {
+      inVerification = false;
+    }
+    if (inVerification) continue;
 
     // Skip GATE lines
     if (trimmed.includes('⏸️') && trimmed.includes('GATE')) continue;
 
-    // Skip non-step lines — steps are numbered: "1. ✅ ..." or "1. ⬜ ..."
-    const stepMatch = trimmed.match(/^\d+\.\s*(✅|⬜|⏭️)/);
-    if (!stepMatch) continue;
+    // Skip headings, table rows, and other non-step lines
+    if (trimmed.startsWith('#') || trimmed.startsWith('|')) continue;
 
-    total++;
-    if (stepMatch[1] === '✅' || stepMatch[1] === '⏭️') {
-      done++;
+    // Numbered steps: "1. ✅ ..." or "1. ⬜ ..."
+    const numberedMatch = trimmed.match(/^\d+\.\s*(✅|⬜|⏭️)/);
+    if (numberedMatch) {
+      total++;
+      if (numberedMatch[1] === '✅' || numberedMatch[1] === '⏭️') done++;
+      continue;
+    }
+
+    // Bullet steps: "- ✅ ..." or "- ⬜ ..."
+    const bulletMatch = trimmed.match(/^-\s+(✅|⬜|⏭️)/);
+    if (bulletMatch) {
+      total++;
+      if (bulletMatch[1] === '✅' || bulletMatch[1] === '⏭️') done++;
+      continue;
+    }
+
+    // Checkbox steps: "- [x] ..." or "- [ ] ..."
+    const checkboxMatch = trimmed.match(/^-\s+\[(x| )\]/);
+    if (checkboxMatch) {
+      total++;
+      if (checkboxMatch[1] === 'x') done++;
+      continue;
     }
   }
 

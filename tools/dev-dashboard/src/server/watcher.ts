@@ -1,4 +1,5 @@
 import chokidar from 'chokidar';
+import fg from 'fast-glob';
 import { dirname, basename, sep } from 'path';
 
 export interface WatcherCallbacks {
@@ -9,6 +10,7 @@ export interface WatcherCallbacks {
 
 export interface WatcherOptions {
   debounceMs?: number;
+  rescanIntervalMs?: number;
 }
 
 export interface Watcher {
@@ -21,6 +23,7 @@ interface ParsedPath {
 }
 
 const DEFAULT_DEBOUNCE_MS = 200;
+const DEFAULT_RESCAN_INTERVAL_MS = 30_000;
 
 /**
  * Parse a file path to extract the project path and feature name.
@@ -39,12 +42,40 @@ function parsePath(filePath: string): ParsedPath | null {
   return { projectPath, featureName };
 }
 
+/**
+ * Find all .dev directories within scan dirs (matching scanner's depth logic).
+ */
+async function findDevDirs(scanDirs: string[], maxDepth = 3): Promise<string[]> {
+  const allDevDirs: string[] = [];
+  for (const scanDir of scanDirs) {
+    const patterns: string[] = [];
+    for (let d = 0; d < maxDepth; d++) {
+      const prefix = d === 0 ? '' : new Array(d).fill('*').join('/') + '/';
+      patterns.push(prefix + '.dev');
+    }
+    try {
+      const dirs = await fg(patterns, {
+        cwd: scanDir,
+        onlyDirectories: true,
+        absolute: true,
+        dot: true,
+        ignore: ['**/node_modules/**', '**/.dev-archive/**'],
+      });
+      allDevDirs.push(...dirs);
+    } catch {
+      // scanDir doesn't exist or isn't accessible
+    }
+  }
+  return allDevDirs;
+}
+
 export async function createWatcher(
   scanDirs: string[],
   callbacks: WatcherCallbacks,
   options: WatcherOptions = {}
 ): Promise<Watcher> {
   const debounceMs = options.debounceMs ?? DEFAULT_DEBOUNCE_MS;
+  const rescanIntervalMs = options.rescanIntervalMs ?? DEFAULT_RESCAN_INTERVAL_MS;
 
   // Track known features to distinguish add vs update
   const knownFeatures = new Set<string>();
@@ -91,16 +122,29 @@ export async function createWatcher(
     );
   }
 
-  // Watch scan directories directly — chokidar globs don't match dot-prefixed
-  // dirs like .dev, so we watch the parent dirs and filter in handlers.
-  const watcher = chokidar.watch(scanDirs, {
-    ignored: [
-      '**/node_modules/**',
-      '**/.git/**',
-      '**/.dev-archive/**',
-    ],
+  // Watch only .dev directories — not the entire scan tree.
+  // This prevents EMFILE errors when scanDirs contain large trees like ~/code.
+  const devDirs = await findDevDirs(scanDirs);
+  const watchedDevDirs = new Set(devDirs);
+
+  const watcher = chokidar.watch(devDirs.length > 0 ? devDirs : [], {
     ignoreInitial: true,
   });
+
+  // Periodically rescan for new .dev directories and add them to the watcher
+  const rescanTimer = setInterval(async () => {
+    try {
+      const currentDevDirs = await findDevDirs(scanDirs);
+      for (const dir of currentDevDirs) {
+        if (!watchedDevDirs.has(dir)) {
+          watchedDevDirs.add(dir);
+          watcher.add(dir);
+        }
+      }
+    } catch {
+      // Ignore rescan errors
+    }
+  }, rescanIntervalMs);
 
   function isDevMd(filePath: string): boolean {
     if (!filePath.includes(`${sep}.dev${sep}`) || !filePath.endsWith('.md')) return false;
@@ -151,10 +195,12 @@ export async function createWatcher(
     callbacks.onFeatureRemoved(parsed.projectPath, parsed.featureName);
   });
 
-  // Wait for the watcher to be ready
-  await new Promise<void>((resolve) => {
-    watcher.on('ready', resolve);
-  });
+  // Wait for the watcher to be ready (skip if nothing to watch)
+  if (devDirs.length > 0) {
+    await new Promise<void>((resolve) => {
+      watcher.on('ready', resolve);
+    });
+  }
 
   // Populate knownFeatures from initially watched files
   const watched = watcher.getWatched();
@@ -170,6 +216,7 @@ export async function createWatcher(
 
   return {
     close: async () => {
+      clearInterval(rescanTimer);
       // Clear all pending timers
       for (const timer of timers.values()) {
         clearTimeout(timer);
