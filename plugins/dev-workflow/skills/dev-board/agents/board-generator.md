@@ -52,7 +52,7 @@ Return a single JSON array containing one object per feature. Use this exact sha
 ```
 
 **Field value conventions:**
-- `status`: lowercase with hyphens — `"active"`, `"gate"`, `"complete"`, `"stale"`, `"no-prd"`
+- `status`: lowercase with hyphens — `"active"`, `"complete"`, `"stale"`, `"no-prd"`
 - `phases[].status`: `"complete"`, `"in-progress"`, `"not-started"`
 - `subPrds[].status`: `"complete"`, `"in-progress"`, `"not-started"`
 - `subPrds[].steps[].status`: `"done"`, `"pending"`
@@ -116,18 +116,7 @@ If `checkpoint.md` exists:
 - Extract the `checkpointed:` field from YAML frontmatter for the last activity date
 - Extract content from `<next_action>` tags for the next step
 
-### 5. Check Session State
-
-Before applying markdown-based status logic, check if `.dev/<feature>/session-state.json` exists. If it does, read it and apply these rules:
-
-1. If `status === "gate"` → set feature status to `"gate"` (regardless of markdown heuristics)
-2. If `status === "active"` and `since` is within 30 minutes of current time → set feature status to `"active"`
-3. If `status === "active"` but `since` is older than 30 minutes → treat as stale session, fall through to markdown heuristics below
-4. If `status === "idle"` → fall through to markdown heuristics below
-
-If `session-state.json` does not exist, fall through to markdown heuristics below.
-
-### 6. Calculate Status (Markdown Heuristics)
+### 5. Calculate Status
 
 | Status | Criteria |
 |--------|----------|
@@ -138,14 +127,14 @@ If `session-state.json` does not exist, fall through to markdown heuristics belo
 
 For staleness, compare checkpoint date (or Last Updated date if no checkpoint) against today's date.
 
-### 7. Calculate Phase Status
+### 6. Calculate Phase Status
 
 Each phase's status is:
 - **Complete**: All steps are `✅` or `⏭️`
 - **In Progress**: At least one step is `✅` or `⏭️`, but not all
 - **Not Started**: All steps are `⬜`
 
-### 8. Determine Next Action
+### 7. Determine Next Action
 
 For active features, the next action is determined by (in priority order):
 1. The `<next_action>` content from `checkpoint.md` (if it exists and is recent)

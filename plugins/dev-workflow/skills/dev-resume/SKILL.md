@@ -128,42 +128,15 @@ Never write new code from scratch when similar code already exists in the codeba
 
 ### Step 8: Begin Work
 
-> **REQUIRED**: Before ANY implementation work, write the session-state file below. Do NOT skip this.
-
-Write the session-state file to signal an active session:
-
-Write `$PROJECT_ROOT/.dev/$FEATURE_NAME/session-state.json`:
-```json
-{
-  "status": "active",
-  "phase": null,
-  "gate_label": null,
-  "since": "<current ISO 8601 timestamp>"
-}
-```
-
-Generate the timestamp via `date -u +"%Y-%m-%dT%H:%M:%SZ"`.
-
-Then proceed with the first action from the agent's summary. Follow the PRD phases and gates.
+After confirmation, proceed with the first action from the agent's summary. Follow the PRD phases and gates.
 
 **CRITICAL: PHASE GATE ENFORCEMENT**
 
 At every `⏸️ **GATE**:` in the PRD — this is a HARD STOP:
 1. **STOP** — Do not proceed to the next phase
-2. Write `$PROJECT_ROOT/.dev/$FEATURE_NAME/session-state.json`:
-   ```json
-   {
-     "status": "gate",
-     "phase": <current phase number>,
-     "gate_label": "<the gate prompt text>",
-     "since": "<current ISO 8601 timestamp>"
-   }
-   ```
-3. **Report** what was accomplished
-4. **Ask**: "Phase [N] complete. Continue to Phase [N+1] or `/dev-checkpoint`?"
-5. **Wait** for explicit user response before continuing
-
-When the user confirms to continue, overwrite `session-state.json` back to `"active"` (with `phase: null`, `gate_label: null`, fresh timestamp) before starting the next phase.
+2. **Report** what was accomplished
+3. **Ask**: "Phase [N] complete. Continue to Phase [N+1] or `/dev-checkpoint`?"
+4. **Wait** for explicit user response before continuing
 
 **STEP-LEVEL STOPS**
 

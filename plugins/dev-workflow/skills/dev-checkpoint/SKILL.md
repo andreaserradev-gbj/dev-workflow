@@ -145,22 +145,6 @@ Check if `$PROJECT_ROOT/.dev/$FEATURE_NAME/checkpoint.md` already exists. Rememb
 
 If it exists, read it first (the Write tool requires reading before overwriting). Then write the continuation prompt to that path.
 
-### Step 8b: Write Session State
-
-After saving the checkpoint, write the session-state file to signal the session is idle:
-
-Write `$PROJECT_ROOT/.dev/$FEATURE_NAME/session-state.json`:
-```json
-{
-  "status": "idle",
-  "phase": null,
-  "gate_label": null,
-  "since": "<current ISO 8601 timestamp>"
-}
-```
-
-Generate the timestamp via `date -u +"%Y-%m-%dT%H:%M:%SZ"`.
-
 ### Step 9: Summary
 
 Report:
