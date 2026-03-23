@@ -26,7 +26,7 @@ export function FeaturePanel({ project, projectPath, featureName, feature }: Pro
 
   if (loading) {
     return (
-      <div class="px-5 py-4 bg-slate-900/50">
+      <div class="px-5 py-4 bg-[#080f1e]">
         <span class="text-xs text-slate-500 font-mono">Loading...</span>
       </div>
     );
@@ -34,7 +34,7 @@ export function FeaturePanel({ project, projectPath, featureName, feature }: Pro
 
   if (error || !detail) {
     return (
-      <div class="px-5 py-4 bg-slate-900/50">
+      <div class="px-5 py-4 bg-[#080f1e]">
         <span class="text-xs text-red-400 font-mono">{error ?? 'No data'}</span>
       </div>
     );
@@ -44,7 +44,7 @@ export function FeaturePanel({ project, projectPath, featureName, feature }: Pro
   const currentPhaseNum = detail.currentPhase?.number ?? null;
 
   return (
-    <div class="px-5 py-4 bg-slate-900/50 border-t border-slate-800/30 space-y-4">
+    <div class="px-5 py-4 bg-[#080f1e] border-t border-slate-800/30 space-y-4">
       {/* Status bar */}
       <div class="flex items-center gap-3 text-xs font-mono text-slate-400">
         <span class="capitalize">{detail.status}</span>
@@ -70,7 +70,7 @@ export function FeaturePanel({ project, projectPath, featureName, feature }: Pro
 
       {/* Next Action */}
       {detail.checkpoint?.nextAction && (
-        <div class="rounded-lg bg-sky-500/5 border border-sky-500/20 px-4 py-3">
+        <div class="rounded-lg bg-sky-500/5 border border-sky-500/20 border-l-2 border-l-sky-500/30 px-4 py-3">
           <p class="text-[11px] font-semibold text-sky-400 uppercase tracking-wider mb-1">Next Action</p>
           <p class="text-sm text-slate-200 whitespace-pre-line">{detail.checkpoint.nextAction}</p>
         </div>
@@ -93,7 +93,7 @@ export function FeaturePanel({ project, projectPath, featureName, feature }: Pro
 
       {/* Blockers */}
       {detail.checkpoint && detail.checkpoint.blockers.length > 0 && (
-        <div class="rounded-lg border border-amber-500/30 bg-amber-500/5 px-4 py-3">
+        <div class="rounded-lg border border-amber-500/30 border-l-2 border-l-amber-500/30 bg-amber-500/5 px-4 py-3">
           <p class="text-[11px] font-semibold text-amber-400 uppercase tracking-wider mb-1.5">Blockers</p>
           <ul class="space-y-1">
             {detail.checkpoint.blockers.map((b, i) => (

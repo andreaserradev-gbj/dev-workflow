@@ -5,6 +5,7 @@ import { FeaturePanel } from './FeaturePanel.js';
 
 interface Props {
   project: Project;
+  singleProject?: boolean;
 }
 
 const STORAGE_KEY_PREFIX = 'dev-dashboard-collapsed:';
@@ -42,9 +43,9 @@ function buildSummary(project: Project): string {
   return parts.join(' \u00b7 ');
 }
 
-export function ProjectCard({ project }: Props) {
+export function ProjectCard({ project, singleProject }: Props) {
   const [expandedFeature, setExpandedFeature] = useState<string | null>(null);
-  const [collapsed, setCollapsed] = useState(() => isCollapsedInit(project.name));
+  const [collapsed, setCollapsed] = useState(() => singleProject ? false : isCollapsedInit(project.name));
 
   function toggleCollapsed() {
     setCollapsed((prev) => {
@@ -54,28 +55,43 @@ export function ProjectCard({ project }: Props) {
     });
   }
 
-  return (
-    <div class="rounded-xl bg-[#0d1425] border border-slate-800/60 overflow-hidden">
-      <button
-        type="button"
-        onClick={toggleCollapsed}
-        class="w-full px-5 py-4 border-b border-slate-800/40 flex items-center justify-between
-               cursor-pointer hover:bg-slate-800/20 transition-colors text-left"
-      >
-        <div class="flex items-center gap-3">
-          <span class="text-slate-500 text-[10px] w-3 flex-shrink-0 select-none">
-            {collapsed ? '\u25b6' : '\u25bc'}
-          </span>
-          <h2 class="text-base font-semibold text-white font-sans tracking-tight">
-            {project.name}
-          </h2>
-          <span class="text-xs text-slate-500 font-mono">
-            {buildSummary(project)}
-          </span>
-        </div>
-      </button>
+  const isCollapsed = singleProject ? false : collapsed;
 
-      {!collapsed && (
+  return (
+    <div class="rounded-xl bg-[#0d1425] border border-slate-800/60 overflow-hidden shadow-md shadow-black/20">
+      {singleProject ? (
+        <div class="w-full px-5 py-4 border-b border-slate-800/60 flex items-center justify-between text-left">
+          <div class="flex items-center gap-3">
+            <h2 class="text-base font-semibold text-white font-sans tracking-tight">
+              {project.name}
+            </h2>
+            <span class="text-xs text-slate-500 font-mono">
+              {buildSummary(project)}
+            </span>
+          </div>
+        </div>
+      ) : (
+        <button
+          type="button"
+          onClick={toggleCollapsed}
+          class="w-full px-5 py-4 border-b border-slate-800/60 flex items-center justify-between
+                 cursor-pointer hover:bg-slate-800/20 transition-colors text-left"
+        >
+          <div class="flex items-center gap-3">
+            <span class="text-slate-500 text-[10px] w-3 flex-shrink-0 select-none">
+              {isCollapsed ? '\u25b6' : '\u25bc'}
+            </span>
+            <h2 class="text-base font-semibold text-white font-sans tracking-tight">
+              {project.name}
+            </h2>
+            <span class="text-xs text-slate-500 font-mono">
+              {buildSummary(project)}
+            </span>
+          </div>
+        </button>
+      )}
+
+      {!isCollapsed && (
         <div class="divide-y divide-slate-800/30">
           {project.features.map((feature) => (
             <div key={feature.name}>

@@ -6,14 +6,31 @@ interface UseNotificationsResult {
   permissionDenied: boolean;
 }
 
+function readEnabled(): boolean {
+  try {
+    if (typeof Notification !== 'undefined' && Notification.permission === 'granted') {
+      return localStorage.getItem('dev-dashboard-notifications') === '1';
+    }
+  } catch {}
+  return false;
+}
+
+function writeEnabled(value: boolean): void {
+  try {
+    if (value) localStorage.setItem('dev-dashboard-notifications', '1');
+    else localStorage.removeItem('dev-dashboard-notifications');
+  } catch {}
+}
+
 export function useNotifications(): UseNotificationsResult {
-  const [enabled, setEnabled] = useState(false);
+  const [enabled, setEnabled] = useState(readEnabled);
   const [permissionDenied, setPermissionDenied] = useState(false);
 
   const toggle = useCallback(async () => {
     if (enabled) {
       // Disable
       setEnabled(false);
+      writeEnabled(false);
       await persistConfig(false);
       return;
     }
@@ -36,6 +53,7 @@ export function useNotifications(): UseNotificationsResult {
 
     setPermissionDenied(false);
     setEnabled(true);
+    writeEnabled(true);
     await persistConfig(true);
   }, [enabled]);
 

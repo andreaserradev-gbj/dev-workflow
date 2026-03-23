@@ -127,7 +127,7 @@ function PanelButton({
   return (
     <button
       type="button"
-      class="inline-flex items-center px-2.5 py-1 rounded-md text-[11px] font-medium font-mono bg-slate-800/60 text-slate-400 hover:bg-slate-700/60 hover:text-slate-300 transition-colors ring-1 ring-inset ring-slate-700/40"
+      class="inline-flex items-center px-2.5 py-1 rounded-md text-[11px] font-medium font-mono bg-slate-900/80 text-slate-400 hover:bg-slate-700/60 hover:text-slate-300 transition-colors ring-1 ring-inset ring-slate-700/30"
       onClick={onClick}
     >
       {copied ? 'Copied!' : label}

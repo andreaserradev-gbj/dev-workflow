@@ -63,7 +63,7 @@ export function FeatureRow({ feature, projectPath, id, expanded, onClick }: Prop
   return (
     <div
       id={id}
-      class={`px-5 py-3.5 flex items-center gap-4 cursor-pointer transition-colors hover:bg-slate-800/30 ${expanded ? 'bg-slate-800/20' : ''}`}
+      class={`px-5 py-4 flex items-center gap-4 cursor-pointer transition-colors hover:bg-slate-800/30 ${expanded ? 'bg-slate-800/20' : ''}`}
       onClick={onClick}
     >
       {/* Name + branch */}
@@ -90,14 +90,14 @@ export function FeatureRow({ feature, projectPath, id, expanded, onClick }: Prop
       </div>
 
       {/* Progress bar */}
-      <div class="w-28 flex-shrink-0">
+      <div class="w-32 flex-shrink-0">
         {feature.progress ? (
           <div>
             <div class="flex justify-between text-[11px] font-mono text-slate-500 mb-1">
               <span>{feature.progress.done}/{feature.progress.total}</span>
               <span>{feature.progress.percent}%</span>
             </div>
-            <div class="h-1.5 rounded-full bg-slate-800 overflow-hidden">
+            <div class="h-2 rounded-full bg-slate-800 overflow-hidden">
               <div
                 class={`h-full rounded-full ${config.bar} transition-all duration-500`}
                 style={{ width: `${feature.progress.percent}%` }}
@@ -122,7 +122,7 @@ export function FeatureRow({ feature, projectPath, id, expanded, onClick }: Prop
 
       {/* Status badge */}
       <span
-        class={`inline-flex items-center px-2 py-0.5 rounded-md text-[11px] font-medium font-mono flex-shrink-0 ${config.badge}`}
+        class={`inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-medium font-mono flex-shrink-0 ${config.badge}`}
       >
         {config.label}
       </span>
