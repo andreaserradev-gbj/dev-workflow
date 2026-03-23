@@ -2,6 +2,7 @@ import type { Feature, FeatureStatus } from '@shared/types.js';
 
 interface Props {
   feature: Feature;
+  id?: string;
 }
 
 const STATUS_CONFIG: Record<FeatureStatus, { label: string; badge: string; bar: string }> = {
@@ -47,11 +48,11 @@ function formatTimeAgo(dateStr: string): string {
   return `${days}d ago`;
 }
 
-export function FeatureRow({ feature }: Props) {
+export function FeatureRow({ feature, id }: Props) {
   const config = STATUS_CONFIG[feature.status] ?? STATUS_CONFIG['no-prd'];
 
   return (
-    <div class="px-5 py-3.5 flex items-center gap-4">
+    <div id={id} class="px-5 py-3.5 flex items-center gap-4">
       {/* Name + branch */}
       <div class="min-w-0 flex-1">
         <div class="flex items-center gap-2">

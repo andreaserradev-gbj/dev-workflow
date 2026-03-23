@@ -31,7 +31,11 @@ export function ProjectCard({ project }: Props) {
 
       <div class="divide-y divide-slate-800/30">
         {project.features.map((feature) => (
-          <FeatureRow key={feature.name} feature={feature} />
+          <FeatureRow
+            key={feature.name}
+            feature={feature}
+            id={`feature-${project.name}-${feature.name}`}
+          />
         ))}
       </div>
     </div>

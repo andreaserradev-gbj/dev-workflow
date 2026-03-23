@@ -14,6 +14,10 @@ export default defineConfig({
   server: {
     proxy: {
       '/api': 'http://localhost:3141',
+      '/ws': {
+        target: 'ws://localhost:3141',
+        ws: true,
+      },
     },
   },
   build: {

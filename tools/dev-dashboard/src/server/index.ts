@@ -6,6 +6,9 @@ import { loadConfig, parseCliArgs } from './config.js';
 import { scanProjects } from './scanner.js';
 import { DashboardState } from './state.js';
 import { registerApiRoutes } from './api.js';
+import { createWsBroadcaster } from './ws.js';
+import { createWatcher } from './watcher.js';
+import { parseFeature } from './parser.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
@@ -45,6 +48,42 @@ async function main(): Promise<void> {
 
   // Start server
   await app.listen({ port: config.port, host: '0.0.0.0' });
+
+  // WebSocket broadcaster — attach to the running HTTP server
+  const broadcaster = createWsBroadcaster(app.server, state);
+
+  // File watcher — re-parse changed features and push updates via WebSocket
+  await createWatcher(config.scanDirs, {
+    onFeatureUpdated: async (projectPath, featureName) => {
+      const featureDir = resolve(projectPath, '.dev', featureName);
+      const feature = await parseFeature(featureDir, featureName);
+      state.updateFeature(projectPath, featureName, feature);
+      broadcaster.broadcast({
+        type: 'feature_updated',
+        project: projectPath,
+        feature: featureName,
+        data: feature,
+      });
+    },
+    onFeatureAdded: async (projectPath, featureName) => {
+      const featureDir = resolve(projectPath, '.dev', featureName);
+      const feature = await parseFeature(featureDir, featureName);
+      state.addFeature(projectPath, feature);
+      broadcaster.broadcast({
+        type: 'feature_added',
+        project: projectPath,
+        feature,
+      });
+    },
+    onFeatureRemoved: (projectPath, featureName) => {
+      state.removeFeature(projectPath, featureName);
+      broadcaster.broadcast({
+        type: 'feature_removed',
+        project: projectPath,
+        feature: featureName,
+      });
+    },
+  });
 
   console.log(
     `dev-dashboard running at http://localhost:${config.port} — scanning ${config.scanDirs.length} directories`

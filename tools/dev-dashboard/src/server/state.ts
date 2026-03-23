@@ -42,6 +42,36 @@ export class DashboardState {
     project.features[idx] = { ...project.features[idx], ...data };
   }
 
+  addFeature(projectPath: string, feature: Feature): void {
+    const project = this.projects.get(projectPath);
+    if (project) {
+      const existing = project.features.findIndex((f) => f.name === feature.name);
+      if (existing === -1) {
+        project.features.push(feature);
+      } else {
+        project.features[existing] = feature;
+      }
+    } else {
+      // New project discovered via watcher
+      const name = projectPath.split('/').pop() ?? projectPath;
+      this.projects.set(projectPath, {
+        name,
+        path: projectPath,
+        features: [feature],
+      });
+    }
+  }
+
+  removeFeature(projectPath: string, featureName: string): void {
+    const project = this.projects.get(projectPath);
+    if (!project) return;
+
+    project.features = project.features.filter((f) => f.name !== featureName);
+    if (project.features.length === 0) {
+      this.projects.delete(projectPath);
+    }
+  }
+
   get projectCount(): number {
     return this.projects.size;
   }

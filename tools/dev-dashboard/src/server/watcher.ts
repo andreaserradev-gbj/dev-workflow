@@ -1,0 +1,182 @@
+import chokidar from 'chokidar';
+import { dirname, basename, sep } from 'path';
+
+export interface WatcherCallbacks {
+  onFeatureUpdated: (projectPath: string, featureName: string) => void;
+  onFeatureAdded: (projectPath: string, featureName: string) => void;
+  onFeatureRemoved: (projectPath: string, featureName: string) => void;
+}
+
+export interface WatcherOptions {
+  debounceMs?: number;
+}
+
+export interface Watcher {
+  close: () => Promise<void>;
+}
+
+interface ParsedPath {
+  projectPath: string;
+  featureName: string;
+}
+
+const DEFAULT_DEBOUNCE_MS = 200;
+
+/**
+ * Parse a file path to extract the project path and feature name.
+ * Expects paths like: .../project/.dev/feature-name/file.md
+ * Returns null if the path doesn't match this pattern.
+ */
+function parsePath(filePath: string): ParsedPath | null {
+  const parts = filePath.split(sep);
+  const devIdx = parts.lastIndexOf('.dev');
+  if (devIdx === -1 || devIdx + 1 >= parts.length) return null;
+
+  const projectPath = parts.slice(0, devIdx).join(sep);
+  const featureName = parts[devIdx + 1];
+
+  if (!projectPath || !featureName) return null;
+  return { projectPath, featureName };
+}
+
+export async function createWatcher(
+  scanDirs: string[],
+  callbacks: WatcherCallbacks,
+  options: WatcherOptions = {}
+): Promise<Watcher> {
+  const debounceMs = options.debounceMs ?? DEFAULT_DEBOUNCE_MS;
+
+  // Track known features to distinguish add vs update
+  const knownFeatures = new Set<string>();
+
+  // Debounce timers per feature key
+  const timers = new Map<string, ReturnType<typeof setTimeout>>();
+  // Pending event type per feature key (for debounce)
+  const pendingEvents = new Map<string, 'updated' | 'added'>();
+
+  function featureKey(projectPath: string, featureName: string): string {
+    return `${projectPath}${sep}.dev${sep}${featureName}`;
+  }
+
+  function scheduleEvent(
+    projectPath: string,
+    featureName: string,
+    eventType: 'updated' | 'added'
+  ): void {
+    const key = featureKey(projectPath, featureName);
+
+    // If there's already a pending event, prefer 'added' over 'updated'
+    const existing = pendingEvents.get(key);
+    if (!existing || eventType === 'added') {
+      pendingEvents.set(key, eventType);
+    }
+
+    // Reset the debounce timer
+    const existingTimer = timers.get(key);
+    if (existingTimer) clearTimeout(existingTimer);
+
+    timers.set(
+      key,
+      setTimeout(() => {
+        timers.delete(key);
+        const type = pendingEvents.get(key) ?? 'updated';
+        pendingEvents.delete(key);
+
+        if (type === 'added') {
+          callbacks.onFeatureAdded(projectPath, featureName);
+        } else {
+          callbacks.onFeatureUpdated(projectPath, featureName);
+        }
+      }, debounceMs)
+    );
+  }
+
+  // Watch scan directories directly — chokidar globs don't match dot-prefixed
+  // dirs like .dev, so we watch the parent dirs and filter in handlers.
+  const watcher = chokidar.watch(scanDirs, {
+    ignored: [
+      '**/node_modules/**',
+      '**/.git/**',
+      '**/.dev-archive/**',
+    ],
+    ignoreInitial: true,
+  });
+
+  function isDevMd(filePath: string): boolean {
+    if (!filePath.includes(`${sep}.dev${sep}`) || !filePath.endsWith('.md')) return false;
+    if (filePath.includes(`${sep}node_modules${sep}`)) return false;
+    if (filePath.includes(`${sep}.dev-archive${sep}`)) return false;
+    return true;
+  }
+
+  watcher.on('add', (filePath: string) => {
+    if (!isDevMd(filePath)) return;
+    const parsed = parsePath(filePath);
+    if (!parsed) return;
+
+    const key = featureKey(parsed.projectPath, parsed.featureName);
+    if (knownFeatures.has(key)) {
+      scheduleEvent(parsed.projectPath, parsed.featureName, 'updated');
+    } else {
+      knownFeatures.add(key);
+      scheduleEvent(parsed.projectPath, parsed.featureName, 'added');
+    }
+  });
+
+  watcher.on('change', (filePath: string) => {
+    if (!isDevMd(filePath)) return;
+    const parsed = parsePath(filePath);
+    if (!parsed) return;
+
+    const key = featureKey(parsed.projectPath, parsed.featureName);
+    knownFeatures.add(key);
+    scheduleEvent(parsed.projectPath, parsed.featureName, 'updated');
+  });
+
+  watcher.on('unlink', (filePath: string) => {
+    if (!isDevMd(filePath)) return;
+    const parsed = parsePath(filePath);
+    if (!parsed) return;
+
+    // Clear any pending debounce for this feature
+    const key = featureKey(parsed.projectPath, parsed.featureName);
+    const existingTimer = timers.get(key);
+    if (existingTimer) {
+      clearTimeout(existingTimer);
+      timers.delete(key);
+      pendingEvents.delete(key);
+    }
+
+    knownFeatures.delete(key);
+    callbacks.onFeatureRemoved(parsed.projectPath, parsed.featureName);
+  });
+
+  // Wait for the watcher to be ready
+  await new Promise<void>((resolve) => {
+    watcher.on('ready', resolve);
+  });
+
+  // Populate knownFeatures from initially watched files
+  const watched = watcher.getWatched();
+  for (const dir of Object.keys(watched)) {
+    for (const file of watched[dir]) {
+      const fullPath = `${dir}${sep}${file}`;
+      const parsed = parsePath(fullPath);
+      if (parsed) {
+        knownFeatures.add(featureKey(parsed.projectPath, parsed.featureName));
+      }
+    }
+  }
+
+  return {
+    close: async () => {
+      // Clear all pending timers
+      for (const timer of timers.values()) {
+        clearTimeout(timer);
+      }
+      timers.clear();
+      pendingEvents.clear();
+      await watcher.close();
+    },
+  };
+}

@@ -91,6 +91,13 @@ export interface DashboardConfig {
   notifications: boolean;
 }
 
+// WebSocket event types pushed to clients
+export type WsEvent =
+  | { type: 'feature_updated'; project: string; feature: string; data: Feature }
+  | { type: 'feature_added'; project: string; feature: Feature }
+  | { type: 'feature_removed'; project: string; feature: string }
+  | { type: 'full_refresh'; data: ProjectsResponse };
+
 // Status sort order (matches board-template.html)
 export const STATUS_ORDER: Record<FeatureStatus, number> = {
   active: 0,
