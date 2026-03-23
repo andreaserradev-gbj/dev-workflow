@@ -1,15 +1,11 @@
-// Feature-level status (derived from session-state + markdown heuristics)
+// Feature-level status (derived from PRD markdown + checkpoint dates)
 export type FeatureStatus =
   | 'active'
-  | 'gate'
   | 'stale'
   | 'complete'
   | 'checkpoint-only'
   | 'no-prd'
   | 'empty';
-
-// Session-state.json status field
-export type SessionStatus = 'active' | 'gate' | 'idle';
 
 // Step-level progress
 export interface Progress {
@@ -25,14 +21,6 @@ export interface Phase {
   done: number;
   total: number;
   status: 'complete' | 'in-progress' | 'not-started';
-}
-
-// Live session state (from session-state.json)
-export interface SessionState {
-  status: SessionStatus;
-  phase: number | null;
-  gateLabel: string | null;
-  since: string;
 }
 
 // Sub-PRD step
@@ -61,7 +49,6 @@ export interface Feature {
   lastCheckpoint: string | null;
   nextAction: string | null;
   branch: string | null;
-  session: SessionState | null;
   summary: string | null;
 }
 
@@ -106,11 +93,10 @@ export interface DashboardConfig {
 
 // Status sort order (matches board-template.html)
 export const STATUS_ORDER: Record<FeatureStatus, number> = {
-  gate: 0,
-  active: 1,
-  stale: 2,
-  'no-prd': 3,
-  'checkpoint-only': 4,
-  empty: 5,
-  complete: 6,
+  active: 0,
+  stale: 1,
+  'no-prd': 2,
+  'checkpoint-only': 3,
+  empty: 4,
+  complete: 5,
 };

@@ -10,11 +10,6 @@ const STATUS_CONFIG: Record<FeatureStatus, { label: string; badge: string; bar: 
     badge: 'bg-sky-500/10 text-sky-400 ring-1 ring-inset ring-sky-500/20',
     bar: 'bg-sky-500',
   },
-  gate: {
-    label: 'Gate',
-    badge: 'bg-amber-500/10 text-amber-400 ring-1 ring-inset ring-amber-500/20',
-    bar: 'bg-amber-500',
-  },
   complete: {
     label: 'Complete',
     badge: 'bg-emerald-500/10 text-emerald-400 ring-1 ring-inset ring-emerald-500/20',
@@ -54,10 +49,9 @@ function formatTimeAgo(dateStr: string): string {
 
 export function FeatureRow({ feature }: Props) {
   const config = STATUS_CONFIG[feature.status] ?? STATUS_CONFIG['no-prd'];
-  const isGate = feature.status === 'gate';
 
   return (
-    <div class={`px-5 py-3.5 flex items-center gap-4 ${isGate ? 'gate-pulse' : ''}`}>
+    <div class="px-5 py-3.5 flex items-center gap-4">
       {/* Name + branch */}
       <div class="min-w-0 flex-1">
         <div class="flex items-center gap-2">
@@ -77,11 +71,6 @@ export function FeatureRow({ feature }: Props) {
             Phase {feature.currentPhase.number}/{feature.currentPhase.total}
             {' — '}
             {feature.currentPhase.title}
-          </p>
-        )}
-        {!feature.currentPhase && feature.session?.gateLabel && (
-          <p class="mt-0.5 text-xs text-amber-400/80">
-            {feature.session.gateLabel}
           </p>
         )}
       </div>

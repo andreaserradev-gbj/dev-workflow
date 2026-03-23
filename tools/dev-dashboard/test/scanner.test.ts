@@ -14,7 +14,7 @@ let tempDir: string;
 //         feature-two/   (checkpoint only)
 //     project-beta/
 //       .dev/
-//         feature-three/ (has master plan + session-state)
+//         feature-three/ (has master plan)
 //     empty-project/
 //       .dev/            (exists but empty)
 //     node_modules/
@@ -61,13 +61,6 @@ checkpointed: 2026-03-20T10:00:00Z
 <next_action>Do the next thing</next_action>
 `;
 
-const SESSION_STATE_ACTIVE = JSON.stringify({
-  status: 'active',
-  phase: null,
-  gate_label: null,
-  since: new Date().toISOString(),
-});
-
 beforeAll(async () => {
   tempDir = await mkdtemp(join(tmpdir(), 'scanner-test-'));
 
@@ -79,10 +72,9 @@ beforeAll(async () => {
   await mkdir(join(tempDir, 'project-alpha/.dev/feature-two'), { recursive: true });
   await writeFile(join(tempDir, 'project-alpha/.dev/feature-two/checkpoint.md'), CHECKPOINT);
 
-  // project-beta with 1 feature + session state
+  // project-beta with 1 feature
   await mkdir(join(tempDir, 'project-beta/.dev/feature-three'), { recursive: true });
   await writeFile(join(tempDir, 'project-beta/.dev/feature-three/00-master-plan.md'), MASTER_PLAN);
-  await writeFile(join(tempDir, 'project-beta/.dev/feature-three/session-state.json'), SESSION_STATE_ACTIVE);
 
   // empty-project with empty .dev/
   await mkdir(join(tempDir, 'empty-project/.dev'), { recursive: true });

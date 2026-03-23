@@ -1,14 +1,13 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import { describe, it, expect } from 'vitest';
 import { resolve } from 'path';
 import {
   parseMasterPlan,
   parseCheckpoint,
   parseSubPrd,
-  parseSessionState,
   determineFeatureStatus,
   parseFeature,
 } from '../src/server/parser.js';
-import type { Feature, FeatureDetail, SessionState } from '../src/shared/types.js';
+import type { Feature } from '../src/shared/types.js';
 
 const FIXTURES = resolve(__dirname, 'fixtures');
 
@@ -102,8 +101,6 @@ describe('parseMasterPlan', () => {
 
     // Should still extract what it can
     expect(result).not.toBeNull();
-    // Phase 1 has no status markers on steps → 0 countable steps
-    // Phase 2 has 1 ✅ and 1 line with just "2." → parser should handle
     expect(result!.phases.length).toBeGreaterThanOrEqual(1);
   });
 
@@ -115,13 +112,12 @@ describe('parseMasterPlan', () => {
   it('does not count verification items as steps', async () => {
     const result = await parseMasterPlan(resolve(FIXTURES, 'full-feature/00-master-plan.md'));
     // Phase 1 has 5 numbered steps + 2 verification items (- [x])
-    // Should only count the 5 numbered steps
     expect(result!.phases[0].total).toBe(5);
   });
 
   it('does not count GATE lines as steps', async () => {
     const result = await parseMasterPlan(resolve(FIXTURES, 'full-feature/00-master-plan.md'));
-    // Total steps across all phases should be 13, not 16 (3 gates excluded)
+    // Total steps across all phases should be 13
     expect(result!.progress.total).toBe(13);
   });
 });
@@ -171,10 +167,8 @@ describe('parseCheckpoint', () => {
   it('handles malformed checkpoint gracefully', async () => {
     const result = await parseCheckpoint(resolve(FIXTURES, 'malformed/checkpoint.md'));
 
-    // Malformed YAML → should return null or partial with null fields
-    // The key thing is it doesn't throw
+    // Malformed YAML — should return null or partial with null fields
     if (result !== null) {
-      // If it parses partially, frontmatter fields should be null/undefined
       expect(result.nextAction).toBeNull();
     }
   });
@@ -207,96 +201,27 @@ describe('parseSubPrd', () => {
   });
 });
 
-// ─── Session State Parsing ─────────────────────────────────────────
-
-describe('parseSessionState', () => {
-  it('parses active session state', async () => {
-    const result = await parseSessionState(resolve(FIXTURES, 'full-feature/session-state.json'));
-
-    expect(result).not.toBeNull();
-    expect(result!.status).toBe('active');
-    expect(result!.phase).toBeNull();
-    expect(result!.gateLabel).toBeNull();
-    expect(result!.since).toBe('2026-03-20T14:00:00Z');
-  });
-
-  it('parses gate session state', async () => {
-    const result = await parseSessionState(resolve(FIXTURES, 'gate-feature/session-state.json'));
-
-    expect(result).not.toBeNull();
-    expect(result!.status).toBe('gate');
-    expect(result!.phase).toBe(1);
-    expect(result!.gateLabel).toContain('Phase 1 complete');
-    expect(result!.since).toBe('2026-03-22T16:45:00Z');
-  });
-
-  it('returns null for missing file', async () => {
-    const result = await parseSessionState(resolve(FIXTURES, 'no-session-state/session-state.json'));
-    expect(result).toBeNull();
-  });
-
-  it('returns null for malformed JSON', async () => {
-    const result = await parseSessionState(resolve(FIXTURES, 'malformed/session-state.json'));
-    expect(result).toBeNull();
-  });
-});
-
 // ─── Status Determination ──────────────────────────────────────────
 
 describe('determineFeatureStatus', () => {
   const now = new Date('2026-03-23T04:00:00Z');
 
-  it('returns "gate" when session-state says gate (regardless of age)', () => {
-    const session: SessionState = {
-      status: 'gate',
-      phase: 1,
-      gateLabel: 'Phase 1 complete.',
-      since: '2026-03-20T00:00:00Z', // 3 days ago — still gate
-    };
-    expect(determineFeatureStatus({ hasMasterPlan: true, allComplete: false, session, checkpointDate: null, lastUpdated: null, now })).toBe('gate');
-  });
-
-  it('returns "active" when session is active and recent', () => {
-    const session: SessionState = {
-      status: 'active',
-      phase: null,
-      gateLabel: null,
-      since: '2026-03-23T03:45:00Z', // 15 min ago
-    };
-    expect(determineFeatureStatus({ hasMasterPlan: true, allComplete: false, session, checkpointDate: null, lastUpdated: null, now })).toBe('active');
-  });
-
-  it('falls back to markdown heuristics when active session is stale (>30min)', () => {
-    const session: SessionState = {
-      status: 'active',
-      phase: null,
-      gateLabel: null,
-      since: '2026-03-23T02:00:00Z', // 2 hours ago
-    };
-    // Has checkpoint within 30 days → "active" from heuristics
+  it('returns "active" when checkpoint is recent', () => {
     expect(determineFeatureStatus({
       hasMasterPlan: true,
       allComplete: false,
-      session,
       checkpointDate: '2026-03-20T14:30:00Z',
       lastUpdated: null,
       now,
     })).toBe('active');
   });
 
-  it('falls back to markdown heuristics when session is idle', () => {
-    const session: SessionState = {
-      status: 'idle',
-      phase: null,
-      gateLabel: null,
-      since: '2026-03-23T03:50:00Z',
-    };
+  it('returns "active" when lastUpdated is recent', () => {
     expect(determineFeatureStatus({
       hasMasterPlan: true,
       allComplete: false,
-      session,
-      checkpointDate: '2026-03-20T14:30:00Z',
-      lastUpdated: null,
+      checkpointDate: null,
+      lastUpdated: '2026-03-20',
       now,
     })).toBe('active');
   });
@@ -305,7 +230,6 @@ describe('determineFeatureStatus', () => {
     expect(determineFeatureStatus({
       hasMasterPlan: true,
       allComplete: true,
-      session: null,
       checkpointDate: null,
       lastUpdated: '2026-03-20',
       now,
@@ -316,8 +240,7 @@ describe('determineFeatureStatus', () => {
     expect(determineFeatureStatus({
       hasMasterPlan: true,
       allComplete: false,
-      session: null,
-      checkpointDate: '2026-02-01T00:00:00Z', // ~50 days ago
+      checkpointDate: '2026-02-01T00:00:00Z',
       lastUpdated: null,
       now,
     })).toBe('stale');
@@ -327,9 +250,18 @@ describe('determineFeatureStatus', () => {
     expect(determineFeatureStatus({
       hasMasterPlan: true,
       allComplete: false,
-      session: null,
       checkpointDate: null,
       lastUpdated: '2026-01-15',
+      now,
+    })).toBe('stale');
+  });
+
+  it('returns "stale" when no date reference available', () => {
+    expect(determineFeatureStatus({
+      hasMasterPlan: true,
+      allComplete: false,
+      checkpointDate: null,
+      lastUpdated: null,
       now,
     })).toBe('stale');
   });
@@ -338,7 +270,6 @@ describe('determineFeatureStatus', () => {
     expect(determineFeatureStatus({
       hasMasterPlan: false,
       allComplete: false,
-      session: null,
       checkpointDate: '2026-03-20T14:30:00Z',
       lastUpdated: null,
       now,
@@ -349,7 +280,6 @@ describe('determineFeatureStatus', () => {
     expect(determineFeatureStatus({
       hasMasterPlan: false,
       allComplete: false,
-      session: null,
       checkpointDate: null,
       lastUpdated: null,
       now,
@@ -360,7 +290,6 @@ describe('determineFeatureStatus', () => {
     expect(determineFeatureStatus({
       hasMasterPlan: false,
       allComplete: false,
-      session: null,
       checkpointDate: null,
       lastUpdated: null,
       now,
@@ -380,7 +309,6 @@ describe('parseFeature', () => {
     expect(result.currentPhase).toMatchObject({ number: 2, title: 'Token Management' });
     expect(result.branch).toBe('feature/auth-system');
     expect(result.nextAction).toContain('refresh token rotation');
-    expect(result.session).not.toBeNull();
   });
 
   it('parses checkpoint-only feature', async () => {
@@ -393,14 +321,13 @@ describe('parseFeature', () => {
     expect(result.nextAction).toContain('Map legacy columns');
   });
 
-  it('parses gate-feature with gate status', async () => {
+  it('parses gate-feature with active status (has incomplete steps)', async () => {
     const result = await parseFeature(resolve(FIXTURES, 'gate-feature'), 'gate-feature');
 
     expect(result.name).toBe('gate-feature');
-    expect(result.status).toBe('gate');
-    expect(result.session).not.toBeNull();
-    expect(result.session!.status).toBe('gate');
-    expect(result.session!.phase).toBe(1);
+    // Phase 1 complete, Phase 2 not started — active (has recent lastUpdated)
+    expect(result.status).toBe('active');
+    expect(result.progress).toMatchObject({ done: 3, total: 6, percent: 50 });
   });
 
   it('parses empty-dev as empty', async () => {
@@ -416,9 +343,7 @@ describe('parseFeature', () => {
     const result = await parseFeature(resolve(FIXTURES, 'no-session-state'), 'no-session-state');
 
     expect(result.name).toBe('no-session-state');
-    // Has PRD + checkpoint within 30 days → active
     expect(result.status).toBe('active');
-    expect(result.session).toBeNull();
     expect(result.branch).toBe('feature/rate-limiting');
   });
 
@@ -426,7 +351,6 @@ describe('parseFeature', () => {
     const result = await parseFeature(resolve(FIXTURES, 'malformed'), 'malformed');
 
     expect(result.name).toBe('malformed');
-    // Should not throw, status should be some valid value
     expect(result.status).toBeDefined();
   });
 });

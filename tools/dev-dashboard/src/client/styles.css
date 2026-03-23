@@ -19,15 +19,6 @@ body {
   animation: fadeIn 0.35s ease-out both;
 }
 
-@keyframes pulse-gate {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.6; }
-}
-
-.gate-pulse {
-  animation: pulse-gate 2s ease-in-out infinite;
-}
-
 ::-webkit-scrollbar { width: 6px; }
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb { background: #1e293b; border-radius: 3px; }

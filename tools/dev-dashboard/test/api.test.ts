@@ -16,19 +16,17 @@ const mockFeature: Feature = {
   lastCheckpoint: '2026-03-20T14:30:00Z',
   nextAction: 'Implement refresh token rotation',
   branch: 'feature/auth-system',
-  session: { status: 'active', phase: null, gateLabel: null, since: '2026-03-20T14:00:00Z' },
   summary: 'Multi-provider authentication with OAuth2 and JWT.',
 };
 
-const mockGateFeature: Feature = {
+const mockStaleFeature: Feature = {
   name: 'notifications',
-  status: 'gate',
+  status: 'stale',
   progress: { done: 3, total: 6, percent: 50 },
   currentPhase: { number: 2, total: 2, title: 'Push Notifications' },
   lastCheckpoint: null,
   nextAction: null,
   branch: null,
-  session: { status: 'gate', phase: 1, gateLabel: 'Phase 1 complete.', since: '2026-03-22T16:45:00Z' },
   summary: 'Event-driven notification system.',
 };
 
@@ -36,7 +34,7 @@ const mockProjects: Project[] = [
   {
     name: 'api-server',
     path: '/tmp/test/api-server',
-    features: [mockFeature, mockGateFeature],
+    features: [mockFeature, mockStaleFeature],
   },
   {
     name: 'web-client',
@@ -50,7 +48,6 @@ const mockProjects: Project[] = [
         lastCheckpoint: '2026-03-15T10:00:00Z',
         nextAction: null,
         branch: 'feature/dashboard-ui',
-        session: null,
         summary: 'Dashboard UI components.',
       },
     ],

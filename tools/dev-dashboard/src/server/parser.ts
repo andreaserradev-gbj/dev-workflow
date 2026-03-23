@@ -1,4 +1,4 @@
-import { readFile, readdir, access } from 'fs/promises';
+import { readFile, readdir } from 'fs/promises';
 import { resolve, basename } from 'path';
 import matter from 'gray-matter';
 import type {
@@ -6,8 +6,6 @@ import type {
   FeatureStatus,
   Phase,
   Progress,
-  SessionState,
-  SubPrd,
   SubPrdStep,
 } from '../shared/types.js';
 
@@ -271,42 +269,13 @@ export async function parseSubPrd(filePath: string): Promise<SubPrdResult | null
   return { id, title, done, total, status, steps };
 }
 
-// ─── Session State ─────────────────────────────────────────────────
-
-export async function parseSessionState(filePath: string): Promise<SessionState | null> {
-  let content: string;
-  try {
-    content = await readFile(filePath, 'utf-8');
-  } catch {
-    return null;
-  }
-
-  try {
-    const data = JSON.parse(content);
-
-    if (!data.status || !data.since) return null;
-    if (!['active', 'gate', 'idle'].includes(data.status)) return null;
-
-    return {
-      status: data.status,
-      phase: data.phase ?? null,
-      gateLabel: data.gate_label ?? null,
-      since: data.since,
-    };
-  } catch {
-    return null;
-  }
-}
-
 // ─── Status Determination ──────────────────────────────────────────
 
-const THIRTY_MINUTES_MS = 30 * 60 * 1000;
 const THIRTY_DAYS_MS = 30 * 24 * 60 * 60 * 1000;
 
 export interface StatusInput {
   hasMasterPlan: boolean;
   allComplete: boolean;
-  session: SessionState | null;
   checkpointDate: string | null;
   lastUpdated: string | null;
   now: Date;
@@ -314,23 +283,10 @@ export interface StatusInput {
 }
 
 export function determineFeatureStatus(input: StatusInput): FeatureStatus {
-  const { hasMasterPlan, allComplete, session, checkpointDate, lastUpdated, now, isEmpty } = input;
+  const { hasMasterPlan, allComplete, checkpointDate, lastUpdated, now, isEmpty } = input;
 
   // Empty directory
   if (isEmpty) return 'empty';
-
-  // Session-state priority
-  if (session) {
-    if (session.status === 'gate') return 'gate';
-
-    if (session.status === 'active') {
-      const sinceMs = new Date(session.since).getTime();
-      const ageMs = now.getTime() - sinceMs;
-      if (ageMs <= THIRTY_MINUTES_MS) return 'active';
-      // Stale active session — fall through to markdown heuristics
-    }
-    // idle → fall through to markdown heuristics
-  }
 
   // No master plan
   if (!hasMasterPlan) {
@@ -362,7 +318,6 @@ export async function parseFeature(featureDir: string, name: string): Promise<Fe
 
   const masterPlan = await parseMasterPlan(resolve(featureDir, '00-master-plan.md'));
   const checkpoint = await parseCheckpoint(resolve(featureDir, 'checkpoint.md'));
-  const session = await parseSessionState(resolve(featureDir, 'session-state.json'));
 
   const allComplete =
     masterPlan !== null &&
@@ -372,7 +327,6 @@ export async function parseFeature(featureDir: string, name: string): Promise<Fe
   const status = determineFeatureStatus({
     hasMasterPlan: masterPlan !== null,
     allComplete,
-    session,
     checkpointDate: checkpoint?.checkpointed ?? null,
     lastUpdated: masterPlan?.lastUpdated ?? null,
     now: new Date(),
@@ -402,7 +356,6 @@ export async function parseFeature(featureDir: string, name: string): Promise<Fe
     lastCheckpoint: checkpoint?.checkpointed ?? null,
     nextAction: checkpoint?.nextAction ?? null,
     branch: checkpoint?.branch ?? null,
-    session,
     summary: masterPlan?.summary ?? null,
   };
 }
