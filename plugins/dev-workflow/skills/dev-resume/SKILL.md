@@ -128,7 +128,9 @@ Never write new code from scratch when similar code already exists in the codeba
 
 ### Step 8: Begin Work
 
-After confirmation, write the session-state file to signal an active session:
+> **REQUIRED**: Before ANY implementation work, write the session-state file below. Do NOT skip this.
+
+Write the session-state file to signal an active session:
 
 Write `$PROJECT_ROOT/.dev/$FEATURE_NAME/session-state.json`:
 ```json
