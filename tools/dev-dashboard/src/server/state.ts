@@ -1,4 +1,29 @@
 import type { Feature, FeatureDetail, Phase, Project, SubPrd } from '../shared/types.js';
+import { STATUS_ORDER } from '../shared/types.js';
+
+/** Sort features by status priority, then projects by most recently active. Pure function. */
+export function sortProjects(projects: Project[]): Project[] {
+  return projects
+    .map((p) => ({
+      ...p,
+      features: [...p.features].sort(
+        (a, b) => (STATUS_ORDER[a.status] ?? 99) - (STATUS_ORDER[b.status] ?? 99)
+      ),
+    }))
+    .sort((a, b) => {
+      const latestCheckpoint = (proj: Project): number => {
+        let max = 0;
+        for (const f of proj.features) {
+          if (f.lastCheckpoint) {
+            const t = new Date(f.lastCheckpoint).getTime();
+            if (t > max) max = t;
+          }
+        }
+        return max;
+      };
+      return latestCheckpoint(b) - latestCheckpoint(a);
+    });
+}
 
 export class DashboardState {
   private projects = new Map<string, Project>();
@@ -11,7 +36,7 @@ export class DashboardState {
   }
 
   getProjects(): Project[] {
-    return Array.from(this.projects.values());
+    return sortProjects(Array.from(this.projects.values()));
   }
 
   getProject(nameOrPath: string): Project | null {

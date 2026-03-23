@@ -1,11 +1,29 @@
-import { useCallback } from 'preact/hooks';
+import { useCallback, useEffect, useMemo, useState } from 'preact/hooks';
+import type { FeatureStatus, Project } from '@shared/types.js';
 import { ProjectCard } from './components/ProjectCard.js';
 import { SessionBar } from './components/SessionBar.js';
 import { useWebSocket } from './hooks/useWebSocket.js';
 import { useNotifications, notifyFeatureUpdate } from './hooks/useNotifications.js';
 
+const FILTER_PILLS: { key: FeatureStatus | 'all'; label: string }[] = [
+  { key: 'all', label: 'All' },
+  { key: 'active', label: 'Active' },
+  { key: 'gate', label: 'Gate' },
+  { key: 'stale', label: 'Stale' },
+  { key: 'complete', label: 'Complete' },
+];
+
 export function App() {
   const { enabled: notificationsEnabled, toggle: toggleNotifications, permissionDenied } = useNotifications();
+  const [statusFilter, setStatusFilter] = useState<FeatureStatus | 'all'>('all');
+  const [searchInput, setSearchInput] = useState('');
+  const [searchQuery, setSearchQuery] = useState('');
+
+  // Debounce search input
+  useEffect(() => {
+    const timer = setTimeout(() => setSearchQuery(searchInput), 150);
+    return () => clearTimeout(timer);
+  }, [searchInput]);
 
   const onFeatureUpdated = useCallback(
     (project: string, feature: string) => {
@@ -17,6 +35,32 @@ export function App() {
   const { projects, connected, loading } = useWebSocket({ onFeatureUpdated });
 
   const totalFeatures = projects.reduce((sum, p) => sum + p.features.length, 0);
+
+  // Count features per status across all projects
+  const statusCounts = useMemo(() => {
+    const counts: Partial<Record<FeatureStatus, number>> = {};
+    for (const p of projects) {
+      for (const f of p.features) {
+        counts[f.status] = (counts[f.status] ?? 0) + 1;
+      }
+    }
+    return counts;
+  }, [projects]);
+
+  // Filter projects by status and search query, hiding empty projects
+  const filteredProjects = useMemo(() => {
+    const q = searchQuery.toLowerCase();
+    return projects
+      .map((p) => ({
+        ...p,
+        features: p.features.filter((f) => {
+          if (statusFilter !== 'all' && f.status !== statusFilter) return false;
+          if (q && !f.name.toLowerCase().includes(q) && !p.name.toLowerCase().includes(q)) return false;
+          return true;
+        }),
+      }))
+      .filter((p) => p.features.length > 0);
+  }, [projects, statusFilter, searchQuery]);
 
   return (
     <div class="max-w-5xl mx-auto px-6 py-10">
@@ -90,12 +134,62 @@ export function App() {
 
       {!loading && <SessionBar projects={projects} />}
 
+      {!loading && totalFeatures > 0 && (
+        <div class="mb-6 flex items-center gap-2 flex-wrap">
+          {FILTER_PILLS.map(({ key, label }) => {
+            const count = key === 'all' ? totalFeatures : (statusCounts[key] ?? 0);
+            const isActive = statusFilter === key;
+            return (
+              <button
+                key={key}
+                type="button"
+                onClick={() => setStatusFilter(key)}
+                class={`px-3 py-1.5 rounded-lg text-xs font-mono transition-colors ${
+                  isActive
+                    ? 'bg-sky-500/15 text-sky-400 ring-1 ring-inset ring-sky-500/30'
+                    : 'bg-slate-800/40 text-slate-500 hover:text-slate-400 hover:bg-slate-800/60'
+                }`}
+              >
+                {label}{count > 0 ? ` (${count})` : ''}
+              </button>
+            );
+          })}
+          <div class="relative ml-auto">
+            <input
+              type="text"
+              value={searchInput}
+              onInput={(e) => setSearchInput((e.target as HTMLInputElement).value)}
+              placeholder="Search features..."
+              class="w-48 px-3 py-1.5 rounded-lg text-xs font-mono bg-slate-800/40 text-slate-300
+                     placeholder:text-slate-600 border border-slate-700/50 focus:outline-none
+                     focus:ring-1 focus:ring-sky-500/30 focus:border-sky-500/30"
+            />
+            {searchInput && (
+              <button
+                type="button"
+                onClick={() => setSearchInput('')}
+                class="absolute right-2 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-400"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" class="w-3 h-3">
+                  <path d="M5.28 4.22a.75.75 0 0 0-1.06 1.06L6.94 8l-2.72 2.72a.75.75 0 1 0 1.06 1.06L8 9.06l2.72 2.72a.75.75 0 1 0 1.06-1.06L9.06 8l2.72-2.72a.75.75 0 0 0-1.06-1.06L8 6.94 5.28 4.22Z" />
+                </svg>
+              </button>
+            )}
+          </div>
+        </div>
+      )}
+
       <div class="space-y-6">
-        {projects.map((project, i) => (
+        {filteredProjects.map((project, i) => (
           <div class="card-enter" style={{ animationDelay: `${i * 80}ms` }}>
             <ProjectCard project={project} />
           </div>
         ))}
+        {!loading && (statusFilter !== 'all' || searchQuery) && filteredProjects.length === 0 && (
+          <div class="rounded-lg bg-slate-800/50 border border-slate-700/50 p-6 text-center text-slate-500">
+            <p class="text-sm font-mono">No matching features</p>
+          </div>
+        )}
       </div>
     </div>
   );

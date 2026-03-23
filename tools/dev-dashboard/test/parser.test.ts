@@ -296,6 +296,28 @@ describe('determineFeatureStatus', () => {
       isEmpty: true,
     })).toBe('empty');
   });
+
+  it('returns "gate" when atGate is true', () => {
+    expect(determineFeatureStatus({
+      hasMasterPlan: true,
+      allComplete: false,
+      checkpointDate: '2026-03-20T14:30:00Z',
+      lastUpdated: null,
+      now,
+      atGate: true,
+    })).toBe('gate');
+  });
+
+  it('returns "gate" even when checkpoint is stale', () => {
+    expect(determineFeatureStatus({
+      hasMasterPlan: true,
+      allComplete: false,
+      checkpointDate: '2026-01-01T00:00:00Z',
+      lastUpdated: null,
+      now,
+      atGate: true,
+    })).toBe('gate');
+  });
 });
 
 // ─── Full Feature Parsing (integration) ────────────────────────────
@@ -321,12 +343,12 @@ describe('parseFeature', () => {
     expect(result.nextAction).toContain('Map legacy columns');
   });
 
-  it('parses gate-feature with active status (has incomplete steps)', async () => {
+  it('parses gate-feature with gate status (phase complete, next not started)', async () => {
     const result = await parseFeature(resolve(FIXTURES, 'gate-feature'), 'gate-feature');
 
     expect(result.name).toBe('gate-feature');
-    // Phase 1 complete, Phase 2 not started — active (has recent lastUpdated)
-    expect(result.status).toBe('active');
+    // Phase 1 complete, Phase 2 not started, no in-progress phase → gate
+    expect(result.status).toBe('gate');
     expect(result.progress).toMatchObject({ done: 3, total: 6, percent: 50 });
   });
 

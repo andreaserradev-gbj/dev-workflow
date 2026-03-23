@@ -1,5 +1,6 @@
 // Feature-level status (derived from PRD markdown + checkpoint dates)
 export type FeatureStatus =
+  | 'gate'
   | 'active'
   | 'stale'
   | 'complete'
@@ -98,12 +99,13 @@ export type WsEvent =
   | { type: 'feature_removed'; project: string; feature: string }
   | { type: 'full_refresh'; data: ProjectsResponse };
 
-// Status sort order (matches board-template.html)
+// Status sort order — gate first (needs user action), complete last
 export const STATUS_ORDER: Record<FeatureStatus, number> = {
-  active: 0,
-  stale: 1,
-  'no-prd': 2,
-  'checkpoint-only': 3,
-  empty: 4,
-  complete: 5,
+  gate: 0,
+  active: 1,
+  'checkpoint-only': 2,
+  stale: 3,
+  'no-prd': 4,
+  empty: 5,
+  complete: 6,
 };

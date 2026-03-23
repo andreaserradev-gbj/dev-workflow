@@ -185,6 +185,16 @@ Generates a visual dashboard from `.dev/` data:
 /dev-board
 ```
 
+### Dev Dashboard — Live cross-project view
+
+A local web dashboard that scans `.dev/` folders across multiple projects and shows live feature status with real-time updates.
+
+```bash
+cd tools/dev-dashboard && npm install && npm start -- --scan ~/code
+```
+
+Open `http://localhost:3141`. See [tools/dev-dashboard/README.md](tools/dev-dashboard/README.md) for configuration and details.
+
 ---
 
 ## Design Principles

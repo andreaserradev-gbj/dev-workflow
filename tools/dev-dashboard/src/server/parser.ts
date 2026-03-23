@@ -280,10 +280,11 @@ export interface StatusInput {
   lastUpdated: string | null;
   now: Date;
   isEmpty?: boolean;
+  atGate?: boolean;
 }
 
 export function determineFeatureStatus(input: StatusInput): FeatureStatus {
-  const { hasMasterPlan, allComplete, checkpointDate, lastUpdated, now, isEmpty } = input;
+  const { hasMasterPlan, allComplete, checkpointDate, lastUpdated, now, isEmpty, atGate } = input;
 
   // Empty directory
   if (isEmpty) return 'empty';
@@ -296,6 +297,9 @@ export function determineFeatureStatus(input: StatusInput): FeatureStatus {
 
   // All steps complete
   if (allComplete) return 'complete';
+
+  // At a phase gate — completed phase(s) with next phase not started, no in-progress phase
+  if (atGate) return 'gate';
 
   // Staleness check
   const referenceDate = checkpointDate || lastUpdated;
@@ -324,6 +328,14 @@ export async function parseFeature(featureDir: string, name: string): Promise<Fe
     masterPlan.progress.total > 0 &&
     masterPlan.progress.done === masterPlan.progress.total;
 
+  // At gate: completed phase(s) followed by not-started phase(s), no in-progress phase
+  const atGate =
+    masterPlan !== null &&
+    !allComplete &&
+    masterPlan.phases.some((p) => p.status === 'complete') &&
+    masterPlan.phases.some((p) => p.status === 'not-started') &&
+    !masterPlan.phases.some((p) => p.status === 'in-progress');
+
   const status = determineFeatureStatus({
     hasMasterPlan: masterPlan !== null,
     allComplete,
@@ -331,6 +343,7 @@ export async function parseFeature(featureDir: string, name: string): Promise<Fe
     lastUpdated: masterPlan?.lastUpdated ?? null,
     now: new Date(),
     isEmpty: isEmpty && masterPlan === null && checkpoint === null,
+    atGate,
   });
 
   // Find current phase (first in-progress, or first not-started)

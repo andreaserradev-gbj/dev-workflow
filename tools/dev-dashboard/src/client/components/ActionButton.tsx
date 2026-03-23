@@ -15,6 +15,12 @@ export interface ActionContext {
 }
 
 const ACTION_BY_STATUS: Record<FeatureStatus, ActionConfig> = {
+  gate: {
+    label: 'Resume',
+    copiedLabel: 'Copied!',
+    payload: (ctx) => `cd ${ctx.projectPath} && claude\n/dev-resume ${ctx.featureName}`,
+    cls: 'bg-amber-500/10 text-amber-400 hover:bg-amber-500/20 ring-1 ring-inset ring-amber-500/20',
+  },
   active: {
     label: 'Resume',
     copiedLabel: 'Copied!',
@@ -25,7 +31,7 @@ const ACTION_BY_STATUS: Record<FeatureStatus, ActionConfig> = {
     label: 'Resume',
     copiedLabel: 'Copied!',
     payload: (ctx) => `cd ${ctx.projectPath} && claude\n/dev-resume ${ctx.featureName}`,
-    cls: 'bg-amber-500/10 text-amber-400 hover:bg-amber-500/20 ring-1 ring-inset ring-amber-500/20',
+    cls: 'bg-red-500/10 text-red-400 hover:bg-red-500/20 ring-1 ring-inset ring-red-500/20',
     warn: true,
   },
   complete: {

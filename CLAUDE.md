@@ -51,6 +51,12 @@ docs/
 .githooks/                      # Git hooks (activate with scripts/setup.sh)
   pre-commit                    # Runs tests before commit
   pre-push                      # Enforces version bumps
+tools/dev-dashboard/            # Cross-project live dashboard
+  bin/dev-dashboard              # Shell entry point
+  src/server/                    # Fastify backend (scanner, parser, watcher, API, WS)
+  src/client/                    # Preact frontend (portfolio view, detail panels)
+  src/shared/                    # Shared TypeScript types
+  test/                          # Vitest tests + fixtures
 scripts/
   setup.sh                      # One-time contributor setup
 tests/

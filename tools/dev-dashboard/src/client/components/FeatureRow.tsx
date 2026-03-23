@@ -10,6 +10,11 @@ interface Props {
 }
 
 const STATUS_CONFIG: Record<FeatureStatus, { label: string; badge: string; bar: string }> = {
+  gate: {
+    label: 'Gate',
+    badge: 'bg-amber-500/10 text-amber-400 ring-1 ring-inset ring-amber-500/20',
+    bar: 'bg-amber-500',
+  },
   active: {
     label: 'Active',
     badge: 'bg-sky-500/10 text-sky-400 ring-1 ring-inset ring-sky-500/20',
@@ -22,8 +27,8 @@ const STATUS_CONFIG: Record<FeatureStatus, { label: string; badge: string; bar: 
   },
   stale: {
     label: 'Stale',
-    badge: 'bg-amber-500/10 text-amber-400 ring-1 ring-inset ring-amber-500/20',
-    bar: 'bg-amber-500',
+    badge: 'bg-red-500/10 text-red-400 ring-1 ring-inset ring-red-500/20',
+    bar: 'bg-red-500',
   },
   'checkpoint-only': {
     label: 'Checkpoint',
