@@ -1,4 +1,7 @@
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
+import { mkdtemp, mkdir, rm } from 'fs/promises';
+import { join } from 'path';
+import { tmpdir } from 'os';
 import Fastify from 'fastify';
 import type { FastifyInstance } from 'fastify';
 import { DashboardState } from '../src/server/state.js';
@@ -7,6 +10,9 @@ import type { Feature, Project } from '../src/shared/types.js';
 
 let app: FastifyInstance;
 let state: DashboardState;
+let tempDir: string;
+let apiServerPath: string;
+let webClientPath: string;
 
 const mockFeature: Feature = {
   name: 'auth-system',
@@ -30,31 +36,39 @@ const mockStaleFeature: Feature = {
   summary: 'Event-driven notification system.',
 };
 
-const mockProjects: Project[] = [
-  {
-    name: 'api-server',
-    path: '/tmp/test/api-server',
-    features: [mockFeature, mockStaleFeature],
-  },
-  {
-    name: 'web-client',
-    path: '/tmp/test/web-client',
-    features: [
-      {
-        name: 'dashboard-ui',
-        status: 'complete',
-        progress: { done: 5, total: 5, percent: 100 },
-        currentPhase: null,
-        lastCheckpoint: '2026-03-15T10:00:00Z',
-        nextAction: null,
-        branch: 'feature/dashboard-ui',
-        summary: 'Dashboard UI components.',
-      },
-    ],
-  },
-];
-
 beforeAll(async () => {
+  tempDir = await mkdtemp(join(tmpdir(), 'api-test-'));
+  apiServerPath = join(tempDir, 'api-server');
+  webClientPath = join(tempDir, 'web-client');
+
+  // Create .dev directories so the access check passes
+  await mkdir(join(apiServerPath, '.dev'), { recursive: true });
+  await mkdir(join(webClientPath, '.dev'), { recursive: true });
+
+  const mockProjects: Project[] = [
+    {
+      name: 'api-server',
+      path: apiServerPath,
+      features: [mockFeature, mockStaleFeature],
+    },
+    {
+      name: 'web-client',
+      path: webClientPath,
+      features: [
+        {
+          name: 'dashboard-ui',
+          status: 'complete',
+          progress: { done: 5, total: 5, percent: 100 },
+          currentPhase: null,
+          lastCheckpoint: '2026-03-15T10:00:00Z',
+          nextAction: null,
+          branch: 'feature/dashboard-ui',
+          summary: 'Dashboard UI components.',
+        },
+      ],
+    },
+  ];
+
   state = new DashboardState();
   state.setProjects(mockProjects);
 
@@ -65,6 +79,7 @@ beforeAll(async () => {
 
 afterAll(async () => {
   await app.close();
+  await rm(tempDir, { recursive: true, force: true });
 });
 
 describe('GET /api/health', () => {

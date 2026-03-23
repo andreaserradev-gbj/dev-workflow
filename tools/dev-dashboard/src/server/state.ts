@@ -87,6 +87,10 @@ export class DashboardState {
     }
   }
 
+  removeProject(projectPath: string): void {
+    this.projects.delete(projectPath);
+  }
+
   removeFeature(projectPath: string, featureName: string): void {
     const project = this.projects.get(projectPath);
     if (!project) return;

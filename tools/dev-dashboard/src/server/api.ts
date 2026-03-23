@@ -1,7 +1,7 @@
-import { readdir } from 'fs/promises';
+import { access, readdir } from 'fs/promises';
 import { resolve } from 'path';
 import type { FastifyInstance } from 'fastify';
-import type { FeatureDetail } from '../shared/types.js';
+import type { FeatureDetail, Project } from '../shared/types.js';
 import type { DashboardState } from './state.js';
 import { updateConfig } from './config.js';
 import { parseCheckpoint, parseMasterPlan, parseSubPrd } from './parser.js';
@@ -16,7 +16,21 @@ export function registerApiRoutes(app: FastifyInstance, state: DashboardState): 
   });
 
   app.get('/api/projects', async () => {
-    return { projects: state.getProjects() };
+    const projects = state.getProjects();
+
+    // Filter out projects whose .dev directories no longer exist on disk,
+    // and prune them from state so the watcher doesn't need to catch up
+    const alive: Project[] = [];
+    for (const project of projects) {
+      try {
+        await access(resolve(project.path, '.dev'));
+        alive.push(project);
+      } catch {
+        state.removeProject(project.path);
+      }
+    }
+
+    return { projects: alive };
   });
 
   app.get<{

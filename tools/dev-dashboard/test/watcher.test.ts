@@ -234,6 +234,28 @@ describe('createWatcher', () => {
     expect(names).toContain('f2');
   });
 
+  it('removes stale projects during rescan when .dev directory is deleted', async () => {
+    const projectDir = join(tempDir, 'project-stale');
+    const featureDir = join(projectDir, '.dev', 'stale-feature');
+    await mkdir(featureDir, { recursive: true });
+    await writeFile(join(featureDir, '00-master-plan.md'), MASTER_PLAN);
+
+    // Use a short rescan interval so the test doesn't take too long
+    watcher = await createWatcher([tempDir], callbacks, { rescanIntervalMs: 500 });
+    await waitForEvents(300);
+    featureRemoved.length = 0;
+
+    // Remove the entire project directory
+    await rm(projectDir, { recursive: true, force: true });
+
+    // Wait for the rescan to detect the removal
+    await waitForEvents(1000);
+
+    expect(featureRemoved.length).toBeGreaterThanOrEqual(1);
+    expect(featureRemoved[0].projectPath).toBe(projectDir);
+    expect(featureRemoved[0].featureName).toBe('stale-feature');
+  });
+
   it('close() stops watching', async () => {
     const projectDir = join(tempDir, 'project-g');
     const featureDir = join(projectDir, '.dev', 'closeable');

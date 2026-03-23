@@ -131,14 +131,44 @@ export async function createWatcher(
     ignoreInitial: true,
   });
 
-  // Periodically rescan for new .dev directories and add them to the watcher
+  // Periodically rescan for new/removed .dev directories
   const rescanTimer = setInterval(async () => {
     try {
       const currentDevDirs = await findDevDirs(scanDirs);
+      const currentSet = new Set(currentDevDirs);
+
+      // Add newly discovered .dev directories
       for (const dir of currentDevDirs) {
         if (!watchedDevDirs.has(dir)) {
           watchedDevDirs.add(dir);
           watcher.add(dir);
+        }
+      }
+
+      // Remove stale .dev directories that no longer exist
+      for (const dir of watchedDevDirs) {
+        if (!currentSet.has(dir)) {
+          watchedDevDirs.delete(dir);
+          watcher.unwatch(dir);
+
+          // Extract projectPath from .dev dir (dir is /path/to/project/.dev)
+          const projectPath = dirname(dir);
+
+          // Find and remove all features belonging to this project
+          for (const key of knownFeatures) {
+            const parsed = parsePath(key);
+            if (parsed && parsed.projectPath === projectPath) {
+              knownFeatures.delete(key);
+              // Clear any pending debounce
+              const existingTimer = timers.get(key);
+              if (existingTimer) {
+                clearTimeout(existingTimer);
+                timers.delete(key);
+                pendingEvents.delete(key);
+              }
+              callbacks.onFeatureRemoved(parsed.projectPath, parsed.featureName);
+            }
+          }
         }
       }
     } catch {
