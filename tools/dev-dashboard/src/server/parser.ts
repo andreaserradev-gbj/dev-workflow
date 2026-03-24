@@ -9,6 +9,16 @@ import type {
   SubPrdStep,
 } from '../shared/types.js';
 
+// ─── Emoji Shortcode Normalization ──────────────────────────────────
+
+/** Replace common GitHub emoji shortcodes with their Unicode equivalents. */
+function normalizeEmoji(text: string): string {
+  return text
+    .replace(/:white_check_mark:/g, '✅')
+    .replace(/:white_large_square:/g, '⬜')
+    .replace(/:next_track_button:|:track_next:/g, '⏭️');
+}
+
 // ─── Master Plan ───────────────────────────────────────────────────
 
 export interface MasterPlanResult {
@@ -54,7 +64,8 @@ function extractFrontmatterField(content: string, field: string): string | null 
   return match ? match[1].trim() : null;
 }
 
-function extractPhases(content: string): Phase[] {
+function extractPhases(rawContent: string): Phase[] {
+  const content = normalizeEmoji(rawContent);
   const phases: Phase[] = [];
 
   // Split by phase headers: ### Phase N: Title  or  ## Phase N — Title
@@ -262,7 +273,7 @@ export interface SubPrdResult {
 export async function parseSubPrd(filePath: string): Promise<SubPrdResult | null> {
   let content: string;
   try {
-    content = await readFile(filePath, 'utf-8');
+    content = normalizeEmoji(await readFile(filePath, 'utf-8'));
   } catch {
     return null;
   }

@@ -120,6 +120,20 @@ describe('parseMasterPlan', () => {
     // Total steps across all phases should be 13
     expect(result!.progress.total).toBe(13);
   });
+
+  it('handles :white_check_mark: and :white_large_square: emoji shortcodes', async () => {
+    const result = await parseMasterPlan(resolve(FIXTURES, 'shortcode-emoji/00-master-plan.md'));
+
+    expect(result).not.toBeNull();
+    expect(result!.phases).toHaveLength(1);
+    expect(result!.phases[0]).toMatchObject({
+      number: 1,
+      done: 3,
+      total: 3,
+      status: 'complete',
+    });
+    expect(result!.progress).toMatchObject({ done: 3, total: 3, percent: 100 });
+  });
 });
 
 // ─── Checkpoint Parsing ────────────────────────────────────────────
@@ -374,5 +388,13 @@ describe('parseFeature', () => {
 
     expect(result.name).toBe('malformed');
     expect(result.status).toBeDefined();
+  });
+
+  it('parses shortcode-emoji feature as complete', async () => {
+    const result = await parseFeature(resolve(FIXTURES, 'shortcode-emoji'), 'shortcode-emoji');
+
+    expect(result.name).toBe('shortcode-emoji');
+    expect(result.status).toBe('complete');
+    expect(result.progress).toMatchObject({ done: 3, total: 3, percent: 100 });
   });
 });
