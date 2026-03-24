@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 # Start the dev-dashboard server, reusing an existing instance if found.
 #
-# Usage: bash start.sh <dashboard-dir>
+# Usage: bash start.sh
+#   Resolves the bundled server relative to this script's location.
 #
 # Output (one of):
 #   running:<port>    — our server is already running on this port
@@ -12,7 +13,11 @@
 
 set -euo pipefail
 
-DASHBOARD_DIR="${1:?Usage: start.sh <dashboard-dir>}"
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+# scripts/ -> skills/dev-dashboard/ -> skills/ -> dev-workflow/ -> dashboard/
+DASHBOARD_DIR="$(cd "$SCRIPT_DIR/../../.." && pwd)/dashboard"
+SERVER_ENTRY="$DASHBOARD_DIR/server/index.cjs"
+
 DEFAULT_PORT=3141
 MAX_TRIES=10
 
@@ -21,38 +26,26 @@ check_our_server() {
   local port="$1"
   local resp
   resp=$(curl -s --max-time 2 "http://localhost:${port}/api/health" 2>/dev/null) || return 1
-  # Verify it's our server by checking for the "status":"ok" field
   echo "$resp" | grep -q '"status"' && return 0 || return 1
 }
 
 # Check if any process is listening on a port
 port_in_use() {
   local port="$1"
-  # Use curl with a very short timeout — connection refused means port is free
   curl -s --max-time 1 "http://localhost:${port}/" -o /dev/null 2>/dev/null
 }
 
-# Ensure build exists
-if [ ! -f "$DASHBOARD_DIR/dist/server/index.js" ]; then
-  echo "error:Server not built. Run 'npm run build' in $DASHBOARD_DIR"
+# Verify bundled server exists
+if [ ! -f "$SERVER_ENTRY" ]; then
+  echo "error:Bundled server not found at $SERVER_ENTRY"
   exit 1
 fi
 
-# Ensure dependencies
-if [ ! -d "$DASHBOARD_DIR/node_modules" ]; then
-  npm --prefix "$DASHBOARD_DIR" install --silent 2>/dev/null || {
-    echo "error:Failed to install dependencies in $DASHBOARD_DIR"
-    exit 1
-  }
-fi
-
 # Scan ports starting from DEFAULT_PORT
-port=$DEFAULT_PORT
-found_existing=""
 found_port=""
 
 for ((i = 0; i < MAX_TRIES; i++)); do
-  candidate=$((port + i))
+  candidate=$((DEFAULT_PORT + i))
 
   if check_our_server "$candidate"; then
     echo "running:${candidate}"
@@ -70,7 +63,7 @@ if [ -z "$found_port" ]; then
 fi
 
 # Start the server in background
-nohup node "$DASHBOARD_DIR/dist/server/index.js" --port "$found_port" \
+nohup node "$SERVER_ENTRY" --port "$found_port" \
   > /tmp/dev-dashboard.log 2>&1 &
 
 # Wait briefly for startup

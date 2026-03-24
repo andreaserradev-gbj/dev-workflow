@@ -10,7 +10,10 @@ import { createWsBroadcaster } from './ws.js';
 import { createWatcher } from './watcher.js';
 import { parseFeature } from './parser.js';
 
-const __dirname = dirname(fileURLToPath(import.meta.url));
+// Works in both ESM (dev/tsc build) and CJS (esbuild bundle)
+const __dirname = import.meta.url
+  ? dirname(fileURLToPath(import.meta.url))
+  : dirname(process.argv[1]);
 
 async function main(): Promise<void> {
   const cliOverrides = parseCliArgs(process.argv.slice(2));

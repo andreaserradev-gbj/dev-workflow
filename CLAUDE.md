@@ -37,6 +37,12 @@ plugins/dev-workflow/           # Plugin package
     dev-wrapup/
       SKILL.md
       scripts/discover.sh
+    dev-dashboard/
+      SKILL.md
+      scripts/start.sh
+  dashboard/                        # Bundled server + client (committed build artifact)
+    server/index.cjs
+    client/
 # Generated in user's project (not in plugin repo)
 .dev/wrapup-feedback.json        # Wrapup feedback history (auto-compacting)
 .codex/
@@ -80,6 +86,16 @@ claude --plugin-dir ./plugins/dev-workflow
 ```
 
 Restart Claude Code to pick up changes.
+
+### Dashboard Bundle
+
+After modifying `tools/dev-dashboard/`, rebuild the bundle that ships with the plugin:
+
+```bash
+cd tools/dev-dashboard && npm run bundle
+```
+
+This builds the Vite client + esbuild-bundles the server into `plugins/dev-workflow/dashboard/`. The bundle is a committed build artifact — commit it alongside source changes.
 
 ### Tests
 
