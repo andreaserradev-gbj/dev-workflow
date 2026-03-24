@@ -3,7 +3,7 @@
 # dev-workflow
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
-[![Version](https://img.shields.io/badge/version-1.11.0-green.svg)](.claude-plugin/marketplace.json)
+[![Version](https://img.shields.io/badge/version-1.14.0-green.svg)](.claude-plugin/marketplace.json)
 [![AgentSkills.io](https://img.shields.io/badge/standard-AgentSkills.io-purple.svg)](https://agentskills.io)
 
 **Claude forgets everything between sessions. This fixes that.**
@@ -185,15 +185,17 @@ Generates a visual dashboard from `.dev/` data:
 /dev-board
 ```
 
-### Dev Dashboard — Live cross-project view
+### `/dev-dashboard` — Live cross-project view
 
-A local web dashboard that scans `.dev/` folders across multiple projects and shows live feature status with real-time updates.
+<img src="docs/dashboard-preview.png" alt="Dev Dashboard showing projects with feature progress, status badges, and phase tracking" width="720"/>
 
-```bash
-cd tools/dev-dashboard && npm install && npm start -- --scan ~/code
+A local web server that scans `.dev/` folders across all your projects and shows live feature status in the browser. Real-time updates via WebSocket — edit a PRD and the dashboard reflects changes instantly.
+
+```
+/dev-dashboard
 ```
 
-Open `http://localhost:3141`. See [tools/dev-dashboard/README.md](tools/dev-dashboard/README.md) for configuration and details.
+Starts the server (or reuses an existing instance) and displays the URL. No setup required — the server is bundled with the plugin. See [tools/dev-dashboard/README.md](tools/dev-dashboard/README.md) for configuration.
 
 ---
 
