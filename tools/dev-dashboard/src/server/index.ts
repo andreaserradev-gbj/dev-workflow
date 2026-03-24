@@ -2,7 +2,7 @@ import Fastify from 'fastify';
 import fastifyStatic from '@fastify/static';
 import { resolve, dirname } from 'path';
 import { fileURLToPath } from 'url';
-import { loadConfig, parseCliArgs } from './config.js';
+import { loadConfig, parseCliArgs, watchConfig } from './config.js';
 import { scanProjects } from './scanner.js';
 import { DashboardState } from './state.js';
 import { registerApiRoutes } from './api.js';
@@ -55,9 +55,9 @@ async function main(): Promise<void> {
   // WebSocket broadcaster — attach to the running HTTP server
   const broadcaster = createWsBroadcaster(app.server, state);
 
-  // File watcher — re-parse changed features and push updates via WebSocket
-  await createWatcher(config.scanDirs, {
-    onFeatureUpdated: async (projectPath, featureName) => {
+  // Watcher callbacks — shared between initial and reloaded watchers
+  const watcherCallbacks = {
+    onFeatureUpdated: async (projectPath: string, featureName: string) => {
       const featureDir = resolve(projectPath, '.dev', featureName);
       const feature = await parseFeature(featureDir, featureName);
       state.updateFeature(projectPath, featureName, feature);
@@ -68,7 +68,7 @@ async function main(): Promise<void> {
         data: feature,
       });
     },
-    onFeatureAdded: async (projectPath, featureName) => {
+    onFeatureAdded: async (projectPath: string, featureName: string) => {
       const featureDir = resolve(projectPath, '.dev', featureName);
       const feature = await parseFeature(featureDir, featureName);
       state.addFeature(projectPath, feature);
@@ -78,7 +78,7 @@ async function main(): Promise<void> {
         feature,
       });
     },
-    onFeatureRemoved: (projectPath, featureName) => {
+    onFeatureRemoved: (projectPath: string, featureName: string) => {
       state.removeFeature(projectPath, featureName);
       broadcaster.broadcast({
         type: 'feature_removed',
@@ -86,6 +86,20 @@ async function main(): Promise<void> {
         feature: featureName,
       });
     },
+  };
+
+  // File watcher — re-parse changed features and push updates via WebSocket
+  let featureWatcher = await createWatcher(config.scanDirs, watcherCallbacks);
+
+  // Config watcher — reload scanDirs on config file changes
+  watchConfig(cliOverrides, config.scanDirs, async (newDirs) => {
+    console.log(`Config changed — rescanning: ${newDirs.join(', ')}`);
+    await featureWatcher.close();
+    const projects = await scanProjects(newDirs);
+    state.setProjects(projects);
+    featureWatcher = await createWatcher(newDirs, watcherCallbacks);
+    broadcaster.broadcast({ type: 'full_refresh', data: { projects: state.getProjects() } });
+    console.log(`Reloaded: ${state.projectCount} projects with ${state.featureCount} features`);
   });
 
   console.log(

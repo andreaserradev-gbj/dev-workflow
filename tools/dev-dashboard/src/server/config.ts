@@ -1,6 +1,7 @@
 import { readFile, writeFile, mkdir, access } from 'fs/promises';
 import { resolve, join } from 'path';
 import { homedir } from 'os';
+import chokidar from 'chokidar';
 import type { DashboardConfig } from '../shared/types.js';
 
 const CONFIG_DIR = join(homedir(), '.config', 'dev-dashboard');
@@ -51,7 +52,7 @@ async function createDefaultConfig(): Promise<void> {
   }
 }
 
-function expandHome(dir: string): string {
+export function expandHome(dir: string): string {
   if (dir.startsWith('~/')) {
     return resolve(homedir(), dir.slice(2));
   }
@@ -84,6 +85,55 @@ export async function updateConfig(patch: Partial<DashboardConfig>): Promise<Das
   await mkdir(CONFIG_DIR, { recursive: true });
   await writeFile(CONFIG_PATH, JSON.stringify(updated, null, 2) + '\n', 'utf-8');
   return updated;
+}
+
+export interface ConfigWatcher {
+  close: () => Promise<void>;
+}
+
+/**
+ * Watch the config file for changes and invoke the callback when scanDirs change.
+ * CLI overrides take precedence — if scanDirs were set via CLI, file changes are ignored.
+ */
+export function watchConfig(
+  cliOverrides: CliOverrides,
+  currentScanDirs: string[],
+  onScanDirsChanged: (newDirs: string[]) => void,
+  configPath: string = CONFIG_PATH
+): ConfigWatcher {
+  let lastDirs = JSON.stringify(currentScanDirs);
+  let debounceTimer: ReturnType<typeof setTimeout> | null = null;
+
+  const watcher = chokidar.watch(configPath, {
+    ignoreInitial: true,
+    awaitWriteFinish: { stabilityThreshold: 200, pollInterval: 50 },
+  });
+
+  watcher.on('change', async () => {
+    if (cliOverrides.scan) return;
+
+    // Debounce rapid writes
+    if (debounceTimer) clearTimeout(debounceTimer);
+    debounceTimer = setTimeout(async () => {
+      try {
+        const raw = await readFile(configPath, 'utf-8');
+        const fileConfig: Partial<DashboardConfig> = JSON.parse(raw);
+        const newDirs = (fileConfig.scanDirs ?? DEFAULTS.scanDirs).map(expandHome);
+        const serialized = JSON.stringify(newDirs);
+        if (serialized !== lastDirs) {
+          lastDirs = serialized;
+          await validateScanDirs(newDirs);
+          onScanDirsChanged(newDirs);
+        }
+      } catch {
+        // Invalid JSON or read error — ignore until next change
+      }
+    }, 100);
+  });
+
+  return {
+    close: () => watcher.close(),
+  };
 }
 
 export function parseCliArgs(args: string[]): CliOverrides {
