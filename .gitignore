@@ -2,3 +2,9 @@
 .envrc
 .dev/
 .dev-archive/
+node_modules/
+
+# dev-dashboard
+tools/dev-dashboard/node_modules/
+tools/dev-dashboard/dist/
+tools/dev-dashboard/src/**/*.js

@@ -1,0 +1,41 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Outfit", system-ui, -apple-system, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
+}
+
+body {
+  background: #060b18;
+  background-image: radial-gradient(ellipse at top center, rgba(56, 189, 248, 0.03) 0%, transparent 50%);
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.card-enter {
+  animation: fadeIn 0.35s ease-out both;
+}
+
+@keyframes slideDown {
+  from { opacity: 0; max-height: 0; }
+  to { opacity: 1; max-height: 800px; }
+}
+
+.panel-surface {
+  background: #080f1e;
+  border: 1px solid rgba(30, 41, 59, 0.4);
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3);
+}
+
+.progress-track {
+  background: rgba(30, 41, 59, 0.6);
+  border-radius: 9999px;
+  overflow: hidden;
+}
+
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: #1e293b; border-radius: 3px; }

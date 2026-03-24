@@ -1,0 +1,12 @@
+#!/usr/bin/env bash
+# Resolve own path (works from symlink, alias, or direct call)
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+DASHBOARD_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
+
+# Check node_modules
+if [ ! -d "$DASHBOARD_DIR/node_modules" ]; then
+  echo "Installing dependencies..."
+  npm --prefix "$DASHBOARD_DIR" install
+fi
+
+exec node "$DASHBOARD_DIR/dist/server/index.js" "$@"

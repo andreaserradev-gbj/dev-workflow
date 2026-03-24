@@ -38,6 +38,12 @@
         ::-webkit-scrollbar { width: 6px; }
         ::-webkit-scrollbar-track { background: transparent; }
         ::-webkit-scrollbar-thumb { background: #1e293b; border-radius: 3px; }
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateX(8px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+        .slide-in { animation: slideIn 0.25s ease-out both; }
+        .rail-item { transition: all 0.15s ease; }
     </style>
     <!-- BOARD_DATA -->
     <script>
@@ -196,6 +202,9 @@
 
         const STATUS_ORDER = { active: 0, stale: 1, 'no-prd': 2, complete: 3 };
 
+        let selectedFeature = null;
+        let sortedFeatures = [];
+
         /* ── Helpers ── */
 
         function esc(str) {
@@ -250,9 +259,9 @@
             }
 
             return stats.map((s, i) => `
-                ${i > 0 ? '<div class="w-px h-5 bg-slate-800"></div>' : ''}
+                ${i > 0 ? '<div class="w-px h-4 bg-slate-800"></div>' : ''}
                 <div class="flex items-center gap-2">
-                    <span class="font-mono text-lg font-semibold ${s.colorClass}">${s.count}</span>
+                    <span class="font-mono text-xl font-semibold ${s.colorClass}">${s.count}</span>
                     <span class="text-xs text-slate-500 uppercase tracking-wider">${s.label}</span>
                 </div>
             `).join('');
@@ -263,7 +272,7 @@
             const s = getStatus(statusKey);
             return `
                 <div class="flex items-center gap-3">
-                    <div class="flex-1 ${height} bg-slate-800/80 rounded-full overflow-hidden">
+                    <div class="flex-1 ${height} bg-slate-800 rounded-full overflow-hidden" style="box-shadow: inset 0 1px 2px rgba(0,0,0,0.4)">
                         <div class="${s.bar} ${height} rounded-full transition-all duration-500" style="width: ${p}%"></div>
                     </div>
                     <div class="flex items-baseline gap-1.5 shrink-0">
@@ -382,7 +391,7 @@
             const p = feature.progress;
 
             return `
-                <div class="card-enter bg-[#0d1425] border border-slate-800/60 border-l-2 ${s.border} rounded-lg p-5 hover:border-slate-700/80 transition-colors"
+                <div class="card-enter bg-[#0d1425] border border-slate-800/60 border-l-2 ${s.border} rounded-lg p-5 hover:border-slate-700/80 transition-colors shadow-lg shadow-black/40"
                      style="animation-delay: ${delay}s">
 
                     <!-- Header -->
@@ -396,7 +405,7 @@
 
                     <!-- Overall progress -->
                     <div class="mb-1">
-                        ${renderProgressBar(p.stepsComplete, p.stepsTotal, feature.status)}
+                        ${renderProgressBar(p.stepsComplete, p.stepsTotal, feature.status, 'h-2')}
                     </div>
                     <div class="text-[11px] text-slate-600 font-mono mb-2">
                         ${p.phasesComplete}/${p.phasesTotal} phases
@@ -429,40 +438,131 @@
             `;
         }
 
+        function renderFeatureListItem(feature, index) {
+            const s = getStatus(feature.status);
+            const p = feature.progress;
+            const progressPct = pct(p.stepsComplete, p.stepsTotal);
+            const isActive = selectedFeature === feature.name;
+
+            return `
+                <li>
+                    <button onclick="selectFeature('${esc(feature.name)}')"
+                            data-feature="${esc(feature.name)}"
+                            class="rail-item w-full text-left px-4 py-3 border-l-2 transition-all duration-150
+                                   ${isActive
+                                       ? 'bg-[#0d1425] ' + s.border + ' border-l-2'
+                                       : 'border-l-transparent hover:bg-slate-800/20 hover:border-l-slate-700'}">
+                        <div class="flex items-center gap-2.5 mb-1.5">
+                            <div class="w-2 h-2 rounded-full ${s.dot} shrink-0"></div>
+                            <span class="font-mono text-sm font-medium ${isActive ? 'text-white' : 'text-slate-300'} truncate flex-1">${esc(feature.name)}</span>
+                            <span class="text-[10px] font-mono font-medium px-1.5 py-0.5 rounded-full shrink-0 ${s.badge}">${s.label}</span>
+                        </div>
+                        <div class="ml-[18px]">
+                            <div class="h-1 bg-slate-800 rounded-full overflow-hidden">
+                                <div class="${s.bar} h-full rounded-full transition-all duration-500" style="width: ${progressPct}%"></div>
+                            </div>
+                            <span class="text-[10px] text-slate-600 font-mono mt-1 block">${p.stepsComplete}/${p.stepsTotal} steps</span>
+                        </div>
+                    </button>
+                </li>
+            `;
+        }
+
+        function renderLeftPanel(features) {
+            const isOverview = selectedFeature === null;
+            return `
+                <button id="overview-btn" onclick="selectFeature(null)"
+                        class="rail-item w-full text-left px-4 py-3 border-l-2 transition-all duration-150
+                               ${isOverview
+                                   ? 'bg-[#0d1425] border-l-sky-500'
+                                   : 'border-l-transparent hover:bg-slate-800/20 hover:border-l-slate-700'}">
+                    <div class="flex items-center gap-2.5">
+                        <svg class="w-4 h-4 ${isOverview ? 'text-sky-400' : 'text-slate-500'}" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"/>
+                        </svg>
+                        <span class="font-sans text-sm font-medium ${isOverview ? 'text-white' : 'text-slate-400'}">Overview</span>
+                        <span class="ml-auto text-[10px] font-mono text-slate-600">${features.length}</span>
+                    </div>
+                </button>
+                <div class="h-px bg-slate-800/60 mx-3 my-1"></div>
+                <nav class="overflow-y-auto flex-1">
+                    <ul class="py-1">
+                        ${features.map((f, i) => renderFeatureListItem(f, i)).join('')}
+                    </ul>
+                </nav>
+            `;
+        }
+
+        function renderRightPanel(feature, allFeatures) {
+            if (feature) {
+                const index = allFeatures.indexOf(feature);
+                return `
+                    <div class="max-w-3xl slide-in">
+                        ${renderFeatureCard(feature, index >= 0 ? index : 0)}
+                    </div>
+                `;
+            }
+            return allFeatures.length > 0
+                ? `<div class="grid grid-cols-1 lg:grid-cols-2 gap-4">${allFeatures.map((f, i) => renderFeatureCard(f, i)).join('')}</div>`
+                : renderEmptyState();
+        }
+
+        function selectFeature(name) {
+            selectedFeature = (selectedFeature === name) ? null : name;
+            const rightPanel = document.getElementById('right-panel');
+            const leftPanel = document.getElementById('left-panel');
+            const feature = selectedFeature ? sortedFeatures.find(f => f.name === selectedFeature) : null;
+            rightPanel.innerHTML = renderRightPanel(feature, sortedFeatures);
+            leftPanel.innerHTML = renderLeftPanel(sortedFeatures);
+        }
+
         function renderBoard(data) {
-            const features = [...data.features].sort(
+            sortedFeatures = [...data.features].sort(
                 (a, b) => (STATUS_ORDER[a.status] ?? 9) - (STATUS_ORDER[b.status] ?? 9)
             );
 
             const app = document.getElementById('app');
             app.innerHTML = `
-                <div class="max-w-6xl mx-auto px-6 py-10">
-
-                    <!-- Header -->
-                    <div class="mb-8">
-                        <div class="flex items-baseline justify-between flex-wrap gap-4 mb-5">
-                            <h1 class="font-mono text-2xl font-bold text-white tracking-tight">${data.projectName}</h1>
-                            <span class="text-xs text-slate-600 font-mono">${formatTimestamp(data.generatedAt)}</span>
+                <div class="flex h-screen overflow-hidden">
+                    <!-- Left Rail -->
+                    <aside class="w-64 shrink-0 border-r border-slate-800/40 bg-[#080f1e] flex flex-col h-screen">
+                        <div class="px-4 py-4 border-b border-slate-800/40 shrink-0">
+                            <h2 class="font-mono text-sm font-semibold text-slate-400 uppercase tracking-wider">${esc(data.projectName)}</h2>
                         </div>
-                        <div class="flex items-center gap-5 flex-wrap">
-                            ${renderSummaryStats(data.summary)}
+                        <div id="left-panel" class="flex flex-col flex-1 overflow-hidden">
+                            ${renderLeftPanel(sortedFeatures)}
                         </div>
-                    </div>
+                    </aside>
 
-                    <!-- Divider -->
-                    <div class="h-px bg-gradient-to-r from-slate-800 via-slate-700/50 to-slate-800 mb-8"></div>
+                    <!-- Right Content -->
+                    <div class="flex-1 overflow-y-auto">
+                        <div class="max-w-5xl mx-auto px-6 py-10">
+                            <!-- Header -->
+                            <div class="mb-8">
+                                <div class="flex items-baseline justify-between flex-wrap gap-4 mb-5">
+                                    <h1 class="font-mono text-2xl font-bold text-white tracking-tight">${esc(data.projectName)}</h1>
+                                    <span class="text-xs text-slate-600 font-mono">${formatTimestamp(data.generatedAt)}</span>
+                                </div>
+                                <div class="flex items-center gap-5 flex-wrap">
+                                    ${renderSummaryStats(data.summary)}
+                                </div>
+                            </div>
 
-                    <!-- Feature cards -->
-                    ${features.length > 0
-                        ? `<div class="grid grid-cols-1 lg:grid-cols-2 gap-4">${features.map((f, i) => renderFeatureCard(f, i)).join('')}</div>`
-                        : renderEmptyState()
-                    }
+                            <!-- Divider -->
+                            <div class="h-px bg-gradient-to-r from-slate-800 via-slate-700/50 to-slate-800 mb-8"></div>
 
-                    <!-- Footer -->
-                    <div class="mt-10 pt-6 border-t border-slate-800/40 text-center">
-                        <p class="text-[11px] text-slate-700 font-mono">
-                            Generated ${formatTimestamp(data.generatedAt)}
-                        </p>
+                            <!-- Feature content -->
+                            <div id="right-panel">
+                                ${renderRightPanel(null, sortedFeatures)}
+                            </div>
+
+                            <!-- Footer -->
+                            <div class="mt-10 pt-6 border-t border-slate-800/40 text-center">
+                                <p class="text-[11px] text-slate-600 font-mono">
+                                    Generated ${formatTimestamp(data.generatedAt)}
+                                </p>
+                            </div>
+                        </div>
                     </div>
                 </div>
             `;

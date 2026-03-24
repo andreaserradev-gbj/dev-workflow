@@ -37,6 +37,12 @@ plugins/dev-workflow/           # Plugin package
     dev-wrapup/
       SKILL.md
       scripts/discover.sh
+    dev-dashboard/
+      SKILL.md
+      scripts/start.sh
+      dashboard/                    # Bundled server + client (committed build artifact)
+        server/index.cjs
+        client/
 # Generated in user's project (not in plugin repo)
 .dev/wrapup-feedback.json        # Wrapup feedback history (auto-compacting)
 .codex/
@@ -51,6 +57,12 @@ docs/
 .githooks/                      # Git hooks (activate with scripts/setup.sh)
   pre-commit                    # Runs tests before commit
   pre-push                      # Enforces version bumps
+tools/dev-dashboard/            # Cross-project live dashboard
+  bin/dev-dashboard              # Shell entry point
+  src/server/                    # Fastify backend (scanner, parser, watcher, API, WS)
+  src/client/                    # Preact frontend (portfolio view, detail panels)
+  src/shared/                    # Shared TypeScript types
+  test/                          # Vitest tests + fixtures
 scripts/
   setup.sh                      # One-time contributor setup
 tests/
@@ -75,6 +87,16 @@ claude --plugin-dir ./plugins/dev-workflow
 
 Restart Claude Code to pick up changes.
 
+### Dashboard Bundle
+
+After modifying `tools/dev-dashboard/`, rebuild the bundle that ships with the plugin:
+
+```bash
+cd tools/dev-dashboard && npm run bundle
+```
+
+This builds the Vite client + esbuild-bundles the server into `plugins/dev-workflow/skills/dev-dashboard/dashboard/`. The bundle is a committed build artifact — commit it alongside source changes. The pre-commit hook blocks commits that change dashboard source without updating the bundle.
+
 ### Tests
 
 ```bash
@@ -85,7 +107,7 @@ Runs automatically via the pre-commit hook.
 
 ### Git Hooks (`.githooks/`)
 
-- **pre-commit** — runs `tests/test-scripts.sh`, blocks commit on failure
+- **pre-commit** — runs `tests/test-scripts.sh` and blocks commit if dashboard source changed without rebuilding the bundle
 - **pre-push** — blocks push if `plugins/` changed without a version bump in `marketplace.json`
 
 ### Version Bumps
