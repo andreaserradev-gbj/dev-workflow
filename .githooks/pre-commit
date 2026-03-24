@@ -1,9 +1,20 @@
 #!/bin/sh
 #
-# Pre-commit hook: run script tests before every commit.
+# Pre-commit hook: run script tests and check dashboard bundle freshness.
 
 if ! bash tests/test-scripts.sh; then
   echo ""
   echo "ERROR: Script tests failed. Fix the issues before committing."
+  exit 1
+fi
+
+# Check if dashboard source changed without rebuilding the bundle
+DASHBOARD_SRC_CHANGED=$(git diff --cached --name-only -- tools/dev-dashboard/src/ tools/dev-dashboard/package.json | head -1)
+BUNDLE_CHANGED=$(git diff --cached --name-only -- plugins/dev-workflow/skills/dev-dashboard/dashboard/ | head -1)
+
+if [ -n "$DASHBOARD_SRC_CHANGED" ] && [ -z "$BUNDLE_CHANGED" ]; then
+  echo ""
+  echo "ERROR: Dashboard source files changed but bundle was not updated."
+  echo "Run 'cd tools/dev-dashboard && npm run bundle' and stage the output."
   exit 1
 fi

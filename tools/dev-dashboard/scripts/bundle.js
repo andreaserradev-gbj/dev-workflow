@@ -2,7 +2,8 @@
 /**
  * Bundle the dev-dashboard server into a single CJS file and copy the
  * Vite-built client, producing a self-contained distribution under
- * plugins/dev-workflow/dashboard/ that requires only Node.js to run.
+ * plugins/dev-workflow/skills/dev-dashboard/dashboard/ so the skill
+ * is fully self-contained and works across Claude Code, Codex, and Gemini.
  *
  * Usage: node scripts/bundle.js
  *   (run after `npm run build` so dist/client/ exists)
@@ -16,7 +17,7 @@ import { fileURLToPath } from 'url';
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const ROOT = resolve(__dirname, '..');
 const REPO_ROOT = resolve(ROOT, '../..');
-const OUT_DIR = resolve(REPO_ROOT, 'plugins/dev-workflow/dashboard');
+const OUT_DIR = resolve(REPO_ROOT, 'plugins/dev-workflow/skills/dev-dashboard/dashboard');
 
 async function bundle() {
   // Clean output directory

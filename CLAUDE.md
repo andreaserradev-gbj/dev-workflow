@@ -40,9 +40,9 @@ plugins/dev-workflow/           # Plugin package
     dev-dashboard/
       SKILL.md
       scripts/start.sh
-  dashboard/                        # Bundled server + client (committed build artifact)
-    server/index.cjs
-    client/
+      dashboard/                    # Bundled server + client (committed build artifact)
+        server/index.cjs
+        client/
 # Generated in user's project (not in plugin repo)
 .dev/wrapup-feedback.json        # Wrapup feedback history (auto-compacting)
 .codex/
@@ -95,7 +95,7 @@ After modifying `tools/dev-dashboard/`, rebuild the bundle that ships with the p
 cd tools/dev-dashboard && npm run bundle
 ```
 
-This builds the Vite client + esbuild-bundles the server into `plugins/dev-workflow/dashboard/`. The bundle is a committed build artifact — commit it alongside source changes.
+This builds the Vite client + esbuild-bundles the server into `plugins/dev-workflow/skills/dev-dashboard/dashboard/`. The bundle is a committed build artifact — commit it alongside source changes. The pre-commit hook blocks commits that change dashboard source without updating the bundle.
 
 ### Tests
 
@@ -107,7 +107,7 @@ Runs automatically via the pre-commit hook.
 
 ### Git Hooks (`.githooks/`)
 
-- **pre-commit** — runs `tests/test-scripts.sh`, blocks commit on failure
+- **pre-commit** — runs `tests/test-scripts.sh` and blocks commit if dashboard source changed without rebuilding the bundle
 - **pre-push** — blocks push if `plugins/` changed without a version bump in `marketplace.json`
 
 ### Version Bumps

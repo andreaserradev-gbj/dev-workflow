@@ -14,8 +14,8 @@
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
-# scripts/ -> skills/dev-dashboard/ -> skills/ -> dev-workflow/ -> dashboard/
-DASHBOARD_DIR="$(cd "$SCRIPT_DIR/../../.." && pwd)/dashboard"
+# scripts/ -> skills/dev-dashboard/dashboard/
+DASHBOARD_DIR="$(cd "$SCRIPT_DIR/.." && pwd)/dashboard"
 SERVER_ENTRY="$DASHBOARD_DIR/server/index.cjs"
 
 DEFAULT_PORT=3141
