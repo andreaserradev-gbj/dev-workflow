@@ -197,6 +197,38 @@ A local web server that scans `.dev/` folders across all your projects and shows
 
 Starts the server (or reuses an existing instance) and displays the URL. No setup required — the server is bundled with the plugin. See [tools/dev-dashboard/README.md](tools/dev-dashboard/README.md) for configuration.
 
+<details>
+<summary>Running from the terminal</summary>
+
+You can start and stop the dashboard outside of Claude Code by adding these to your shell config:
+
+```bash
+dev-dashboard() {
+  local result
+  result=$(bash ~/.claude/plugins/marketplaces/dev-workflow/plugins/dev-workflow/skills/dev-dashboard/scripts/start.sh)
+  echo "$result"
+  local port="${result#*:}"
+  if [[ "$result" == running:* || "$result" == started:* ]]; then
+    open "http://localhost:${port}"
+  fi
+}
+
+dev-dashboard-stop() {
+  local pids
+  pids=$(pgrep -f 'dev-dashboard/dashboard/server/index.cjs')
+  if [[ -z "$pids" ]]; then
+    echo "No dev-dashboard server running"
+    return 0
+  fi
+  echo "$pids" | xargs kill
+  echo "Stopped dev-dashboard (pid: ${pids//$'\n'/, })"
+}
+```
+
+Then run `dev-dashboard` to start and open the browser, and `dev-dashboard-stop` to shut it down.
+
+</details>
+
 ---
 
 ## Design Principles
