@@ -195,7 +195,28 @@ A local web server that scans `.dev/` folders across all your projects and shows
 /dev-dashboard
 ```
 
-Starts the server (or reuses an existing instance) and displays the URL. No setup required — the server is bundled with the plugin. See [tools/dev-dashboard/README.md](tools/dev-dashboard/README.md) for configuration.
+Starts the server (or reuses an existing instance) and displays the URL. No setup required — the server is bundled with the plugin.
+
+<details>
+<summary>Configuration</summary>
+
+Config lives at `~/.config/dev-dashboard/config.json` (created automatically on first run):
+
+```json
+{
+  "scanDirs": ["~/code"],
+  "port": 3141
+}
+```
+
+| Field | Type | Default | Description |
+|-------|------|---------|-------------|
+| `scanDirs` | `string[]` | `["~/code"]` | Directories to scan for projects containing `.dev/` folders |
+| `port` | `number` | `3141` | HTTP server port |
+
+See [tools/dev-dashboard/README.md](tools/dev-dashboard/README.md) for CLI flags and more details.
+
+</details>
 
 <details>
 <summary>Running from the terminal</summary>
