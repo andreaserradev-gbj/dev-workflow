@@ -53,10 +53,10 @@ beforeEach(async () => {
   featureRemoved = [];
 
   callbacks = {
-    onFeatureUpdated: (projectPath, featureName) => {
+    onFeatureUpdated: (projectPath, featureName, _archived) => {
       featureUpdated.push({ projectPath, featureName });
     },
-    onFeatureAdded: (projectPath, featureName) => {
+    onFeatureAdded: (projectPath, featureName, _archived) => {
       featureAdded.push({ projectPath, featureName });
     },
     onFeatureRemoved: (projectPath, featureName) => {
@@ -277,6 +277,42 @@ describe('createWatcher', () => {
     const phantomUpdate = featureUpdated.find((e) => e.featureName === 'status-report-2026-03-23.md');
     expect(phantomAdd).toBeUndefined();
     expect(phantomUpdate).toBeUndefined();
+  });
+
+  it('watches .dev-archive directories and passes archived flag', async () => {
+    const projectDir = join(tempDir, 'project-archive');
+    const archiveDir = join(projectDir, '.dev-archive', 'old-feature');
+    await mkdir(archiveDir, { recursive: true });
+    await writeFile(join(archiveDir, '00-master-plan.md'), MASTER_PLAN);
+
+    let archivedFlag: boolean | undefined;
+    const archiveCallbacks: WatcherCallbacks = {
+      onFeatureUpdated: (_p, _f, archived) => {
+        archivedFlag = archived;
+        featureUpdated.push({ projectPath: _p, featureName: _f });
+      },
+      onFeatureAdded: (_p, _f, archived) => {
+        archivedFlag = archived;
+        featureAdded.push({ projectPath: _p, featureName: _f });
+      },
+      onFeatureRemoved: (_p, _f) => {
+        featureRemoved.push({ projectPath: _p, featureName: _f });
+      },
+    };
+
+    watcher = await createWatcher([tempDir], archiveCallbacks);
+    await waitForEvents(300);
+    featureUpdated.length = 0;
+    featureAdded.length = 0;
+    archivedFlag = undefined;
+
+    // Modify the archived feature
+    await writeFile(join(archiveDir, '00-master-plan.md'), MASTER_PLAN + '\n<!-- archived update -->');
+    await waitForEvents(500);
+
+    expect(featureUpdated.length).toBeGreaterThanOrEqual(1);
+    expect(featureUpdated[0].featureName).toBe('old-feature');
+    expect(archivedFlag).toBe(true);
   });
 
   it('close() stops watching', async () => {

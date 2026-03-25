@@ -3,8 +3,8 @@ import fg from 'fast-glob';
 import { dirname, sep } from 'path';
 
 export interface WatcherCallbacks {
-  onFeatureUpdated: (projectPath: string, featureName: string) => void;
-  onFeatureAdded: (projectPath: string, featureName: string) => void;
+  onFeatureUpdated: (projectPath: string, featureName: string, archived: boolean) => void;
+  onFeatureAdded: (projectPath: string, featureName: string, archived: boolean) => void;
   onFeatureRemoved: (projectPath: string, featureName: string) => void;
 }
 
@@ -20,6 +20,7 @@ export interface Watcher {
 interface ParsedPath {
   projectPath: string;
   featureName: string;
+  archived: boolean;
 }
 
 const DEFAULT_DEBOUNCE_MS = 200;
@@ -28,12 +29,22 @@ const DEFAULT_RESCAN_INTERVAL_MS = 30_000;
 /**
  * Parse a file path to extract the project path and feature name.
  * Expects paths like: .../project/.dev/feature-name/file.md
+ *                  or: .../project/.dev-archive/feature-name/file.md
  * Returns null if the path doesn't match this pattern.
  */
 function parsePath(filePath: string): ParsedPath | null {
   const parts = filePath.split(sep);
-  const devIdx = parts.lastIndexOf('.dev');
-  // Need at least 2 segments after .dev: feature-dir/file.md
+
+  // Try .dev-archive first (contains ".dev" as substring, so check it first)
+  let devIdx = parts.lastIndexOf('.dev-archive');
+  let archived = false;
+  if (devIdx !== -1) {
+    archived = true;
+  } else {
+    devIdx = parts.lastIndexOf('.dev');
+  }
+
+  // Need at least 2 segments after the dir: feature-dir/file.md
   // This rejects files sitting directly in .dev/ (e.g. status reports)
   if (devIdx === -1 || devIdx + 2 >= parts.length) return null;
 
@@ -41,11 +52,11 @@ function parsePath(filePath: string): ParsedPath | null {
   const featureName = parts[devIdx + 1];
 
   if (!projectPath || !featureName) return null;
-  return { projectPath, featureName };
+  return { projectPath, featureName, archived };
 }
 
 /**
- * Find all .dev directories within scan dirs (matching scanner's depth logic).
+ * Find all .dev and .dev-archive directories within scan dirs (matching scanner's depth logic).
  */
 async function findDevDirs(scanDirs: string[], maxDepth = 3): Promise<string[]> {
   const allDevDirs: string[] = [];
@@ -54,6 +65,7 @@ async function findDevDirs(scanDirs: string[], maxDepth = 3): Promise<string[]> 
     for (let d = 0; d < maxDepth; d++) {
       const prefix = d === 0 ? '' : new Array(d).fill('*').join('/') + '/';
       patterns.push(prefix + '.dev');
+      patterns.push(prefix + '.dev-archive');
     }
     try {
       const dirs = await fg(patterns, {
@@ -61,7 +73,7 @@ async function findDevDirs(scanDirs: string[], maxDepth = 3): Promise<string[]> 
         onlyDirectories: true,
         absolute: true,
         dot: true,
-        ignore: ['**/node_modules/**', '**/.dev-archive/**'],
+        ignore: ['**/node_modules/**'],
       });
       allDevDirs.push(...dirs);
     } catch {
@@ -87,16 +99,18 @@ export async function createWatcher(
   // Pending event type per feature key (for debounce)
   const pendingEvents = new Map<string, 'updated' | 'added'>();
 
-  function featureKey(projectPath: string, featureName: string): string {
-    return `${projectPath}${sep}.dev${sep}${featureName}`;
+  function featureKey(projectPath: string, featureName: string, archived = false): string {
+    const subdir = archived ? '.dev-archive' : '.dev';
+    return `${projectPath}${sep}${subdir}${sep}${featureName}`;
   }
 
   function scheduleEvent(
     projectPath: string,
     featureName: string,
     eventType: 'updated' | 'added',
+    archived: boolean,
   ): void {
-    const key = featureKey(projectPath, featureName);
+    const key = featureKey(projectPath, featureName, archived);
 
     // If there's already a pending event, prefer 'added' over 'updated'
     const existing = pendingEvents.get(key);
@@ -116,9 +130,9 @@ export async function createWatcher(
         pendingEvents.delete(key);
 
         if (type === 'added') {
-          callbacks.onFeatureAdded(projectPath, featureName);
+          callbacks.onFeatureAdded(projectPath, featureName, archived);
         } else {
-          callbacks.onFeatureUpdated(projectPath, featureName);
+          callbacks.onFeatureUpdated(projectPath, featureName, archived);
         }
       }, debounceMs),
     );
@@ -179,9 +193,10 @@ export async function createWatcher(
   }, rescanIntervalMs);
 
   function isDevMd(filePath: string): boolean {
-    if (!filePath.includes(`${sep}.dev${sep}`) || !filePath.endsWith('.md')) return false;
+    const hasDevDir =
+      filePath.includes(`${sep}.dev${sep}`) || filePath.includes(`${sep}.dev-archive${sep}`);
+    if (!hasDevDir || !filePath.endsWith('.md')) return false;
     if (filePath.includes(`${sep}node_modules${sep}`)) return false;
-    if (filePath.includes(`${sep}.dev-archive${sep}`)) return false;
     return true;
   }
 
@@ -190,12 +205,12 @@ export async function createWatcher(
     const parsed = parsePath(filePath);
     if (!parsed) return;
 
-    const key = featureKey(parsed.projectPath, parsed.featureName);
+    const key = featureKey(parsed.projectPath, parsed.featureName, parsed.archived);
     if (knownFeatures.has(key)) {
-      scheduleEvent(parsed.projectPath, parsed.featureName, 'updated');
+      scheduleEvent(parsed.projectPath, parsed.featureName, 'updated', parsed.archived);
     } else {
       knownFeatures.add(key);
-      scheduleEvent(parsed.projectPath, parsed.featureName, 'added');
+      scheduleEvent(parsed.projectPath, parsed.featureName, 'added', parsed.archived);
     }
   });
 
@@ -204,9 +219,9 @@ export async function createWatcher(
     const parsed = parsePath(filePath);
     if (!parsed) return;
 
-    const key = featureKey(parsed.projectPath, parsed.featureName);
+    const key = featureKey(parsed.projectPath, parsed.featureName, parsed.archived);
     knownFeatures.add(key);
-    scheduleEvent(parsed.projectPath, parsed.featureName, 'updated');
+    scheduleEvent(parsed.projectPath, parsed.featureName, 'updated', parsed.archived);
   });
 
   watcher.on('unlink', (filePath: string) => {
@@ -215,7 +230,7 @@ export async function createWatcher(
     if (!parsed) return;
 
     // Clear any pending debounce for this feature
-    const key = featureKey(parsed.projectPath, parsed.featureName);
+    const key = featureKey(parsed.projectPath, parsed.featureName, parsed.archived);
     const existingTimer = timers.get(key);
     if (existingTimer) {
       clearTimeout(existingTimer);

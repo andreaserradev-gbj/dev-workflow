@@ -57,9 +57,11 @@ async function main(): Promise<void> {
 
   // Watcher callbacks — shared between initial and reloaded watchers
   const watcherCallbacks = {
-    onFeatureUpdated: async (projectPath: string, featureName: string) => {
-      const featureDir = resolve(projectPath, '.dev', featureName);
+    onFeatureUpdated: async (projectPath: string, featureName: string, archived: boolean) => {
+      const subdir = archived ? '.dev-archive' : '.dev';
+      const featureDir = resolve(projectPath, subdir, featureName);
       const feature = await parseFeature(featureDir, featureName);
+      if (archived) feature.status = 'archived';
       state.updateFeature(projectPath, featureName, feature);
       broadcaster.broadcast({
         type: 'feature_updated',
@@ -68,9 +70,11 @@ async function main(): Promise<void> {
         data: feature,
       });
     },
-    onFeatureAdded: async (projectPath: string, featureName: string) => {
-      const featureDir = resolve(projectPath, '.dev', featureName);
+    onFeatureAdded: async (projectPath: string, featureName: string, archived: boolean) => {
+      const subdir = archived ? '.dev-archive' : '.dev';
+      const featureDir = resolve(projectPath, subdir, featureName);
       const feature = await parseFeature(featureDir, featureName);
+      if (archived) feature.status = 'archived';
       state.addFeature(projectPath, feature);
       broadcaster.broadcast({
         type: 'feature_added',
