@@ -8,6 +8,17 @@ if ! bash tests/test-scripts.sh; then
   exit 1
 fi
 
+# Lint & format check dashboard source if any dashboard files are staged
+DASHBOARD_TS_CHANGED=$(git diff --cached --name-only -- tools/dev-dashboard/src/ | head -1)
+if [ -n "$DASHBOARD_TS_CHANGED" ]; then
+  echo "Running dashboard lint & format check..."
+  if ! (cd tools/dev-dashboard && npx eslint src/ && npx prettier --check src/); then
+    echo ""
+    echo "ERROR: Dashboard lint/format issues. Run 'cd tools/dev-dashboard && npm run lint:fix && npm run format' to fix."
+    exit 1
+  fi
+fi
+
 # Check if dashboard source changed without rebuilding the bundle
 DASHBOARD_SRC_CHANGED=$(git diff --cached --name-only -- tools/dev-dashboard/src/ tools/dev-dashboard/package.json | head -1)
 BUNDLE_CHANGED=$(git diff --cached --name-only -- plugins/dev-workflow/skills/dev-dashboard/dashboard/ | head -1)

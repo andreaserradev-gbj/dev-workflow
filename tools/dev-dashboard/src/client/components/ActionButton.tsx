@@ -37,7 +37,8 @@ const ACTION_BY_STATUS: Record<FeatureStatus, ActionConfig> = {
   complete: {
     label: 'Archive',
     copiedLabel: 'Copied!',
-    payload: (ctx) => `mv ${ctx.projectPath}/.dev/${ctx.featureName} ${ctx.projectPath}/.dev-archive/`,
+    payload: (ctx) =>
+      `mv ${ctx.projectPath}/.dev/${ctx.featureName} ${ctx.projectPath}/.dev-archive/`,
     cls: 'bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/20 ring-1 ring-inset ring-emerald-500/20',
   },
   'checkpoint-only': {
@@ -74,7 +75,7 @@ export function PrimaryActionButton({ status, context }: PrimaryProps) {
   return (
     <button
       type="button"
-      class={`inline-flex items-center px-2.5 py-1 rounded-md text-[11px] font-medium font-mono transition-colors flex-shrink-0 ${config.cls}`}
+      class={`inline-flex items-center px-2.5 py-1 rounded-md text-[13px] font-medium font-mono transition-colors flex-shrink-0 ${config.cls}`}
       onClick={(e) => {
         e.stopPropagation();
         copy(config.payload(context));
@@ -106,11 +107,7 @@ export function PanelCommands({ context }: PanelCommandsProps) {
         copied={resume.copied}
         onClick={() => resume.copy(resumePayload)}
       />
-      <PanelButton
-        label="Board"
-        copied={board.copied}
-        onClick={() => board.copy(boardPayload)}
-      />
+      <PanelButton label="Board" copied={board.copied} onClick={() => board.copy(boardPayload)} />
     </div>
   );
 }
@@ -127,7 +124,7 @@ function PanelButton({
   return (
     <button
       type="button"
-      class="inline-flex items-center px-2.5 py-1 rounded-md text-[11px] font-medium font-mono bg-slate-900/80 text-slate-400 hover:bg-slate-700/60 hover:text-slate-300 transition-colors ring-1 ring-inset ring-slate-700/30"
+      class="inline-flex items-center px-2.5 py-1 rounded-md text-[13px] font-medium font-mono bg-slate-900/80 text-slate-400 hover:bg-slate-700/60 hover:text-slate-300 transition-colors ring-1 ring-inset ring-slate-700/30"
       onClick={onClick}
     >
       {copied ? 'Copied!' : label}

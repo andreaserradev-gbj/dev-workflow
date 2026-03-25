@@ -22,7 +22,10 @@ function getDominantStatus(features: Feature[]): FeatureStatus {
   let max = 0;
   let dominant: FeatureStatus = 'empty';
   for (const [status, count] of Object.entries(counts)) {
-    if (count > max) { max = count; dominant = status as FeatureStatus; }
+    if (count > max) {
+      max = count;
+      dominant = status as FeatureStatus;
+    }
   }
   return dominant;
 }
@@ -42,12 +45,16 @@ export function ProjectRail({ projects, selectedProject, onSelect }: Props) {
         onClick={() => onSelect(null)}
         class={`w-full text-left px-4 py-3 transition-colors ${
           selectedProject === null
-            ? 'bg-[#0d1425] border-l-2 border-l-sky-500'
+            ? 'bg-sky-500/10 border-l-2 border-l-white'
             : 'border-l-2 border-l-transparent hover:bg-slate-800/20'
         }`}
       >
-        <span class="text-sm font-semibold text-slate-200 font-sans">All Projects</span>
-        <span class="block text-[11px] text-slate-500 font-mono mt-0.5">
+        <span
+          class={`text-sm font-semibold font-sans ${selectedProject === null ? 'text-white' : 'text-slate-200'}`}
+        >
+          All Projects
+        </span>
+        <span class="block text-[13px] text-slate-500 font-mono mt-0.5">
           {totalFeatures} features · {totalActive} active
         </span>
       </button>
@@ -73,15 +80,15 @@ export function ProjectRail({ projects, selectedProject, onSelect }: Props) {
             type="button"
             onClick={() => onSelect(isSelected ? null : project.name)}
             class={`w-full text-left px-4 py-3 transition-colors border-l-2 ${
-              isSelected
-                ? 'bg-[#0d1425] border-l-sky-500'
-                : `${borderColor} hover:bg-slate-800/20`
+              isSelected ? 'bg-sky-500/10 border-l-white' : `${borderColor} hover:bg-slate-800/20`
             }`}
           >
-            <span class="text-sm font-semibold text-slate-200 font-sans truncate block">
+            <span
+              class={`text-sm font-semibold font-sans truncate block ${isSelected ? 'text-white' : 'text-slate-200'}`}
+            >
               {project.name}
             </span>
-            <span class="text-[11px] text-slate-500 font-mono mt-0.5 block">
+            <span class="text-[13px] text-slate-500 font-mono mt-0.5 block">
               {featureCount} features · {activeCount} active
             </span>
             {/* Mini progress bar */}

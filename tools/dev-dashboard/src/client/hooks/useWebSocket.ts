@@ -15,7 +15,7 @@ interface UseWebSocketResult {
 function sortFeatures(projects: Project[]): void {
   for (const project of projects) {
     project.features.sort(
-      (a, b) => (STATUS_ORDER[a.status] ?? 99) - (STATUS_ORDER[b.status] ?? 99)
+      (a, b) => (STATUS_ORDER[a.status] ?? 99) - (STATUS_ORDER[b.status] ?? 99),
     );
   }
 }
@@ -49,20 +49,18 @@ export function useWebSocket(options: UseWebSocketOptions = {}): UseWebSocketRes
                 .map((f) => (f.name === event.feature ? event.data : f))
                 .sort((a, b) => (STATUS_ORDER[a.status] ?? 99) - (STATUS_ORDER[b.status] ?? 99)),
             };
-          })
+          }),
         );
         break;
 
       case 'feature_added':
         setProjects((prev) => {
-          const existing = prev.find(
-            (p) => p.path === event.project || p.name === event.project
-          );
+          const existing = prev.find((p) => p.path === event.project || p.name === event.project);
           if (existing) {
             return prev.map((p) => {
               if (p !== existing) return p;
               const features = [...p.features, event.feature].sort(
-                (a, b) => (STATUS_ORDER[a.status] ?? 99) - (STATUS_ORDER[b.status] ?? 99)
+                (a, b) => (STATUS_ORDER[a.status] ?? 99) - (STATUS_ORDER[b.status] ?? 99),
               );
               return { ...p, features };
             });
@@ -89,7 +87,7 @@ export function useWebSocket(options: UseWebSocketOptions = {}): UseWebSocketRes
                 features: p.features.filter((f) => f.name !== event.feature),
               };
             })
-            .filter((p) => p.features.length > 0)
+            .filter((p) => p.features.length > 0),
         );
         break;
     }
@@ -98,7 +96,7 @@ export function useWebSocket(options: UseWebSocketOptions = {}): UseWebSocketRes
   useEffect(() => {
     function connect() {
       const protocol = location.protocol === 'https:' ? 'wss:' : 'ws:';
-      const ws = new WebSocket(`${protocol}//${location.host}`);
+      const ws = new WebSocket(`${protocol}//${location.host}/ws`);
       wsRef.current = ws;
 
       ws.onopen = () => {

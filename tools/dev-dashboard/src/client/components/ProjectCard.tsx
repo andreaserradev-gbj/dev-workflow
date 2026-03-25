@@ -45,7 +45,9 @@ function buildSummary(project: Project): string {
 
 export function ProjectCard({ project, singleProject }: Props) {
   const [expandedFeature, setExpandedFeature] = useState<string | null>(null);
-  const [collapsed, setCollapsed] = useState(() => singleProject ? false : isCollapsedInit(project.name));
+  const [collapsed, setCollapsed] = useState(() =>
+    singleProject ? false : isCollapsedInit(project.name),
+  );
 
   function toggleCollapsed() {
     setCollapsed((prev) => {
@@ -65,9 +67,7 @@ export function ProjectCard({ project, singleProject }: Props) {
             <h2 class="text-base font-semibold text-white font-sans tracking-tight">
               {project.name}
             </h2>
-            <span class="text-xs text-slate-500 font-mono">
-              {buildSummary(project)}
-            </span>
+            <span class="text-xs text-slate-500 font-mono">{buildSummary(project)}</span>
           </div>
         </div>
       ) : (
@@ -84,9 +84,7 @@ export function ProjectCard({ project, singleProject }: Props) {
             <h2 class="text-base font-semibold text-white font-sans tracking-tight">
               {project.name}
             </h2>
-            <span class="text-xs text-slate-500 font-mono">
-              {buildSummary(project)}
-            </span>
+            <span class="text-xs text-slate-500 font-mono">{buildSummary(project)}</span>
           </div>
         </button>
       )}
@@ -101,9 +99,7 @@ export function ProjectCard({ project, singleProject }: Props) {
                 id={`feature-${project.name}-${feature.name}`}
                 expanded={expandedFeature === feature.name}
                 onClick={() =>
-                  setExpandedFeature((prev) =>
-                    prev === feature.name ? null : feature.name
-                  )
+                  setExpandedFeature((prev) => (prev === feature.name ? null : feature.name))
                 }
               />
               {expandedFeature === feature.name && (

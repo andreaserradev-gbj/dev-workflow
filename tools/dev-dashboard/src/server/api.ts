@@ -45,7 +45,9 @@ export function registerApiRoutes(app: FastifyInstance, state: DashboardState): 
 
     const feature = project.features.find((f) => f.name === featureName);
     if (!feature) {
-      return reply.status(404).send({ error: `Feature "${featureName}" not found in "${projectName}"` });
+      return reply
+        .status(404)
+        .send({ error: `Feature "${featureName}" not found in "${projectName}"` });
     }
 
     const featureDir = resolve(project.path, '.dev', featureName);
@@ -56,9 +58,7 @@ export function registerApiRoutes(app: FastifyInstance, state: DashboardState): 
     const subPrds: FeatureDetail['subPrds'] = [];
     try {
       const entries = await readdir(featureDir);
-      const subPrdFiles = entries
-        .filter((e) => /^\d+-sub-prd-.*\.md$/.test(e))
-        .sort();
+      const subPrdFiles = entries.filter((e) => /^\d+-sub-prd-.*\.md$/.test(e)).sort();
       for (const file of subPrdFiles) {
         const result = await parseSubPrd(resolve(featureDir, file));
         if (result) subPrds.push(result);

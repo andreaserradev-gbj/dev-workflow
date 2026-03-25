@@ -12,7 +12,7 @@ const DEFAULT_MAX_DEPTH = 3;
 
 export async function scanProjects(
   scanDirs: string[],
-  options: ScanOptions = {}
+  options: ScanOptions = {},
 ): Promise<Project[]> {
   const maxDepth = options.maxDepth ?? DEFAULT_MAX_DEPTH;
   const projectMap = new Map<string, Project>();
@@ -45,9 +45,7 @@ export async function scanProjects(
       let featureDirs: string[];
       try {
         const entries = await readdir(devDir, { withFileTypes: true });
-        featureDirs = entries
-          .filter((e) => e.isDirectory())
-          .map((e) => e.name);
+        featureDirs = entries.filter((e) => e.isDirectory()).map((e) => e.name);
       } catch {
         continue;
       }

@@ -1,13 +1,7 @@
 import { readFile, readdir } from 'fs/promises';
 import { resolve, basename } from 'path';
 import matter from 'gray-matter';
-import type {
-  Feature,
-  FeatureStatus,
-  Phase,
-  Progress,
-  SubPrdStep,
-} from '../shared/types.js';
+import type { Feature, FeatureStatus, Phase, Progress, SubPrdStep } from '../shared/types.js';
 
 // ─── Emoji Shortcode Normalization ──────────────────────────────────
 
@@ -209,11 +203,12 @@ export async function parseCheckpoint(filePath: string): Promise<CheckpointResul
   const lastCommit = typeof frontmatter.last_commit === 'string' ? frontmatter.last_commit : null;
   const uncommittedChanges =
     typeof frontmatter.uncommitted_changes === 'boolean' ? frontmatter.uncommitted_changes : null;
-  const checkpointed = typeof frontmatter.checkpointed === 'string'
-    ? frontmatter.checkpointed
-    : frontmatter.checkpointed instanceof Date
-      ? frontmatter.checkpointed.toISOString()
-      : null;
+  const checkpointed =
+    typeof frontmatter.checkpointed === 'string'
+      ? frontmatter.checkpointed
+      : frontmatter.checkpointed instanceof Date
+        ? frontmatter.checkpointed.toISOString()
+        : null;
 
   const nextAction = extractXmlTag(content, 'next_action');
   const decisions = extractXmlListItems(content, 'decisions');
@@ -286,7 +281,8 @@ export async function parseSubPrd(filePath: string): Promise<SubPrdResult | null
 
   // Extract steps from Implementation Progress table
   const steps: SubPrdStep[] = [];
-  const tableRegex = /## Implementation Progress[\s\S]*?\|[\s\S]*?\|[\s\S]*?\|([\s\S]*?)(?=\n---|\n##|$)/;
+  const tableRegex =
+    /## Implementation Progress[\s\S]*?\|[\s\S]*?\|[\s\S]*?\|([\s\S]*?)(?=\n---|\n##|$)/;
   const tableMatch = content.match(tableRegex);
 
   if (tableMatch) {
@@ -321,7 +317,13 @@ export async function parseSubPrd(filePath: string): Promise<SubPrdResult | null
   const done = steps.filter((s) => s.status === 'done').length;
   const total = steps.length;
   const status: SubPrdResult['status'] =
-    total === 0 ? 'not-started' : done === total ? 'complete' : done > 0 ? 'in-progress' : 'not-started';
+    total === 0
+      ? 'not-started'
+      : done === total
+        ? 'complete'
+        : done > 0
+          ? 'in-progress'
+          : 'not-started';
 
   return { id, title, done, total, status, steps };
 }

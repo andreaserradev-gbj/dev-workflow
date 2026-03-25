@@ -103,11 +103,9 @@ async function main(): Promise<void> {
   });
 
   console.log(
-    `dev-dashboard running at http://localhost:${config.port} — scanning ${config.scanDirs.length} directories`
+    `dev-dashboard running at http://localhost:${config.port} — scanning ${config.scanDirs.length} directories`,
   );
-  console.log(
-    `Found ${state.projectCount} projects with ${state.featureCount} features`
-  );
+  console.log(`Found ${state.projectCount} projects with ${state.featureCount} features`);
 }
 
 main().catch((err) => {

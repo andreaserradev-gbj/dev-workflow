@@ -1,6 +1,6 @@
 import chokidar from 'chokidar';
 import fg from 'fast-glob';
-import { dirname, basename, sep } from 'path';
+import { dirname, sep } from 'path';
 
 export interface WatcherCallbacks {
   onFeatureUpdated: (projectPath: string, featureName: string) => void;
@@ -74,7 +74,7 @@ async function findDevDirs(scanDirs: string[], maxDepth = 3): Promise<string[]> 
 export async function createWatcher(
   scanDirs: string[],
   callbacks: WatcherCallbacks,
-  options: WatcherOptions = {}
+  options: WatcherOptions = {},
 ): Promise<Watcher> {
   const debounceMs = options.debounceMs ?? DEFAULT_DEBOUNCE_MS;
   const rescanIntervalMs = options.rescanIntervalMs ?? DEFAULT_RESCAN_INTERVAL_MS;
@@ -94,7 +94,7 @@ export async function createWatcher(
   function scheduleEvent(
     projectPath: string,
     featureName: string,
-    eventType: 'updated' | 'added'
+    eventType: 'updated' | 'added',
   ): void {
     const key = featureKey(projectPath, featureName);
 
@@ -120,7 +120,7 @@ export async function createWatcher(
         } else {
           callbacks.onFeatureUpdated(projectPath, featureName);
         }
-      }, debounceMs)
+      }, debounceMs),
     );
   }
 

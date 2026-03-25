@@ -69,11 +69,9 @@ export function FeatureRow({ feature, projectPath, id, expanded, onClick }: Prop
       {/* Name + branch */}
       <div class="min-w-0 flex-1">
         <div class="flex items-center gap-2">
-          <span class="text-sm font-medium text-slate-100 truncate">
-            {feature.name}
-          </span>
+          <span class="text-sm font-medium text-slate-100 truncate">{feature.name}</span>
           {feature.branch && (
-            <span class="text-[11px] text-slate-500 font-mono truncate max-w-[180px]">
+            <span class="text-[13px] text-slate-500 font-mono truncate max-w-[180px]">
               {feature.branch}
             </span>
           )}
@@ -93,8 +91,10 @@ export function FeatureRow({ feature, projectPath, id, expanded, onClick }: Prop
       <div class="w-32 flex-shrink-0">
         {feature.progress ? (
           <div>
-            <div class="flex justify-between text-[11px] font-mono text-slate-500 mb-1">
-              <span>{feature.progress.done}/{feature.progress.total}</span>
+            <div class="flex justify-between text-[13px] font-mono text-slate-500 mb-1">
+              <span>
+                {feature.progress.done}/{feature.progress.total}
+              </span>
               <span>{feature.progress.percent}%</span>
             </div>
             <div class="h-2 rounded-full bg-slate-800 overflow-hidden">
@@ -105,24 +105,24 @@ export function FeatureRow({ feature, projectPath, id, expanded, onClick }: Prop
             </div>
           </div>
         ) : (
-          <span class="text-[11px] text-slate-600 font-mono">—</span>
+          <span class="text-[13px] text-slate-600 font-mono">—</span>
         )}
       </div>
 
       {/* Checkpoint time */}
       <div class="w-16 flex-shrink-0 text-right">
         {feature.lastCheckpoint ? (
-          <span class="text-[11px] text-slate-500 font-mono">
+          <span class="text-[13px] text-slate-500 font-mono">
             {formatTimeAgo(feature.lastCheckpoint)}
           </span>
         ) : (
-          <span class="text-[11px] text-slate-600 font-mono">—</span>
+          <span class="text-[13px] text-slate-600 font-mono">—</span>
         )}
       </div>
 
       {/* Status badge */}
       <span
-        class={`inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-medium font-mono flex-shrink-0 ${config.badge}`}
+        class={`inline-flex items-center px-2.5 py-0.5 rounded-full text-[13px] font-medium font-mono flex-shrink-0 ${config.badge}`}
       >
         {config.label}
       </span>

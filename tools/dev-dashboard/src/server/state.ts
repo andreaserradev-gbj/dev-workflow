@@ -1,4 +1,4 @@
-import type { Feature, FeatureDetail, Phase, Project, SubPrd } from '../shared/types.js';
+import type { Feature, Project } from '../shared/types.js';
 import { STATUS_ORDER } from '../shared/types.js';
 
 /** Sort features by status priority, then projects by most recently active. Pure function. */
@@ -7,7 +7,7 @@ export function sortProjects(projects: Project[]): Project[] {
     .map((p) => ({
       ...p,
       features: [...p.features].sort(
-        (a, b) => (STATUS_ORDER[a.status] ?? 99) - (STATUS_ORDER[b.status] ?? 99)
+        (a, b) => (STATUS_ORDER[a.status] ?? 99) - (STATUS_ORDER[b.status] ?? 99),
       ),
     }))
     .sort((a, b) => {

@@ -9,10 +9,7 @@ export interface WsBroadcaster {
   readonly clientCount: number;
 }
 
-export function createWsBroadcaster(
-  server: Server,
-  state: DashboardState
-): WsBroadcaster {
+export function createWsBroadcaster(server: Server, state: DashboardState): WsBroadcaster {
   const wss = new WebSocketServer({ server });
 
   wss.on('connection', (ws) => {

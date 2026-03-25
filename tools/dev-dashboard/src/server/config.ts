@@ -99,7 +99,7 @@ export function watchConfig(
   cliOverrides: CliOverrides,
   currentScanDirs: string[],
   onScanDirsChanged: (newDirs: string[]) => void,
-  configPath: string = CONFIG_PATH
+  configPath: string = CONFIG_PATH,
 ): ConfigWatcher {
   let lastDirs = JSON.stringify(currentScanDirs);
   let debounceTimer: ReturnType<typeof setTimeout> | null = null;
