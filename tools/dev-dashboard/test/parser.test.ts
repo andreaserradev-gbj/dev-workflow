@@ -121,6 +121,20 @@ describe('parseMasterPlan', () => {
     expect(result!.progress.total).toBe(13);
   });
 
+  it('recognizes **Status** field with [x]/[ ] as phase completion markers', async () => {
+    const result = await parseMasterPlan(resolve(FIXTURES, 'status-field/00-master-plan.md'));
+
+    expect(result).not.toBeNull();
+    expect(result!.phases).toHaveLength(3);
+
+    // Phases 1 & 2: [x] → complete
+    expect(result!.phases[0]).toMatchObject({ number: 1, status: 'complete' });
+    expect(result!.phases[1]).toMatchObject({ number: 2, status: 'complete' });
+
+    // Phase 3: [ ] → not-started
+    expect(result!.phases[2]).toMatchObject({ number: 3, status: 'not-started' });
+  });
+
   it('handles :white_check_mark: and :white_large_square: emoji shortcodes', async () => {
     const result = await parseMasterPlan(resolve(FIXTURES, 'shortcode-emoji/00-master-plan.md'));
 
@@ -410,6 +424,14 @@ describe('parseFeature', () => {
 
     expect(result.name).toBe('malformed');
     expect(result.status).toBeDefined();
+  });
+
+  it('parses status-field feature using **Status** [x]/[ ] markers', async () => {
+    const result = await parseFeature(resolve(FIXTURES, 'status-field'), 'status-field');
+
+    expect(result.name).toBe('status-field');
+    // 2 of 3 phases complete → uses phase-level progress
+    expect(result.progress).toMatchObject({ done: 2, total: 3, percent: 67 });
   });
 
   it('parses shortcode-emoji feature as complete', async () => {

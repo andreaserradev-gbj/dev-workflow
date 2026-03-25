@@ -100,7 +100,9 @@ function extractPhases(rawContent: string): Phase[] {
       // Fall back to phase-level marker when no individual steps found
       status = titleMarker === '✅' ? 'complete' : 'not-started';
     } else {
-      status = 'not-started';
+      // Fall back to **Status** field in section (e.g., "- **Status**: `[x]` done")
+      const sectionStatus = extractSectionStatus(section);
+      status = sectionStatus ?? 'not-started';
     }
 
     phases.push({
@@ -167,6 +169,13 @@ function countSteps(section: string): { done: number; total: number } {
   }
 
   return { done, total };
+}
+
+/** Check for a **Status** field indicating phase completion (e.g., "- **Status**: `[x]` done"). */
+function extractSectionStatus(section: string): Phase['status'] | null {
+  const match = section.match(/\*\*Status\*\*:\s*`?\[( |x)\]`?/i);
+  if (!match) return null;
+  return match[1] === 'x' ? 'complete' : 'not-started';
 }
 
 // ─── Checkpoint ────────────────────────────────────────────────────
