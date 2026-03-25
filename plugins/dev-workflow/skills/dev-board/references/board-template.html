@@ -54,7 +54,7 @@
             var BOARD_DATA = {
                 projectName: "dev-workflow",
                 generatedAt: "2026-03-02T14:30:00Z",
-                summary: { total: 4, active: 2, complete: 1, stale: 1, noPrd: 0 },
+                summary: { total: 4, active: 2, complete: 1, stale: 1, gate: 0, noPrd: 0 },
                 features: [
                     {
                         name: "dev-board",
@@ -168,31 +168,39 @@
                 badge: 'bg-sky-500/10 text-sky-400 ring-1 ring-inset ring-sky-500/20',
                 bar: 'bg-sky-500',
                 dot: 'bg-sky-400',
-                border: 'border-l-sky-500',
+                color: '#0ea5e9',
                 accent: 'text-sky-400',
+            },
+            gate: {
+                label: 'Gate',
+                badge: 'bg-amber-500/10 text-amber-400 ring-1 ring-inset ring-amber-500/20',
+                bar: 'bg-amber-500',
+                dot: 'bg-amber-400',
+                color: '#f59e0b',
+                accent: 'text-amber-400',
             },
             complete: {
                 label: 'Complete',
                 badge: 'bg-emerald-500/10 text-emerald-400 ring-1 ring-inset ring-emerald-500/20',
                 bar: 'bg-emerald-500',
                 dot: 'bg-emerald-400',
-                border: 'border-l-emerald-500',
+                color: '#10b981',
                 accent: 'text-emerald-400',
             },
             stale: {
                 label: 'Stale',
-                badge: 'bg-amber-500/10 text-amber-400 ring-1 ring-inset ring-amber-500/20',
-                bar: 'bg-amber-500',
-                dot: 'bg-amber-400',
-                border: 'border-l-amber-500',
-                accent: 'text-amber-400',
+                badge: 'bg-red-500/10 text-red-400 ring-1 ring-inset ring-red-500/20',
+                bar: 'bg-red-500',
+                dot: 'bg-red-400',
+                color: '#ef4444',
+                accent: 'text-red-400',
             },
             'no-prd': {
                 label: 'No PRD',
                 badge: 'bg-slate-500/10 text-slate-400 ring-1 ring-inset ring-slate-500/20',
                 bar: 'bg-slate-600',
                 dot: 'bg-slate-500',
-                border: 'border-l-slate-600',
+                color: '#64748b',
                 accent: 'text-slate-400',
             },
         };
@@ -203,7 +211,7 @@
             'not-started': { dot: 'bg-slate-600', bar: 'bg-slate-700' },
         };
 
-        const STATUS_ORDER = { active: 0, stale: 1, 'no-prd': 2, complete: 3 };
+        const STATUS_ORDER = { gate: 0, active: 1, stale: 2, 'no-prd': 3, complete: 4 };
 
         let selectedFeature = null;
         let sortedFeatures = [];
@@ -255,8 +263,11 @@
                 { count: summary.total, label: 'features', colorClass: 'text-white' },
                 { count: summary.active, label: 'active', colorClass: 'text-sky-400' },
                 { count: summary.complete, label: 'complete', colorClass: 'text-emerald-400' },
-                { count: summary.stale, label: 'stale', colorClass: 'text-amber-400' },
+                { count: summary.stale, label: 'stale', colorClass: 'text-red-400' },
             ];
+            if (summary.gate > 0) {
+                stats.push({ count: summary.gate, label: 'gate', colorClass: 'text-amber-400' });
+            }
             if (summary.noPrd > 0) {
                 stats.push({ count: summary.noPrd, label: 'no prd', colorClass: 'text-slate-400' });
             }
@@ -394,8 +405,10 @@
             const p = feature.progress;
 
             return `
-                <div class="card-enter bg-[#0d1425] border border-slate-800/60 border-l-2 ${s.border} rounded-lg p-5 hover:border-slate-700/80 transition-colors shadow-lg shadow-black/40"
+                <div class="card-enter relative bg-[#0d1425] border border-slate-800/60 rounded-lg p-5 hover:border-slate-700/80 transition-colors shadow-lg shadow-black/40"
                      style="animation-delay: ${delay}s">
+                    <div class="absolute left-0 top-0 bottom-0 w-[3px] rounded-l-sm" style="background: ${s.color}"></div>
+                    <div class="absolute right-0 top-0 bottom-0 w-[3px] rounded-r-sm" style="background: ${s.color}"></div>
 
                     <!-- Header -->
                     <div class="flex items-start justify-between gap-3 mb-2">
@@ -451,10 +464,11 @@
                 <li>
                     <button onclick="selectFeature('${esc(feature.name)}')"
                             data-feature="${esc(feature.name)}"
-                            class="rail-item w-full text-left px-4 py-3 border-l-2 transition-all duration-150
+                            class="rail-item relative w-full text-left px-4 py-3 transition-all duration-150
                                    ${isActive
-                                       ? 'bg-sky-500/10 border-l-white border-l-2'
-                                       : 'border-l-transparent hover:bg-slate-800/20 hover:border-l-slate-700'}">
+                                       ? 'bg-sky-500/15'
+                                       : 'hover:bg-slate-800/20'}">
+                        <div class="absolute left-0 top-0 bottom-0 rounded-r-sm ${isActive ? 'w-[4px]' : 'w-[3px]'}" style="background: ${s.color}"></div>
                         <div class="flex items-center gap-2.5 mb-1.5">
                             <div class="w-2 h-2 rounded-full ${s.dot} shrink-0"></div>
                             <span class="font-mono text-sm font-medium ${isActive ? 'text-white' : 'text-slate-300'} truncate flex-1">${esc(feature.name)}</span>
@@ -475,10 +489,10 @@
             const isOverview = selectedFeature === null;
             return `
                 <button id="overview-btn" onclick="selectFeature(null)"
-                        class="rail-item w-full text-left px-4 py-3 border-l-2 transition-all duration-150
+                        class="rail-item w-full text-left px-4 py-3 transition-all duration-150
                                ${isOverview
-                                   ? 'bg-sky-500/10 border-l-white'
-                                   : 'border-l-transparent hover:bg-slate-800/20 hover:border-l-slate-700'}">
+                                   ? 'bg-sky-500/15'
+                                   : 'hover:bg-slate-800/20'}">
                     <div class="flex items-center gap-2.5">
                         <svg class="w-4 h-4 ${isOverview ? 'text-sky-400' : 'text-slate-500'}" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"/>

@@ -332,6 +332,28 @@ describe('determineFeatureStatus', () => {
       atGate: true,
     })).toBe('gate');
   });
+
+  it('returns "stale" when 0% progress and no checkpoint', () => {
+    expect(determineFeatureStatus({
+      hasMasterPlan: true,
+      allComplete: false,
+      checkpointDate: null,
+      lastUpdated: '2026-03-20',
+      now,
+      progressDone: 0,
+    })).toBe('stale');
+  });
+
+  it('returns "active" when 0% progress but has checkpoint', () => {
+    expect(determineFeatureStatus({
+      hasMasterPlan: true,
+      allComplete: false,
+      checkpointDate: '2026-03-20T14:30:00Z',
+      lastUpdated: null,
+      now,
+      progressDone: 0,
+    })).toBe('active');
+  });
 });
 
 // ─── Full Feature Parsing (integration) ────────────────────────────

@@ -48,8 +48,8 @@ Repeat for each feature folder in your assigned batch.
 | Status | Criteria |
 |--------|----------|
 | **Complete** | All phases complete (all steps have `✅`) |
-| **Active** | Has PRD files with incomplete steps (`⬜`), checkpoint within 30 days |
-| **Stale** | Has PRD files with incomplete steps (`⬜`), no checkpoint or checkpoint older than 30 days |
+| **Active** | Has PRD files with incomplete steps (`⬜`), some progress (done > 0) or has checkpoint, and checkpoint/last-updated within 30 days |
+| **Stale** | Has PRD files with incomplete steps (`⬜`), and either: checkpoint older than 30 days, no date reference, or 0% progress with no checkpoint |
 | **No PRD** | Folder exists but contains no `00-master-plan.md` |
 
 ## Guidelines

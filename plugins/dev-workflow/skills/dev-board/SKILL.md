@@ -100,7 +100,7 @@ The agent returns a JSON array of feature objects. Wrap it into the full data co
 {
   "projectName": "<from 3a>",
   "generatedAt": "<from 3a>",
-  "summary": { "total": N, "active": N, "complete": N, "stale": N, "noPrd": N },
+  "summary": { "total": N, "active": N, "complete": N, "stale": N, "gate": N, "noPrd": N },
   "features": <agent JSON array>
 }
 ```
@@ -110,6 +110,7 @@ Compute `summary` by counting feature statuses across the array:
 - `active`: features with `status === "active"`
 - `complete`: features with `status === "complete"`
 - `stale`: features with `status === "stale"`
+- `gate`: features with `status === "gate"`
 - `noPrd`: features with `status === "no-prd"`
 
 #### 3c. Inject into template and write

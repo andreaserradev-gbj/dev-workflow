@@ -2,6 +2,7 @@ import { useState } from 'preact/hooks';
 import type { FeatureStatus, Project } from '@shared/types.js';
 import { FeatureRow } from './FeatureRow.js';
 import { FeaturePanel } from './FeaturePanel.js';
+import { buildStatusGradient } from '../utils/statusColors.js';
 
 interface Props {
   project: Project;
@@ -58,9 +59,17 @@ export function ProjectCard({ project, singleProject }: Props) {
   }
 
   const isCollapsed = singleProject ? false : collapsed;
+  const gradient = buildStatusGradient(project.features);
 
   return (
-    <div class="rounded-xl bg-[#0d1425] border border-slate-800/60 overflow-hidden shadow-md shadow-black/20">
+    <div class="relative rounded-xl bg-[#0d1425] border border-slate-800/60 overflow-hidden shadow-md shadow-black/20">
+      {/* Right status bar */}
+      {gradient && (
+        <div
+          class="absolute right-0 top-0 bottom-0 w-[3px] rounded-l-sm z-10"
+          style={{ background: gradient }}
+        />
+      )}
       {singleProject ? (
         <div class="w-full px-5 py-4 border-b border-slate-800/60 flex items-center justify-between text-left">
           <div class="flex items-center gap-3">

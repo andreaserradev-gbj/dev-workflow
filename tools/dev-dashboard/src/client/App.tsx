@@ -14,6 +14,7 @@ const FILTER_PILLS: { key: FeatureStatus | 'all'; label: string }[] = [
 ];
 
 const SELECTED_PROJECT_KEY = 'dev-dashboard-selected-project';
+const RAIL_COLLAPSED_KEY = 'dev-dashboard-rail-collapsed';
 
 function readSelectedProject(): string | null {
   try {
@@ -32,11 +33,29 @@ function writeSelectedProject(name: string | null): void {
   }
 }
 
+function readRailCollapsed(): boolean {
+  try {
+    return localStorage.getItem(RAIL_COLLAPSED_KEY) === '1';
+  } catch {
+    return false;
+  }
+}
+
+function writeRailCollapsed(v: boolean): void {
+  try {
+    if (v) localStorage.setItem(RAIL_COLLAPSED_KEY, '1');
+    else localStorage.removeItem(RAIL_COLLAPSED_KEY);
+  } catch {
+    /* */
+  }
+}
+
 export function App() {
   const [statusFilter, setStatusFilter] = useState<FeatureStatus | 'all'>('all');
   const [searchInput, setSearchInput] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedProject, setSelectedProject] = useState<string | null>(readSelectedProject);
+  const [railCollapsed, setRailCollapsed] = useState(readRailCollapsed);
 
   // Debounce search input
   useEffect(() => {
@@ -59,18 +78,32 @@ export function App() {
     writeSelectedProject(name);
   }, []);
 
-  const totalFeatures = projects.reduce((sum, p) => sum + p.features.length, 0);
+  const handleToggleRail = useCallback(() => {
+    setRailCollapsed((prev) => {
+      const next = !prev;
+      writeRailCollapsed(next);
+      return next;
+    });
+  }, []);
 
-  // Count features per status across all projects
+  // Projects scoped to the selected project (used for status counts + session bar)
+  const scopedProjects = useMemo(
+    () => (selectedProject ? projects.filter((p) => p.name === selectedProject) : projects),
+    [projects, selectedProject],
+  );
+
+  // Count features per status within the scoped projects
   const statusCounts = useMemo(() => {
     const counts: Partial<Record<FeatureStatus, number>> = {};
-    for (const p of projects) {
+    for (const p of scopedProjects) {
       for (const f of p.features) {
         counts[f.status] = (counts[f.status] ?? 0) + 1;
       }
     }
     return counts;
-  }, [projects]);
+  }, [scopedProjects]);
+
+  const scopedTotalFeatures = scopedProjects.reduce((sum, p) => sum + p.features.length, 0);
 
   // Filter projects by selected project, status, and search query
   const filteredProjects = useMemo(() => {
@@ -97,6 +130,8 @@ export function App() {
           projects={projects}
           selectedProject={selectedProject}
           onSelect={handleSelectProject}
+          collapsed={railCollapsed}
+          onToggleCollapsed={handleToggleRail}
         />
       )}
 
@@ -116,7 +151,7 @@ export function App() {
             <p class="mt-1 text-sm text-slate-500 font-mono">
               {loading
                 ? 'Connecting...'
-                : `${projects.length} projects · ${totalFeatures} features`}
+                : `${filteredProjects.length} projects · ${filteredProjects.reduce((s, p) => s + p.features.length, 0)} features`}
             </p>
           </header>
 
@@ -129,12 +164,18 @@ export function App() {
             </div>
           )}
 
-          {!loading && <SessionBar projects={projects} onSelectProject={handleSelectProject} />}
+          {!loading && (
+            <SessionBar
+              projects={scopedProjects}
+              statusFilter={statusFilter}
+              onSelectProject={handleSelectProject}
+            />
+          )}
 
-          {!loading && totalFeatures > 0 && (
+          {!loading && scopedTotalFeatures > 0 && (
             <div class="mb-6 flex items-center gap-2 flex-wrap">
               {FILTER_PILLS.map(({ key, label }) => {
-                const count = key === 'all' ? totalFeatures : (statusCounts[key] ?? 0);
+                const count = key === 'all' ? scopedTotalFeatures : (statusCounts[key] ?? 0);
                 const isActive = statusFilter === key;
                 return (
                   <button

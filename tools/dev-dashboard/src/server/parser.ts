@@ -340,10 +340,20 @@ export interface StatusInput {
   now: Date;
   isEmpty?: boolean;
   atGate?: boolean;
+  progressDone?: number;
 }
 
 export function determineFeatureStatus(input: StatusInput): FeatureStatus {
-  const { hasMasterPlan, allComplete, checkpointDate, lastUpdated, now, isEmpty, atGate } = input;
+  const {
+    hasMasterPlan,
+    allComplete,
+    checkpointDate,
+    lastUpdated,
+    now,
+    isEmpty,
+    atGate,
+    progressDone,
+  } = input;
 
   // Empty directory
   if (isEmpty) return 'empty';
@@ -366,6 +376,8 @@ export function determineFeatureStatus(input: StatusInput): FeatureStatus {
     const refMs = new Date(referenceDate).getTime();
     const ageMs = now.getTime() - refMs;
     if (ageMs > THIRTY_DAYS_MS) return 'stale';
+    // No work started and no checkpoint — treat as stale (planned but not active)
+    if (progressDone === 0 && !checkpointDate) return 'stale';
     return 'active';
   }
 
@@ -403,6 +415,7 @@ export async function parseFeature(featureDir: string, name: string): Promise<Fe
     now: new Date(),
     isEmpty: isEmpty && masterPlan === null && checkpoint === null,
     atGate,
+    progressDone: masterPlan?.progress.done,
   });
 
   // Find current phase (first in-progress, or first not-started)

@@ -52,7 +52,7 @@ Return a single JSON array containing one object per feature. Use this exact sha
 ```
 
 **Field value conventions:**
-- `status`: lowercase with hyphens — `"active"`, `"complete"`, `"stale"`, `"no-prd"`
+- `status`: lowercase with hyphens — `"active"`, `"gate"`, `"complete"`, `"stale"`, `"no-prd"`
 - `phases[].status`: `"complete"`, `"in-progress"`, `"not-started"`
 - `subPrds[].status`: `"complete"`, `"in-progress"`, `"not-started"`
 - `subPrds[].steps[].status`: `"done"`, `"pending"`
@@ -121,8 +121,9 @@ If `checkpoint.md` exists:
 | Status | Criteria |
 |--------|----------|
 | **Complete** | All phases have all steps marked `✅` or `⏭️` |
-| **Active** | Has PRD with incomplete steps (`⬜`), checkpoint within 30 days or recently updated |
-| **Stale** | Has PRD with incomplete steps (`⬜`), no checkpoint or checkpoint older than 30 days |
+| **Gate** | Has completed phase(s) and not-started phase(s), but no in-progress phase (ready for next phase decision) |
+| **Active** | Has PRD with incomplete steps (`⬜`), some progress (done > 0) or has checkpoint, and checkpoint/last-updated within 30 days |
+| **Stale** | Has PRD with incomplete steps (`⬜`), and either: checkpoint older than 30 days, no date reference, or 0% progress with no checkpoint |
 | **No PRD** | Folder exists but no `00-master-plan.md` |
 
 For staleness, compare checkpoint date (or Last Updated date if no checkpoint) against today's date.
