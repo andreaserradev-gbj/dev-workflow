@@ -6,18 +6,23 @@
 remote="$1"
 
 while read local_ref local_oid remote_ref remote_oid; do
-  # Compare the full branch diff against main, not just the new commits
-  merge_base=$(git merge-base "$local_oid" main 2>/dev/null)
-  if [ -z "$merge_base" ]; then
-    continue
-  fi
-
-  # Skip if pushing main itself (no comparison needed)
+  # For main: compare against what the remote already has
+  # For branches: compare against the merge-base with main
   case "$remote_ref" in
-    refs/heads/main) continue ;;
+    refs/heads/main)
+      if [ "$remote_oid" = "0000000000000000000000000000000000000000" ]; then
+        continue
+      fi
+      range="$remote_oid..$local_oid"
+      ;;
+    *)
+      merge_base=$(git merge-base "$local_oid" main 2>/dev/null)
+      if [ -z "$merge_base" ]; then
+        continue
+      fi
+      range="$merge_base..$local_oid"
+      ;;
   esac
-
-  range="$merge_base..$local_oid"
 
   plugins_changed=$(git diff --name-only "$range" -- 'plugins/' 2>/dev/null)
   version_changed=$(git diff --name-only "$range" -- '.claude-plugin/marketplace.json' 2>/dev/null)
