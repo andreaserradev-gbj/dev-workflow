@@ -9,6 +9,7 @@ const STATUS_PRIORITY: FeatureStatus[] = [
   'no-prd',
   'complete',
   'empty',
+  'archived',
 ];
 
 export const STATUS_COLORS: Record<FeatureStatus, string> = {
@@ -19,13 +20,16 @@ export const STATUS_COLORS: Record<FeatureStatus, string> = {
   'checkpoint-only': '#8b5cf6', // violet-500
   'no-prd': '#64748b', // slate-500
   empty: '#475569', // slate-600
+  archived: '#334155', // slate-700
 };
 
 export function buildStatusGradient(features: Feature[]): string | null {
-  if (features.length === 0) return null;
+  // Exclude archived features from gradient — keeps it informative about active work
+  const activeFeatures = features.filter((f) => f.status !== 'archived');
+  if (activeFeatures.length === 0) return null;
 
   const counts: Partial<Record<FeatureStatus, number>> = {};
-  for (const f of features) {
+  for (const f of activeFeatures) {
     counts[f.status] = (counts[f.status] ?? 0) + 1;
   }
 
@@ -33,7 +37,7 @@ export function buildStatusGradient(features: Feature[]): string | null {
   for (const status of STATUS_PRIORITY) {
     const count = counts[status];
     if (count) {
-      segments.push({ color: STATUS_COLORS[status], fraction: count / features.length });
+      segments.push({ color: STATUS_COLORS[status], fraction: count / activeFeatures.length });
     }
   }
 

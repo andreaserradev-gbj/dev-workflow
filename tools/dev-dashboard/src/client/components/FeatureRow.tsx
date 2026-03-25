@@ -45,6 +45,11 @@ const STATUS_CONFIG: Record<FeatureStatus, { label: string; badge: string; bar: 
     badge: 'bg-slate-500/10 text-slate-400 ring-1 ring-inset ring-slate-500/20',
     bar: 'bg-slate-700',
   },
+  archived: {
+    label: 'Archived',
+    badge: 'bg-slate-600/10 text-slate-500 ring-1 ring-inset ring-slate-600/20',
+    bar: 'bg-slate-700',
+  },
 };
 
 function formatTimeAgo(dateStr: string): string {
@@ -63,7 +68,7 @@ export function FeatureRow({ feature, projectPath, id, expanded, onClick }: Prop
   return (
     <div
       id={id}
-      class={`px-5 py-4 flex items-center gap-4 cursor-pointer transition-colors hover:bg-slate-800/30 ${expanded ? 'bg-slate-800/20' : ''}`}
+      class={`px-5 py-4 flex items-center gap-4 cursor-pointer transition-colors hover:bg-slate-800/30 ${expanded ? 'bg-slate-800/20' : ''} ${feature.status === 'archived' ? 'opacity-60' : ''}`}
       onClick={onClick}
     >
       {/* Name + branch */}

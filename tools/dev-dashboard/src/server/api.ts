@@ -18,14 +18,28 @@ export function registerApiRoutes(app: FastifyInstance, state: DashboardState): 
   app.get('/api/projects', async () => {
     const projects = state.getProjects();
 
-    // Filter out projects whose .dev directories no longer exist on disk,
+    // Filter out projects whose .dev or .dev-archive directories no longer exist on disk,
     // and prune them from state so the watcher doesn't need to catch up
     const alive: Project[] = [];
     for (const project of projects) {
+      let hasDevDir = false;
       try {
         await access(resolve(project.path, '.dev'));
-        alive.push(project);
+        hasDevDir = true;
       } catch {
+        // .dev doesn't exist
+      }
+      if (!hasDevDir) {
+        try {
+          await access(resolve(project.path, '.dev-archive'));
+          hasDevDir = true;
+        } catch {
+          // .dev-archive doesn't exist either
+        }
+      }
+      if (hasDevDir) {
+        alive.push(project);
+      } else {
         state.removeProject(project.path);
       }
     }
@@ -50,7 +64,8 @@ export function registerApiRoutes(app: FastifyInstance, state: DashboardState): 
         .send({ error: `Feature "${featureName}" not found in "${projectName}"` });
     }
 
-    const featureDir = resolve(project.path, '.dev', featureName);
+    const devSubdir = feature.status === 'archived' ? '.dev-archive' : '.dev';
+    const featureDir = resolve(project.path, devSubdir, featureName);
     const masterPlan = await parseMasterPlan(resolve(featureDir, '00-master-plan.md'));
     const checkpoint = await parseCheckpoint(resolve(featureDir, 'checkpoint.md'));
 

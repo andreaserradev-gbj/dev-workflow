@@ -49,6 +49,12 @@ const STATUS_STYLES: Record<
     ring: 'ring-slate-700/20',
     dot: 'bg-slate-600',
   },
+  archived: {
+    bg: 'bg-slate-600/10',
+    text: 'text-slate-600',
+    ring: 'ring-slate-700/20',
+    dot: 'bg-slate-600',
+  },
 };
 
 const STATUS_LABELS: Partial<Record<FeatureStatus | 'all', string>> = {
@@ -59,6 +65,7 @@ const STATUS_LABELS: Partial<Record<FeatureStatus | 'all', string>> = {
   'checkpoint-only': 'checkpoint-only',
   'no-prd': 'no PRD',
   empty: 'empty',
+  archived: 'archived',
 };
 
 const STORAGE_KEY = 'dev-dashboard-session-bar-collapsed';
@@ -87,6 +94,8 @@ export function SessionBar({ projects, statusFilter, onSelectProject }: Props) {
 
   for (const project of projects) {
     for (const feature of project.features) {
+      // "All" excludes archived — archived has its own pill
+      if (statusFilter === 'all' && feature.status === 'archived') continue;
       if (statusFilter === 'all' || feature.status === statusFilter) {
         matched.push({
           projectName: project.name,

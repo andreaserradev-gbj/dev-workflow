@@ -7,9 +7,11 @@ import { buildStatusGradient } from '../utils/statusColors.js';
 interface Props {
   project: Project;
   singleProject?: boolean;
+  archivedFilter?: boolean;
 }
 
 const STORAGE_KEY_PREFIX = 'dev-dashboard-collapsed:';
+const ARCHIVE_KEY_PREFIX = 'dev-dashboard-archive-collapsed:';
 
 function isCollapsedInit(name: string): boolean {
   try {
@@ -34,20 +36,46 @@ function persistCollapsed(name: string, collapsed: boolean): void {
 const HIGHLIGHT_STATUSES: FeatureStatus[] = ['gate', 'active', 'stale'];
 
 function buildSummary(project: Project): string {
+  const activeFeatures = project.features.filter((f) => f.status !== 'archived');
+  const archivedCount = project.features.length - activeFeatures.length;
   const parts: string[] = [
-    `${project.features.length} feature${project.features.length !== 1 ? 's' : ''}`,
+    `${activeFeatures.length} feature${activeFeatures.length !== 1 ? 's' : ''}`,
   ];
   for (const status of HIGHLIGHT_STATUSES) {
-    const count = project.features.filter((f) => f.status === status).length;
+    const count = activeFeatures.filter((f) => f.status === status).length;
     if (count > 0) parts.push(`${count} ${status}`);
   }
+  if (archivedCount > 0) parts.push(`${archivedCount} archived`);
   return parts.join(' \u00b7 ');
 }
 
-export function ProjectCard({ project, singleProject }: Props) {
+function isArchiveCollapsedInit(name: string): boolean {
+  try {
+    return localStorage.getItem(ARCHIVE_KEY_PREFIX + name) !== '0';
+  } catch {
+    return true; // collapsed by default
+  }
+}
+
+function persistArchiveCollapsed(name: string, collapsed: boolean): void {
+  try {
+    if (collapsed) {
+      localStorage.removeItem(ARCHIVE_KEY_PREFIX + name);
+    } else {
+      localStorage.setItem(ARCHIVE_KEY_PREFIX + name, '0');
+    }
+  } catch {
+    // localStorage unavailable
+  }
+}
+
+export function ProjectCard({ project, singleProject, archivedFilter }: Props) {
   const [expandedFeature, setExpandedFeature] = useState<string | null>(null);
   const [collapsed, setCollapsed] = useState(() =>
     singleProject ? false : isCollapsedInit(project.name),
+  );
+  const [archiveCollapsed, setArchiveCollapsed] = useState(() =>
+    isArchiveCollapsedInit(project.name),
   );
 
   function toggleCollapsed() {
@@ -58,7 +86,17 @@ export function ProjectCard({ project, singleProject }: Props) {
     });
   }
 
+  function toggleArchiveCollapsed() {
+    setArchiveCollapsed((prev) => {
+      const next = !prev;
+      persistArchiveCollapsed(project.name, next);
+      return next;
+    });
+  }
+
   const isCollapsed = singleProject ? false : collapsed;
+  const activeFeatures = project.features.filter((f) => f.status !== 'archived');
+  const archivedFeatures = project.features.filter((f) => f.status === 'archived');
   const gradient = buildStatusGradient(project.features);
 
   return (
@@ -100,7 +138,7 @@ export function ProjectCard({ project, singleProject }: Props) {
 
       {!isCollapsed && (
         <div class="divide-y divide-slate-800/30">
-          {project.features.map((feature) => (
+          {activeFeatures.map((feature) => (
             <div key={feature.name}>
               <FeatureRow
                 feature={feature}
@@ -121,6 +159,43 @@ export function ProjectCard({ project, singleProject }: Props) {
               )}
             </div>
           ))}
+          {archivedFeatures.length > 0 && !archivedFilter && (
+            <>
+              <button
+                type="button"
+                onClick={toggleArchiveCollapsed}
+                class="w-full px-5 py-2 flex items-center gap-2 text-xs text-slate-600 font-mono
+                       hover:bg-slate-800/20 transition-colors cursor-pointer"
+              >
+                <span class="text-[10px] w-3 select-none">
+                  {archiveCollapsed ? '\u25b6' : '\u25bc'}
+                </span>
+                Archive ({archivedFeatures.length})
+              </button>
+              {!archiveCollapsed &&
+                archivedFeatures.map((feature) => (
+                  <div key={feature.name}>
+                    <FeatureRow
+                      feature={feature}
+                      projectPath={project.path}
+                      id={`feature-${project.name}-${feature.name}`}
+                      expanded={expandedFeature === feature.name}
+                      onClick={() =>
+                        setExpandedFeature((prev) => (prev === feature.name ? null : feature.name))
+                      }
+                    />
+                    {expandedFeature === feature.name && (
+                      <FeaturePanel
+                        project={project.name}
+                        projectPath={project.path}
+                        featureName={feature.name}
+                        feature={feature}
+                      />
+                    )}
+                  </div>
+                ))}
+            </>
+          )}
         </div>
       )}
     </div>

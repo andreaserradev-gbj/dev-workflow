@@ -36,6 +36,17 @@ const mockStaleFeature: Feature = {
   summary: 'Event-driven notification system.',
 };
 
+const mockArchivedFeature: Feature = {
+  name: 'old-auth',
+  status: 'archived',
+  progress: { done: 5, total: 5, percent: 100 },
+  currentPhase: null,
+  lastCheckpoint: '2026-02-01T10:00:00Z',
+  nextAction: null,
+  branch: null,
+  summary: 'Legacy auth system.',
+};
+
 beforeAll(async () => {
   tempDir = await mkdtemp(join(tmpdir(), 'api-test-'));
   apiServerPath = join(tempDir, 'api-server');
@@ -43,13 +54,14 @@ beforeAll(async () => {
 
   // Create .dev directories so the access check passes
   await mkdir(join(apiServerPath, '.dev'), { recursive: true });
+  await mkdir(join(apiServerPath, '.dev-archive/old-auth'), { recursive: true });
   await mkdir(join(webClientPath, '.dev'), { recursive: true });
 
   const mockProjects: Project[] = [
     {
       name: 'api-server',
       path: apiServerPath,
-      features: [mockFeature, mockStaleFeature],
+      features: [mockFeature, mockStaleFeature, mockArchivedFeature],
     },
     {
       name: 'web-client',
@@ -90,7 +102,7 @@ describe('GET /api/health', () => {
     const body = res.json();
     expect(body.status).toBe('ok');
     expect(body.projects).toBe(2);
-    expect(body.features).toBe(3);
+    expect(body.features).toBe(4);
   });
 });
 
@@ -104,11 +116,37 @@ describe('GET /api/projects', () => {
 
     const apiServer = body.projects.find((p: Project) => p.name === 'api-server');
     expect(apiServer).toBeDefined();
-    expect(apiServer.features).toHaveLength(2);
+    expect(apiServer.features).toHaveLength(3);
 
     const webClient = body.projects.find((p: Project) => p.name === 'web-client');
     expect(webClient).toBeDefined();
     expect(webClient.features).toHaveLength(1);
+  });
+
+  it('keeps project alive if only .dev-archive exists', async () => {
+    // Create a project with only .dev-archive (no .dev)
+    const archiveOnlyPath = join(tempDir, 'archive-only');
+    await mkdir(join(archiveOnlyPath, '.dev-archive'), { recursive: true });
+
+    const archiveOnlyState = new DashboardState();
+    archiveOnlyState.setProjects([
+      {
+        name: 'archive-only',
+        path: archiveOnlyPath,
+        features: [mockArchivedFeature],
+      },
+    ]);
+
+    const archiveApp = Fastify();
+    registerApiRoutes(archiveApp, archiveOnlyState);
+    await archiveApp.ready();
+
+    const res = await archiveApp.inject({ method: 'GET', url: '/api/projects' });
+    const body = res.json();
+    expect(body.projects).toHaveLength(1);
+    expect(body.projects[0].name).toBe('archive-only');
+
+    await archiveApp.close();
   });
 
   it('includes correct feature data', async () => {
@@ -158,5 +196,18 @@ describe('GET /api/projects/:project/features/:feature', () => {
     expect(res.statusCode).toBe(404);
     const body = res.json();
     expect(body.error).toBeDefined();
+  });
+
+  it('resolves archived feature detail from .dev-archive path', async () => {
+    const res = await app.inject({
+      method: 'GET',
+      url: '/api/projects/api-server/features/old-auth',
+    });
+
+    expect(res.statusCode).toBe(200);
+    const body = res.json();
+    expect(body.name).toBe('old-auth');
+    expect(body.status).toBe('archived');
+    expect(body.project).toBe('api-server');
   });
 });

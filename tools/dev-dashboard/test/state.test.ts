@@ -47,6 +47,7 @@ describe('sortProjects', () => {
         feat('f-checkpoint', { status: 'checkpoint-only' }),
         feat('f-active', { status: 'active' }),
         feat('f-gate', { status: 'gate' }),
+        feat('f-archived', { status: 'archived' }),
       ]),
     ];
 
@@ -61,6 +62,7 @@ describe('sortProjects', () => {
       'no-prd',
       'empty',
       'complete',
+      'archived',
     ]);
   });
 

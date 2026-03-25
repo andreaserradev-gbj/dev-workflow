@@ -111,7 +111,12 @@ describe('scanProjects', () => {
 
     const alpha = projects.find((p) => p.name === 'project-alpha');
     expect(alpha).toBeDefined();
-    expect(alpha!.features.map((f) => f.name).sort()).toEqual(['feature-one', 'feature-two']);
+    // Includes active features from .dev/ and archived features from .dev-archive/
+    expect(alpha!.features.map((f) => f.name).sort()).toEqual([
+      'feature-one',
+      'feature-two',
+      'old-feature',
+    ]);
   });
 
   it('parses feature data correctly', async () => {
@@ -141,14 +146,50 @@ describe('scanProjects', () => {
     expect(names).not.toContain('some-pkg');
   });
 
-  it('excludes .dev-archive directories', async () => {
+  it('includes .dev-archive features with archived status', async () => {
     const projects = await scanProjects([tempDir]);
 
     const alpha = projects.find((p) => p.name === 'project-alpha');
-    if (alpha) {
-      const featureNames = alpha.features.map((f) => f.name);
-      expect(featureNames).not.toContain('old-feature');
-    }
+    expect(alpha).toBeDefined();
+    const oldFeature = alpha!.features.find((f) => f.name === 'old-feature');
+    expect(oldFeature).toBeDefined();
+    expect(oldFeature!.status).toBe('archived');
+  });
+
+  it('active feature takes precedence over archived with same name', async () => {
+    // feature-one exists in both .dev and .dev-archive (we need to create the collision)
+    const { mkdir: mkdirSync, writeFile: writeFileSync } = await import('fs/promises');
+    await mkdirSync(join(tempDir, 'project-alpha/.dev-archive/feature-one'), { recursive: true });
+    await writeFileSync(
+      join(tempDir, 'project-alpha/.dev-archive/feature-one/00-master-plan.md'),
+      MASTER_PLAN,
+    );
+
+    const projects = await scanProjects([tempDir]);
+    const alpha = projects.find((p) => p.name === 'project-alpha');
+    expect(alpha).toBeDefined();
+
+    // Should only have one feature-one, and it should NOT be archived
+    const featureOnes = alpha!.features.filter((f) => f.name === 'feature-one');
+    expect(featureOnes).toHaveLength(1);
+    expect(featureOnes[0].status).not.toBe('archived');
+  });
+
+  it('discovers project with only .dev-archive (no .dev)', async () => {
+    const { mkdir: mkdirSync, writeFile: writeFileSync } = await import('fs/promises');
+    await mkdirSync(join(tempDir, 'archive-only-project/.dev-archive/old-stuff'), {
+      recursive: true,
+    });
+    await writeFileSync(
+      join(tempDir, 'archive-only-project/.dev-archive/old-stuff/00-master-plan.md'),
+      MASTER_PLAN,
+    );
+
+    const projects = await scanProjects([tempDir]);
+    const archiveOnly = projects.find((p) => p.name === 'archive-only-project');
+    expect(archiveOnly).toBeDefined();
+    expect(archiveOnly!.features).toHaveLength(1);
+    expect(archiveOnly!.features[0].status).toBe('archived');
   });
 
   it('skips projects with empty .dev/ (no feature subdirectories)', async () => {

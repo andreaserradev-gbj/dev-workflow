@@ -1,3 +1,4 @@
+import { useState } from 'preact/hooks';
 import type { Project } from '@shared/types.js';
 import { buildStatusGradient } from '../utils/statusColors.js';
 
@@ -9,6 +10,8 @@ interface Props {
   onToggleCollapsed: () => void;
 }
 
+const RAIL_ARCHIVE_KEY = 'dev-dashboard-rail-archive-collapsed';
+
 export function ProjectRail({
   projects,
   selectedProject,
@@ -16,7 +19,17 @@ export function ProjectRail({
   collapsed,
   onToggleCollapsed,
 }: Props) {
-  const totalFeatures = projects.reduce((s, p) => s + p.features.length, 0);
+  const [archiveSectionCollapsed, setArchiveSectionCollapsed] = useState(() => {
+    try {
+      return localStorage.getItem(RAIL_ARCHIVE_KEY) !== '0';
+    } catch {
+      return true;
+    }
+  });
+  const totalFeatures = projects.reduce(
+    (s, p) => s + p.features.filter((f) => f.status !== 'archived').length,
+    0,
+  );
   const totalActive = projects.reduce(
     (s, p) => s + p.features.filter((f) => f.status === 'active').length,
     0,
@@ -111,52 +124,113 @@ export function ProjectRail({
       {/* Divider */}
       <div class="border-b border-slate-800/40" />
 
-      {/* Project rows */}
-      {projects.map((project) => {
-        const featureCount = project.features.length;
-        const activeCount = project.features.filter((f) => f.status === 'active').length;
-        const isSelected = selectedProject === project.name;
-
-        const totalDone = project.features.reduce((s, f) => s + (f.progress?.done ?? 0), 0);
-        const totalSteps = project.features.reduce((s, f) => s + (f.progress?.total ?? 0), 0);
-        const pct = totalSteps > 0 ? Math.round((totalDone / totalSteps) * 100) : 0;
-
-        const gradient = buildStatusGradient(project.features);
-
-        return (
-          <button
+      {/* Project rows — active projects */}
+      {projects
+        .filter((p) => p.features.some((f) => f.status !== 'archived'))
+        .map((project) => (
+          <ProjectRailRow
             key={project.name}
-            type="button"
-            onClick={() => onSelect(isSelected ? null : project.name)}
-            class={`relative w-full text-left px-4 py-3 transition-colors ${
-              isSelected ? 'bg-sky-500/15' : 'hover:bg-slate-800/20'
-            }`}
-          >
-            {/* Status bar — always shows status color */}
-            <div
-              class={`absolute left-0 top-0 bottom-0 rounded-r-sm ${isSelected ? 'w-[4px]' : 'w-[3px]'}`}
-              style={{ background: gradient ?? '#334155' }}
-            />
-            <span
-              class={`text-sm font-semibold font-sans truncate block ${isSelected ? 'text-white' : 'text-slate-200'}`}
-            >
-              {project.name}
-            </span>
-            <span class="text-[13px] text-slate-500 font-mono mt-0.5 block">
-              {featureCount} features · {activeCount} active
-            </span>
-            {/* Mini progress bar */}
-            {totalSteps > 0 && (
-              <div class="mt-1.5 h-1 rounded-full bg-slate-800 overflow-hidden">
-                <div
-                  class="h-full rounded-full bg-sky-500/70 transition-all duration-500"
-                  style={{ width: `${pct}%` }}
-                />
-              </div>
-            )}
-          </button>
+            project={project}
+            isSelected={selectedProject === project.name}
+            onSelect={onSelect}
+          />
+        ))}
+
+      {/* Archive-only projects */}
+      {(() => {
+        const archiveOnly = projects.filter((p) =>
+          p.features.every((f) => f.status === 'archived'),
         );
-      })}
+        if (archiveOnly.length === 0) return null;
+        return (
+          <>
+            <button
+              type="button"
+              onClick={() => {
+                setArchiveSectionCollapsed((prev) => {
+                  const next = !prev;
+                  try {
+                    if (next) localStorage.removeItem(RAIL_ARCHIVE_KEY);
+                    else localStorage.setItem(RAIL_ARCHIVE_KEY, '0');
+                  } catch {
+                    /* */
+                  }
+                  return next;
+                });
+              }}
+              class="w-full px-4 py-2 flex items-center gap-2 text-xs text-slate-600 font-mono
+                     hover:text-slate-500 transition-colors cursor-pointer border-t border-slate-800/40"
+            >
+              <span class="text-[10px] w-3 select-none">
+                {archiveSectionCollapsed ? '\u25b6' : '\u25bc'}
+              </span>
+              Archived ({archiveOnly.length})
+            </button>
+            {!archiveSectionCollapsed &&
+              archiveOnly.map((project) => (
+                <ProjectRailRow
+                  key={project.name}
+                  project={project}
+                  isSelected={selectedProject === project.name}
+                  onSelect={onSelect}
+                />
+              ))}
+          </>
+        );
+      })()}
     </aside>
+  );
+}
+
+function ProjectRailRow({
+  project,
+  isSelected,
+  onSelect,
+}: {
+  project: Project;
+  isSelected: boolean;
+  onSelect: (name: string | null) => void;
+}) {
+  const nonArchived = project.features.filter((f) => f.status !== 'archived');
+  const archivedCount = project.features.length - nonArchived.length;
+  const featureCount = nonArchived.length;
+  const activeCount = nonArchived.filter((f) => f.status === 'active').length;
+
+  const totalDone = nonArchived.reduce((s, f) => s + (f.progress?.done ?? 0), 0);
+  const totalSteps = nonArchived.reduce((s, f) => s + (f.progress?.total ?? 0), 0);
+  const pct = totalSteps > 0 ? Math.round((totalDone / totalSteps) * 100) : 0;
+
+  const gradient = buildStatusGradient(project.features);
+
+  return (
+    <button
+      type="button"
+      onClick={() => onSelect(isSelected ? null : project.name)}
+      class={`relative w-full text-left px-4 py-3 transition-colors ${
+        isSelected ? 'bg-sky-500/15' : 'hover:bg-slate-800/20'
+      }`}
+    >
+      <div
+        class={`absolute left-0 top-0 bottom-0 rounded-r-sm ${isSelected ? 'w-[4px]' : 'w-[3px]'}`}
+        style={{ background: gradient ?? '#334155' }}
+      />
+      <span
+        class={`text-sm font-semibold font-sans truncate block ${isSelected ? 'text-white' : 'text-slate-200'}`}
+      >
+        {project.name}
+      </span>
+      <span class="text-[13px] text-slate-500 font-mono mt-0.5 block">
+        {featureCount} features · {activeCount} active
+        {archivedCount > 0 && ` · ${archivedCount} archived`}
+      </span>
+      {totalSteps > 0 && (
+        <div class="mt-1.5 h-1 rounded-full bg-slate-800 overflow-hidden">
+          <div
+            class="h-full rounded-full bg-sky-500/70 transition-all duration-500"
+            style={{ width: `${pct}%` }}
+          />
+        </div>
+      )}
+    </button>
   );
 }

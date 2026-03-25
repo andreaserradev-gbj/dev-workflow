@@ -59,6 +59,13 @@ const ACTION_BY_STATUS: Record<FeatureStatus, ActionConfig> = {
     payload: (ctx) => `cd ${ctx.projectPath} && claude\n/dev-plan`,
     cls: 'bg-slate-500/10 text-slate-400 hover:bg-slate-500/20 ring-1 ring-inset ring-slate-500/20',
   },
+  archived: {
+    label: 'Restore',
+    copiedLabel: 'Copied!',
+    payload: (ctx) =>
+      `mv ${ctx.projectPath}/.dev-archive/${ctx.featureName} ${ctx.projectPath}/.dev/`,
+    cls: 'bg-slate-600/10 text-slate-500 hover:bg-slate-600/20 ring-1 ring-inset ring-slate-600/20',
+  },
 };
 
 // ─── Primary action button (shown in FeatureRow) ────────────────

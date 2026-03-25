@@ -6,7 +6,8 @@ export type FeatureStatus =
   | 'complete'
   | 'checkpoint-only'
   | 'no-prd'
-  | 'empty';
+  | 'empty'
+  | 'archived';
 
 // Step-level progress
 export interface Progress {
@@ -108,4 +109,5 @@ export const STATUS_ORDER: Record<FeatureStatus, number> = {
   'no-prd': 4,
   empty: 5,
   complete: 6,
+  archived: 7,
 };

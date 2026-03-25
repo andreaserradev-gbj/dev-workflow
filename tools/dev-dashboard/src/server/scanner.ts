@@ -20,11 +20,11 @@ export async function scanProjects(
   for (const scanDir of scanDirs) {
     // Build glob pattern to find .dev directories
     // We need to find directories named ".dev" at various depths
-    const patterns = buildGlobPatterns(maxDepth);
+    const devPatterns = buildGlobPatterns(maxDepth, '.dev');
 
     let devDirs: string[];
     try {
-      devDirs = await fg(patterns, {
+      devDirs = await fg(devPatterns, {
         cwd: scanDir,
         onlyDirectories: true,
         absolute: true,
@@ -68,20 +68,73 @@ export async function scanProjects(
 
       projectMap.set(projectDir, project);
     }
+
+    // Scan .dev-archive directories for archived features
+    const archivePatterns = buildGlobPatterns(maxDepth, '.dev-archive');
+
+    let archiveDirs: string[];
+    try {
+      archiveDirs = await fg(archivePatterns, {
+        cwd: scanDir,
+        onlyDirectories: true,
+        absolute: true,
+        dot: true,
+        ignore: ['**/node_modules/**'],
+      });
+    } catch {
+      continue;
+    }
+
+    for (const archiveDir of archiveDirs) {
+      const projectDir = dirname(archiveDir);
+      const projectName = basename(projectDir);
+
+      let featureDirs: string[];
+      try {
+        const entries = await readdir(archiveDir, { withFileTypes: true });
+        featureDirs = entries.filter((e) => e.isDirectory()).map((e) => e.name);
+      } catch {
+        continue;
+      }
+
+      if (featureDirs.length === 0) continue;
+
+      const existing = projectMap.get(projectDir);
+      const project: Project = existing ?? {
+        name: projectName,
+        path: projectDir,
+        features: [],
+      };
+
+      // Collect active feature names so we can skip collisions
+      const activeNames = new Set(project.features.map((f) => f.name));
+
+      for (const featureName of featureDirs) {
+        // Active takes precedence over archived
+        if (activeNames.has(featureName)) continue;
+
+        const featurePath = resolve(archiveDir, featureName);
+        const feature = await parseFeature(featurePath, featureName);
+        feature.status = 'archived';
+        project.features.push(feature);
+      }
+
+      projectMap.set(projectDir, project);
+    }
   }
 
   return Array.from(projectMap.values());
 }
 
-function buildGlobPatterns(maxDepth: number): string[] {
+function buildGlobPatterns(maxDepth: number, dirName: string = '.dev'): string[] {
   const patterns: string[] = [];
-  // .dev at depth 1 (direct child), depth 2, etc.
+  // dirName at depth 1 (direct child), depth 2, etc.
   // depth 1: .dev
   // depth 2: */.dev
   // depth 3: */*/.dev
   for (let d = 0; d < maxDepth; d++) {
     const prefix = d === 0 ? '' : new Array(d).fill('*').join('/') + '/';
-    patterns.push(prefix + '.dev');
+    patterns.push(prefix + dirName);
   }
   return patterns;
 }

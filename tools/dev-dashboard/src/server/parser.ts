@@ -394,10 +394,21 @@ export async function parseFeature(featureDir: string, name: string): Promise<Fe
   const masterPlan = await parseMasterPlan(resolve(featureDir, '00-master-plan.md'));
   const checkpoint = await parseCheckpoint(resolve(featureDir, 'checkpoint.md'));
 
-  const allComplete =
-    masterPlan !== null &&
-    masterPlan.progress.total > 0 &&
-    masterPlan.progress.done === masterPlan.progress.total;
+  // If master plan has 0 inline steps, fall back to sub-PRD progress, then phase counts
+  let progress: Progress | null = masterPlan?.progress ?? null;
+  if (masterPlan && masterPlan.progress.total === 0) {
+    const subPrdProgress = await aggregateSubPrdProgress(featureDir);
+    if (subPrdProgress && subPrdProgress.total > 0) {
+      progress = subPrdProgress;
+    } else if (masterPlan.phases.length > 0) {
+      // Use phases themselves as progress units (for plans with title-level ✅ markers)
+      const done = masterPlan.phases.filter((p) => p.status === 'complete').length;
+      const total = masterPlan.phases.length;
+      progress = { done, total, percent: Math.round((done / total) * 100) };
+    }
+  }
+
+  const allComplete = progress !== null && progress.total > 0 && progress.done === progress.total;
 
   // At gate: completed phase(s) followed by not-started phase(s), no in-progress phase
   const atGate =
@@ -415,7 +426,7 @@ export async function parseFeature(featureDir: string, name: string): Promise<Fe
     now: new Date(),
     isEmpty: isEmpty && masterPlan === null && checkpoint === null,
     atGate,
-    progressDone: masterPlan?.progress.done,
+    progressDone: progress?.done,
   });
 
   // Find current phase (first in-progress, or first not-started)
@@ -436,13 +447,37 @@ export async function parseFeature(featureDir: string, name: string): Promise<Fe
   return {
     name,
     status,
-    progress: masterPlan?.progress ?? null,
+    progress,
     currentPhase,
     lastCheckpoint: checkpoint?.checkpointed ?? null,
     nextAction: checkpoint?.nextAction ?? null,
     branch: checkpoint?.branch ?? null,
     summary: masterPlan?.summary ?? null,
   };
+}
+
+/** Aggregate step counts from sub-PRD files when master plan has no inline steps. */
+async function aggregateSubPrdProgress(featureDir: string): Promise<Progress | null> {
+  try {
+    const entries = await readdir(featureDir);
+    const subPrdFiles = entries.filter((e) => /^\d+-sub-prd-.*\.md$/.test(e)).sort();
+    if (subPrdFiles.length === 0) return null;
+
+    let done = 0;
+    let total = 0;
+    for (const file of subPrdFiles) {
+      const result = await parseSubPrd(resolve(featureDir, file));
+      if (result) {
+        done += result.done;
+        total += result.total;
+      }
+    }
+
+    const percent = total > 0 ? Math.round((done / total) * 100) : 0;
+    return { done, total, percent };
+  } catch {
+    return null;
+  }
 }
 
 async function isEmptyFeatureDir(dirPath: string): Promise<boolean> {

@@ -11,10 +11,12 @@ const FILTER_PILLS: { key: FeatureStatus | 'all'; label: string }[] = [
   { key: 'gate', label: 'Gate' },
   { key: 'stale', label: 'Stale' },
   { key: 'complete', label: 'Complete' },
+  { key: 'archived', label: 'Archived' },
 ];
 
 const SELECTED_PROJECT_KEY = 'dev-dashboard-selected-project';
 const RAIL_COLLAPSED_KEY = 'dev-dashboard-rail-collapsed';
+const ARCHIVED_PROJECTS_KEY = 'dev-dashboard-archived-projects-collapsed';
 
 function readSelectedProject(): string | null {
   try {
@@ -56,6 +58,13 @@ export function App() {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedProject, setSelectedProject] = useState<string | null>(readSelectedProject);
   const [railCollapsed, setRailCollapsed] = useState(readRailCollapsed);
+  const [archivedProjectsCollapsed, setArchivedProjectsCollapsed] = useState(() => {
+    try {
+      return localStorage.getItem(ARCHIVED_PROJECTS_KEY) !== '0';
+    } catch {
+      return true;
+    }
+  });
 
   // Debounce search input
   useEffect(() => {
@@ -103,7 +112,11 @@ export function App() {
     return counts;
   }, [scopedProjects]);
 
-  const scopedTotalFeatures = scopedProjects.reduce((sum, p) => sum + p.features.length, 0);
+  // "All" count excludes archived features
+  const scopedTotalFeatures = scopedProjects.reduce(
+    (sum, p) => sum + p.features.filter((f) => f.status !== 'archived').length,
+    0,
+  );
 
   // Filter projects by selected project, status, and search query
   const filteredProjects = useMemo(() => {
@@ -121,6 +134,35 @@ export function App() {
       }))
       .filter((p) => p.features.length > 0);
   }, [projects, statusFilter, searchQuery, selectedProject]);
+
+  // Split into active projects and archive-only projects (only when "All" filter)
+  const activeProjects = useMemo(
+    () =>
+      statusFilter === 'all'
+        ? filteredProjects.filter((p) => p.features.some((f) => f.status !== 'archived'))
+        : filteredProjects,
+    [filteredProjects, statusFilter],
+  );
+  const archiveOnlyProjects = useMemo(
+    () =>
+      statusFilter === 'all'
+        ? filteredProjects.filter((p) => p.features.every((f) => f.status === 'archived'))
+        : [],
+    [filteredProjects, statusFilter],
+  );
+
+  const handleToggleArchivedProjects = useCallback(() => {
+    setArchivedProjectsCollapsed((prev) => {
+      const next = !prev;
+      try {
+        if (next) localStorage.removeItem(ARCHIVED_PROJECTS_KEY);
+        else localStorage.setItem(ARCHIVED_PROJECTS_KEY, '0');
+      } catch {
+        /* */
+      }
+      return next;
+    });
+  }, []);
 
   return (
     <div class="flex h-screen overflow-hidden">
@@ -151,7 +193,7 @@ export function App() {
             <p class="mt-1 text-sm text-slate-500 font-mono">
               {loading
                 ? 'Connecting...'
-                : `${filteredProjects.length} projects · ${filteredProjects.reduce((s, p) => s + p.features.length, 0)} features`}
+                : `${filteredProjects.length} projects · ${filteredProjects.reduce((s, p) => s + p.features.filter((f) => f.status !== 'archived').length, 0)} features`}
             </p>
           </header>
 
@@ -224,11 +266,40 @@ export function App() {
           )}
 
           <div class="space-y-6">
-            {filteredProjects.map((project, i) => (
+            {activeProjects.map((project, i) => (
               <div class="card-enter" style={{ animationDelay: `${i * 80}ms` }}>
-                <ProjectCard project={project} singleProject={!!selectedProject} />
+                <ProjectCard
+                  project={project}
+                  singleProject={!!selectedProject}
+                  archivedFilter={statusFilter === 'archived'}
+                />
               </div>
             ))}
+            {archiveOnlyProjects.length > 0 && (
+              <>
+                <button
+                  type="button"
+                  onClick={handleToggleArchivedProjects}
+                  class="w-full px-4 py-2 flex items-center gap-2 text-xs text-slate-600 font-mono
+                         hover:text-slate-500 transition-colors cursor-pointer"
+                >
+                  <span class="text-[10px] w-3 select-none">
+                    {archivedProjectsCollapsed ? '\u25b6' : '\u25bc'}
+                  </span>
+                  Archived Projects ({archiveOnlyProjects.length})
+                </button>
+                {!archivedProjectsCollapsed &&
+                  archiveOnlyProjects.map((project, i) => (
+                    <div class="card-enter" style={{ animationDelay: `${i * 80}ms` }}>
+                      <ProjectCard
+                        project={project}
+                        singleProject={!!selectedProject}
+                        archivedFilter={statusFilter === 'archived'}
+                      />
+                    </div>
+                  ))}
+              </>
+            )}
             {!loading &&
               (statusFilter !== 'all' || searchQuery) &&
               filteredProjects.length === 0 && (
