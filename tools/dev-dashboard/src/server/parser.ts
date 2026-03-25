@@ -151,6 +151,14 @@ function countSteps(section: string): { done: number; total: number } {
       continue;
     }
 
+    // Numbered checkbox steps: "1. [x] ..." or "1. `[x]` ..."
+    const numberedCheckbox = trimmed.match(/^\d+\.\s+`?\[(x| )\]`?/);
+    if (numberedCheckbox) {
+      total++;
+      if (numberedCheckbox[1] === 'x') done++;
+      continue;
+    }
+
     // Bullet steps: "- ✅ ..." or "- ⬜ ..."
     const bulletMatch = trimmed.match(/^-\s+(✅|⬜|⏭️)/);
     if (bulletMatch) {

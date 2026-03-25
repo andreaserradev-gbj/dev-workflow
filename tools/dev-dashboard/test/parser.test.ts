@@ -148,6 +148,21 @@ describe('parseMasterPlan', () => {
     });
     expect(result!.progress).toMatchObject({ done: 3, total: 3, percent: 100 });
   });
+
+  it('counts numbered checkbox steps (plain and backtick-wrapped)', async () => {
+    const result = await parseMasterPlan(resolve(FIXTURES, 'numbered-checkbox/00-master-plan.md'));
+
+    expect(result).not.toBeNull();
+    expect(result!.phases).toHaveLength(2);
+
+    // Phase 1: 5 numbered steps (4 done), verification items excluded
+    expect(result!.phases[0]).toMatchObject({ number: 1, done: 4, total: 5, status: 'in-progress' });
+
+    // Phase 2: 3 numbered backtick-wrapped steps, all pending
+    expect(result!.phases[1]).toMatchObject({ number: 2, done: 0, total: 3, status: 'not-started' });
+
+    expect(result!.progress).toMatchObject({ done: 4, total: 8, percent: 50 });
+  });
 });
 
 // ─── Checkpoint Parsing ────────────────────────────────────────────
