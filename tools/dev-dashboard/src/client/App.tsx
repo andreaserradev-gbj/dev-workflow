@@ -53,11 +53,27 @@ function writeRailCollapsed(v: boolean): void {
   }
 }
 
+function readHashProject(): string | null {
+  try {
+    const hash = window.location.hash;
+    if (hash.startsWith('#project=')) {
+      return decodeURIComponent(hash.slice(9)) || null;
+    }
+  } catch {
+    /* */
+  }
+  return null;
+}
+
+function readInitialProject(): string | null {
+  return readHashProject() ?? readSelectedProject();
+}
+
 export function App() {
   const [statusFilter, setStatusFilter] = useState<FeatureStatus | 'all'>('all');
   const [searchInput, setSearchInput] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
-  const [selectedProject, setSelectedProject] = useState<string | null>(readSelectedProject);
+  const [selectedProject, setSelectedProject] = useState<string | null>(readInitialProject);
   const [railCollapsed, setRailCollapsed] = useState(readRailCollapsed);
   const [archivedProjectsCollapsed, setArchivedProjectsCollapsed] = useState(() => {
     try {
@@ -75,18 +91,53 @@ export function App() {
 
   const { projects, connected, loading } = useWebSocket();
 
-  // Clear selected project if it no longer exists
+  // Clear selected project if it no longer exists (gate on !loading so we
+  // don't evict a restored selection before WebSocket data arrives)
   useEffect(() => {
-    if (selectedProject && !projects.find((p) => p.name === selectedProject)) {
+    if (!loading && selectedProject && !projects.find((p) => p.name === selectedProject)) {
       setSelectedProject(null);
       writeSelectedProject(null);
+      history.replaceState(null, '', window.location.pathname);
     }
-  }, [projects, selectedProject]);
+  }, [projects, selectedProject, loading]);
 
   const handleSelectProject = useCallback((name: string | null) => {
     setSelectedProject(name);
     writeSelectedProject(name);
+    const url = name ? `#project=${encodeURIComponent(name)}` : window.location.pathname;
+    history.pushState(null, '', url);
   }, []);
+
+  // Sync URL hash on initial load (when restored from localStorage)
+  useEffect(() => {
+    if (selectedProject && !window.location.hash) {
+      history.replaceState(null, '', `#project=${encodeURIComponent(selectedProject)}`);
+    }
+  }, []);
+
+  // Browser back/forward navigation
+  useEffect(() => {
+    const onPopState = () => {
+      const name = readHashProject();
+      setSelectedProject(name);
+      writeSelectedProject(name);
+    };
+    window.addEventListener('popstate', onPopState);
+    return () => window.removeEventListener('popstate', onPopState);
+  }, []);
+
+  // Escape key returns to all projects
+  useEffect(() => {
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && selectedProject) {
+        const tag = (e.target as HTMLElement)?.tagName;
+        if (tag === 'INPUT' || tag === 'TEXTAREA') return;
+        handleSelectProject(null);
+      }
+    };
+    window.addEventListener('keydown', onKeyDown);
+    return () => window.removeEventListener('keydown', onKeyDown);
+  }, [selectedProject, handleSelectProject]);
 
   const handleToggleRail = useCallback(() => {
     setRailCollapsed((prev) => {
@@ -185,7 +236,17 @@ export function App() {
         <div class="max-w-7xl mx-auto px-6 lg:px-10 py-10">
           <header class="mb-10">
             <div class="flex items-center gap-3">
-              <h1 class="text-3xl font-bold tracking-tight text-white font-sans">Dev Dashboard</h1>
+              <h1
+                class={`text-3xl font-bold tracking-tight font-sans ${
+                  selectedProject
+                    ? 'text-white/70 hover:text-white cursor-pointer transition-colors'
+                    : 'text-white'
+                }`}
+                onClick={selectedProject ? () => handleSelectProject(null) : undefined}
+                title={selectedProject ? 'Back to all projects' : undefined}
+              >
+                Dev Dashboard
+              </h1>
               <span
                 class={`mt-1 w-2 h-2 rounded-full flex-shrink-0 ${
                   connected ? 'bg-emerald-500' : 'bg-amber-500 animate-pulse'
@@ -194,9 +255,23 @@ export function App() {
               />
             </div>
             <p class="mt-1 text-sm text-slate-500 font-mono">
-              {loading
-                ? 'Connecting...'
-                : `${filteredProjects.length} projects · ${filteredProjects.reduce((s, p) => s + p.features.filter((f) => f.status !== 'archived').length, 0)} features`}
+              {loading ? (
+                'Connecting...'
+              ) : selectedProject ? (
+                <>
+                  <button
+                    type="button"
+                    onClick={() => handleSelectProject(null)}
+                    class="text-slate-500 hover:text-sky-400 transition-colors cursor-pointer"
+                  >
+                    All Projects
+                  </button>
+                  <span class="mx-1.5 text-slate-700">›</span>
+                  <span class="text-slate-400">{selectedProject}</span>
+                </>
+              ) : (
+                `${filteredProjects.length} projects · ${filteredProjects.reduce((s, p) => s + p.features.filter((f) => f.status !== 'archived').length, 0)} features`
+              )}
             </p>
           </header>
 
