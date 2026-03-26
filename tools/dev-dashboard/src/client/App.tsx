@@ -3,6 +3,7 @@ import type { FeatureStatus } from '@shared/types.js';
 import { ProjectCard } from './components/ProjectCard.js';
 import { ProjectRail } from './components/ProjectRail.js';
 import { SessionBar } from './components/SessionBar.js';
+import { ConnectionOverlay } from './components/ConnectionOverlay.js';
 import { useWebSocket } from './hooks/useWebSocket.js';
 
 const FILTER_PILLS: { key: FeatureStatus | 'all'; label: string }[] = [
@@ -166,6 +167,8 @@ export function App() {
 
   return (
     <div class="flex h-screen overflow-hidden">
+      <ConnectionOverlay connected={connected} loading={loading} />
+
       {/* Left Rail */}
       {!loading && projects.length > 0 && (
         <ProjectRail
