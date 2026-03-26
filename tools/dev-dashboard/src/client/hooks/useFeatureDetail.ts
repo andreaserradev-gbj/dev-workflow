@@ -37,14 +37,17 @@ export function useFeatureDetail(
 
   // Track the signal to detect changes after initial mount
   const prevSignal = useRef(invalidationSignal);
+  const hasFetchedRef = useRef(false);
   const abortRef = useRef<AbortController | null>(null);
 
   useEffect(() => {
     const isInvalidation = prevSignal.current !== invalidationSignal && cached != null;
     prevSignal.current = invalidationSignal;
 
-    // If we have cached data and this is a re-render with the same signal, skip fetch
-    if (cached && !isInvalidation && data != null) return;
+    // Always fetch on first mount (cache may be stale from a previous mount cycle).
+    // On subsequent renders, skip fetch if signal hasn't changed.
+    if (hasFetchedRef.current && cached && !isInvalidation && data != null) return;
+    hasFetchedRef.current = true;
 
     // For stale-while-revalidate: don't show loading if we have cached data
     if (!cached) setLoading(true);
