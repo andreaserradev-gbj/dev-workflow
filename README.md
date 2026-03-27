@@ -3,10 +3,10 @@
 # dev-workflow
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
-[![Version](https://img.shields.io/badge/version-1.15.0-green.svg)](.claude-plugin/marketplace.json)
+[![Version](https://img.shields.io/badge/version-1.26.0-green.svg)](.claude-plugin/marketplace.json)
 [![AgentSkills.io](https://img.shields.io/badge/standard-AgentSkills.io-purple.svg)](https://agentskills.io)
 
-**Claude forgets everything between sessions. This fixes that.**
+**AI coding agents forget everything between sessions. This fixes that.**
 
 Context fills up. You restart. Twenty minutes re-explaining what you were building, what you decided, where you left off. Or:
 
@@ -163,39 +163,25 @@ Reviews the conversation for insights worth keeping:
 /dev-wrapup
 ```
 
-### `/dev-status` — See all features at a glance
-
-Scans `.dev/` with parallel agents and generates a status report:
-
-- Progress and status counts across all features
-- Offers to archive completed or stale features to `.dev-archive/`
-
-```
-/dev-status
-```
-
-### `/dev-board` — Project dashboard
-
-Generates a visual dashboard from `.dev/` data:
-
-- **HTML board** (`.dev/board.html`) — feature cards with progress bars
-- **Stakeholder summary** (`.dev/board-stakeholder.md`) — markdown for sharing
-
-```
-/dev-board
-```
-
 ### `/dev-dashboard` — Live cross-project view
 
 <img src="docs/dashboard-preview.png" alt="Dev Dashboard showing projects with feature progress, status badges, and phase tracking" width="720"/>
 
-A local web server that scans `.dev/` folders across all your projects and shows live feature status in the browser. Real-time updates via WebSocket — edit a PRD and the dashboard reflects changes instantly.
+A local web server that scans `.dev/` folders across all your projects and shows live feature status in the browser. Real-time updates via WebSocket — edit a PRD and the dashboard reflects changes instantly. Works with any AI coding tool (Claude Code, Codex, Gemini CLI, etc.) — it reads `.dev/` PRDs directly, no AI integration needed.
 
 ```
 /dev-dashboard
 ```
 
 Starts the server (or reuses an existing instance) and displays the URL. No setup required — the server is bundled with the plugin.
+
+**Dashboard actions:**
+
+| Action | Where | What it does |
+|--------|-------|--------------|
+| **Archive** | Feature row / panel (complete features) | Moves `.dev/<name>` to `.dev-archive/` with confirmation |
+| **Restore** | Feature row / panel (archived features) | Moves `.dev-archive/<name>` back to `.dev/` with confirmation |
+| **Copy as Markdown** | Report view | Copies activity report as formatted markdown |
 
 <details>
 <summary>Configuration</summary>
