@@ -216,7 +216,7 @@ export function ReportView({ projects }: Props) {
     return { total, completed, created, avgProgress };
   }, [data, from, to]);
 
-  // Copy for Jira
+  // Copy as Markdown
   const handleCopy = useCallback(() => {
     if (!data) return;
     const fromDisplay = formatDateDisplay(from);
@@ -276,7 +276,7 @@ export function ReportView({ projects }: Props) {
               clip-rule="evenodd"
             />
           </svg>
-          {copied ? 'Copied!' : 'Copy for Jira'}
+          {copied ? 'Copied!' : 'Copy as Markdown'}
         </button>
       </div>
 
