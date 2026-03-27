@@ -49,6 +49,8 @@ export interface Feature {
   progress: Progress | null;
   currentPhase: { number: number; total: number; title: string } | null;
   lastCheckpoint: string | null;
+  created: string | null;
+  lastUpdated: string | null;
   nextAction: string | null;
   branch: string | null;
   summary: string | null;
@@ -77,6 +79,18 @@ export interface FeatureDetail extends Feature {
   } | null;
   phases: Phase[];
   subPrds: SubPrd[];
+}
+
+// Feature annotated with project name (for cross-project report view)
+export interface ReportFeature extends Feature {
+  project: string;
+}
+
+// GET /api/report response
+export interface ReportResponse {
+  features: ReportFeature[];
+  from: string;
+  to: string;
 }
 
 // GET /api/health response

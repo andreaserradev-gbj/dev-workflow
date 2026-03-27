@@ -1,5 +1,6 @@
 import { useState } from 'preact/hooks';
 import type { Project } from '@shared/types.js';
+import type { ActiveView } from '../App.js';
 import { buildStatusGradient } from '../utils/statusColors.js';
 
 interface Props {
@@ -8,6 +9,8 @@ interface Props {
   onSelect: (name: string | null) => void;
   collapsed: boolean;
   onToggleCollapsed: () => void;
+  activeView: ActiveView;
+  onViewReport: (project?: string) => void;
 }
 
 const RAIL_ARCHIVE_KEY = 'dev-dashboard-rail-archive-collapsed';
@@ -18,6 +21,8 @@ export function ProjectRail({
   onSelect,
   collapsed,
   onToggleCollapsed,
+  activeView,
+  onViewReport,
 }: Props) {
   const [archiveSectionCollapsed, setArchiveSectionCollapsed] = useState(() => {
     try {
@@ -55,6 +60,26 @@ export function ProjectRail({
               d="M6.22 4.22a.75.75 0 0 1 1.06 0l3.25 3.25a.75.75 0 0 1 0 1.06l-3.25 3.25a.75.75 0 0 1-1.06-1.06L8.94 8 6.22 5.28a.75.75 0 0 1 0-1.06Z"
               clip-rule="evenodd"
             />
+          </svg>
+        </button>
+        {/* Report icon */}
+        <button
+          type="button"
+          onClick={() => onViewReport()}
+          title="Report"
+          class={`mt-3 p-1.5 rounded transition-colors ${
+            activeView === 'report'
+              ? 'bg-sky-500/15 text-sky-400'
+              : 'text-slate-500 hover:text-slate-300'
+          }`}
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 16 16"
+            fill="currentColor"
+            class="w-4 h-4"
+          >
+            <path d="M2 4a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V4Zm3.5 1a.5.5 0 0 0-.5.5v5a.5.5 0 0 0 1 0v-5a.5.5 0 0 0-.5-.5Zm2.5 2a.5.5 0 0 0-.5.5v3a.5.5 0 0 0 1 0v-3A.5.5 0 0 0 8 7Zm3 1a.5.5 0 0 0-1 0v2.5a.5.5 0 0 0 1 0V8Z" />
           </svg>
         </button>
         {/* Mini status bars for each project */}
@@ -120,6 +145,34 @@ export function ProjectRail({
           </svg>
         </button>
       </div>
+
+      {/* Report entry */}
+      <button
+        type="button"
+        onClick={() => onViewReport()}
+        class={`w-full text-left px-4 py-3 transition-colors border-l-2 ${
+          activeView === 'report'
+            ? 'bg-sky-500/15 border-l-sky-500'
+            : 'border-l-transparent hover:bg-slate-800/20'
+        }`}
+      >
+        <span
+          class={`text-sm font-semibold font-sans flex items-center gap-2 ${
+            activeView === 'report' ? 'text-white' : 'text-slate-200'
+          }`}
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 16 16"
+            fill="currentColor"
+            class="w-3.5 h-3.5"
+          >
+            <path d="M2 4a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V4Zm3.5 1a.5.5 0 0 0-.5.5v5a.5.5 0 0 0 1 0v-5a.5.5 0 0 0-.5-.5Zm2.5 2a.5.5 0 0 0-.5.5v3a.5.5 0 0 0 1 0v-3A.5.5 0 0 0 8 7Zm3 1a.5.5 0 0 0-1 0v2.5a.5.5 0 0 0 1 0V8Z" />
+          </svg>
+          Report
+        </span>
+        <span class="block text-[13px] text-slate-500 font-mono mt-0.5">Activity summary</span>
+      </button>
 
       {/* Divider */}
       <div class="border-b border-slate-800/40" />

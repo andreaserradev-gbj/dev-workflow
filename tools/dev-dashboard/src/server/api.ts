@@ -1,7 +1,7 @@
 import { access, readdir } from 'fs/promises';
 import { resolve } from 'path';
 import type { FastifyInstance } from 'fastify';
-import type { FeatureDetail, Project } from '../shared/types.js';
+import type { FeatureDetail, Project, ReportFeature, ReportResponse } from '../shared/types.js';
 import type { DashboardState } from './state.js';
 import { updateConfig } from './config.js';
 import { parseCheckpoint, parseMasterPlan, parseSubPrd } from './parser.js';
@@ -100,6 +100,45 @@ export function registerApiRoutes(app: FastifyInstance, state: DashboardState): 
     return detail;
   });
 
+  app.get<{
+    Querystring: { from: string; to: string; project?: string };
+  }>('/api/report', async (request, reply) => {
+    const fromDate = new Date(request.query.from);
+    const toDate = new Date(request.query.to);
+
+    if (isNaN(fromDate.getTime()) || isNaN(toDate.getTime())) {
+      return reply.status(400).send({ error: 'Invalid date format. Use YYYY-MM-DD.' });
+    }
+
+    // Make toDate inclusive (end of day)
+    toDate.setHours(23, 59, 59, 999);
+
+    const projects = state.getProjects();
+    const filtered = request.query.project
+      ? projects.filter((p) => p.name === request.query.project)
+      : projects;
+
+    const features: ReportFeature[] = [];
+    for (const project of filtered) {
+      for (const feature of project.features) {
+        if (
+          isInRange(feature.lastCheckpoint, fromDate, toDate) ||
+          isInRange(feature.created, fromDate, toDate) ||
+          isInRange(feature.lastUpdated, fromDate, toDate)
+        ) {
+          features.push({ ...feature, project: project.name });
+        }
+      }
+    }
+
+    const response: ReportResponse = {
+      features,
+      from: request.query.from,
+      to: request.query.to,
+    };
+    return reply.send(response);
+  });
+
   app.post<{
     Body: { notifications?: boolean };
   }>('/api/config', async (request) => {
@@ -111,4 +150,10 @@ export function registerApiRoutes(app: FastifyInstance, state: DashboardState): 
     const updated = await updateConfig(patch);
     return { notifications: updated.notifications };
   });
+}
+
+function isInRange(dateStr: string | null, from: Date, to: Date): boolean {
+  if (!dateStr) return false;
+  const d = new Date(dateStr);
+  return !isNaN(d.getTime()) && d >= from && d <= to;
 }

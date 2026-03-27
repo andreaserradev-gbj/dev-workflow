@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useState } from 'preact/hooks';
 import type { FeatureStatus } from '@shared/types.js';
 import { ProjectCard } from './components/ProjectCard.js';
 import { ProjectRail } from './components/ProjectRail.js';
+import { ReportView } from './components/ReportView.js';
 import { SessionBar } from './components/SessionBar.js';
 import { ConnectionOverlay } from './components/ConnectionOverlay.js';
 import { useWebSocket } from './hooks/useWebSocket.js';
@@ -18,6 +19,8 @@ const FILTER_PILLS: { key: FeatureStatus | 'all'; label: string }[] = [
 const SELECTED_PROJECT_KEY = 'dev-dashboard-selected-project';
 const RAIL_COLLAPSED_KEY = 'dev-dashboard-rail-collapsed';
 const ARCHIVED_PROJECTS_KEY = 'dev-dashboard-archived-projects-collapsed';
+
+export type ActiveView = 'projects' | 'report';
 
 function readSelectedProject(): string | null {
   try {
@@ -65,6 +68,15 @@ function readHashProject(): string | null {
   return null;
 }
 
+function readHashView(): ActiveView {
+  try {
+    if (window.location.hash.startsWith('#report')) return 'report';
+  } catch {
+    /* */
+  }
+  return 'projects';
+}
+
 function readInitialProject(): string | null {
   return readHashProject() ?? readSelectedProject();
 }
@@ -74,6 +86,7 @@ export function App() {
   const [searchInput, setSearchInput] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedProject, setSelectedProject] = useState<string | null>(readInitialProject);
+  const [activeView, setActiveView] = useState<ActiveView>(readHashView);
   const [railCollapsed, setRailCollapsed] = useState(readRailCollapsed);
   const [archivedProjectsCollapsed, setArchivedProjectsCollapsed] = useState(() => {
     try {
@@ -104,8 +117,15 @@ export function App() {
   const handleSelectProject = useCallback((name: string | null) => {
     setSelectedProject(name);
     writeSelectedProject(name);
+    setActiveView('projects');
     const url = name ? `#project=${encodeURIComponent(name)}` : window.location.pathname;
     history.pushState(null, '', url);
+  }, []);
+
+  const handleSelectReport = useCallback((project?: string) => {
+    setActiveView('report');
+    const hash = project ? `#report&project=${encodeURIComponent(project)}` : '#report';
+    history.pushState(null, '', hash);
   }, []);
 
   // Sync URL hash on initial load (when restored from localStorage)
@@ -118,6 +138,7 @@ export function App() {
   // Browser back/forward navigation
   useEffect(() => {
     const onPopState = () => {
+      setActiveView(readHashView());
       const name = readHashProject();
       setSelectedProject(name);
       writeSelectedProject(name);
@@ -126,18 +147,21 @@ export function App() {
     return () => window.removeEventListener('popstate', onPopState);
   }, []);
 
-  // Escape key returns to all projects
+  // Escape key returns to all projects (or exits report view)
   useEffect(() => {
     const onKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape' && selectedProject) {
-        const tag = (e.target as HTMLElement)?.tagName;
-        if (tag === 'INPUT' || tag === 'TEXTAREA') return;
+      if (e.key !== 'Escape') return;
+      const tag = (e.target as HTMLElement)?.tagName;
+      if (tag === 'INPUT' || tag === 'TEXTAREA') return;
+      if (activeView === 'report') {
+        handleSelectProject(null);
+      } else if (selectedProject) {
         handleSelectProject(null);
       }
     };
     window.addEventListener('keydown', onKeyDown);
     return () => window.removeEventListener('keydown', onKeyDown);
-  }, [selectedProject, handleSelectProject]);
+  }, [selectedProject, activeView, handleSelectProject]);
 
   const handleToggleRail = useCallback(() => {
     setRailCollapsed((prev) => {
@@ -228,6 +252,8 @@ export function App() {
           onSelect={handleSelectProject}
           collapsed={railCollapsed}
           onToggleCollapsed={handleToggleRail}
+          activeView={activeView}
+          onViewReport={handleSelectReport}
         />
       )}
 
@@ -257,6 +283,18 @@ export function App() {
             <p class="mt-1 text-sm text-slate-500 font-mono">
               {loading ? (
                 'Connecting...'
+              ) : activeView === 'report' ? (
+                <>
+                  <button
+                    type="button"
+                    onClick={() => handleSelectProject(null)}
+                    class="text-slate-500 hover:text-sky-400 transition-colors cursor-pointer"
+                  >
+                    All Projects
+                  </button>
+                  <span class="mx-1.5 text-slate-700">›</span>
+                  <span class="text-slate-400">Report</span>
+                </>
               ) : selectedProject ? (
                 <>
                   <button
@@ -275,117 +313,123 @@ export function App() {
             </p>
           </header>
 
-          {!loading && projects.length === 0 && (
-            <div class="rounded-lg bg-slate-800/50 border border-slate-700/50 p-8 text-center text-slate-500">
-              <p class="text-lg font-medium">No projects found</p>
-              <p class="mt-1 text-sm">
-                Check your scan directories in ~/.config/dev-dashboard/config.json
-              </p>
-            </div>
-          )}
-
-          {!loading && (
-            <SessionBar
-              projects={scopedProjects}
-              statusFilter={statusFilter}
-              onSelectProject={handleSelectProject}
-            />
-          )}
-
-          {!loading && scopedTotalFeatures > 0 && (
-            <div class="mb-6 flex items-center gap-2 flex-wrap">
-              {FILTER_PILLS.map(({ key, label }) => {
-                const count = key === 'all' ? scopedTotalFeatures : (statusCounts[key] ?? 0);
-                const isActive = statusFilter === key;
-                return (
-                  <button
-                    key={key}
-                    type="button"
-                    onClick={() => setStatusFilter(key)}
-                    class={`px-3 py-1.5 rounded-lg text-xs font-mono transition-colors ${
-                      isActive
-                        ? 'bg-sky-500/15 text-sky-400 ring-1 ring-inset ring-sky-500/30'
-                        : 'bg-slate-800/40 text-slate-500 hover:text-slate-400 hover:bg-slate-800/60'
-                    }`}
-                  >
-                    {label}
-                    {count > 0 ? ` (${count})` : ''}
-                  </button>
-                );
-              })}
-              <div class="relative ml-auto">
-                <input
-                  type="text"
-                  value={searchInput}
-                  onInput={(e) => setSearchInput((e.target as HTMLInputElement).value)}
-                  placeholder="Search features..."
-                  class="w-48 px-3 py-1.5 rounded-lg text-xs font-mono bg-slate-800/40 text-slate-300
-                         placeholder:text-slate-600 border border-slate-700/50 focus:outline-none
-                         focus:ring-1 focus:ring-sky-500/30 focus:border-sky-500/30"
-                />
-                {searchInput && (
-                  <button
-                    type="button"
-                    onClick={() => setSearchInput('')}
-                    class="absolute right-2 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-400"
-                  >
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      viewBox="0 0 16 16"
-                      fill="currentColor"
-                      class="w-3 h-3"
-                    >
-                      <path d="M5.28 4.22a.75.75 0 0 0-1.06 1.06L6.94 8l-2.72 2.72a.75.75 0 1 0 1.06 1.06L8 9.06l2.72 2.72a.75.75 0 1 0 1.06-1.06L9.06 8l2.72-2.72a.75.75 0 0 0-1.06-1.06L8 6.94 5.28 4.22Z" />
-                    </svg>
-                  </button>
-                )}
-              </div>
-            </div>
-          )}
-
-          <div class="space-y-6">
-            {activeProjects.map((project, i) => (
-              <div class="card-enter" style={{ animationDelay: `${i * 80}ms` }}>
-                <ProjectCard
-                  project={project}
-                  singleProject={!!selectedProject}
-                  archivedFilter={statusFilter === 'archived'}
-                />
-              </div>
-            ))}
-            {archiveOnlyProjects.length > 0 && (
-              <>
-                <button
-                  type="button"
-                  onClick={handleToggleArchivedProjects}
-                  class="w-full px-4 py-2 flex items-center gap-2 text-xs text-slate-600 font-mono
-                         hover:text-slate-500 transition-colors cursor-pointer"
-                >
-                  <span class="text-[10px] w-3 select-none">
-                    {archivedProjectsCollapsed ? '\u25b6' : '\u25bc'}
-                  </span>
-                  Archived Projects ({archiveOnlyProjects.length})
-                </button>
-                {!archivedProjectsCollapsed &&
-                  archiveOnlyProjects.map((project, i) => (
-                    <div class="card-enter" style={{ animationDelay: `${i * 80}ms` }}>
-                      <ProjectCard
-                        project={project}
-                        singleProject={!!selectedProject}
-                        archivedFilter={statusFilter === 'archived'}
-                      />
-                    </div>
-                  ))}
-              </>
-            )}
-            {!loading &&
-              (statusFilter !== 'all' || searchQuery) &&
-              filteredProjects.length === 0 && (
-                <div class="rounded-lg bg-slate-800/50 border border-slate-700/50 p-6 text-center text-slate-500">
-                  <p class="text-sm font-mono">No matching features</p>
+          {activeView === 'report' ? (
+            <ReportView projects={projects} />
+          ) : (
+            <>
+              {!loading && projects.length === 0 && (
+                <div class="rounded-lg bg-slate-800/50 border border-slate-700/50 p-8 text-center text-slate-500">
+                  <p class="text-lg font-medium">No projects found</p>
+                  <p class="mt-1 text-sm">
+                    Check your scan directories in ~/.config/dev-dashboard/config.json
+                  </p>
                 </div>
               )}
-          </div>
+
+              {!loading && (
+                <SessionBar
+                  projects={scopedProjects}
+                  statusFilter={statusFilter}
+                  onSelectProject={handleSelectProject}
+                />
+              )}
+
+              {!loading && scopedTotalFeatures > 0 && (
+                <div class="mb-6 flex items-center gap-2 flex-wrap">
+                  {FILTER_PILLS.map(({ key, label }) => {
+                    const count = key === 'all' ? scopedTotalFeatures : (statusCounts[key] ?? 0);
+                    const isActive = statusFilter === key;
+                    return (
+                      <button
+                        key={key}
+                        type="button"
+                        onClick={() => setStatusFilter(key)}
+                        class={`px-3 py-1.5 rounded-lg text-xs font-mono transition-colors ${
+                          isActive
+                            ? 'bg-sky-500/15 text-sky-400 ring-1 ring-inset ring-sky-500/30'
+                            : 'bg-slate-800/40 text-slate-500 hover:text-slate-400 hover:bg-slate-800/60'
+                        }`}
+                      >
+                        {label}
+                        {count > 0 ? ` (${count})` : ''}
+                      </button>
+                    );
+                  })}
+                  <div class="relative ml-auto">
+                    <input
+                      type="text"
+                      value={searchInput}
+                      onInput={(e) => setSearchInput((e.target as HTMLInputElement).value)}
+                      placeholder="Search features..."
+                      class="w-48 px-3 py-1.5 rounded-lg text-xs font-mono bg-slate-800/40 text-slate-300
+                             placeholder:text-slate-600 border border-slate-700/50 focus:outline-none
+                             focus:ring-1 focus:ring-sky-500/30 focus:border-sky-500/30"
+                    />
+                    {searchInput && (
+                      <button
+                        type="button"
+                        onClick={() => setSearchInput('')}
+                        class="absolute right-2 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-400"
+                      >
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          viewBox="0 0 16 16"
+                          fill="currentColor"
+                          class="w-3 h-3"
+                        >
+                          <path d="M5.28 4.22a.75.75 0 0 0-1.06 1.06L6.94 8l-2.72 2.72a.75.75 0 1 0 1.06 1.06L8 9.06l2.72 2.72a.75.75 0 1 0 1.06-1.06L9.06 8l2.72-2.72a.75.75 0 0 0-1.06-1.06L8 6.94 5.28 4.22Z" />
+                        </svg>
+                      </button>
+                    )}
+                  </div>
+                </div>
+              )}
+
+              <div class="space-y-6">
+                {activeProjects.map((project, i) => (
+                  <div class="card-enter" style={{ animationDelay: `${i * 80}ms` }}>
+                    <ProjectCard
+                      project={project}
+                      singleProject={!!selectedProject}
+                      archivedFilter={statusFilter === 'archived'}
+                    />
+                  </div>
+                ))}
+                {archiveOnlyProjects.length > 0 && (
+                  <>
+                    <button
+                      type="button"
+                      onClick={handleToggleArchivedProjects}
+                      class="w-full px-4 py-2 flex items-center gap-2 text-xs text-slate-600 font-mono
+                             hover:text-slate-500 transition-colors cursor-pointer"
+                    >
+                      <span class="text-[10px] w-3 select-none">
+                        {archivedProjectsCollapsed ? '\u25b6' : '\u25bc'}
+                      </span>
+                      Archived Projects ({archiveOnlyProjects.length})
+                    </button>
+                    {!archivedProjectsCollapsed &&
+                      archiveOnlyProjects.map((project, i) => (
+                        <div class="card-enter" style={{ animationDelay: `${i * 80}ms` }}>
+                          <ProjectCard
+                            project={project}
+                            singleProject={!!selectedProject}
+                            archivedFilter={statusFilter === 'archived'}
+                          />
+                        </div>
+                      ))}
+                  </>
+                )}
+                {!loading &&
+                  (statusFilter !== 'all' || searchQuery) &&
+                  filteredProjects.length === 0 && (
+                    <div class="rounded-lg bg-slate-800/50 border border-slate-700/50 p-6 text-center text-slate-500">
+                      <p class="text-sm font-mono">No matching features</p>
+                    </div>
+                  )}
+              </div>
+            </>
+          )}
         </div>
       </div>
     </div>

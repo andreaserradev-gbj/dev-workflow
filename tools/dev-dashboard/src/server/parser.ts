@@ -20,6 +20,7 @@ export interface MasterPlanResult {
   phases: Phase[];
   progress: Progress;
   lastUpdated: string | null;
+  created: string | null;
 }
 
 export async function parseMasterPlan(filePath: string): Promise<MasterPlanResult | null> {
@@ -32,6 +33,7 @@ export async function parseMasterPlan(filePath: string): Promise<MasterPlanResul
 
   const summary = extractSummary(content);
   const lastUpdated = extractFrontmatterField(content, 'Last Updated');
+  const created = extractFrontmatterField(content, 'Created');
   const phases = extractPhases(content);
 
   let done = 0;
@@ -43,7 +45,7 @@ export async function parseMasterPlan(filePath: string): Promise<MasterPlanResul
 
   const percent = total > 0 ? Math.round((done / total) * 100) : 0;
 
-  return { summary, phases, progress: { done, total, percent }, lastUpdated };
+  return { summary, phases, progress: { done, total, percent }, lastUpdated, created };
 }
 
 function extractSummary(content: string): string | null {
@@ -467,6 +469,8 @@ export async function parseFeature(featureDir: string, name: string): Promise<Fe
     progress,
     currentPhase,
     lastCheckpoint: checkpoint?.checkpointed ?? null,
+    created: masterPlan?.created ?? null,
+    lastUpdated: masterPlan?.lastUpdated ?? null,
     nextAction: checkpoint?.nextAction ?? null,
     branch: checkpoint?.branch ?? null,
     summary: masterPlan?.summary ?? null,
