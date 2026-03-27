@@ -1,4 +1,4 @@
-import { access, readdir } from 'fs/promises';
+import { access, mkdir, readdir, rename } from 'fs/promises';
 import { resolve } from 'path';
 import type { FastifyInstance } from 'fastify';
 import type { FeatureDetail, Project, ReportFeature, ReportResponse } from '../shared/types.js';
@@ -149,6 +149,58 @@ export function registerApiRoutes(app: FastifyInstance, state: DashboardState): 
     }
     const updated = await updateConfig(patch);
     return { notifications: updated.notifications };
+  });
+
+  // ─── Archive / Restore ────────────────────────────────────────
+
+  app.post<{
+    Params: { project: string; feature: string };
+  }>('/api/projects/:project/features/:feature/archive', async (request, reply) => {
+    const { project: projectName, feature: featureName } = request.params;
+    const project = state.getProject(projectName);
+    if (!project) {
+      return reply.status(404).send({ error: `Project "${projectName}" not found` });
+    }
+
+    const src = resolve(project.path, '.dev', featureName);
+    const destDir = resolve(project.path, '.dev-archive');
+    const dest = resolve(destDir, featureName);
+
+    try {
+      await access(src);
+    } catch {
+      return reply.status(404).send({ error: `Feature "${featureName}" not found in .dev/` });
+    }
+
+    await mkdir(destDir, { recursive: true });
+    await rename(src, dest);
+    return { ok: true };
+  });
+
+  app.post<{
+    Params: { project: string; feature: string };
+  }>('/api/projects/:project/features/:feature/restore', async (request, reply) => {
+    const { project: projectName, feature: featureName } = request.params;
+    const project = state.getProject(projectName);
+    if (!project) {
+      return reply.status(404).send({ error: `Project "${projectName}" not found` });
+    }
+
+    const src = resolve(project.path, '.dev-archive', featureName);
+    const destDir = resolve(project.path, '.dev');
+    const dest = resolve(destDir, featureName);
+
+    try {
+      await access(src);
+    } catch {
+      return reply
+        .status(404)
+        .send({ error: `Feature "${featureName}" not found in .dev-archive/` });
+    }
+
+    await mkdir(destDir, { recursive: true });
+    await rename(src, dest);
+    return { ok: true };
   });
 }
 

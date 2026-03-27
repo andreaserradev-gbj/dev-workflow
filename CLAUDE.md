@@ -25,15 +25,6 @@ plugins/dev-workflow/           # Plugin package
       SKILL.md
       scripts/discover.sh, validate.sh, git-state.sh
       agents/context-loader.md
-    dev-status/
-      SKILL.md
-      scripts/discover.sh, validate.sh
-      agents/feature-batch-scanner.md
-    dev-board/
-      SKILL.md
-      references/board-template.html, stakeholder-template.md
-      scripts/discover.sh, validate.sh
-      agents/board-generator.md
     dev-wrapup/
       SKILL.md
       scripts/discover.sh
@@ -96,6 +87,17 @@ cd tools/dev-dashboard && npm run bundle
 ```
 
 This builds the Vite client + esbuild-bundles the server into `plugins/dev-workflow/skills/dev-dashboard/dashboard/`. The bundle is a committed build artifact — commit it alongside source changes. The pre-commit hook blocks commits that change dashboard source without updating the bundle.
+
+### Dashboard Actions
+
+The dashboard is AI-tool-agnostic — it works with any tool that reads/writes `.dev/` PRDs (Claude Code, Codex, Gemini CLI, etc.).
+
+**Server-side actions** (executed via API with confirmation prompt):
+- **Archive** — moves a completed feature from `.dev/` to `.dev-archive/` (`POST /api/projects/:project/features/:feature/archive`)
+- **Restore** — moves an archived feature back from `.dev-archive/` to `.dev/` (`POST /api/projects/:project/features/:feature/restore`)
+
+**Clipboard utility**:
+- **Copy as Markdown** — copies the activity report as a formatted markdown table (in Report view)
 
 ### Tests
 

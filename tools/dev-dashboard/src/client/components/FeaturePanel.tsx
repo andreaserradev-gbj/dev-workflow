@@ -1,6 +1,6 @@
 import type { Feature, Phase, SubPrd } from '@shared/types.js';
 import { useFeatureDetail } from '../hooks/useFeatureDetail.js';
-import { PanelCommands, PrimaryActionButton } from './ActionButton.js';
+import { PrimaryActionButton } from './ActionButton.js';
 
 interface Props {
   project: string;
@@ -177,11 +177,12 @@ export function FeaturePanel({ project, projectPath, featureName, feature }: Pro
         </div>
       )}
 
-      {/* Commands */}
-      {detail.status === 'archived' ? (
-        <PrimaryActionButton status="archived" context={{ projectPath, featureName }} />
-      ) : (
-        <PanelCommands context={{ projectPath, featureName }} />
+      {/* Archive / Restore action */}
+      {(detail.status === 'archived' || detail.status === 'complete') && (
+        <PrimaryActionButton
+          status={detail.status}
+          context={{ projectPath, featureName, projectName: project }}
+        />
       )}
     </div>
   );

@@ -8,8 +8,6 @@
     "./skills/dev-plan/agents/prd-researcher.md",
     "./skills/dev-plan/agents/prd-planner.md",
     "./skills/dev-checkpoint/agents/checkpoint-analyzer.md",
-    "./skills/dev-resume/agents/context-loader.md",
-    "./skills/dev-status/agents/feature-batch-scanner.md",
-    "./skills/dev-board/agents/board-generator.md"
+    "./skills/dev-resume/agents/context-loader.md"
   ]
 }

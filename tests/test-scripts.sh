@@ -200,8 +200,8 @@ check_sync() {
   done
 }
 
-check_sync discover.sh dev-plan dev-resume dev-status dev-wrapup
-check_sync validate.sh dev-plan dev-resume dev-status
+check_sync discover.sh dev-plan dev-resume dev-wrapup
+check_sync validate.sh dev-plan dev-resume
 check_sync git-state.sh dev-resume
 
 echo ""

@@ -4,6 +4,7 @@ import { PrimaryActionButton } from './ActionButton.js';
 interface Props {
   feature: Feature;
   projectPath: string;
+  projectName: string;
   id?: string;
   expanded?: boolean;
   onClick?: () => void;
@@ -62,7 +63,7 @@ function formatTimeAgo(dateStr: string): string {
   return `${days}d ago`;
 }
 
-export function FeatureRow({ feature, projectPath, id, expanded, onClick }: Props) {
+export function FeatureRow({ feature, projectPath, projectName, id, expanded, onClick }: Props) {
   const config = STATUS_CONFIG[feature.status] ?? STATUS_CONFIG['no-prd'];
 
   return (
@@ -132,10 +133,10 @@ export function FeatureRow({ feature, projectPath, id, expanded, onClick }: Prop
         {config.label}
       </span>
 
-      {/* Primary action */}
+      {/* Archive / Restore action */}
       <PrimaryActionButton
         status={feature.status}
-        context={{ projectPath, featureName: feature.name }}
+        context={{ projectPath, featureName: feature.name, projectName }}
       />
     </div>
   );
