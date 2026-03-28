@@ -15,6 +15,11 @@ if [ -n "$repo_root" ] && command -v gh >/dev/null 2>&1; then
   fi
 fi
 
+marketplace_version=""
+if [ -n "$repo_root" ]; then
+  marketplace_version=$(node -e "const m=require('$repo_root/.claude-plugin/marketplace.json'); process.stdout.write(m.plugins[0].version)" 2>/dev/null)
+fi
+
 while read local_ref local_oid remote_ref remote_oid; do
   # For main: compare against what the remote already has
   # For branches: compare against the merge-base with main
@@ -36,6 +41,7 @@ while read local_ref local_oid remote_ref remote_oid; do
 
   plugins_changed=$(git diff --name-only "$range" -- 'plugins/' 2>/dev/null)
   version_changed=$(git diff --name-only "$range" -- '.claude-plugin/marketplace.json' 2>/dev/null)
+  changelog_changed=$(git diff --name-only "$range" -- 'CHANGELOG.md' 2>/dev/null)
 
   if [ -n "$plugins_changed" ] && [ -z "$version_changed" ]; then
     echo "ERROR: Files under plugins/ were modified but .claude-plugin/marketplace.json was not updated."
@@ -44,6 +50,20 @@ while read local_ref local_oid remote_ref remote_oid; do
     echo "Changed plugin files:"
     echo "$plugins_changed" | sed 's/^/  /'
     exit 1
+  fi
+
+  if [ -n "$version_changed" ]; then
+    if [ -z "$changelog_changed" ]; then
+      echo "ERROR: .claude-plugin/marketplace.json was updated but CHANGELOG.md was not."
+      echo "Add a local changelog entry for v$marketplace_version before pushing."
+      exit 1
+    fi
+
+    if [ -z "$marketplace_version" ] || ! grep -q "^## v$marketplace_version - " "$repo_root/CHANGELOG.md"; then
+      echo "ERROR: CHANGELOG.md does not contain a local release entry for v$marketplace_version."
+      echo "Add a '## v$marketplace_version - YYYY-MM-DD' entry in the local changelog section before pushing."
+      exit 1
+    fi
   fi
 done
 
