@@ -68,7 +68,6 @@ All notable changes to this project should be documented in this file.
 
 ### Changed
 
-- Added a Configuration button to the dashboard header so you can reopen scan-folder settings at any time after setup.
 - Changed fresh dev-dashboard setup to start in an onboarding state while leaving existing configured installs untouched.
 - Updated the dashboard docs and release metadata to match the new first-run scan-root flow.
 
