@@ -4,6 +4,12 @@ All notable changes to this project should be documented in this file.
 
 <!-- LOCAL-RELEASES-START -->
 
+## v1.26.4 - 2026-03-28
+
+### Added
+
+- Added a Configuration button in the dashboard header so you can reopen scan-folder settings after setup and update which folders dev-dashboard watches.
+
 ## v1.26.3 - 2026-03-28
 
 ### Added
