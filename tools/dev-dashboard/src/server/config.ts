@@ -1,54 +1,98 @@
 import { readFile, writeFile, mkdir, access } from 'fs/promises';
-import { resolve, join } from 'path';
+import { resolve, join, dirname } from 'path';
 import { homedir } from 'os';
 import chokidar from 'chokidar';
 import type { DashboardConfig } from '../shared/types.js';
 
-const CONFIG_DIR = join(homedir(), '.config', 'dev-dashboard');
-const CONFIG_PATH = join(CONFIG_DIR, 'config.json');
+export function getConfigDir(): string {
+  return join(process.env.XDG_CONFIG_HOME ?? join(homedir(), '.config'), 'dev-dashboard');
+}
 
-const DEFAULTS: DashboardConfig = {
-  scanDirs: ['~/code'],
+export function getConfigPath(): string {
+  return join(getConfigDir(), 'config.json');
+}
+
+export const CONFIG_DIR = getConfigDir();
+export const CONFIG_PATH = getConfigPath();
+export const DEFAULT_CONFIG: DashboardConfig = {
+  scanDirs: [],
   port: 3141,
   notifications: false,
+  scanDirsConfigured: false,
 };
+export const DEFAULT_PORT = DEFAULT_CONFIG.port;
 
 export interface CliOverrides {
   scan?: string[];
   port?: number;
 }
 
-export async function loadConfig(overrides: CliOverrides = {}): Promise<DashboardConfig> {
-  let fileConfig: Partial<DashboardConfig> = {};
-
-  try {
-    const raw = await readFile(CONFIG_PATH, 'utf-8');
-    fileConfig = JSON.parse(raw);
-  } catch {
-    // File doesn't exist or is invalid — create with defaults
-    await createDefaultConfig();
-    console.log(`Created config at ${CONFIG_PATH}`);
+export class ConfigReadError extends Error {
+  constructor(
+    message: string,
+    public readonly code: 'invalid_json' | 'unreadable',
+  ) {
+    super(message);
+    this.name = 'ConfigReadError';
   }
+}
+
+export async function loadConfig(
+  overrides: CliOverrides = {},
+  configPath: string = getConfigPath(),
+): Promise<DashboardConfig> {
+  const storedConfig = await readStoredConfig(configPath);
+  const scanDirs = normalizeScanDirs(overrides.scan ?? storedConfig.scanDirs).map(expandHome);
 
   const config: DashboardConfig = {
-    scanDirs: overrides.scan ?? fileConfig.scanDirs ?? DEFAULTS.scanDirs,
-    port: overrides.port ?? fileConfig.port ?? DEFAULTS.port,
-    notifications: fileConfig.notifications ?? DEFAULTS.notifications,
+    scanDirs,
+    port: overrides.port ?? storedConfig.port,
+    notifications: storedConfig.notifications,
+    scanDirsConfigured: overrides.scan ? scanDirs.length > 0 : storedConfig.scanDirsConfigured,
   };
 
-  // Expand ~ and validate
-  config.scanDirs = config.scanDirs.map(expandHome);
   await validateScanDirs(config.scanDirs);
-
   return config;
 }
 
-async function createDefaultConfig(): Promise<void> {
+export async function readStoredConfig(
+  configPath: string = getConfigPath(),
+): Promise<DashboardConfig> {
+  let fileConfig: Partial<DashboardConfig> = {};
+
   try {
-    await mkdir(CONFIG_DIR, { recursive: true });
-    await writeFile(CONFIG_PATH, JSON.stringify(DEFAULTS, null, 2) + '\n', 'utf-8');
+    const raw = await readFile(configPath, 'utf-8');
+    try {
+      fileConfig = JSON.parse(raw);
+    } catch {
+      throw new ConfigReadError(
+        `Config file contains invalid JSON at ${configPath}`,
+        'invalid_json',
+      );
+    }
+  } catch (error) {
+    if (isMissingFileError(error)) {
+      await createDefaultConfig(configPath);
+      console.log(`Created config at ${configPath}`);
+      return normalizeStoredConfig(fileConfig);
+    }
+
+    if (error instanceof ConfigReadError) {
+      throw error;
+    }
+
+    throw new ConfigReadError(`Could not read config at ${configPath}`, 'unreadable');
+  }
+
+  return normalizeStoredConfig(fileConfig);
+}
+
+async function createDefaultConfig(configPath: string): Promise<void> {
+  try {
+    await mkdir(dirname(configPath), { recursive: true });
+    await writeFile(configPath, JSON.stringify(DEFAULT_CONFIG, null, 2) + '\n', 'utf-8');
   } catch (err) {
-    console.warn(`Warning: could not write config to ${CONFIG_PATH}:`, err);
+    console.warn(`Warning: could not write config to ${configPath}:`, err);
   }
 }
 
@@ -72,18 +116,25 @@ async function validateScanDirs(dirs: string[]): Promise<void> {
   }
 }
 
-export async function updateConfig(patch: Partial<DashboardConfig>): Promise<DashboardConfig> {
+export async function updateConfig(
+  patch: Partial<DashboardConfig>,
+  configPath: string = getConfigPath(),
+): Promise<DashboardConfig> {
   let existing: Partial<DashboardConfig> = {};
   try {
-    const raw = await readFile(CONFIG_PATH, 'utf-8');
+    const raw = await readFile(configPath, 'utf-8');
     existing = JSON.parse(raw);
   } catch {
     // Start from defaults if file doesn't exist
   }
 
-  const updated = { ...DEFAULTS, ...existing, ...patch };
-  await mkdir(CONFIG_DIR, { recursive: true });
-  await writeFile(CONFIG_PATH, JSON.stringify(updated, null, 2) + '\n', 'utf-8');
+  const updated = normalizeStoredConfig({ ...DEFAULT_CONFIG, ...existing, ...patch });
+  if (patch.scanDirs) {
+    updated.scanDirsConfigured = updated.scanDirs.length > 0;
+  }
+
+  await mkdir(dirname(configPath), { recursive: true });
+  await writeFile(configPath, JSON.stringify(updated, null, 2) + '\n', 'utf-8');
   return updated;
 }
 
@@ -118,7 +169,7 @@ export function watchConfig(
       try {
         const raw = await readFile(configPath, 'utf-8');
         const fileConfig: Partial<DashboardConfig> = JSON.parse(raw);
-        const newDirs = (fileConfig.scanDirs ?? DEFAULTS.scanDirs).map(expandHome);
+        const newDirs = (fileConfig.scanDirs ?? DEFAULT_CONFIG.scanDirs).map(expandHome);
         const serialized = JSON.stringify(newDirs);
         if (serialized !== lastDirs) {
           lastDirs = serialized;
@@ -162,4 +213,40 @@ export function parseCliArgs(args: string[]): CliOverrides {
   }
 
   return overrides;
+}
+
+function normalizeStoredConfig(fileConfig: Partial<DashboardConfig>): DashboardConfig {
+  const scanDirs = normalizeScanDirs(fileConfig.scanDirs);
+  const scanDirsConfigured =
+    typeof fileConfig.scanDirsConfigured === 'boolean'
+      ? fileConfig.scanDirsConfigured
+      : scanDirs.length > 0;
+
+  return {
+    scanDirs,
+    port: fileConfig.port ?? DEFAULT_CONFIG.port,
+    notifications: fileConfig.notifications ?? DEFAULT_CONFIG.notifications,
+    scanDirsConfigured,
+  };
+}
+
+function normalizeScanDirs(scanDirs: string[] | undefined): string[] {
+  if (!Array.isArray(scanDirs)) return [];
+
+  const seen = new Set<string>();
+  const normalized: string[] = [];
+
+  for (const dir of scanDirs) {
+    if (typeof dir !== 'string') continue;
+    const trimmed = dir.trim();
+    if (!trimmed || seen.has(trimmed)) continue;
+    seen.add(trimmed);
+    normalized.push(trimmed);
+  }
+
+  return normalized;
+}
+
+function isMissingFileError(error: unknown): error is NodeJS.ErrnoException {
+  return !!error && typeof error === 'object' && 'code' in error && error.code === 'ENOENT';
 }

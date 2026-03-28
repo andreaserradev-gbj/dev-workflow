@@ -1,9 +1,15 @@
 import { access, mkdir, readdir, rename } from 'fs/promises';
 import { resolve } from 'path';
-import type { FastifyInstance } from 'fastify';
-import type { FeatureDetail, Project, ReportFeature, ReportResponse } from '../shared/types.js';
+import type { FastifyInstance, FastifyReply } from 'fastify';
+import type {
+  DashboardConfig,
+  FeatureDetail,
+  Project,
+  ReportFeature,
+  ReportResponse,
+} from '../shared/types.js';
 import type { DashboardState } from './state.js';
-import { updateConfig } from './config.js';
+import { ConfigReadError, readStoredConfig, updateConfig } from './config.js';
 import { parseCheckpoint, parseMasterPlan, parseSubPrd } from './parser.js';
 
 export function registerApiRoutes(app: FastifyInstance, state: DashboardState): void {
@@ -139,16 +145,34 @@ export function registerApiRoutes(app: FastifyInstance, state: DashboardState): 
     return reply.send(response);
   });
 
+  app.get('/api/config', async (_request, reply: FastifyReply) => {
+    try {
+      return await readStoredConfig();
+    } catch (error) {
+      if (error instanceof ConfigReadError) {
+        return reply.status(500).send({
+          error: error.message,
+          code: error.code,
+        });
+      }
+
+      throw error;
+    }
+  });
+
   app.post<{
-    Body: { notifications?: boolean };
+    Body: { notifications?: boolean; scanDirs?: string[] };
   }>('/api/config', async (request) => {
-    const { notifications } = request.body ?? {};
-    const patch: Record<string, unknown> = {};
+    const { notifications, scanDirs } = request.body ?? {};
+    const patch: Partial<DashboardConfig> = {};
     if (typeof notifications === 'boolean') {
       patch.notifications = notifications;
     }
+    if (Array.isArray(scanDirs)) {
+      patch.scanDirs = scanDirs;
+    }
     const updated = await updateConfig(patch);
-    return { notifications: updated.notifications };
+    return updated;
   });
 
   // ─── Archive / Restore ────────────────────────────────────────

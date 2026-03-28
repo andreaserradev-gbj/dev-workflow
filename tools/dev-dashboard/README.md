@@ -12,7 +12,20 @@ Live, cross-project dashboard that scans `.dev/` folders across your codebase an
 /dev-dashboard
 ```
 
-Starts the server (or reuses an existing instance), finds an available port, and displays the URL. The server is bundled with the plugin — no build step or `npm install` needed. Only requires Node.js 24+.
+Starts the server (or reuses an existing instance), finds an available port, and displays the URL. On first run, it also installs `dev-dashboard` and `dev-dashboard-stop` shell commands so terminal usage reuses the same bundled launcher. The server is bundled with the plugin — no build step or `npm install` needed. Only requires Node.js 24+.
+
+### Via Installed Terminal Commands
+
+After the first `/dev-dashboard` run, use:
+
+```bash
+dev-dashboard
+dev-dashboard-stop
+```
+
+The installer writes Unix command shims to `~/.local/bin` by default, or to
+`$DEV_DASHBOARD_BIN_DIR` if you override it. This installer-backed terminal path
+is Unix-only in this iteration.
 
 ### Manual (for development)
 
@@ -25,21 +38,27 @@ npm start      # production mode
 
 ## Configuration
 
-Config lives at `~/.config/dev-dashboard/config.json` (created automatically on first run):
+Config lives at `~/.config/dev-dashboard/config.json` (created automatically on first run). Fresh installs start with no scan roots so the dashboard can ask for them explicitly:
 
 ```json
 {
-  "scanDirs": ["~/code"],
+  "scanDirs": ["~/code", "~/work"],
   "port": 3141,
-  "notifications": false
+  "notifications": false,
+  "scanDirsConfigured": true
 }
 ```
 
-| Field | Type | Default | Description |
-|-------|------|---------|-------------|
-| `scanDirs` | `string[]` | `["~/code"]` | Directories to scan for projects containing `.dev/` folders. Supports `~` expansion. |
-| `port` | `number` | `3141` | HTTP server port |
-| `notifications` | `boolean` | `false` | Enable browser notifications on feature updates |
+| Field                | Type       | Default | Description                                                                          |
+| -------------------- | ---------- | ------- | ------------------------------------------------------------------------------------ |
+| `scanDirs`           | `string[]` | `[]`    | Directories to scan for projects containing `.dev/` folders. Supports `~` expansion. |
+| `port`               | `number`   | `3141`  | HTTP server port                                                                     |
+| `notifications`      | `boolean`  | `false` | Enable browser notifications on feature updates                                      |
+| `scanDirsConfigured` | `boolean`  | `false` | Marks whether first-run scan-directory onboarding has been completed                 |
+
+The bundled launcher prefers the configured `port` before scanning nearby fallback
+ports, so `/dev-dashboard` and `dev-dashboard` honor the same persistent port
+setting by default.
 
 ## CLI Flags
 
@@ -49,10 +68,14 @@ Flags override config file values:
 npm start -- --scan ~/code ~/work --port 8080
 ```
 
-| Flag | Description |
-|------|-------------|
+| Flag              | Description                                            |
+| ----------------- | ------------------------------------------------------ |
 | `--scan <dir...>` | One or more directories to scan (overrides `scanDirs`) |
-| `--port <number>` | Server port (overrides `port`) |
+| `--port <number>` | Server port (overrides `port`)                         |
+
+These flags apply to the development entrypoints here in `tools/dev-dashboard/`.
+The installed `dev-dashboard` command uses the persisted config file instead of
+accepting ad hoc CLI overrides.
 
 ## How It Works
 
@@ -64,15 +87,15 @@ npm start -- --scan ~/code ~/work --port 8080
 
 ## Feature Statuses
 
-| Status | Meaning |
-|--------|---------|
-| **Gate** | Phase complete, waiting for user decision to continue |
-| **Active** | Has a PRD with recent activity (within 30 days) |
-| **Checkpoint** | Has a checkpoint file but no PRD |
-| **Stale** | No activity for 30+ days |
-| **No PRD** | `.dev/` folder exists but no master plan |
-| **Empty** | Empty `.dev/` directory |
-| **Complete** | All PRD steps finished |
+| Status         | Meaning                                               |
+| -------------- | ----------------------------------------------------- |
+| **Gate**       | Phase complete, waiting for user decision to continue |
+| **Active**     | Has a PRD with recent activity (within 30 days)       |
+| **Checkpoint** | Has a checkpoint file but no PRD                      |
+| **Stale**      | No activity for 30+ days                              |
+| **No PRD**     | `.dev/` folder exists but no master plan              |
+| **Empty**      | Empty `.dev/` directory                               |
+| **Complete**   | All PRD steps finished                                |
 
 ## Bundling
 
@@ -86,9 +109,9 @@ This builds the Vite client and esbuild-bundles the server into `plugins/dev-wor
 
 ## Dev Dashboard vs Dev Board
 
-| | Dev Dashboard | Dev Board |
-|---|---|---|
-| **Type** | Live web app | Static HTML file |
-| **Use case** | Day-to-day development | Sharing with stakeholders |
-| **Updates** | Real-time via WebSocket | Regenerate with `/dev-board` |
-| **Scope** | Cross-project (multiple repos) | Single project |
+|              | Dev Dashboard                  | Dev Board                    |
+| ------------ | ------------------------------ | ---------------------------- |
+| **Type**     | Live web app                   | Static HTML file             |
+| **Use case** | Day-to-day development         | Sharing with stakeholders    |
+| **Updates**  | Real-time via WebSocket        | Regenerate with `/dev-board` |
+| **Scope**    | Cross-project (multiple repos) | Single project               |

@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
-import { mkdtemp, mkdir, rm } from 'fs/promises';
+import { mkdtemp, mkdir, readFile, rm, writeFile } from 'fs/promises';
 import { join } from 'path';
 import { tmpdir } from 'os';
 import Fastify from 'fastify';
@@ -13,6 +13,7 @@ let state: DashboardState;
 let tempDir: string;
 let apiServerPath: string;
 let webClientPath: string;
+let originalXdgConfigHome: string | undefined;
 
 const mockFeature: Feature = {
   name: 'auth-system',
@@ -49,6 +50,8 @@ const mockArchivedFeature: Feature = {
 
 beforeAll(async () => {
   tempDir = await mkdtemp(join(tmpdir(), 'api-test-'));
+  originalXdgConfigHome = process.env.XDG_CONFIG_HOME;
+  process.env.XDG_CONFIG_HOME = join(tempDir, 'xdg-config');
   apiServerPath = join(tempDir, 'api-server');
   webClientPath = join(tempDir, 'web-client');
 
@@ -91,6 +94,11 @@ beforeAll(async () => {
 
 afterAll(async () => {
   await app.close();
+  if (originalXdgConfigHome === undefined) {
+    delete process.env.XDG_CONFIG_HOME;
+  } else {
+    process.env.XDG_CONFIG_HOME = originalXdgConfigHome;
+  }
   await rm(tempDir, { recursive: true, force: true });
 });
 
@@ -209,5 +217,63 @@ describe('GET /api/projects/:project/features/:feature', () => {
     expect(body.name).toBe('old-auth');
     expect(body.status).toBe('archived');
     expect(body.project).toBe('api-server');
+  });
+});
+
+describe('GET /api/config', () => {
+  it('creates and returns onboarding-ready defaults on first read', async () => {
+    const res = await app.inject({ method: 'GET', url: '/api/config' });
+
+    expect(res.statusCode).toBe(200);
+    expect(res.json()).toEqual({
+      scanDirs: [],
+      port: 3141,
+      notifications: false,
+      scanDirsConfigured: false,
+    });
+  });
+
+  it('returns a non-destructive error for malformed config', async () => {
+    const configPath = join(process.env.XDG_CONFIG_HOME!, 'dev-dashboard', 'config.json');
+    await mkdir(join(process.env.XDG_CONFIG_HOME!, 'dev-dashboard'), { recursive: true });
+    await writeFile(configPath, '{ invalid json', 'utf-8');
+
+    const res = await app.inject({ method: 'GET', url: '/api/config' });
+
+    expect(res.statusCode).toBe(500);
+    expect(res.json()).toEqual({
+      error: `Config file contains invalid JSON at ${configPath}`,
+      code: 'invalid_json',
+    });
+    expect(await readFile(configPath, 'utf-8')).toBe('{ invalid json');
+  });
+});
+
+describe('POST /api/config', () => {
+  it('persists scan directories and marks onboarding complete', async () => {
+    const res = await app.inject({
+      method: 'POST',
+      url: '/api/config',
+      payload: {
+        scanDirs: ['~/code', '  ~/work  ', '~/code'],
+      },
+    });
+
+    expect(res.statusCode).toBe(200);
+    expect(res.json()).toEqual({
+      scanDirs: ['~/code', '~/work'],
+      port: 3141,
+      notifications: false,
+      scanDirsConfigured: true,
+    });
+
+    const raw = await readFile(
+      join(process.env.XDG_CONFIG_HOME!, 'dev-dashboard', 'config.json'),
+      'utf-8',
+    );
+    expect(JSON.parse(raw)).toMatchObject({
+      scanDirs: ['~/code', '~/work'],
+      scanDirsConfigured: true,
+    });
   });
 });

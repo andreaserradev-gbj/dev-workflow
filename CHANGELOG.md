@@ -4,6 +4,17 @@ All notable changes to this project should be documented in this file.
 
 <!-- LOCAL-RELEASES-START -->
 
+## v1.26.3 - 2026-03-28
+
+### Added
+
+- Added explicit first-run scan-directory onboarding to dev-dashboard, so new installs now ask which folders to scan instead of silently assuming `~/code`.
+
+### Changed
+
+- Changed fresh dev-dashboard setup to start in an onboarding state while leaving existing configured installs untouched.
+- Updated the dashboard docs and release metadata to match the new first-run scan-root flow.
+
 ## v1.26.2 - 2026-03-28
 
 ### Added

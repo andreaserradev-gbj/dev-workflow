@@ -49,13 +49,13 @@ The common workaround? Manually copy plans into files, paste fragments back into
                                                             build again...
 ```
 
-| Step | What you do | What happens |
-|------|-------------|--------------|
-| **1. Plan** | `/dev-plan` | Generates a structured PRD in `.dev/` with phases and gates |
-| **2. Build** | Implement | Work until context gets heavy |
-| **3. Checkpoint** | `/dev-checkpoint` | Saves progress, git state, decisions, next steps |
-| **4. Restart** | Close and reopen Claude | Fresh context window, clean slate |
-| **5. Resume** | `/dev-resume` | Loads ~2KB checkpoint, rebuilds context, picks up where you left off |
+| Step              | What you do             | What happens                                                         |
+| ----------------- | ----------------------- | -------------------------------------------------------------------- |
+| **1. Plan**       | `/dev-plan`             | Generates a structured PRD in `.dev/` with phases and gates          |
+| **2. Build**      | Implement               | Work until context gets heavy                                        |
+| **3. Checkpoint** | `/dev-checkpoint`       | Saves progress, git state, decisions, next steps                     |
+| **4. Restart**    | Close and reopen Claude | Fresh context window, clean slate                                    |
+| **5. Resume**     | `/dev-resume`           | Loads ~2KB checkpoint, rebuilds context, picks up where you left off |
 
 **Repeat steps 2–5** until the feature is complete. Each session starts fresh with high-quality context.
 
@@ -174,31 +174,37 @@ A local web server that scans `.dev/` folders across all your projects and shows
 ```
 
 Starts the server (or reuses an existing instance) and displays the URL. No setup required — the server is bundled with the plugin.
+On first run, `/dev-dashboard` also installs local `dev-dashboard` and `dev-dashboard-stop`
+commands so future terminal launches reuse the same bundled launcher.
 
 **Dashboard actions:**
 
-| Action | Where | What it does |
-|--------|-------|--------------|
-| **Archive** | Feature row / panel (complete features) | Moves `.dev/<name>` to `.dev-archive/` with confirmation |
-| **Restore** | Feature row / panel (archived features) | Moves `.dev-archive/<name>` back to `.dev/` with confirmation |
-| **Copy as Markdown** | Report view | Copies activity report as formatted markdown |
+| Action               | Where                                   | What it does                                                  |
+| -------------------- | --------------------------------------- | ------------------------------------------------------------- |
+| **Archive**          | Feature row / panel (complete features) | Moves `.dev/<name>` to `.dev-archive/` with confirmation      |
+| **Restore**          | Feature row / panel (archived features) | Moves `.dev-archive/<name>` back to `.dev/` with confirmation |
+| **Copy as Markdown** | Report view                             | Copies activity report as formatted markdown                  |
 
 <details>
 <summary>Configuration</summary>
 
-Config lives at `~/.config/dev-dashboard/config.json` (created automatically on first run):
+Config lives at `~/.config/dev-dashboard/config.json` (created automatically on first run). Fresh installs start with no scan roots, and the dashboard prompts you to save them explicitly on first launch:
 
 ```json
 {
-  "scanDirs": ["~/code"],
-  "port": 3141
+  "scanDirs": ["~/code", "~/work"],
+  "port": 3141,
+  "notifications": false,
+  "scanDirsConfigured": true
 }
 ```
 
-| Field | Type | Default | Description |
-|-------|------|---------|-------------|
-| `scanDirs` | `string[]` | `["~/code"]` | Directories to scan for projects containing `.dev/` folders |
-| `port` | `number` | `3141` | HTTP server port |
+| Field                | Type       | Default | Description                                                          |
+| -------------------- | ---------- | ------- | -------------------------------------------------------------------- |
+| `scanDirs`           | `string[]` | `[]`    | Directories to scan for projects containing `.dev/` folders          |
+| `port`               | `number`   | `3141`  | HTTP server port                                                     |
+| `notifications`      | `boolean`  | `false` | Reserved for future notification support                             |
+| `scanDirsConfigured` | `boolean`  | `false` | Marks whether first-run scan-directory onboarding has been completed |
 
 See [tools/dev-dashboard/README.md](tools/dev-dashboard/README.md) for CLI flags and more details.
 
@@ -207,32 +213,20 @@ See [tools/dev-dashboard/README.md](tools/dev-dashboard/README.md) for CLI flags
 <details>
 <summary>Running from the terminal</summary>
 
-You can start and stop the dashboard outside of Claude Code by adding these to your shell config:
+Run `/dev-dashboard` once to install the local commands, then use:
 
 ```bash
-dev-dashboard() {
-  local result
-  result=$(bash ~/.claude/plugins/marketplaces/dev-workflow/plugins/dev-workflow/skills/dev-dashboard/scripts/start.sh)
-  echo "$result"
-  local port="${result#*:}"
-  if [[ "$result" == running:* || "$result" == started:* ]]; then
-    open "http://localhost:${port}"
-  fi
-}
-
-dev-dashboard-stop() {
-  local pids
-  pids=$(pgrep -f 'dev-dashboard/dashboard/server/index.cjs')
-  if [[ -z "$pids" ]]; then
-    echo "No dev-dashboard server running"
-    return 0
-  fi
-  echo "$pids" | xargs kill
-  echo "Stopped dev-dashboard (pid: ${pids//$'\n'/, })"
-}
+dev-dashboard
+dev-dashboard-stop
 ```
 
-Then run `dev-dashboard` to start and open the browser, and `dev-dashboard-stop` to shut it down.
+The installer writes Unix command shims to `~/.local/bin` by default, or to
+`$DEV_DASHBOARD_BIN_DIR` if you override it. If the install reports that the bin
+directory is not on `PATH`, add that directory to your shell config before using
+the commands directly in a terminal.
+
+This installer-backed path is the primary terminal UX for this release. Manual
+shell snippets are no longer the recommended default.
 
 </details>
 
