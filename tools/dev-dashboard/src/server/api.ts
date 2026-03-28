@@ -1,6 +1,6 @@
 import { access, mkdir, readdir, rename } from 'fs/promises';
 import { resolve } from 'path';
-import type { FastifyInstance } from 'fastify';
+import type { FastifyInstance, FastifyReply } from 'fastify';
 import type {
   DashboardConfig,
   FeatureDetail,
@@ -9,7 +9,7 @@ import type {
   ReportResponse,
 } from '../shared/types.js';
 import type { DashboardState } from './state.js';
-import { readStoredConfig, updateConfig } from './config.js';
+import { ConfigReadError, readStoredConfig, updateConfig } from './config.js';
 import { parseCheckpoint, parseMasterPlan, parseSubPrd } from './parser.js';
 
 export function registerApiRoutes(app: FastifyInstance, state: DashboardState): void {
@@ -145,8 +145,19 @@ export function registerApiRoutes(app: FastifyInstance, state: DashboardState): 
     return reply.send(response);
   });
 
-  app.get('/api/config', async () => {
-    return readStoredConfig();
+  app.get('/api/config', async (_request, reply: FastifyReply) => {
+    try {
+      return await readStoredConfig();
+    } catch (error) {
+      if (error instanceof ConfigReadError) {
+        return reply.status(500).send({
+          error: error.message,
+          code: error.code,
+        });
+      }
+
+      throw error;
+    }
   });
 
   app.post<{

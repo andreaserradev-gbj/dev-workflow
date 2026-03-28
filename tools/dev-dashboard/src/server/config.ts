@@ -27,6 +27,16 @@ export interface CliOverrides {
   port?: number;
 }
 
+export class ConfigReadError extends Error {
+  constructor(
+    message: string,
+    public readonly code: 'invalid_json' | 'unreadable',
+  ) {
+    super(message);
+    this.name = 'ConfigReadError';
+  }
+}
+
 export async function loadConfig(
   overrides: CliOverrides = {},
   configPath: string = getConfigPath(),
@@ -52,10 +62,26 @@ export async function readStoredConfig(
 
   try {
     const raw = await readFile(configPath, 'utf-8');
-    fileConfig = JSON.parse(raw);
-  } catch {
-    await createDefaultConfig(configPath);
-    console.log(`Created config at ${configPath}`);
+    try {
+      fileConfig = JSON.parse(raw);
+    } catch {
+      throw new ConfigReadError(
+        `Config file contains invalid JSON at ${configPath}`,
+        'invalid_json',
+      );
+    }
+  } catch (error) {
+    if (isMissingFileError(error)) {
+      await createDefaultConfig(configPath);
+      console.log(`Created config at ${configPath}`);
+      return normalizeStoredConfig(fileConfig);
+    }
+
+    if (error instanceof ConfigReadError) {
+      throw error;
+    }
+
+    throw new ConfigReadError(`Could not read config at ${configPath}`, 'unreadable');
   }
 
   return normalizeStoredConfig(fileConfig);
@@ -219,4 +245,8 @@ function normalizeScanDirs(scanDirs: string[] | undefined): string[] {
   }
 
   return normalized;
+}
+
+function isMissingFileError(error: unknown): error is NodeJS.ErrnoException {
+  return !!error && typeof error === 'object' && 'code' in error && error.code === 'ENOENT';
 }

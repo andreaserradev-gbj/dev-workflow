@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
-import { mkdtemp, mkdir, readFile, rm } from 'fs/promises';
+import { mkdtemp, mkdir, readFile, rm, writeFile } from 'fs/promises';
 import { join } from 'path';
 import { tmpdir } from 'os';
 import Fastify from 'fastify';
@@ -231,6 +231,21 @@ describe('GET /api/config', () => {
       notifications: false,
       scanDirsConfigured: false,
     });
+  });
+
+  it('returns a non-destructive error for malformed config', async () => {
+    const configPath = join(process.env.XDG_CONFIG_HOME!, 'dev-dashboard', 'config.json');
+    await mkdir(join(process.env.XDG_CONFIG_HOME!, 'dev-dashboard'), { recursive: true });
+    await writeFile(configPath, '{ invalid json', 'utf-8');
+
+    const res = await app.inject({ method: 'GET', url: '/api/config' });
+
+    expect(res.statusCode).toBe(500);
+    expect(res.json()).toEqual({
+      error: `Config file contains invalid JSON at ${configPath}`,
+      code: 'invalid_json',
+    });
+    expect(await readFile(configPath, 'utf-8')).toBe('{ invalid json');
   });
 });
 

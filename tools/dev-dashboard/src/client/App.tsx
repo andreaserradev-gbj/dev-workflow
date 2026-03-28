@@ -164,7 +164,14 @@ export function App() {
 
     fetch('/api/config', { signal: controller.signal })
       .then((res) => {
-        if (!res.ok) throw new Error(`Failed to load config (${res.status})`);
+        if (!res.ok) {
+          return res
+            .json()
+            .catch(() => ({ error: `Failed to load config (${res.status})` }))
+            .then((body) => {
+              throw new Error(body.error ?? `Failed to load config (${res.status})`);
+            });
+        }
         return res.json();
       })
       .then((config: DashboardConfig) => {
@@ -529,6 +536,7 @@ export function App() {
                       <p class="mt-1 text-sm">
                         Check your scan directories in ~/.config/dev-dashboard/config.json
                       </p>
+                      {configError && <p class="mt-3 text-sm text-rose-400">{configError}</p>}
                       {dashboardConfig && dashboardConfig.scanDirs.length > 0 && (
                         <p class="mt-3 text-xs font-mono text-slate-600">
                           Watching {dashboardConfig.scanDirs.join(', ')}

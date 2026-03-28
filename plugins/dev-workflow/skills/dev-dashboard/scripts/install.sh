@@ -48,6 +48,38 @@ EOF
   mv "$tmp_path" "$shim_path"
 }
 
+is_managed_shim() {
+  local shim_path="$1"
+  local target_path="$2"
+
+  [ -f "$shim_path" ] || return 1
+
+  grep -Fq "exec bash \"$target_path\"" "$shim_path" && return 0
+  grep -Fq '/skills/dev-dashboard/scripts/' "$shim_path" && return 0
+
+  return 1
+}
+
+refuse_unrelated_target() {
+  local shim_path="$1"
+  local target_path="$2"
+  local command_name="$3"
+
+  if [ ! -e "$shim_path" ]; then
+    return 0
+  fi
+
+  if is_managed_shim "$shim_path" "$target_path"; then
+    return 0
+  fi
+
+  echo "error:Refusing to overwrite existing unrelated command at $command_name ($shim_path)"
+  exit 1
+}
+
+refuse_unrelated_target "$START_SHIM" "$START_SCRIPT" 'dev-dashboard'
+refuse_unrelated_target "$STOP_SHIM" "$STOP_SCRIPT" 'dev-dashboard-stop'
+
 write_shim "$START_SCRIPT" "$START_SHIM" ' --open'
 write_shim "$STOP_SCRIPT" "$STOP_SHIM" ''
 
