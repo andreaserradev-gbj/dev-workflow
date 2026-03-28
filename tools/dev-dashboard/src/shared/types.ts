@@ -105,6 +105,7 @@ export interface DashboardConfig {
   scanDirs: string[];
   port: number;
   notifications: boolean;
+  scanDirsConfigured: boolean;
 }
 
 // WebSocket event types pushed to clients

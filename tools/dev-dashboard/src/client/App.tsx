@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from 'preact/hooks';
-import type { FeatureStatus } from '@shared/types.js';
+import type { DashboardConfig, FeatureStatus } from '@shared/types.js';
 import { ProjectCard } from './components/ProjectCard.js';
 import { ProjectRail } from './components/ProjectRail.js';
 import { ReportView } from './components/ReportView.js';
@@ -112,6 +112,20 @@ function writeProjectViewMode(mode: ProjectViewMode): void {
   }
 }
 
+function splitScanDirs(value: string): string[] {
+  const seen = new Set<string>();
+  const dirs: string[] = [];
+
+  for (const line of value.split('\n')) {
+    const trimmed = line.trim();
+    if (!trimmed || seen.has(trimmed)) continue;
+    seen.add(trimmed);
+    dirs.push(trimmed);
+  }
+
+  return dirs;
+}
+
 export function App() {
   const [statusFilter, setStatusFilter] = useState<FeatureStatus | 'all'>('all');
   const [searchInput, setSearchInput] = useState('');
@@ -121,6 +135,12 @@ export function App() {
   const [activeView, setActiveView] = useState<ActiveView>(readHashView);
   const [projectViewMode, setProjectViewMode] = useState<ProjectViewMode>(readProjectViewMode);
   const [railCollapsed, setRailCollapsed] = useState(readRailCollapsed);
+  const [dashboardConfig, setDashboardConfig] = useState<DashboardConfig | null>(null);
+  const [configLoading, setConfigLoading] = useState(true);
+  const [configError, setConfigError] = useState<string | null>(null);
+  const [scanDirsDraft, setScanDirsDraft] = useState('');
+  const [savingScanDirs, setSavingScanDirs] = useState(false);
+  const [saveScanDirsError, setSaveScanDirsError] = useState<string | null>(null);
   const [archivedProjectsCollapsed, setArchivedProjectsCollapsed] = useState(() => {
     try {
       return localStorage.getItem(ARCHIVED_PROJECTS_KEY) !== '0';
@@ -138,6 +158,29 @@ export function App() {
   useEffect(() => {
     writeProjectViewMode(projectViewMode);
   }, [projectViewMode]);
+
+  useEffect(() => {
+    const controller = new AbortController();
+
+    fetch('/api/config', { signal: controller.signal })
+      .then((res) => {
+        if (!res.ok) throw new Error(`Failed to load config (${res.status})`);
+        return res.json();
+      })
+      .then((config: DashboardConfig) => {
+        setDashboardConfig(config);
+        setScanDirsDraft(config.scanDirs.join('\n'));
+        setConfigLoading(false);
+        setConfigError(null);
+      })
+      .catch((err: Error) => {
+        if (err.name === 'AbortError') return;
+        setConfigError(err.message);
+        setConfigLoading(false);
+      });
+
+    return () => controller.abort();
+  }, []);
 
   const { projects, connected, loading } = useWebSocket();
 
@@ -305,6 +348,47 @@ export function App() {
     });
   }, []);
 
+  const handleSaveScanDirs = useCallback(
+    async (e: Event) => {
+      e.preventDefault();
+      const scanDirs = splitScanDirs(scanDirsDraft);
+      if (scanDirs.length === 0) {
+        setSaveScanDirsError('Add at least one directory to scan.');
+        return;
+      }
+
+      setSavingScanDirs(true);
+      setSaveScanDirsError(null);
+      try {
+        const res = await fetch('/api/config', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ scanDirs }),
+        });
+
+        if (!res.ok) {
+          const body = await res.json().catch(() => ({ error: 'Failed to save scan directories' }));
+          throw new Error(body.error ?? 'Failed to save scan directories');
+        }
+
+        const config: DashboardConfig = await res.json();
+        setDashboardConfig(config);
+        setScanDirsDraft(config.scanDirs.join('\n'));
+      } catch (err: unknown) {
+        setSaveScanDirsError(
+          err instanceof Error ? err.message : 'Failed to save scan directories',
+        );
+      } finally {
+        setSavingScanDirs(false);
+      }
+    },
+    [scanDirsDraft],
+  );
+
+  const needsScanDirOnboarding =
+    !!dashboardConfig &&
+    (!dashboardConfig.scanDirsConfigured || dashboardConfig.scanDirs.length === 0);
+
   return (
     <div class="flex h-screen overflow-hidden">
       <ConnectionOverlay connected={connected} loading={loading} />
@@ -383,12 +467,76 @@ export function App() {
           ) : (
             <>
               {!loading && projects.length === 0 && (
-                <div class="rounded-lg bg-slate-800/50 border border-slate-700/50 p-8 text-center text-slate-500">
-                  <p class="text-lg font-medium">No projects found</p>
-                  <p class="mt-1 text-sm">
-                    Check your scan directories in ~/.config/dev-dashboard/config.json
-                  </p>
-                </div>
+                <>
+                  {needsScanDirOnboarding ? (
+                    <div class="rounded-2xl border border-sky-500/20 bg-slate-900/80 p-8 shadow-[0_20px_80px_rgba(14,165,233,0.08)]">
+                      <div class="max-w-3xl">
+                        <p class="text-xs font-mono uppercase tracking-[0.28em] text-sky-400/80">
+                          First-run setup
+                        </p>
+                        <h2 class="mt-3 text-2xl font-semibold text-white">
+                          Choose the folders dev-dashboard should scan
+                        </h2>
+                        <p class="mt-3 text-sm leading-6 text-slate-400">
+                          Add one or more parent directories that contain your projects. The
+                          dashboard watches those roots for `.dev/` and `.dev-archive/` folders and
+                          reuses the same saved config for both `/dev-dashboard` and
+                          `dev-dashboard`.
+                        </p>
+                        <form class="mt-6 space-y-4" onSubmit={handleSaveScanDirs}>
+                          <label class="block">
+                            <span class="mb-2 block text-xs font-mono uppercase tracking-[0.22em] text-slate-500">
+                              One path per line
+                            </span>
+                            <textarea
+                              value={scanDirsDraft}
+                              onInput={(e) =>
+                                setScanDirsDraft((e.target as HTMLTextAreaElement).value)
+                              }
+                              rows={4}
+                              placeholder={'~/code\n~/work'}
+                              class="w-full rounded-xl border border-slate-700/60 bg-slate-950/80 px-4 py-3 text-sm text-slate-200 placeholder:text-slate-600 focus:border-sky-500/40 focus:outline-none focus:ring-1 focus:ring-sky-500/30"
+                            />
+                          </label>
+                          <div class="flex flex-wrap items-center gap-3 text-xs text-slate-500">
+                            <button
+                              type="submit"
+                              disabled={savingScanDirs}
+                              class="inline-flex items-center rounded-lg bg-sky-500/15 px-4 py-2 font-mono text-sky-300 ring-1 ring-inset ring-sky-500/30 transition-colors hover:bg-sky-500/20 disabled:cursor-wait disabled:opacity-60"
+                            >
+                              {savingScanDirs ? 'Saving...' : 'Save scan directories'}
+                            </button>
+                            <span>
+                              Saved to{' '}
+                              <code class="font-mono text-slate-400">
+                                ~/.config/dev-dashboard/config.json
+                              </code>
+                            </span>
+                          </div>
+                          {saveScanDirsError && (
+                            <p class="text-sm text-rose-400">{saveScanDirsError}</p>
+                          )}
+                          {configError && <p class="text-sm text-rose-400">{configError}</p>}
+                          {configLoading && (
+                            <p class="text-sm text-slate-500">Loading dashboard config...</p>
+                          )}
+                        </form>
+                      </div>
+                    </div>
+                  ) : (
+                    <div class="rounded-lg bg-slate-800/50 border border-slate-700/50 p-8 text-center text-slate-500">
+                      <p class="text-lg font-medium">No projects found</p>
+                      <p class="mt-1 text-sm">
+                        Check your scan directories in ~/.config/dev-dashboard/config.json
+                      </p>
+                      {dashboardConfig && dashboardConfig.scanDirs.length > 0 && (
+                        <p class="mt-3 text-xs font-mono text-slate-600">
+                          Watching {dashboardConfig.scanDirs.join(', ')}
+                        </p>
+                      )}
+                    </div>
+                  )}
+                </>
               )}
 
               {!loading && (
