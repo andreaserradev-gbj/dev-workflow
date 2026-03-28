@@ -12,7 +12,20 @@ Live, cross-project dashboard that scans `.dev/` folders across your codebase an
 /dev-dashboard
 ```
 
-Starts the server (or reuses an existing instance), finds an available port, and displays the URL. The server is bundled with the plugin — no build step or `npm install` needed. Only requires Node.js 24+.
+Starts the server (or reuses an existing instance), finds an available port, and displays the URL. On first run, it also installs `dev-dashboard` and `dev-dashboard-stop` shell commands so terminal usage reuses the same bundled launcher. The server is bundled with the plugin — no build step or `npm install` needed. Only requires Node.js 24+.
+
+### Via Installed Terminal Commands
+
+After the first `/dev-dashboard` run, use:
+
+```bash
+dev-dashboard
+dev-dashboard-stop
+```
+
+The installer writes Unix command shims to `~/.local/bin` by default, or to
+`$DEV_DASHBOARD_BIN_DIR` if you override it. This installer-backed terminal path
+is Unix-only in this iteration.
 
 ### Manual (for development)
 
@@ -41,6 +54,10 @@ Config lives at `~/.config/dev-dashboard/config.json` (created automatically on 
 | `port` | `number` | `3141` | HTTP server port |
 | `notifications` | `boolean` | `false` | Enable browser notifications on feature updates |
 
+The bundled launcher prefers the configured `port` before scanning nearby fallback
+ports, so `/dev-dashboard` and `dev-dashboard` honor the same persistent port
+setting by default.
+
 ## CLI Flags
 
 Flags override config file values:
@@ -53,6 +70,10 @@ npm start -- --scan ~/code ~/work --port 8080
 |------|-------------|
 | `--scan <dir...>` | One or more directories to scan (overrides `scanDirs`) |
 | `--port <number>` | Server port (overrides `port`) |
+
+These flags apply to the development entrypoints here in `tools/dev-dashboard/`.
+The installed `dev-dashboard` command uses the persisted config file instead of
+accepting ad hoc CLI overrides.
 
 ## How It Works
 

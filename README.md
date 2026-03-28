@@ -174,6 +174,8 @@ A local web server that scans `.dev/` folders across all your projects and shows
 ```
 
 Starts the server (or reuses an existing instance) and displays the URL. No setup required — the server is bundled with the plugin.
+On first run, `/dev-dashboard` also installs local `dev-dashboard` and `dev-dashboard-stop`
+commands so future terminal launches reuse the same bundled launcher.
 
 **Dashboard actions:**
 
@@ -207,32 +209,20 @@ See [tools/dev-dashboard/README.md](tools/dev-dashboard/README.md) for CLI flags
 <details>
 <summary>Running from the terminal</summary>
 
-You can start and stop the dashboard outside of Claude Code by adding these to your shell config:
+Run `/dev-dashboard` once to install the local commands, then use:
 
 ```bash
-dev-dashboard() {
-  local result
-  result=$(bash ~/.claude/plugins/marketplaces/dev-workflow/plugins/dev-workflow/skills/dev-dashboard/scripts/start.sh)
-  echo "$result"
-  local port="${result#*:}"
-  if [[ "$result" == running:* || "$result" == started:* ]]; then
-    open "http://localhost:${port}"
-  fi
-}
-
-dev-dashboard-stop() {
-  local pids
-  pids=$(pgrep -f 'dev-dashboard/dashboard/server/index.cjs')
-  if [[ -z "$pids" ]]; then
-    echo "No dev-dashboard server running"
-    return 0
-  fi
-  echo "$pids" | xargs kill
-  echo "Stopped dev-dashboard (pid: ${pids//$'\n'/, })"
-}
+dev-dashboard
+dev-dashboard-stop
 ```
 
-Then run `dev-dashboard` to start and open the browser, and `dev-dashboard-stop` to shut it down.
+The installer writes Unix command shims to `~/.local/bin` by default, or to
+`$DEV_DASHBOARD_BIN_DIR` if you override it. If the install reports that the bin
+directory is not on `PATH`, add that directory to your shell config before using
+the commands directly in a terminal.
+
+This installer-backed path is the primary terminal UX for this release. Manual
+shell snippets are no longer the recommended default.
 
 </details>
 
