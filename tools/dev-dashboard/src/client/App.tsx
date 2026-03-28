@@ -5,6 +5,7 @@ import { ProjectRail } from './components/ProjectRail.js';
 import { ReportView } from './components/ReportView.js';
 import { SessionBar } from './components/SessionBar.js';
 import { ConnectionOverlay } from './components/ConnectionOverlay.js';
+import { ConfigurationPanel } from './components/ConfigurationPanel.js';
 import { useWebSocket } from './hooks/useWebSocket.js';
 import { BUILD_INFO } from './buildInfo.js';
 
@@ -139,6 +140,7 @@ export function App() {
   const [configLoading, setConfigLoading] = useState(true);
   const [configError, setConfigError] = useState<string | null>(null);
   const [scanDirsDraft, setScanDirsDraft] = useState('');
+  const [scanDirsEditorOpen, setScanDirsEditorOpen] = useState(false);
   const [savingScanDirs, setSavingScanDirs] = useState(false);
   const [saveScanDirsError, setSaveScanDirsError] = useState<string | null>(null);
   const [archivedProjectsCollapsed, setArchivedProjectsCollapsed] = useState(() => {
@@ -381,6 +383,7 @@ export function App() {
         const config: DashboardConfig = await res.json();
         setDashboardConfig(config);
         setScanDirsDraft(config.scanDirs.join('\n'));
+        setScanDirsEditorOpen(false);
       } catch (err: unknown) {
         setSaveScanDirsError(
           err instanceof Error ? err.message : 'Failed to save scan directories',
@@ -395,6 +398,8 @@ export function App() {
   const needsScanDirOnboarding =
     !!dashboardConfig &&
     (!dashboardConfig.scanDirsConfigured || dashboardConfig.scanDirs.length === 0);
+
+  const showScanDirsEditor = !needsScanDirOnboarding && scanDirsEditorOpen;
 
   return (
     <div class="flex h-screen overflow-hidden">
@@ -417,57 +422,109 @@ export function App() {
       <div class="flex-1 overflow-y-auto">
         <div class="max-w-7xl mx-auto px-6 lg:px-10 py-10">
           <header class="mb-10">
-            <div class="flex items-center gap-3">
-              <h1
-                class={`text-3xl font-bold tracking-tight font-sans ${
-                  selectedProject
-                    ? 'text-white/70 hover:text-white cursor-pointer transition-colors'
-                    : 'text-white'
-                }`}
-                onClick={selectedProject ? () => handleSelectProject(null) : undefined}
-                title={selectedProject ? 'Back to all projects' : undefined}
-              >
-                Dev Dashboard
-              </h1>
-              <span
-                class={`mt-1 w-2 h-2 rounded-full flex-shrink-0 ${
-                  connected ? 'bg-emerald-500' : 'bg-amber-500 animate-pulse'
-                }`}
-                title={connected ? 'Connected' : 'Reconnecting...'}
-              />
-            </div>
-            <p class="mt-1 text-sm text-slate-500 font-mono">
-              {loading ? (
-                'Connecting...'
-              ) : activeView === 'report' ? (
-                <>
-                  <button
-                    type="button"
-                    onClick={() => handleSelectProject(null)}
-                    class="text-slate-500 hover:text-sky-400 transition-colors cursor-pointer"
+            <div class="flex flex-wrap items-start justify-between gap-4">
+              <div>
+                <div class="flex items-center gap-3">
+                  <h1
+                    class={`text-3xl font-bold tracking-tight font-sans ${
+                      selectedProject
+                        ? 'text-white/70 hover:text-white cursor-pointer transition-colors'
+                        : 'text-white'
+                    }`}
+                    onClick={selectedProject ? () => handleSelectProject(null) : undefined}
+                    title={selectedProject ? 'Back to all projects' : undefined}
                   >
-                    All Projects
-                  </button>
-                  <span class="mx-1.5 text-slate-700">›</span>
-                  <span class="text-slate-400">Report</span>
-                </>
-              ) : selectedProject ? (
-                <>
-                  <button
-                    type="button"
-                    onClick={() => handleSelectProject(null)}
-                    class="text-slate-500 hover:text-sky-400 transition-colors cursor-pointer"
+                    Dev Dashboard
+                  </h1>
+                  <span
+                    class={`mt-1 w-2 h-2 rounded-full flex-shrink-0 ${
+                      connected ? 'bg-emerald-500' : 'bg-amber-500 animate-pulse'
+                    }`}
+                    title={connected ? 'Connected' : 'Reconnecting...'}
+                  />
+                </div>
+                <p class="mt-1 text-sm text-slate-500 font-mono">
+                  {loading ? (
+                    'Connecting...'
+                  ) : activeView === 'report' ? (
+                    <>
+                      <button
+                        type="button"
+                        onClick={() => handleSelectProject(null)}
+                        class="text-slate-500 hover:text-sky-400 transition-colors cursor-pointer"
+                      >
+                        All Projects
+                      </button>
+                      <span class="mx-1.5 text-slate-700">›</span>
+                      <span class="text-slate-400">Report</span>
+                    </>
+                  ) : selectedProject ? (
+                    <>
+                      <button
+                        type="button"
+                        onClick={() => handleSelectProject(null)}
+                        class="text-slate-500 hover:text-sky-400 transition-colors cursor-pointer"
+                      >
+                        All Projects
+                      </button>
+                      <span class="mx-1.5 text-slate-700">›</span>
+                      <span class="text-slate-400">{selectedProject}</span>
+                    </>
+                  ) : (
+                    `${filteredProjects.length} projects · ${filteredProjects.reduce((s, p) => s + p.features.filter((f) => f.status !== 'archived').length, 0)} features`
+                  )}
+                </p>
+              </div>
+              {!needsScanDirOnboarding && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setScanDirsEditorOpen((open) => !open);
+                    setSaveScanDirsError(null);
+                  }}
+                  disabled={configLoading}
+                  aria-label={
+                    showScanDirsEditor ? 'Close scan directory settings' : 'Open configuration'
+                  }
+                  title={showScanDirsEditor ? 'Close scan directory settings' : 'Configuration'}
+                  class={`inline-flex items-center gap-2 rounded-xl px-3 py-2 text-xs font-mono ring-1 ring-inset transition-colors ${
+                    showScanDirsEditor
+                      ? 'bg-sky-500/15 text-sky-300 ring-sky-500/30'
+                      : 'bg-slate-900/70 text-slate-400 ring-slate-700/50 hover:bg-slate-900 hover:text-slate-200'
+                  } disabled:cursor-wait disabled:opacity-60`}
+                >
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    viewBox="0 0 16 16"
+                    fill="currentColor"
+                    class="h-4 w-4"
+                    aria-hidden="true"
                   >
-                    All Projects
-                  </button>
-                  <span class="mx-1.5 text-slate-700">›</span>
-                  <span class="text-slate-400">{selectedProject}</span>
-                </>
-              ) : (
-                `${filteredProjects.length} projects · ${filteredProjects.reduce((s, p) => s + p.features.filter((f) => f.status !== 'archived').length, 0)} features`
+                    <path d="M7.25 1.5a.75.75 0 0 1 1.5 0v.53a5.97 5.97 0 0 1 1.62.67l.38-.38a.75.75 0 1 1 1.06 1.06l-.38.38c.28.5.5 1.04.66 1.62h.54a.75.75 0 0 1 0 1.5h-.54a5.97 5.97 0 0 1-.66 1.62l.38.38a.75.75 0 0 1-1.06 1.06l-.38-.38a5.97 5.97 0 0 1-1.62.66v.54a.75.75 0 0 1-1.5 0v-.54a5.97 5.97 0 0 1-1.62-.66l-.38.38a.75.75 0 0 1-1.06-1.06l.38-.38a5.97 5.97 0 0 1-.67-1.62H2.87a.75.75 0 0 1 0-1.5h.53a5.97 5.97 0 0 1 .67-1.62l-.38-.38a.75.75 0 1 1 1.06-1.06l.38.38a5.97 5.97 0 0 1 1.62-.67V1.5ZM8 5.25a1.75 1.75 0 1 0 0 3.5 1.75 1.75 0 0 0 0-3.5Z" />
+                  </svg>
+                  <span class="hidden sm:inline">Configuration</span>
+                </button>
               )}
-            </p>
+            </div>
           </header>
+
+          {showScanDirsEditor && (
+            <ConfigurationPanel
+              dashboardConfig={dashboardConfig}
+              scanDirsDraft={scanDirsDraft}
+              onScanDirsDraftChange={setScanDirsDraft}
+              onSubmit={handleSaveScanDirs}
+              onCancel={() => {
+                setScanDirsDraft(dashboardConfig?.scanDirs.join('\n') ?? '');
+                setSaveScanDirsError(null);
+                setScanDirsEditorOpen(false);
+              }}
+              saving={savingScanDirs}
+              saveError={saveScanDirsError}
+              configError={configError}
+              configLoading={configLoading}
+            />
+          )}
 
           {activeView === 'report' ? (
             <ReportView projects={projects} onGoToFeature={handleSelectFeature} />
