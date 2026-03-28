@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useState } from 'preact/hooks';
 import type { FeatureStatus, Project, ReportFeature } from '@shared/types.js';
 import { useReportData } from '../hooks/useReportData.js';
 import { useClipboard } from '../hooks/useClipboard.js';
+import { computeReportStats } from '../utils/reportStats.js';
 
 interface Props {
   projects: Project[];
@@ -197,23 +198,7 @@ export function ReportView({ projects }: Props) {
   // Summary stats
   const stats = useMemo(() => {
     if (!data) return { total: 0, completed: 0, created: 0, avgProgress: 0 };
-    const total = data.features.length;
-    const completed = data.features.filter((f) => f.status === 'complete').length;
-    const fromDate = new Date(from);
-    const toDate = new Date(to);
-    toDate.setHours(23, 59, 59, 999);
-    const created = data.features.filter((f) => {
-      if (!f.created) return false;
-      const d = new Date(f.created);
-      return !isNaN(d.getTime()) && d >= fromDate && d <= toDate;
-    }).length;
-    let avgProgress = 0;
-    const withProgress = data.features.filter((f) => f.progress && f.progress.total > 0);
-    if (withProgress.length > 0) {
-      const sum = withProgress.reduce((s, f) => s + f.progress!.done / f.progress!.total, 0);
-      avgProgress = Math.round((sum / withProgress.length) * 100);
-    }
-    return { total, completed, created, avgProgress };
+    return computeReportStats(data.features, from, to);
   }, [data, from, to]);
 
   // Copy as Markdown

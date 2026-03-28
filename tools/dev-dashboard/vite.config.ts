@@ -2,9 +2,19 @@ import { defineConfig } from 'vite';
 import preact from '@preact/preset-vite';
 import tailwindcss from '@tailwindcss/vite';
 import { resolve } from 'path';
+import { readFileSync } from 'fs';
+
+const pkg = JSON.parse(readFileSync(resolve(__dirname, 'package.json'), 'utf-8')) as {
+  version?: string;
+};
+const buildDate = new Date().toISOString().slice(0, 10);
 
 export default defineConfig({
   plugins: [preact(), tailwindcss()],
+  define: {
+    __APP_VERSION__: JSON.stringify(pkg.version ?? '0.0.0'),
+    __BUILD_DATE__: JSON.stringify(buildDate),
+  },
   root: 'src/client',
   resolve: {
     alias: {

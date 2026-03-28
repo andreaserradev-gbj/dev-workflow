@@ -6,6 +6,7 @@ import { ReportView } from './components/ReportView.js';
 import { SessionBar } from './components/SessionBar.js';
 import { ConnectionOverlay } from './components/ConnectionOverlay.js';
 import { useWebSocket } from './hooks/useWebSocket.js';
+import { BUILD_INFO } from './buildInfo.js';
 
 const FILTER_PILLS: { key: FeatureStatus | 'all'; label: string }[] = [
   { key: 'all', label: 'All' },
@@ -427,6 +428,15 @@ export function App() {
                       <p class="text-sm font-mono">No matching features</p>
                     </div>
                   )}
+              </div>
+
+              <div class="mt-8 pt-4 border-t border-slate-800/40 flex items-center justify-end gap-2 text-[11px] font-mono text-slate-600">
+                <span class="rounded-full bg-slate-800/50 px-2 py-1 text-slate-500">
+                  {BUILD_INFO.modeLabel}
+                </span>
+                <span>v{BUILD_INFO.version}</span>
+                <span class="text-slate-700">•</span>
+                <span>built {BUILD_INFO.buildDate}</span>
               </div>
             </>
           )}
