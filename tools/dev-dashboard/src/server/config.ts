@@ -4,14 +4,14 @@ import { homedir } from 'os';
 import chokidar from 'chokidar';
 import type { DashboardConfig } from '../shared/types.js';
 
-const CONFIG_DIR = join(homedir(), '.config', 'dev-dashboard');
-const CONFIG_PATH = join(CONFIG_DIR, 'config.json');
-
-const DEFAULTS: DashboardConfig = {
+export const CONFIG_DIR = join(homedir(), '.config', 'dev-dashboard');
+export const CONFIG_PATH = join(CONFIG_DIR, 'config.json');
+export const DEFAULT_CONFIG: DashboardConfig = {
   scanDirs: ['~/code'],
   port: 3141,
   notifications: false,
 };
+export const DEFAULT_PORT = DEFAULT_CONFIG.port;
 
 export interface CliOverrides {
   scan?: string[];
@@ -31,9 +31,9 @@ export async function loadConfig(overrides: CliOverrides = {}): Promise<Dashboar
   }
 
   const config: DashboardConfig = {
-    scanDirs: overrides.scan ?? fileConfig.scanDirs ?? DEFAULTS.scanDirs,
-    port: overrides.port ?? fileConfig.port ?? DEFAULTS.port,
-    notifications: fileConfig.notifications ?? DEFAULTS.notifications,
+    scanDirs: overrides.scan ?? fileConfig.scanDirs ?? DEFAULT_CONFIG.scanDirs,
+    port: overrides.port ?? fileConfig.port ?? DEFAULT_CONFIG.port,
+    notifications: fileConfig.notifications ?? DEFAULT_CONFIG.notifications,
   };
 
   // Expand ~ and validate
@@ -46,7 +46,7 @@ export async function loadConfig(overrides: CliOverrides = {}): Promise<Dashboar
 async function createDefaultConfig(): Promise<void> {
   try {
     await mkdir(CONFIG_DIR, { recursive: true });
-    await writeFile(CONFIG_PATH, JSON.stringify(DEFAULTS, null, 2) + '\n', 'utf-8');
+    await writeFile(CONFIG_PATH, JSON.stringify(DEFAULT_CONFIG, null, 2) + '\n', 'utf-8');
   } catch (err) {
     console.warn(`Warning: could not write config to ${CONFIG_PATH}:`, err);
   }
@@ -81,7 +81,7 @@ export async function updateConfig(patch: Partial<DashboardConfig>): Promise<Das
     // Start from defaults if file doesn't exist
   }
 
-  const updated = { ...DEFAULTS, ...existing, ...patch };
+  const updated = { ...DEFAULT_CONFIG, ...existing, ...patch };
   await mkdir(CONFIG_DIR, { recursive: true });
   await writeFile(CONFIG_PATH, JSON.stringify(updated, null, 2) + '\n', 'utf-8');
   return updated;
@@ -118,7 +118,7 @@ export function watchConfig(
       try {
         const raw = await readFile(configPath, 'utf-8');
         const fileConfig: Partial<DashboardConfig> = JSON.parse(raw);
-        const newDirs = (fileConfig.scanDirs ?? DEFAULTS.scanDirs).map(expandHome);
+        const newDirs = (fileConfig.scanDirs ?? DEFAULT_CONFIG.scanDirs).map(expandHome);
         const serialized = JSON.stringify(newDirs);
         if (serialized !== lastDirs) {
           lastDirs = serialized;
