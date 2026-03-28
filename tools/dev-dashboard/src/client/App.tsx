@@ -20,8 +20,10 @@ const FILTER_PILLS: { key: FeatureStatus | 'all'; label: string }[] = [
 const SELECTED_PROJECT_KEY = 'dev-dashboard-selected-project';
 const RAIL_COLLAPSED_KEY = 'dev-dashboard-rail-collapsed';
 const ARCHIVED_PROJECTS_KEY = 'dev-dashboard-archived-projects-collapsed';
+const PROJECT_VIEW_MODE_KEY = 'dev-dashboard-project-view-mode';
 
 export type ActiveView = 'projects' | 'report';
+export type ProjectViewMode = 'detailed' | 'compact';
 
 function readSelectedProject(): string | null {
   try {
@@ -61,8 +63,20 @@ function readHashProject(): string | null {
   try {
     const hash = window.location.hash;
     if (hash.startsWith('#project=')) {
-      return decodeURIComponent(hash.slice(9)) || null;
+      const match = hash.match(/#project=([^&]+)/);
+      if (match) return decodeURIComponent(match[1]) || null;
     }
+  } catch {
+    /* */
+  }
+  return null;
+}
+
+function readHashFeature(): string | null {
+  try {
+    if (!window.location.hash.startsWith('#project=')) return null;
+    const match = window.location.hash.match(/[#&]feature=([^&]+)/);
+    if (match) return decodeURIComponent(match[1]) || null;
   } catch {
     /* */
   }
@@ -82,12 +96,30 @@ function readInitialProject(): string | null {
   return readHashProject() ?? readSelectedProject();
 }
 
+function readProjectViewMode(): ProjectViewMode {
+  try {
+    return localStorage.getItem(PROJECT_VIEW_MODE_KEY) === 'compact' ? 'compact' : 'detailed';
+  } catch {
+    return 'detailed';
+  }
+}
+
+function writeProjectViewMode(mode: ProjectViewMode): void {
+  try {
+    localStorage.setItem(PROJECT_VIEW_MODE_KEY, mode);
+  } catch {
+    /* */
+  }
+}
+
 export function App() {
   const [statusFilter, setStatusFilter] = useState<FeatureStatus | 'all'>('all');
   const [searchInput, setSearchInput] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedProject, setSelectedProject] = useState<string | null>(readInitialProject);
+  const [selectedFeature, setSelectedFeature] = useState<string | null>(readHashFeature);
   const [activeView, setActiveView] = useState<ActiveView>(readHashView);
+  const [projectViewMode, setProjectViewMode] = useState<ProjectViewMode>(readProjectViewMode);
   const [railCollapsed, setRailCollapsed] = useState(readRailCollapsed);
   const [archivedProjectsCollapsed, setArchivedProjectsCollapsed] = useState(() => {
     try {
@@ -103,6 +135,10 @@ export function App() {
     return () => clearTimeout(timer);
   }, [searchInput]);
 
+  useEffect(() => {
+    writeProjectViewMode(projectViewMode);
+  }, [projectViewMode]);
+
   const { projects, connected, loading } = useWebSocket();
 
   // Clear selected project if it no longer exists (gate on !loading so we
@@ -110,17 +146,43 @@ export function App() {
   useEffect(() => {
     if (!loading && selectedProject && !projects.find((p) => p.name === selectedProject)) {
       setSelectedProject(null);
+      setSelectedFeature(null);
       writeSelectedProject(null);
       history.replaceState(null, '', window.location.pathname);
     }
   }, [projects, selectedProject, loading]);
 
+  useEffect(() => {
+    if (!selectedProject || !selectedFeature) return;
+    const project = projects.find((p) => p.name === selectedProject);
+    if (project && !project.features.find((f) => f.name === selectedFeature)) {
+      setSelectedFeature(null);
+      history.replaceState(null, '', `#project=${encodeURIComponent(selectedProject)}`);
+    }
+  }, [projects, selectedProject, selectedFeature]);
+
   const handleSelectProject = useCallback((name: string | null) => {
     setSelectedProject(name);
+    setSelectedFeature(null);
     writeSelectedProject(name);
     setActiveView('projects');
     const url = name ? `#project=${encodeURIComponent(name)}` : window.location.pathname;
     history.pushState(null, '', url);
+  }, []);
+
+  const handleSelectFeature = useCallback((project: string, feature: string) => {
+    setStatusFilter('all');
+    setSearchInput('');
+    setSearchQuery('');
+    setSelectedProject(project);
+    setSelectedFeature(feature);
+    writeSelectedProject(project);
+    setActiveView('projects');
+    history.pushState(
+      null,
+      '',
+      `#project=${encodeURIComponent(project)}&feature=${encodeURIComponent(feature)}`,
+    );
   }, []);
 
   const handleSelectReport = useCallback((project?: string) => {
@@ -134,14 +196,16 @@ export function App() {
     if (selectedProject && !window.location.hash) {
       history.replaceState(null, '', `#project=${encodeURIComponent(selectedProject)}`);
     }
-  }, []);
+  }, [selectedProject]);
 
   // Browser back/forward navigation
   useEffect(() => {
     const onPopState = () => {
       setActiveView(readHashView());
       const name = readHashProject();
+      const feature = readHashFeature();
       setSelectedProject(name);
+      setSelectedFeature(feature);
       writeSelectedProject(name);
     };
     window.addEventListener('popstate', onPopState);
@@ -315,7 +379,7 @@ export function App() {
           </header>
 
           {activeView === 'report' ? (
-            <ReportView projects={projects} />
+            <ReportView projects={projects} onGoToFeature={handleSelectFeature} />
           ) : (
             <>
               {!loading && projects.length === 0 && (
@@ -357,31 +421,77 @@ export function App() {
                     );
                   })}
                   <div class="relative ml-auto">
-                    <input
-                      type="text"
-                      value={searchInput}
-                      onInput={(e) => setSearchInput((e.target as HTMLInputElement).value)}
-                      placeholder="Search features..."
-                      class="w-48 px-3 py-1.5 rounded-lg text-xs font-mono bg-slate-800/40 text-slate-300
-                             placeholder:text-slate-600 border border-slate-700/50 focus:outline-none
-                             focus:ring-1 focus:ring-sky-500/30 focus:border-sky-500/30"
-                    />
-                    {searchInput && (
-                      <button
-                        type="button"
-                        onClick={() => setSearchInput('')}
-                        class="absolute right-2 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-400"
-                      >
-                        <svg
-                          xmlns="http://www.w3.org/2000/svg"
-                          viewBox="0 0 16 16"
-                          fill="currentColor"
-                          class="w-3 h-3"
+                    <div class="flex items-center gap-2">
+                      <div class="inline-flex items-center rounded-lg bg-slate-900/70 ring-1 ring-inset ring-slate-700/50 p-1">
+                        <button
+                          type="button"
+                          onClick={() => setProjectViewMode('detailed')}
+                          title="Detailed view"
+                          aria-label="Detailed view"
+                          class={`p-1.5 rounded-md transition-colors ${
+                            projectViewMode === 'detailed'
+                              ? 'bg-sky-500/15 text-sky-400 ring-1 ring-inset ring-sky-500/30'
+                              : 'text-slate-500 hover:text-slate-300'
+                          }`}
                         >
-                          <path d="M5.28 4.22a.75.75 0 0 0-1.06 1.06L6.94 8l-2.72 2.72a.75.75 0 1 0 1.06 1.06L8 9.06l2.72 2.72a.75.75 0 1 0 1.06-1.06L9.06 8l2.72-2.72a.75.75 0 0 0-1.06-1.06L8 6.94 5.28 4.22Z" />
-                        </svg>
-                      </button>
-                    )}
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            viewBox="0 0 16 16"
+                            fill="currentColor"
+                            class="w-4 h-4"
+                          >
+                            <path d="M2.5 3.25A1.25 1.25 0 0 1 3.75 2h8.5A1.25 1.25 0 0 1 13.5 3.25v1.5A1.25 1.25 0 0 1 12.25 6h-8.5A1.25 1.25 0 0 1 2.5 4.75v-1.5Zm0 4A1.25 1.25 0 0 1 3.75 6h8.5A1.25 1.25 0 0 1 13.5 7.25v1.5A1.25 1.25 0 0 1 12.25 10h-8.5A1.25 1.25 0 0 1 2.5 8.75v-1.5Zm1.25 2.75A1.25 1.25 0 0 0 2.5 11.25v1.5A1.25 1.25 0 0 0 3.75 14h8.5a1.25 1.25 0 0 0 1.25-1.25v-1.5A1.25 1.25 0 0 0 12.25 10h-8.5Z" />
+                          </svg>
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setProjectViewMode('compact')}
+                          title="Compact view"
+                          aria-label="Compact view"
+                          class={`p-1.5 rounded-md transition-colors ${
+                            projectViewMode === 'compact'
+                              ? 'bg-sky-500/15 text-sky-400 ring-1 ring-inset ring-sky-500/30'
+                              : 'text-slate-500 hover:text-slate-300'
+                          }`}
+                        >
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            viewBox="0 0 16 16"
+                            fill="currentColor"
+                            class="w-4 h-4"
+                          >
+                            <path d="M2.5 4.25A1.75 1.75 0 0 1 4.25 2.5h7.5a1.75 1.75 0 1 1 0 3.5h-7.5A1.75 1.75 0 0 1 2.5 4.25Zm0 7.5A1.75 1.75 0 0 1 4.25 10h7.5a1.75 1.75 0 1 1 0 3.5h-7.5A1.75 1.75 0 0 1 2.5 11.75Z" />
+                          </svg>
+                        </button>
+                      </div>
+                      <div class="relative">
+                        <input
+                          type="text"
+                          value={searchInput}
+                          onInput={(e) => setSearchInput((e.target as HTMLInputElement).value)}
+                          placeholder="Search features..."
+                          class="w-48 px-3 py-1.5 rounded-lg text-xs font-mono bg-slate-800/40 text-slate-300
+                                 placeholder:text-slate-600 border border-slate-700/50 focus:outline-none
+                                 focus:ring-1 focus:ring-sky-500/30 focus:border-sky-500/30"
+                        />
+                        {searchInput && (
+                          <button
+                            type="button"
+                            onClick={() => setSearchInput('')}
+                            class="absolute right-2 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-400"
+                          >
+                            <svg
+                              xmlns="http://www.w3.org/2000/svg"
+                              viewBox="0 0 16 16"
+                              fill="currentColor"
+                              class="w-3 h-3"
+                            >
+                              <path d="M5.28 4.22a.75.75 0 0 0-1.06 1.06L6.94 8l-2.72 2.72a.75.75 0 1 0 1.06 1.06L8 9.06l2.72 2.72a.75.75 0 1 0 1.06-1.06L9.06 8l2.72-2.72a.75.75 0 0 0-1.06-1.06L8 6.94 5.28 4.22Z" />
+                            </svg>
+                          </button>
+                        )}
+                      </div>
+                    </div>
                   </div>
                 </div>
               )}
@@ -393,6 +503,8 @@ export function App() {
                       project={project}
                       singleProject={!!selectedProject}
                       archivedFilter={statusFilter === 'archived'}
+                      targetFeature={selectedProject === project.name ? selectedFeature : null}
+                      viewMode={projectViewMode}
                     />
                   </div>
                 ))}
@@ -416,6 +528,10 @@ export function App() {
                             project={project}
                             singleProject={!!selectedProject}
                             archivedFilter={statusFilter === 'archived'}
+                            targetFeature={
+                              selectedProject === project.name ? selectedFeature : null
+                            }
+                            viewMode={projectViewMode}
                           />
                         </div>
                       ))}

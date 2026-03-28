@@ -2,10 +2,11 @@ import { useCallback, useEffect, useMemo, useState } from 'preact/hooks';
 import type { FeatureStatus, Project, ReportFeature } from '@shared/types.js';
 import { useReportData } from '../hooks/useReportData.js';
 import { useClipboard } from '../hooks/useClipboard.js';
-import { computeReportStats } from '../utils/reportStats.js';
+import { computeReportStats, getWorkedDays, sortReportProjects } from '../utils/reportStats.js';
 
 interface Props {
   projects: Project[];
+  onGoToFeature: (project: string, feature: string) => void;
 }
 
 const STATUS_CONFIG: Record<FeatureStatus, { label: string; badge: string; bar: string }> = {
@@ -52,8 +53,10 @@ const STATUS_CONFIG: Record<FeatureStatus, { label: string; badge: string; bar: 
 };
 
 const REPORT_DATE_RANGE_KEY = 'dev-dashboard-report-date-range';
+const REPORT_VIEW_MODE_KEY = 'dev-dashboard-report-view-mode';
 
 type PresetKey = '7d' | '30d' | 'month' | 'quarter';
+type ReportViewMode = 'detailed' | 'compact';
 
 const PRESETS: { key: PresetKey; label: string }[] = [
   { key: '7d', label: 'Last 7 days' },
@@ -91,7 +94,12 @@ function computePresetRange(key: PresetKey): { from: string; to: string } {
   return { from: fmt(from), to };
 }
 
-function readSavedRange(): { from: string; to: string; project?: string } | null {
+function readSavedRange(): {
+  from: string;
+  to: string;
+  project?: string;
+  preset?: PresetKey | null;
+} | null {
   try {
     const raw = localStorage.getItem(REPORT_DATE_RANGE_KEY);
     if (!raw) return null;
@@ -101,9 +109,30 @@ function readSavedRange(): { from: string; to: string; project?: string } | null
   }
 }
 
-function writeSavedRange(from: string, to: string, project?: string): void {
+function writeSavedRange(
+  from: string,
+  to: string,
+  project?: string,
+  preset?: PresetKey | null,
+): void {
   try {
-    localStorage.setItem(REPORT_DATE_RANGE_KEY, JSON.stringify({ from, to, project }));
+    localStorage.setItem(REPORT_DATE_RANGE_KEY, JSON.stringify({ from, to, project, preset }));
+  } catch {
+    /* */
+  }
+}
+
+function readSavedViewMode(): ReportViewMode {
+  try {
+    return localStorage.getItem(REPORT_VIEW_MODE_KEY) === 'compact' ? 'compact' : 'detailed';
+  } catch {
+    return 'detailed';
+  }
+}
+
+function writeSavedViewMode(mode: ReportViewMode): void {
+  try {
+    localStorage.setItem(REPORT_VIEW_MODE_KEY, mode);
   } catch {
     /* */
   }
@@ -139,7 +168,7 @@ function readHashReportProject(): string | undefined {
   return undefined;
 }
 
-export function ReportView({ projects }: Props) {
+export function ReportView({ projects, onGoToFeature }: Props) {
   const saved = readSavedRange();
   const defaultRange = computePresetRange('30d');
   const hashProject = readHashReportProject();
@@ -149,10 +178,8 @@ export function ReportView({ projects }: Props) {
   const [selectedProject, setSelectedProject] = useState<string | undefined>(
     hashProject ?? saved?.project,
   );
-  const [activePreset, setActivePreset] = useState<PresetKey | null>(() => {
-    if (saved) return null;
-    return '30d';
-  });
+  const [activePreset, setActivePreset] = useState<PresetKey | null>(saved?.preset ?? '30d');
+  const [viewMode, setViewMode] = useState<ReportViewMode>(readSavedViewMode);
 
   const params = useMemo(
     () => (from && to ? { from, to, project: selectedProject } : null),
@@ -163,8 +190,12 @@ export function ReportView({ projects }: Props) {
 
   // Persist date range
   useEffect(() => {
-    writeSavedRange(from, to, selectedProject);
-  }, [from, to, selectedProject]);
+    writeSavedRange(from, to, selectedProject, activePreset);
+  }, [from, to, selectedProject, activePreset]);
+
+  useEffect(() => {
+    writeSavedViewMode(viewMode);
+  }, [viewMode]);
 
   const handlePreset = useCallback((key: PresetKey) => {
     const range = computePresetRange(key);
@@ -192,8 +223,12 @@ export function ReportView({ projects }: Props) {
       list.push(f);
       map.set(f.project, list);
     }
-    return Array.from(map.entries()).map(([project, features]) => ({ project, features }));
-  }, [data]);
+    return sortReportProjects(
+      Array.from(map.entries()).map(([project, features]) => ({ project, features })),
+      from,
+      to,
+    );
+  }, [data, from, to]);
 
   // Summary stats
   const stats = useMemo(() => {
@@ -308,23 +343,67 @@ export function ReportView({ projects }: Props) {
         </div>
 
         {/* Project filter */}
-        <select
-          value={selectedProject ?? ''}
-          onChange={(e) => {
-            const val = (e.target as HTMLSelectElement).value || undefined;
-            setSelectedProject(val);
-          }}
-          class="ml-auto px-2.5 py-1.5 rounded-lg text-xs font-mono bg-slate-800/40 text-slate-300
-                 border border-slate-700/50 focus:outline-none focus:ring-1 focus:ring-sky-500/30
-                 focus:border-sky-500/30 [color-scheme:dark]"
-        >
-          <option value="">All Projects</option>
-          {projects.map((p) => (
-            <option key={p.name} value={p.name}>
-              {p.name}
-            </option>
-          ))}
-        </select>
+        <div class="ml-auto flex items-center gap-2">
+          <div class="inline-flex items-center rounded-lg bg-slate-900/70 ring-1 ring-inset ring-slate-700/50 p-1">
+            <button
+              type="button"
+              onClick={() => setViewMode('detailed')}
+              title="Detailed view"
+              aria-label="Detailed view"
+              class={`p-1.5 rounded-md transition-colors ${
+                viewMode === 'detailed'
+                  ? 'bg-sky-500/15 text-sky-400 ring-1 ring-inset ring-sky-500/30'
+                  : 'text-slate-500 hover:text-slate-300'
+              }`}
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 16 16"
+                fill="currentColor"
+                class="w-4 h-4"
+              >
+                <path d="M2.5 3.25A1.25 1.25 0 0 1 3.75 2h8.5A1.25 1.25 0 0 1 13.5 3.25v1.5A1.25 1.25 0 0 1 12.25 6h-8.5A1.25 1.25 0 0 1 2.5 4.75v-1.5Zm0 4A1.25 1.25 0 0 1 3.75 6h8.5A1.25 1.25 0 0 1 13.5 7.25v1.5A1.25 1.25 0 0 1 12.25 10h-8.5A1.25 1.25 0 0 1 2.5 8.75v-1.5Zm1.25 2.75A1.25 1.25 0 0 0 2.5 11.25v1.5A1.25 1.25 0 0 0 3.75 14h8.5a1.25 1.25 0 0 0 1.25-1.25v-1.5A1.25 1.25 0 0 0 12.25 10h-8.5Z" />
+              </svg>
+            </button>
+            <button
+              type="button"
+              onClick={() => setViewMode('compact')}
+              title="Compact view"
+              aria-label="Compact view"
+              class={`p-1.5 rounded-md transition-colors ${
+                viewMode === 'compact'
+                  ? 'bg-sky-500/15 text-sky-400 ring-1 ring-inset ring-sky-500/30'
+                  : 'text-slate-500 hover:text-slate-300'
+              }`}
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 16 16"
+                fill="currentColor"
+                class="w-4 h-4"
+              >
+                <path d="M2.5 4.25A1.75 1.75 0 0 1 4.25 2.5h7.5a1.75 1.75 0 1 1 0 3.5h-7.5A1.75 1.75 0 0 1 2.5 4.25Zm0 7.5A1.75 1.75 0 0 1 4.25 10h7.5a1.75 1.75 0 1 1 0 3.5h-7.5A1.75 1.75 0 0 1 2.5 11.75Z" />
+              </svg>
+            </button>
+          </div>
+          <select
+            value={selectedProject ?? ''}
+            onChange={(e) => {
+              const val = (e.target as HTMLSelectElement).value || undefined;
+              setSelectedProject(val);
+            }}
+            class="px-2.5 py-1.5 rounded-lg text-xs font-mono bg-slate-800/40 text-slate-300
+                   border border-slate-700/50 focus:outline-none focus:ring-1 focus:ring-sky-500/30
+                   focus:border-sky-500/30 [color-scheme:dark]"
+          >
+            <option value="">All Projects</option>
+            {projects.map((p) => (
+              <option key={p.name} value={p.name}>
+                {p.name}
+              </option>
+            ))}
+          </select>
+        </div>
       </div>
 
       {/* Loading / error */}
@@ -377,7 +456,11 @@ export function ReportView({ projects }: Props) {
                       class="card-enter"
                       style={{ animationDelay: `${240 + i * 60}ms` }}
                     >
-                      <ReportFeatureCard feature={feature} />
+                      <ReportFeatureCard
+                        feature={feature}
+                        viewMode={viewMode}
+                        onGoToFeature={onGoToFeature}
+                      />
                     </div>
                   );
                 })}
@@ -428,14 +511,36 @@ function StatCard({
   );
 }
 
-function ReportFeatureCard({ feature }: { feature: ReportFeature }) {
+function ReportFeatureCard({
+  feature,
+  viewMode,
+  onGoToFeature,
+}: {
+  feature: ReportFeature;
+  viewMode: ReportViewMode;
+  onGoToFeature: (project: string, feature: string) => void;
+}) {
   const config = STATUS_CONFIG[feature.status] ?? STATUS_CONFIG['no-prd'];
   const pct = feature.progress?.percent ?? 0;
+  const workedDays = getWorkedDays(feature);
+  const isCompact = viewMode === 'compact';
 
   return (
-    <div class="bg-[#0d1425] border border-slate-800/60 rounded-xl px-5 py-4 shadow-md hover:bg-[#0f1830] transition-colors">
+    <div class="group relative bg-[#0d1425] border border-slate-800/60 rounded-xl px-5 py-4 shadow-md hover:bg-[#0f1830] transition-colors">
+      <button
+        type="button"
+        onClick={() => onGoToFeature(feature.project, feature.name)}
+        class="absolute right-4 top-4 inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5
+               text-[11px] font-mono text-sky-400 bg-sky-500/10 ring-1 ring-inset ring-sky-500/25
+               opacity-0 pointer-events-none transition-all duration-150
+               group-hover:opacity-100 group-hover:pointer-events-auto
+               hover:bg-sky-500/20 hover:text-sky-300"
+      >
+        Go to feature
+      </button>
+
       {/* Top row: badge + name + progress */}
-      <div class="flex items-center gap-2.5 mb-2">
+      <div class="flex items-center gap-2.5 mb-2 pr-28">
         <span
           class={`inline-flex items-center px-2.5 py-0.5 rounded-full text-[13px] font-medium font-mono flex-shrink-0 ${config.badge}`}
         >
@@ -444,7 +549,12 @@ function ReportFeatureCard({ feature }: { feature: ReportFeature }) {
         <span class="text-sm font-semibold font-sans text-slate-100 truncate">{feature.name}</span>
         <div class="flex-1" />
         {feature.progress && feature.progress.total > 0 && (
-          <div class="flex items-center gap-2 min-w-[120px]">
+          <div class="flex items-center gap-3 min-w-[120px]">
+            {workedDays && (
+              <span class="text-[11px] font-mono text-slate-500 whitespace-nowrap">
+                {workedDays} day{workedDays !== 1 ? 's' : ''}
+              </span>
+            )}
             <div class="flex-1 h-1.5 rounded-full bg-slate-800/60 overflow-hidden">
               <div
                 class={`h-full rounded-full ${config.bar} transition-all duration-500`}
@@ -457,28 +567,30 @@ function ReportFeatureCard({ feature }: { feature: ReportFeature }) {
       </div>
 
       {/* Summary */}
-      {feature.summary && (
+      {!isCompact && feature.summary && (
         <p class="text-xs text-slate-400 leading-relaxed mb-2.5">{feature.summary}</p>
       )}
 
       {/* Date meta */}
-      <div class="flex items-center gap-4 flex-wrap">
-        {feature.created && (
-          <span class="text-[11px] font-mono text-slate-500">
-            <span class="text-slate-600">Created</span> {feature.created}
-          </span>
-        )}
-        {feature.lastCheckpoint && (
-          <span class="text-[11px] font-mono text-slate-500">
-            <span class="text-slate-600">Checkpoint</span> {feature.lastCheckpoint.slice(0, 10)}
-          </span>
-        )}
-        {feature.lastUpdated && (
-          <span class="text-[11px] font-mono text-slate-500">
-            <span class="text-slate-600">Updated</span> {feature.lastUpdated}
-          </span>
-        )}
-      </div>
+      {!isCompact && (
+        <div class="flex items-center gap-4 flex-wrap">
+          {feature.created && (
+            <span class="text-[11px] font-mono text-slate-500">
+              <span class="text-slate-600">Created</span> {feature.created}
+            </span>
+          )}
+          {feature.lastCheckpoint && (
+            <span class="text-[11px] font-mono text-slate-500">
+              <span class="text-slate-600">Checkpoint</span> {feature.lastCheckpoint.slice(0, 10)}
+            </span>
+          )}
+          {feature.lastUpdated && (
+            <span class="text-[11px] font-mono text-slate-500">
+              <span class="text-slate-600">Updated</span> {feature.lastUpdated}
+            </span>
+          )}
+        </div>
+      )}
     </div>
   );
 }

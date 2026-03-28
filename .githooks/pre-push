@@ -4,6 +4,16 @@
 # marketplace.json version bump (compared to main).
 
 remote="$1"
+repo_root=$(git rev-parse --show-toplevel 2>/dev/null)
+
+if [ -n "$repo_root" ] && command -v gh >/dev/null 2>&1; then
+  node "$repo_root/scripts/sync-changelog-from-github-releases.mjs" >/dev/null 2>&1 || true
+  if ! git diff --quiet -- "$repo_root/CHANGELOG.md"; then
+    echo "ERROR: CHANGELOG.md was updated from GitHub releases."
+    echo "Review and commit the changelog before pushing."
+    exit 1
+  fi
+fi
 
 while read local_ref local_oid remote_ref remote_oid; do
   # For main: compare against what the remote already has

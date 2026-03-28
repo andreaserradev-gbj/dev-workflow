@@ -1,5 +1,6 @@
-import { useState } from 'preact/hooks';
+import { useEffect, useState } from 'preact/hooks';
 import type { FeatureStatus, Project } from '@shared/types.js';
+import type { ProjectViewMode } from '../App.js';
 import { FeatureRow } from './FeatureRow.js';
 import { FeaturePanel } from './FeaturePanel.js';
 import { buildStatusGradient } from '../utils/statusColors.js';
@@ -8,18 +9,12 @@ interface Props {
   project: Project;
   singleProject?: boolean;
   archivedFilter?: boolean;
+  targetFeature?: string | null;
+  viewMode?: ProjectViewMode;
 }
 
 const STORAGE_KEY_PREFIX = 'dev-dashboard-collapsed:';
 const ARCHIVE_KEY_PREFIX = 'dev-dashboard-archive-collapsed:';
-
-function isCollapsedInit(name: string): boolean {
-  try {
-    return localStorage.getItem(STORAGE_KEY_PREFIX + name) === '1';
-  } catch {
-    return false;
-  }
-}
 
 function persistCollapsed(name: string, collapsed: boolean): void {
   try {
@@ -69,10 +64,16 @@ function persistArchiveCollapsed(name: string, collapsed: boolean): void {
   }
 }
 
-export function ProjectCard({ project, singleProject, archivedFilter }: Props) {
+export function ProjectCard({
+  project,
+  singleProject,
+  archivedFilter,
+  targetFeature,
+  viewMode = 'detailed',
+}: Props) {
   const [expandedFeature, setExpandedFeature] = useState<string | null>(null);
   const [collapsed, setCollapsed] = useState(() =>
-    singleProject ? false : isCollapsedInit(project.name),
+    singleProject ? false : viewMode === 'compact' ? true : false,
   );
   const [archiveCollapsed, setArchiveCollapsed] = useState(() =>
     isArchiveCollapsedInit(project.name),
@@ -98,6 +99,39 @@ export function ProjectCard({ project, singleProject, archivedFilter }: Props) {
   const activeFeatures = project.features.filter((f) => f.status !== 'archived');
   const archivedFeatures = project.features.filter((f) => f.status === 'archived');
   const gradient = buildStatusGradient(project.features);
+
+  useEffect(() => {
+    if (!targetFeature) return;
+    const target = project.features.find((feature) => feature.name === targetFeature);
+    if (!target) return;
+
+    setExpandedFeature(targetFeature);
+
+    if (!singleProject) {
+      setCollapsed(false);
+      persistCollapsed(project.name, false);
+    }
+
+    if (target.status === 'archived') {
+      setArchiveCollapsed(false);
+      persistArchiveCollapsed(project.name, false);
+    }
+
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        document
+          .getElementById(`feature-${project.name}-${targetFeature}`)
+          ?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      });
+    });
+  }, [targetFeature, project.features, project.name, singleProject]);
+
+  useEffect(() => {
+    if (singleProject) return;
+    const next = viewMode === 'compact';
+    setCollapsed(next);
+    persistCollapsed(project.name, next);
+  }, [viewMode, project.name, singleProject]);
 
   return (
     <div class="relative rounded-xl bg-[#0d1425] border border-slate-800/60 overflow-hidden shadow-md shadow-black/20">
