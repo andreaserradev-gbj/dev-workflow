@@ -42,6 +42,40 @@ All notable changes to this project should be documented in this file.
 
 <!-- GITHUB-RELEASES-START -->
 
+## v1.26.2 - 2026-03-28
+
+### Added
+
+- Added compact and detailed view modes to the activity report.
+- Added a worked-days metric to report features, with fallback date logic when `Created` is missing.
+- Added a hover-only `Go to feature` action in the activity report that opens the matching feature in project view.
+- Added compact and detailed project-list controls near search in the projects view.
+
+### Changed
+
+- Sorted activity report projects with active or stale work first, then other non-archived projects, then archived-only projects.
+- Persisted the selected report date preset so the active period chip survives reloads and view switches.
+- Changed the projects-view compact/detailed control to collapse or expand project cards globally instead of changing feature row content.
+- Moved the report compact/detailed control next to the project selector and switched it to icon buttons with tooltips.
+- Synced the dashboard build stamp to the marketplace version.
+
+### Fixed
+
+- Fixed activity report completion stats for fully completed features.
+- Fixed missing worked-days labels for features that have progress but no explicit `Created` metadata.
+
+## v1.26.1 - 2026-03-28
+
+### Changed
+
+- Bumped the marketplace version to `1.26.1`.
+
+### Fixed
+
+- Fixed activity report completion stats.
+- Added a dashboard build/version stamp.
+- Updated the dashboard to read its version from `.claude-plugin/marketplace.json` instead of `tools/dev-dashboard/package.json`.
+
 ## v1.26.0 - 2026-03-27
 
 ## Changes
