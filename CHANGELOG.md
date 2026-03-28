@@ -4,6 +4,20 @@ All notable changes to this project should be documented in this file.
 
 <!-- LOCAL-RELEASES-START -->
 
+## v1.26.3 - 2026-03-28
+
+### Added
+
+- Added explicit first-run scan-directory onboarding to dev-dashboard with a dedicated empty-state form that saves scan roots through the existing config API.
+- Added persisted `scanDirsConfigured` state so fresh installs can distinguish onboarding-needed config from existing configured setups.
+- Added API test coverage for onboarding-ready defaults and scan-directory persistence.
+
+### Changed
+
+- Changed fresh dev-dashboard config defaults to start with no scan roots instead of silently assuming `~/code`.
+- Updated dashboard docs to describe explicit scan-root onboarding and the new config shape.
+- Rebuilt the bundled dashboard client and server artifacts for the onboarding flow.
+
 ## v1.26.2 - 2026-03-28
 
 ### Added
