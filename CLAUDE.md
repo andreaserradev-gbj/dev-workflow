@@ -110,11 +110,32 @@ Runs automatically via the pre-commit hook.
 ### Git Hooks (`.githooks/`)
 
 - **pre-commit** — runs `tests/test-scripts.sh` and blocks commit if dashboard source changed without rebuilding the bundle
-- **pre-push** — blocks push if `plugins/` changed without a version bump in `marketplace.json`
+- **pre-push** — syncs the GitHub releases section of `CHANGELOG.md`, blocks push if that sync changes the file, blocks push if `plugins/` changed without a version bump in `marketplace.json`, and blocks version bumps that do not have a matching local changelog entry
 
 ### Version Bumps
 
 When any file under `plugins/` is modified, bump the `version` in `.claude-plugin/marketplace.json` before pushing to main (or opening a PR targeting main).
+
+### Release Workflow
+
+`CHANGELOG.md` is the source of truth for release notes.
+
+For a new release:
+
+1. Bump the version in `.claude-plugin/marketplace.json`
+2. Add or scaffold the matching local changelog entry in `CHANGELOG.md`
+3. Commit and push to `main`
+4. GitHub Actions creates the `vX.Y.Z` release automatically from the local changelog entry
+
+Helper scripts:
+
+- `node scripts/scaffold-local-release-notes.mjs` — scaffold a local changelog entry for the current marketplace version from commits since the last tag
+- `node scripts/sync-changelog-from-github-releases.mjs` — refresh the generated GitHub releases section in `CHANGELOG.md`
+
+`CHANGELOG.md` contains two sections:
+
+- **Local releases** — manual entries for versions not yet published on GitHub
+- **GitHub releases** — generated from the exact published GitHub release bodies
 
 ## Skill File Format
 
