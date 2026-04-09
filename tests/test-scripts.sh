@@ -204,6 +204,30 @@ check_sync discover.sh dev-plan dev-resume dev-wrapup
 check_sync validate.sh dev-plan dev-resume
 check_sync git-state.sh dev-resume
 
+BIN_DIR="$(cd "$(dirname "$0")/../plugins/dev-workflow/bin" && pwd)"
+
+check_bin_sync() {
+  local file="$1"
+  shift
+  local canonical="$BIN_DIR/$file"
+  local canonical_hash
+  canonical_hash="$(cksum "$canonical" | cut -d' ' -f1)"
+  for skill in "$@"; do
+    local copy="$SKILLS_DIR/$skill/scripts/$file"
+    local copy_hash
+    copy_hash="$(cksum "$copy" | cut -d' ' -f1)"
+    if [ "$canonical_hash" != "$copy_hash" ]; then
+      echo "FAIL: $file in $skill differs from bin/ (canonical)"
+      FAIL=$((FAIL + 1))
+    else
+      echo "PASS: $file in sync ($skill)"
+      PASS=$((PASS + 1))
+    fi
+  done
+}
+
+check_bin_sync dev-workflow.cjs dev-checkpoint dev-plan dev-resume
+
 echo ""
 echo "=== Results: $PASS passed, $FAIL failed ==="
 [ "$FAIL" -eq 0 ] || exit 1

@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# Pre-commit hook: run script tests and check dashboard bundle freshness.
+# Pre-commit hook: run script tests and check dashboard and CLI bundle freshness.
 
 if ! bash tests/test-scripts.sh; then
   echo ""
@@ -27,5 +27,16 @@ if [ -n "$DASHBOARD_SRC_CHANGED" ] && [ -z "$BUNDLE_CHANGED" ]; then
   echo ""
   echo "ERROR: Dashboard source files changed but bundle was not updated."
   echo "Run 'cd tools/dev-dashboard && npm run bundle' and stage the output."
+  exit 1
+fi
+
+# Check if CLI source changed without rebuilding the bundle
+CLI_SRC_CHANGED=$(git diff --cached --name-only -- tools/dev-workflow-cli/src/ tools/dev-workflow-core/src/ tools/dev-workflow-cli/package.json | head -1)
+CLI_BUNDLE_CHANGED=$(git diff --cached --name-only -- plugins/dev-workflow/bin/dev-workflow.cjs | head -1)
+
+if [ -n "$CLI_SRC_CHANGED" ] && [ -z "$CLI_BUNDLE_CHANGED" ]; then
+  echo ""
+  echo "ERROR: CLI source files changed but bundle was not updated."
+  echo "Run 'cd tools/dev-workflow-cli && npm run bundle' and stage the output."
   exit 1
 fi

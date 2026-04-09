@@ -6,7 +6,7 @@ description: >-
   and writes PRD files to .dev/.
   Use when starting a new feature, spike, or major task.
 argument-hint: <feature description>
-allowed-tools: Bash(bash:*) Read
+allowed-tools: Bash(bash:*) Bash(node:*) Read
 ---
 
 ## Step 0: Discover Project Root
@@ -33,8 +33,6 @@ The sole deliverable is PRD files written to `$PROJECT_ROOT/.dev/$FEATURE_NAME/`
 Produce documentation, not code. Every session must end with files on disk.
 
 This is part of a 3-skill system (`/dev-plan` → `/dev-checkpoint` → `/dev-resume`). The other skills parse PRD files using status markers (`⬜`/`✅`), phase gates, file changes summary, and sub-PRD links.
-
-**Plan mode**: If active, write a PRD summary to the plan file, call `ExitPlanMode`, then write full PRD files after approval.
 
 ## AGENTS
 
@@ -138,8 +136,18 @@ Use `subagent_type=dev-workflow:prd-planner`.
    - Always create `00-master-plan.md` — use the Master Plan template in [prd-templates.md](references/prd-templates.md)
    - For complex features, create `01-sub-prd-[name].md` etc. — use the Sub-PRD template in [prd-templates.md](references/prd-templates.md)
    - Incorporate research findings (Phase 2) and implementation plan (agent output) into the PRD
-4. **State what was created** — list every file path written.
-5. **Suggest running `/dev-checkpoint`** to save a continuation prompt.
+4. **Verify PRD structure** — Run the CLI to confirm the PRD is parseable:
+
+   ```bash
+   node "$CLI" feature-show --json --dir "$PROJECT_ROOT/.dev/$FEATURE_NAME"
+   ```
+
+   Where `$CLI` is the absolute path to `scripts/dev-workflow.cjs` within this skill's directory. Apply the path safety rules from Step 0 (`$HOME`, copy from output).
+
+   If the command fails or returns unexpected data, fix the PRD files before continuing.
+
+5. **State what was created** — list every file path written.
+6. **Suggest running `/dev-checkpoint`** to save a continuation prompt.
 
 > **Guardrail**: Files MUST be created. If this phase is reached without writing, stop everything else and write the PRD.
 

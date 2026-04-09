@@ -6,7 +6,7 @@ description: >-
   a resumption summary before continuing.
   Use at the start of a new session to restore context from a previous checkpoint.
 argument-hint: <feature name>
-allowed-tools: Bash(bash:*) Read
+allowed-tools: Bash(bash:*) Bash(node:*) Read
 ---
 
 ## Resume From Checkpoint
@@ -69,41 +69,49 @@ Parse the output lines:
 - `branch:<name>` → store as `$CURRENT_BRANCH`
 - `uncommitted:<true|false>` → store as `$HAS_UNCOMMITTED`
 
-### Step 3: Load and Analyze Checkpoint with Agent
+### Step 3: Load Checkpoint and Feature Data via CLI
 
-Launch the **context-loader agent** to parse the checkpoint and compare state:
+Run the CLI to get structured checkpoint and feature data:
 
-```
-"Parse the checkpoint at $CHECKPOINT_PATH.
-
-Current git state (gathered by parent skill):
-- Branch: $CURRENT_BRANCH
-- Uncommitted changes: $HAS_UNCOMMITTED
-
-Compare this against the checkpoint frontmatter and report any drift.
-Extract context summary, decisions, blockers, and next actions.
-Read the PRD files listed in the checkpoint."
+```bash
+node "$CLI" checkpoint-read --json --dir "$FEATURE_DIR"
 ```
 
-Use `subagent_type=dev-workflow:context-loader` and `model=haiku`.
+```bash
+node "$CLI" feature-show --json --dir "$FEATURE_DIR"
+```
 
-### Step 4: Review Agent Findings
+Where `$CLI` is the absolute path to `scripts/dev-workflow.cjs` within this skill's directory. Apply the path safety rules from Step 0 (`$HOME`, copy from output). `$FEATURE_DIR` is the parent directory of `$CHECKPOINT_PATH`.
 
-After the agent returns, check context validity:
-- **Fresh/Stale**: Proceed (note age if stale)
-- **Drifted**: Warn. If branch mismatch, ask: "Checkpoint was on `X`, you're on `Y`. Switch or continue?"
+Parse the JSON output:
+- **checkpoint-read** returns: `branch`, `lastCommit`, `uncommittedChanges`, `checkpointed`, `context`, `nextAction`, `decisions[]`, `blockers[]`, `notes[]`
+- **feature-show** returns: `name`, `status`, `progress {done, total, percent}`, `currentPhase {number, total, title}`, `lastCheckpoint`, `nextAction`, `summary`
+
+### Step 4: Check Context Validity
+
+Compare the checkpoint data against the current git state from Step 2:
+
+| Check | Checkpoint value | Current | Match? |
+|-------|-----------------|---------|--------|
+| Branch | `branch` from checkpoint-read | `$CURRENT_BRANCH` | Compare |
+| Uncommitted | `uncommittedChanges` from checkpoint-read | `$HAS_UNCOMMITTED` | Compare |
+
+Determine status:
+- **Fresh**: Branch matches, checkpoint is recent (< 3 days old based on `checkpointed` timestamp)
+- **Stale**: Branch matches but checkpoint is old (informational warning)
+- **Drifted**: Branch mismatch → warn and ask: "Checkpoint was on `X`, you're on `Y`. Switch or continue?"
 
 ### Step 5: Present Resumption Summary
 
-Present the agent's summary in this format:
+Build the summary from the CLI output:
 
 ```
-**Status**: [Current phase/step from context]
-**Last session**: [1-sentence summary of what was accomplished]
-**Decisions**: [Key decisions, or "None recorded"]
-**Watch out for**: [Blockers, or "Nothing flagged"]
+**Status**: [currentPhase from feature-show] — [progress.done]/[progress.total] ([progress.percent]%)
+**Last session**: [Derive from checkpoint context field]
+**Decisions**: [decisions array from checkpoint-read, or "None recorded"]
+**Watch out for**: [blockers array from checkpoint-read, or "Nothing flagged"]
 
-**Start with**: [Concrete first action from next steps]
+**Start with**: [First concrete action from nextAction field]
 ```
 
 **Wait for go-ahead** — do not proceed until the user confirms.
@@ -132,7 +140,17 @@ After confirmation, proceed with the first action from the agent's summary. Foll
 
 **CRITICAL: PHASE GATE ENFORCEMENT**
 
-At every `⏸️ **GATE**:` in the PRD — this is a HARD STOP:
+After completing a phase's work, run the CLI to mechanically verify gate status:
+
+```bash
+node "$CLI" gate-check --json --dir "$FEATURE_DIR"
+```
+
+Where `$CLI` is the absolute path to `scripts/dev-workflow.cjs` within this skill's directory.
+
+The command returns exit 0 when at a gate (`atGate: true`) or when all phases are complete (`allComplete: true`), and exit 2 when work is still in progress. Use this to confirm phase completion rather than relying on visual inspection of markdown markers.
+
+At every gate (whether detected by `gate-check` or by `⏸️ **GATE**:` markers in the PRD) — this is a HARD STOP:
 1. **STOP** — Do not proceed to the next phase
 2. **Report** what was accomplished
 3. **Ask**: "Phase [N] complete. Continue to Phase [N+1] or `/dev-checkpoint`?"

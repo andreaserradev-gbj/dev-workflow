@@ -14,17 +14,15 @@ plugins/dev-workflow/           # Plugin package
     dev-plan/
       SKILL.md
       references/prd-templates.md
-      scripts/discover.sh, validate.sh
+      scripts/discover.sh, validate.sh, dev-workflow.cjs
       agents/prd-researcher.md, prd-planner.md
     dev-checkpoint/
       SKILL.md
       references/checkpoint-template.md, worktree-guide.md
-      scripts/discover.sh, validate.sh, git-state.sh, worktree-setup.sh
-      agents/checkpoint-analyzer.md
+      scripts/discover.sh, validate.sh, git-state.sh, worktree-setup.sh, dev-workflow.cjs
     dev-resume/
       SKILL.md
-      scripts/discover.sh, validate.sh, git-state.sh
-      agents/context-loader.md
+      scripts/discover.sh, validate.sh, git-state.sh, dev-workflow.cjs
     dev-wrapup/
       SKILL.md
       scripts/discover.sh
@@ -54,10 +52,19 @@ tools/dev-dashboard/            # Cross-project live dashboard
   src/client/                    # Preact frontend (portfolio view, detail panels)
   src/shared/                    # Shared TypeScript types
   test/                          # Vitest tests + fixtures
+tools/dev-workflow-core/         # Shared workflow core (parser, scanner, types)
+  src/                           # TypeScript source
+  test/                          # Vitest tests + fixtures
+tools/dev-workflow-cli/          # Agent-first CLI over the shared core
+  src/commands/                  # CLI commands (feature-show, progress-summary, etc.)
+  test/                          # Vitest tests
+  scripts/bundle.js              # Bundles CLI to plugins/dev-workflow/bin/dev-workflow.cjs
+plugins/dev-workflow/bin/
+  dev-workflow.cjs               # Bundled CLI artifact (canonical copy)
 scripts/
   setup.sh                      # One-time contributor setup
 tests/
-  test-scripts.sh               # Script edge-case tests
+  test-scripts.sh               # Script edge-case tests + cross-skill sync checks
 ```
 
 ## Development
@@ -88,6 +95,26 @@ cd tools/dev-dashboard && npm run bundle
 
 This builds the Vite client + esbuild-bundles the server into `plugins/dev-workflow/skills/dev-dashboard/dashboard/`. The bundle is a committed build artifact — commit it alongside source changes. The pre-commit hook blocks commits that change dashboard source without updating the bundle.
 
+### CLI Bundle
+
+After modifying `tools/dev-workflow-cli/` or `tools/dev-workflow-core/`, rebuild the CLI bundle:
+
+```bash
+cd tools/dev-workflow-cli && npm run bundle
+```
+
+This esbuild-bundles the CLI into `plugins/dev-workflow/bin/dev-workflow.cjs` (canonical copy). Each skill that uses the CLI (`dev-resume`, `dev-checkpoint`, `dev-plan`) has its own copy at `scripts/dev-workflow.cjs` to stay self-contained. After rebuilding, copy the canonical bundle to each skill:
+
+```bash
+cp plugins/dev-workflow/bin/dev-workflow.cjs plugins/dev-workflow/skills/dev-resume/scripts/dev-workflow.cjs
+cp plugins/dev-workflow/bin/dev-workflow.cjs plugins/dev-workflow/skills/dev-checkpoint/scripts/dev-workflow.cjs
+cp plugins/dev-workflow/bin/dev-workflow.cjs plugins/dev-workflow/skills/dev-plan/scripts/dev-workflow.cjs
+```
+
+The pre-commit hook blocks commits where CLI source changed without updating the bundle. The test suite (`tests/test-scripts.sh`) blocks commits where the per-skill copies differ from the canonical `bin/dev-workflow.cjs`.
+
+The CLI is agent-first: designed for structured output (`--json`), deterministic exit codes, and consumption by skill scripts — not as a user-facing terminal tool. Command names are intentionally promotable to a public CLI later without redesign, but no stability guarantees are made at this stage.
+
 ### Dashboard Actions
 
 The dashboard is AI-tool-agnostic — it works with any tool that reads/writes `.dev/` PRDs (Claude Code, Codex, Gemini CLI, etc.).
@@ -109,7 +136,7 @@ Runs automatically via the pre-commit hook.
 
 ### Git Hooks (`.githooks/`)
 
-- **pre-commit** — runs `tests/test-scripts.sh` and blocks commit if dashboard source changed without rebuilding the bundle
+- **pre-commit** — runs `tests/test-scripts.sh` (including cross-skill sync checks for shared scripts and CLI copies), blocks commit if dashboard or CLI source changed without rebuilding the respective bundle
 - **pre-push** — syncs the GitHub releases section of `CHANGELOG.md`, blocks push if that sync changes the file, blocks push if `plugins/` changed without a version bump in `marketplace.json`, and blocks version bumps that do not have a matching local changelog entry
 
 ### Version Bumps
