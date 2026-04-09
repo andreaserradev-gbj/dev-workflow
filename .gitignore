@@ -8,3 +8,7 @@ node_modules/
 tools/dev-dashboard/node_modules/
 tools/dev-dashboard/dist/
 tools/dev-dashboard/src/**/*.js
+
+# dev-workflow-core
+tools/dev-workflow-core/node_modules/
+tools/dev-workflow-core/dist/
