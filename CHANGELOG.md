@@ -83,6 +83,29 @@ All notable changes to this project should be documented in this file.
 
 <!-- GITHUB-RELEASES-START -->
 
+## v1.27.0 - 2026-04-09
+
+### Added
+
+- Extracted shared workflow core (`dev-workflow-core`) from dashboard for unified `.dev/` parsing across all consumers.
+- Added agent-first CLI (`dev-workflow-cli`) with four commands: `feature-show`, `progress-summary`, `gate-check`, `checkpoint-read`.
+- CLI bundle distributed as self-contained `dev-workflow.cjs` copies inside each skill for portability.
+- Added CLI drift protection in pre-commit hook and cross-skill sync checks in test suite.
+
+### Changed
+
+- Migrated dashboard to consume shared `dev-workflow-core` instead of owning parsing logic directly.
+- Updated `dev-resume` skill to use CLI for checkpoint/feature loading instead of context-loader agent.
+- Updated `dev-checkpoint` skill to use CLI for progress/gate state instead of checkpoint-analyzer agent.
+- Updated `dev-plan` skill to verify PRD structure via CLI after creation.
+- Added mechanical `gate-check` enforcement to `dev-resume` phase gates.
+
+### Removed
+
+- Removed `context-loader` agent (replaced by CLI in dev-resume).
+- Removed `checkpoint-analyzer` agent (replaced by CLI in dev-checkpoint).
+- Removed stale `ExitPlanMode` reference from dev-plan.
+
 ## v1.26.4 - 2026-03-28
 
 ### Added
