@@ -75,24 +75,36 @@ Outputs `$FEATURE_NAME` on success; on failure, STOP and report the error.
 
 The checkpoint will be saved to `$PROJECT_ROOT/.dev/$FEATURE_NAME/checkpoint.md`.
 
-### Step 2: Analyze Session with Agent
+### Step 2: Gather Feature State via CLI
 
-Launch the **checkpoint-analyzer agent** to scan PRD files and the current session:
+Run the CLI to get structured progress and gate data:
 
-```
-"Analyze the PRD files in $PROJECT_ROOT/.dev/$FEATURE_NAME/ and the current session.
-Find: completed items (⬜ → ✅), pending items, decisions made, blockers encountered.
-Determine current phase and next step."
+```bash
+node "$CLI" progress-summary --json --dir "$PROJECT_ROOT/.dev/$FEATURE_NAME"
 ```
 
-Use `subagent_type=dev-workflow:checkpoint-analyzer` and `model=haiku`.
+```bash
+node "$CLI" gate-check --json --dir "$PROJECT_ROOT/.dev/$FEATURE_NAME"
+```
 
-### Step 3: Review Agent Findings
+Where `$CLI` is the absolute path to `scripts/dev-workflow.cjs` within this skill's directory. Apply the path safety rules from Step 0 (`$HOME`, copy from output).
 
-After the agent returns:
+Parse the JSON output:
+- **progress-summary** returns: `feature`, `overall {done, total, percent}`, `phases[] {number, title, done, total, status}`, `subPrds[] {id, title, done, total, status}`
+- **gate-check** returns: `feature`, `atGate`, `completedPhase`, `nextPhase`, `allComplete`
 
-1. **Verify accuracy** — Check that completed/pending items match what happened
-2. **Add missing context** — Include any decisions or blockers the agent missed
+From the CLI output, determine:
+- **Current phase**: the first phase with status `in-progress`, or the next `not-started` phase if at a gate
+- **Overall progress**: `overall.done`/`overall.total` (`overall.percent`%)
+
+### Step 3: Analyze Session Context
+
+Review the current conversation to extract:
+1. **Completed items** — what was accomplished this session (to mark `⬜` → `✅`)
+2. **Decisions made** — architectural choices, trade-offs
+3. **Blockers encountered** — issues, workarounds, gotchas
+
+Cross-reference with the CLI progress data to verify accuracy. The CLI provides the ground truth for PRD status markers; your session review adds decisions, blockers, and context that only the conversation contains.
 
 ### Step 4: Update PRD Status Markers (REQUIRED)
 
