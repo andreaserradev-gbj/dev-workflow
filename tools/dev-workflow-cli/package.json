@@ -1,0 +1,27 @@
+{
+  "name": "dev-workflow-cli",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "bin": {
+    "dev-workflow": "./src/index.ts"
+  },
+  "scripts": {
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "build": "tsc",
+    "bundle": "node scripts/bundle.js"
+  },
+  "dependencies": {
+    "dev-workflow-core": "file:../dev-workflow-core"
+  },
+  "engines": {
+    "node": ">=24"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "esbuild": "^0.27.4",
+    "typescript": "^5.6.0",
+    "vitest": "^3.0.0"
+  }
+}
