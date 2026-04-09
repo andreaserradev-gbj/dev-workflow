@@ -4,6 +4,14 @@ All notable changes to this project should be documented in this file.
 
 <!-- LOCAL-RELEASES-START -->
 
+## v1.27.1 - 2026-04-09
+
+### Fixed
+
+- Fixed `gate-check` failing (exit code 2) for features using sub-PRDs instead of `### Phase N:` headers in the master plan.
+- Fixed `parseSubPrd` ignoring `**Status**` header field when no Implementation Progress table is present.
+- Fixed `parseFeature` not detecting gate status from sub-PRD completion states.
+
 ## v1.27.0 - 2026-04-09
 
 ### Added
