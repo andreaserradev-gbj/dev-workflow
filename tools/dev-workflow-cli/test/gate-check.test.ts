@@ -95,4 +95,25 @@ describe('gate-check', () => {
     expect(code).toBe(1);
     expect(output.errorLines.join('\n')).toContain('Could not resolve feature directory');
   });
+
+  it('detects gate from sub-PRDs when master plan has no Phase headers (exit 0)', async () => {
+    const code = await gateCheck(['--dir', resolve(FIXTURES, 'subprd-gate'), '--json']);
+
+    expect(code).toBe(0);
+    const json = JSON.parse(output.lines.join('\n'));
+    expect(json.atGate).toBe(true);
+    expect(json.completedPhase).toMatchObject({ number: 1, title: 'Cloud Cleanup' });
+    expect(json.nextPhase).toMatchObject({ number: 2, title: 'Config Cleanup' });
+    expect(json.allComplete).toBe(false);
+  });
+
+  it('detects gate from sub-PRDs with header-only status (exit 0)', async () => {
+    const code = await gateCheck(['--dir', resolve(FIXTURES, 'subprd-gate-no-table'), '--json']);
+
+    expect(code).toBe(0);
+    const json = JSON.parse(output.lines.join('\n'));
+    expect(json.atGate).toBe(true);
+    expect(json.completedPhase).toMatchObject({ number: 1, title: 'Networking Cleanup' });
+    expect(json.nextPhase).toMatchObject({ number: 2, title: 'Storage Cleanup' });
+  });
 });

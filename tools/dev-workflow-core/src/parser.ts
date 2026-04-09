@@ -337,7 +337,7 @@ export async function parseSubPrd(filePath: string): Promise<SubPrdResult | null
   const total = steps.length;
   const status: SubPrdResult['status'] =
     total === 0
-      ? 'not-started'
+      ? extractSubPrdHeaderStatus(content) ?? 'not-started'
       : done === total
         ? 'complete'
         : done > 0
@@ -345,6 +345,17 @@ export async function parseSubPrd(filePath: string): Promise<SubPrdResult | null
           : 'not-started';
 
   return { id, title, done, total, status, steps };
+}
+
+/** Extract status from the **Status** frontmatter field in a sub-PRD (e.g., "**Status**: Complete"). */
+function extractSubPrdHeaderStatus(content: string): SubPrdResult['status'] | null {
+  const match = content.match(/\*\*Status\*\*:\s*(.+)/i);
+  if (!match) return null;
+  const val = match[1].trim().toLowerCase();
+  if (val === 'complete' || val === 'completed' || val === 'done') return 'complete';
+  if (val.startsWith('in progress') || val.startsWith('in-progress')) return 'in-progress';
+  if (val === 'not started' || val === 'not-started' || val === 'pending') return 'not-started';
+  return null;
 }
 
 // ─── Status Determination ──────────────────────────────────────────
@@ -430,12 +441,16 @@ export async function parseFeature(featureDir: string, name: string): Promise<Fe
   const allComplete = progress !== null && progress.total > 0 && progress.done === progress.total;
 
   // At gate: completed phase(s) followed by not-started phase(s), no in-progress phase
+  // Fall back to sub-PRD statuses when master plan has no Phase headers
+  let gatePhases = masterPlan?.phases ?? [];
+  if (gatePhases.length === 0 && masterPlan) {
+    gatePhases = await parseSubPrdsAsPhases(featureDir);
+  }
   const atGate =
-    masterPlan !== null &&
     !allComplete &&
-    masterPlan.phases.some((p) => p.status === 'complete') &&
-    masterPlan.phases.some((p) => p.status === 'not-started') &&
-    !masterPlan.phases.some((p) => p.status === 'in-progress');
+    gatePhases.some((p) => p.status === 'complete') &&
+    gatePhases.some((p) => p.status === 'not-started') &&
+    !gatePhases.some((p) => p.status === 'in-progress');
 
   const status = determineFeatureStatus({
     hasMasterPlan: masterPlan !== null,
@@ -498,6 +513,35 @@ async function aggregateSubPrdProgress(featureDir: string): Promise<Progress | n
     return { done, total, percent };
   } catch {
     return null;
+  }
+}
+
+/** Scan sub-PRDs in a feature directory and return Phase-like entries for gate detection. */
+export async function parseSubPrdsAsPhases(featureDir: string): Promise<Phase[]> {
+  try {
+    const entries = await readdir(featureDir);
+    const subPrdFiles = entries.filter((e) => /^\d+-sub-prd-.*\.md$/.test(e)).sort();
+    if (subPrdFiles.length === 0) return [];
+
+    const phases: Phase[] = [];
+    for (const file of subPrdFiles) {
+      const result = await parseSubPrd(resolve(featureDir, file));
+      if (result) {
+        const numMatch = file.match(/^(\d+)/);
+        const number = numMatch ? parseInt(numMatch[1], 10) : phases.length + 1;
+        phases.push({
+          number,
+          title: result.title,
+          done: result.done,
+          total: result.total,
+          status: result.status,
+        });
+      }
+    }
+
+    return phases;
+  } catch {
+    return [];
   }
 }
 

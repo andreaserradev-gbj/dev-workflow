@@ -1,5 +1,5 @@
 import { resolve } from 'path';
-import { parseMasterPlan } from 'dev-workflow-core';
+import { parseMasterPlan, parseSubPrdsAsPhases } from 'dev-workflow-core';
 import { resolveFeatureDir } from '../resolve.js';
 import { parseFlags } from '../index.js';
 
@@ -29,7 +29,11 @@ export async function gateCheck(args: string[]): Promise<number> {
     return 1;
   }
 
-  const phases = masterPlan.phases;
+  // Use master plan phases; fall back to sub-PRDs when the master plan has no Phase headers
+  let phases = masterPlan.phases;
+  if (phases.length === 0) {
+    phases = await parseSubPrdsAsPhases(featureDir);
+  }
   const allComplete = phases.length > 0 && phases.every((p) => p.status === 'complete');
   const hasCompleted = phases.some((p) => p.status === 'complete');
   const hasNotStarted = phases.some((p) => p.status === 'not-started');

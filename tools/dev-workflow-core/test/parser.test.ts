@@ -4,6 +4,7 @@ import {
   parseMasterPlan,
   parseCheckpoint,
   parseSubPrd,
+  parseSubPrdsAsPhases,
   determineFeatureStatus,
   parseFeature,
 } from '../src/parser.js';
@@ -242,6 +243,48 @@ describe('parseSubPrd', () => {
     const result = await parseSubPrd(resolve(FIXTURES, 'gate-feature/01-sub-prd-fake.md'));
     expect(result).toBeNull();
   });
+
+  it('falls back to **Status** header when no table steps found', async () => {
+    const result = await parseSubPrd(resolve(FIXTURES, 'subprd-gate-no-table/01-sub-prd-networking.md'));
+
+    expect(result).not.toBeNull();
+    expect(result!.title).toBe('Networking Cleanup');
+    expect(result!.total).toBe(0);
+    expect(result!.status).toBe('complete');
+  });
+
+  it('falls back to not-started from **Status** header', async () => {
+    const result = await parseSubPrd(resolve(FIXTURES, 'subprd-gate-no-table/02-sub-prd-storage.md'));
+
+    expect(result).not.toBeNull();
+    expect(result!.status).toBe('not-started');
+  });
+});
+
+// ─── Sub-PRD as Phases (gate fallback) ────────────────────────────
+
+describe('parseSubPrdsAsPhases', () => {
+  it('converts sub-PRDs to Phase entries with table-based status', async () => {
+    const phases = await parseSubPrdsAsPhases(resolve(FIXTURES, 'subprd-gate'));
+
+    expect(phases).toHaveLength(3);
+    expect(phases[0]).toMatchObject({ number: 1, title: 'Cloud Cleanup', status: 'complete' });
+    expect(phases[1]).toMatchObject({ number: 2, title: 'Config Cleanup', status: 'not-started' });
+    expect(phases[2]).toMatchObject({ number: 3, title: 'Code Removal', status: 'not-started' });
+  });
+
+  it('converts sub-PRDs to Phase entries with header-based status', async () => {
+    const phases = await parseSubPrdsAsPhases(resolve(FIXTURES, 'subprd-gate-no-table'));
+
+    expect(phases).toHaveLength(2);
+    expect(phases[0]).toMatchObject({ number: 1, title: 'Networking Cleanup', status: 'complete' });
+    expect(phases[1]).toMatchObject({ number: 2, title: 'Storage Cleanup', status: 'not-started' });
+  });
+
+  it('returns empty array when no sub-PRDs exist', async () => {
+    const phases = await parseSubPrdsAsPhases(resolve(FIXTURES, 'gate-feature'));
+    expect(phases).toHaveLength(0);
+  });
 });
 
 // ─── Status Determination ──────────────────────────────────────────
@@ -455,5 +498,21 @@ describe('parseFeature', () => {
     expect(result.name).toBe('shortcode-emoji');
     expect(result.status).toBe('complete');
     expect(result.progress).toMatchObject({ done: 3, total: 3, percent: 100 });
+  });
+
+  it('detects gate from sub-PRDs when master plan has no Phase headers', async () => {
+    const result = await parseFeature(resolve(FIXTURES, 'subprd-gate'), 'subprd-gate');
+
+    expect(result.name).toBe('subprd-gate');
+    expect(result.status).toBe('gate');
+    // Progress from sub-PRD step counts: 3 of 8
+    expect(result.progress).toMatchObject({ done: 3, total: 8 });
+  });
+
+  it('detects gate from sub-PRDs with header-only status', async () => {
+    const result = await parseFeature(resolve(FIXTURES, 'subprd-gate-no-table'), 'subprd-gate-no-table');
+
+    expect(result.name).toBe('subprd-gate-no-table');
+    expect(result.status).toBe('gate');
   });
 });
