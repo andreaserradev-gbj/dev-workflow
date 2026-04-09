@@ -1,67 +1,19 @@
-// Feature-level status (derived from PRD markdown + checkpoint dates)
-export type FeatureStatus =
-  | 'gate'
-  | 'active'
-  | 'stale'
-  | 'complete'
-  | 'checkpoint-only'
-  | 'no-prd'
-  | 'empty'
-  | 'archived';
+// Shared workflow types — re-exported from the core package's types-only
+// subpath so the Vite client build never pulls in Node.js code.
+export type {
+  FeatureStatus,
+  Progress,
+  Phase,
+  SubPrdStep,
+  SubPrd,
+  Feature,
+  Project,
+} from 'dev-workflow-core/types';
+export { STATUS_ORDER } from 'dev-workflow-core/types';
 
-// Step-level progress
-export interface Progress {
-  done: number;
-  total: number;
-  percent: number;
-}
+// ─── Dashboard-only types (API/UI concerns) ──────────────────────
 
-// Phase from master plan
-export interface Phase {
-  number: number;
-  title: string;
-  done: number;
-  total: number;
-  status: 'complete' | 'in-progress' | 'not-started';
-}
-
-// Sub-PRD step
-export interface SubPrdStep {
-  number: number;
-  description: string;
-  status: 'done' | 'pending';
-}
-
-// Sub-PRD summary
-export interface SubPrd {
-  id: string;
-  title: string;
-  done: number;
-  total: number;
-  status: 'complete' | 'in-progress' | 'not-started';
-  steps: SubPrdStep[];
-}
-
-// Feature summary (used in portfolio list view)
-export interface Feature {
-  name: string;
-  status: FeatureStatus;
-  progress: Progress | null;
-  currentPhase: { number: number; total: number; title: string } | null;
-  lastCheckpoint: string | null;
-  created: string | null;
-  lastUpdated: string | null;
-  nextAction: string | null;
-  branch: string | null;
-  summary: string | null;
-}
-
-// Project groups features by parent directory
-export interface Project {
-  name: string;
-  path: string;
-  features: Feature[];
-}
+import type { Feature, Phase, Project, SubPrd } from 'dev-workflow-core/types';
 
 // GET /api/projects response
 export interface ProjectsResponse {
@@ -114,15 +66,3 @@ export type WsEvent =
   | { type: 'feature_added'; project: string; feature: Feature }
   | { type: 'feature_removed'; project: string; feature: string }
   | { type: 'full_refresh'; data: ProjectsResponse };
-
-// Status sort order — gate first (needs user action), complete last
-export const STATUS_ORDER: Record<FeatureStatus, number> = {
-  gate: 0,
-  active: 1,
-  'checkpoint-only': 2,
-  stale: 3,
-  'no-prd': 4,
-  empty: 5,
-  complete: 6,
-  archived: 7,
-};
