@@ -52,12 +52,17 @@ export async function progressSummary(args: string[]): Promise<number> {
     }
   }
 
-  // If master plan has no inline steps, aggregate from sub-PRDs
+  // If master plan has no inline steps, aggregate from sub-PRDs, then phase counts
   let overall = masterPlan.progress;
   if (overall.total === 0 && subPrds.length > 0) {
     const done = subPrds.reduce((sum, s) => sum + s.done, 0);
     const total = subPrds.reduce((sum, s) => sum + s.total, 0);
     overall = { done, total, percent: total > 0 ? Math.round((done / total) * 100) : 0 };
+  }
+  if (overall.total === 0 && masterPlan.phases.length > 0) {
+    const done = masterPlan.phases.filter((p) => p.status === 'complete').length;
+    const total = masterPlan.phases.length;
+    overall = { done, total, percent: Math.round((done / total) * 100) };
   }
 
   const output: ProgressOutput = {

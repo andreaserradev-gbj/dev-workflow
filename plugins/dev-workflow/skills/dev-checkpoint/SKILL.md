@@ -6,7 +6,7 @@ description: >-
   and writes checkpoint.md for the next session.
   Use at the end of a session or before switching context.
 argument-hint: <feature name>
-allowed-tools: Bash(bash:*) Bash(git add:*) Bash(git commit:*) Bash(git log:*) Bash(git status:*) Read
+allowed-tools: Bash(bash:*) Bash(node:*) Bash(git add:*) Bash(git commit:*) Bash(git log:*) Bash(git status:*) Read
 ---
 
 ## Checkpoint Current Session

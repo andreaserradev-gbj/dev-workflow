@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# Pre-commit hook: run script tests and check dashboard bundle freshness.
+# Pre-commit hook: run script tests and check dashboard and CLI bundle freshness.
 
 if ! bash tests/test-scripts.sh; then
   echo ""

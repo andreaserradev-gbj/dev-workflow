@@ -6,7 +6,7 @@ description: >-
   and writes PRD files to .dev/.
   Use when starting a new feature, spike, or major task.
 argument-hint: <feature description>
-allowed-tools: Bash(bash:*) Read
+allowed-tools: Bash(bash:*) Bash(node:*) Read
 ---
 
 ## Step 0: Discover Project Root
