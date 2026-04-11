@@ -148,7 +148,7 @@ node "$CLI" gate-check --json --dir "$FEATURE_DIR"
 
 Where `$CLI` is the absolute path to `scripts/dev-workflow.cjs` within this skill's directory.
 
-The command returns exit 0 when at a gate (`atGate: true`) or when all phases are complete (`allComplete: true`), and exit 2 when work is still in progress. Use this to confirm phase completion rather than relying on visual inspection of markdown markers.
+The command always returns exit 0 on success (exit 1 on error). Check the `atGate` and `allComplete` fields in the JSON output to determine gate status. Use this to confirm phase completion rather than relying on visual inspection of markdown markers.
 
 At every gate (whether detected by `gate-check` or by `⏸️ **GATE**:` markers in the PRD) — this is a HARD STOP:
 1. **STOP** — Do not proceed to the next phase

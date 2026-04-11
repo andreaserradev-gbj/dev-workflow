@@ -4,6 +4,12 @@ All notable changes to this project should be documented in this file.
 
 <!-- LOCAL-RELEASES-START -->
 
+## v1.27.2 - 2026-04-11
+
+### Fixed
+
+- `gate-check` now always exits 0 on success (uses JSON `atGate` field for status instead of exit code 2). Prevents parallel tool call cancellation when LLM runs `gate-check` alongside other commands.
+
 ## v1.27.1 - 2026-04-09
 
 ### Fixed

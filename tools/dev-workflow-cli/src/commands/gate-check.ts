@@ -75,6 +75,5 @@ export async function gateCheck(args: string[]): Promise<number> {
     }
   }
 
-  // Exit code: 0 = at gate or all complete, 2 = not at gate
-  return atGate || allComplete ? 0 : 2;
+  return 0;
 }

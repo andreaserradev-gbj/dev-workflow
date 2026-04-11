@@ -43,10 +43,10 @@ describe('gate-check', () => {
     expect(json.allComplete).toBe(false);
   });
 
-  it('reports not at gate for in-progress feature (exit 2)', async () => {
+  it('reports not at gate for in-progress feature (exit 0)', async () => {
     const code = await gateCheck(['--dir', resolve(FIXTURES, 'full-feature'), '--json']);
 
-    expect(code).toBe(2);
+    expect(code).toBe(0);
     const json = JSON.parse(output.lines.join('\n'));
     expect(json.atGate).toBe(false);
     expect(json.completedPhase).toBeNull();
@@ -76,7 +76,7 @@ describe('gate-check', () => {
   it('shows not at gate text for in-progress feature', async () => {
     const code = await gateCheck(['--dir', resolve(FIXTURES, 'full-feature')]);
 
-    expect(code).toBe(2);
+    expect(code).toBe(0);
     const text = output.lines.join('\n');
     expect(text).toContain('Not at a gate');
     expect(text).toContain('In progress: Phase 2');
