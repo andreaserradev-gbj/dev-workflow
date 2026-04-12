@@ -63,6 +63,37 @@ export interface Project {
   features: Feature[];
 }
 
+// Checkpoint write input — camelCase internally, snake_case at YAML boundary
+export interface CheckpointWriteInput {
+  branch?: string;
+  lastCommit?: string;
+  uncommittedChanges?: boolean;
+  checkpointed?: string; // ISO 8601, defaults to now
+  prdFiles?: string[]; // "Read the following PRD files in order" list
+  context: string;
+  currentState: string;
+  nextAction: string;
+  keyFiles: string;
+  decisions?: string[];
+  blockers?: string[];
+  notes?: string[];
+  continuationPrompt?: string; // final "Please continue with..." line
+}
+
+// Status update target and result
+export interface StepTarget {
+  phase: number; // which phase's steps to target
+  step?: number; // specific step number (omit for phase-level marker)
+}
+
+export type StatusMarker = '✅' | '⬜';
+
+export interface StatusUpdateResult {
+  changed: boolean;
+  line: number;
+  file: string;
+}
+
 // Status sort order — gate first (needs user action), complete last
 export const STATUS_ORDER: Record<FeatureStatus, number> = {
   gate: 0,

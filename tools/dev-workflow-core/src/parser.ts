@@ -6,7 +6,7 @@ import type { Feature, FeatureStatus, Phase, Progress, SubPrdStep } from './type
 // ─── Emoji Shortcode Normalization ──────────────────────────────────
 
 /** Replace common GitHub emoji shortcodes with their Unicode equivalents. */
-function normalizeEmoji(text: string): string {
+export function normalizeEmoji(text: string): string {
   return text
     .replace(/:white_check_mark:/g, '✅')
     .replace(/:white_large_square:/g, '⬜')
