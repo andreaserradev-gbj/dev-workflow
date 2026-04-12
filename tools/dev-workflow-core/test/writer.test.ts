@@ -31,14 +31,15 @@ async function roundTripTest(fixtureDir: string) {
     lastCommit: original!.lastCommit ?? undefined,
     uncommittedChanges: original!.uncommittedChanges ?? undefined,
     checkpointed: original!.checkpointed ?? undefined,
-    prdFiles: [], // Not stored in checkpoint, omit for round-trip
+    prdFiles: original!.prdFiles.length > 0 ? original!.prdFiles : undefined,
     context: original!.context ?? '',
-    currentState: '', // Not stored separately in CheckpointResult
+    currentState: original!.currentState ?? '',
     nextAction: original!.nextAction ?? '',
-    keyFiles: '', // Not stored separately in CheckpointResult
+    keyFiles: original!.keyFiles ?? '',
     decisions: original!.decisions.length > 0 ? original!.decisions : undefined,
     blockers: original!.blockers.length > 0 ? original!.blockers : undefined,
     notes: original!.notes.length > 0 ? original!.notes : undefined,
+    continuationPrompt: original!.continuationPrompt ?? undefined,
   };
 
   // Write to temp file
@@ -57,9 +58,14 @@ async function roundTripTest(fixtureDir: string) {
   // checkpointed may differ in format (ISO string vs YAML date) but the value should match
   // after round-trip through gray-matter
   expect(written!.context).toBe(original!.context);
+  expect(written!.currentState).toBe(original!.currentState);
+  expect(written!.nextAction).toBe(original!.nextAction);
+  expect(written!.keyFiles).toBe(original!.keyFiles);
+  expect(written!.prdFiles).toEqual(original!.prdFiles);
   expect(written!.decisions).toEqual(original!.decisions);
   expect(written!.blockers).toEqual(original!.blockers);
   expect(written!.notes).toEqual(original!.notes);
+  expect(written!.continuationPrompt).toBe(original!.continuationPrompt);
 
   // Cleanup
   await rm(TMP_DIR, { recursive: true, force: true });
@@ -82,13 +88,15 @@ describe('writeCheckpoint round-trip', () => {
       lastCommit: original!.lastCommit ?? undefined,
       uncommittedChanges: original!.uncommittedChanges ?? undefined,
       checkpointed: original!.checkpointed ?? undefined,
+      prdFiles: original!.prdFiles.length > 0 ? original!.prdFiles : undefined,
       context: original!.context ?? '',
-      currentState: '## Current Progress\n\n- ✅ Phase 1 complete: All 5 steps done\n- ⬜ Phase 2 in progress',
+      currentState: original!.currentState ?? '',
       nextAction: original!.nextAction ?? '',
-      keyFiles: '## Key Files\n\n- Token service: src/auth/token-service.ts\n- JWT config: src/auth/jwt-config.ts',
+      keyFiles: original!.keyFiles ?? '',
       decisions: original!.decisions.length > 0 ? original!.decisions : undefined,
       blockers: original!.blockers.length > 0 ? original!.blockers : undefined,
       notes: original!.notes.length > 0 ? original!.notes : undefined,
+      continuationPrompt: original!.continuationPrompt ?? undefined,
     };
 
     await mkdir(TMP_DIR, { recursive: true });
@@ -105,10 +113,14 @@ describe('writeCheckpoint round-trip', () => {
 
     // XML sections must match
     expect(written!.context).toBe(original!.context);
+    expect(written!.currentState).toBe(original!.currentState);
     expect(written!.nextAction).toBe(original!.nextAction);
+    expect(written!.keyFiles).toBe(original!.keyFiles);
+    expect(written!.prdFiles).toEqual(original!.prdFiles);
     expect(written!.decisions).toEqual(original!.decisions);
     expect(written!.blockers).toEqual(original!.blockers);
     expect(written!.notes).toEqual(original!.notes);
+    expect(written!.continuationPrompt).toBe(original!.continuationPrompt);
   });
 
   it('round-trips the checkpoint-only fixture (no optional sections)', async () => {
@@ -126,10 +138,11 @@ describe('writeCheckpoint round-trip', () => {
       lastCommit: original!.lastCommit ?? undefined,
       uncommittedChanges: original!.uncommittedChanges ?? undefined,
       checkpointed: original!.checkpointed ?? undefined,
+      prdFiles: original!.prdFiles.length > 0 ? original!.prdFiles : undefined,
       context: original!.context ?? '',
-      currentState: '## Current Progress\n\n- ✅ Migration scaffold: Created base migration runner\n- ⬜ Schema mapping: Define column transformations',
+      currentState: original!.currentState ?? '',
       nextAction: original!.nextAction ?? '',
-      keyFiles: '## Key Files\n\n- Migration runner: src/migrate/runner.ts\n- Schema map: src/migrate/schema-map.ts',
+      keyFiles: original!.keyFiles ?? '',
       decisions: undefined,
       blockers: undefined,
       notes: undefined,
@@ -144,7 +157,10 @@ describe('writeCheckpoint round-trip', () => {
     expect(written!.branch).toBe(original!.branch);
     expect(written!.uncommittedChanges).toBe(original!.uncommittedChanges);
     expect(written!.context).toBe(original!.context);
+    expect(written!.currentState).toBe(original!.currentState);
     expect(written!.nextAction).toBe(original!.nextAction);
+    expect(written!.keyFiles).toBe(original!.keyFiles);
+    expect(written!.prdFiles).toEqual(original!.prdFiles);
     expect(written!.decisions).toEqual([]);
     expect(written!.blockers).toEqual([]);
     expect(written!.notes).toEqual([]);
@@ -168,10 +184,11 @@ describe('writeCheckpoint diff (formatting-only vs content loss)', () => {
       lastCommit: original!.lastCommit ?? undefined,
       uncommittedChanges: original!.uncommittedChanges ?? undefined,
       checkpointed: original!.checkpointed ?? undefined,
+      prdFiles: original!.prdFiles.length > 0 ? original!.prdFiles : undefined,
       context: original!.context ?? '',
-      currentState: '## Current Progress\n\n- ✅ Phase 1 complete: All 5 steps done\n- ⬜ Phase 2 in progress',
+      currentState: original!.currentState ?? '',
       nextAction: original!.nextAction ?? '',
-      keyFiles: '## Key Files\n\n- Token service: src/auth/token-service.ts',
+      keyFiles: original!.keyFiles ?? '',
       decisions: original!.decisions.length > 0 ? original!.decisions : undefined,
       blockers: original!.blockers.length > 0 ? original!.blockers : undefined,
       notes: original!.notes.length > 0 ? original!.notes : undefined,
@@ -190,7 +207,11 @@ describe('writeCheckpoint diff (formatting-only vs content loss)', () => {
     expect(written!.lastCommit).toBe(original!.lastCommit);
     expect(written!.uncommittedChanges).toBe(original!.uncommittedChanges);
     expect(written!.context).toBe(original!.context);
+    expect(written!.currentState).toBe(original!.currentState);
     expect(written!.nextAction).toBe(original!.nextAction);
+    expect(written!.keyFiles).toBe(original!.keyFiles);
+    expect(written!.prdFiles).toEqual(original!.prdFiles);
+    expect(written!.continuationPrompt).toBe(original!.continuationPrompt);
     expect(written!.decisions).toEqual(original!.decisions);
     expect(written!.blockers).toEqual(original!.blockers);
     expect(written!.notes).toEqual(original!.notes);
@@ -797,11 +818,11 @@ describe('writeCheckpoint regression tests', () => {
     expect(parsed!.lastCommit).toBeNull();
     expect(parsed!.uncommittedChanges).toBeNull();
     expect(parsed!.context).toBe('Just context, nothing else');
-    // Note: parseCheckpoint doesn't extract currentState/keyFiles as separate fields;
-    // they're only in the raw content. Verify the raw content contains them.
-    const rawContent = await readFile(tmpPath, 'utf-8');
-    expect(rawContent).toContain('<current_state>');
-    expect(rawContent).toContain('<key_files>');
+    // currentState and keyFiles are extracted by parseCheckpoint
+    expect(parsed!.currentState).toBe('Working on it');
+    expect(parsed!.keyFiles).toBe('src/main.ts');
+    expect(parsed!.prdFiles).toEqual([]);
+    expect(parsed!.continuationPrompt).toBeNull();
     // checkpointed defaults to now
     expect(parsed!.checkpointed).not.toBeNull();
   });
@@ -958,7 +979,10 @@ describe('writeCheckpoint regression tests', () => {
       // Track known parser limitations — these parse but break round-trip
       const hasInlineClose = /^\s*- .+<\/(?:decisions|blockers|notes)>$/m.test(content);
       const hasBacktickedXml = /\`\u003c(?:decisions|blockers|notes)\u003e\`/.test(content);
-      const isKnownBreakage = hasInlineClose || hasBacktickedXml;
+      // All known parser limitations are now fixed:
+      // - Inline close tags: parser strips stray close tags from list items
+      // - Backticked XML tags: extractXmlTag replaces inline code with placeholders
+      const isKnownBreakage = false;
 
       const original = await parseCheckpoint(cpPath);
       if (!original) continue;
@@ -969,13 +993,15 @@ describe('writeCheckpoint regression tests', () => {
         lastCommit: original.lastCommit ?? undefined,
         uncommittedChanges: original.uncommittedChanges ?? undefined,
         checkpointed: original.checkpointed ?? undefined,
+        prdFiles: original.prdFiles.length > 0 ? original.prdFiles : undefined,
         context: original.context ?? '',
-        currentState: '',
+        currentState: original.currentState ?? '',
         nextAction: original.nextAction ?? '',
-        keyFiles: '',
+        keyFiles: original.keyFiles ?? '',
         decisions: original.decisions.length > 0 ? original.decisions : undefined,
         blockers: original.blockers.length > 0 ? original.blockers : undefined,
         notes: original.notes.length > 0 ? original.notes : undefined,
+        continuationPrompt: original.continuationPrompt ?? undefined,
       };
 
       await mkdir(TMP_DIR, { recursive: true });
@@ -1000,15 +1026,21 @@ describe('writeCheckpoint regression tests', () => {
       if (typeof original.uncommittedChanges === 'boolean') {
         expect(reparsed!.uncommittedChanges).toBe(original.uncommittedChanges);
       }
-      expect(reparsed!.context).toBe(original.context);
-      expect(reparsed!.nextAction).toBe(original.nextAction);
+      // Required fields: writer always produces the XML tag, so null → '' is expected
+      expect(reparsed!.context ?? '').toBe(original.context ?? '');
+      expect(reparsed!.currentState ?? '').toBe(original.currentState ?? '');
+      expect(reparsed!.nextAction ?? '').toBe(original.nextAction ?? '');
+      expect(reparsed!.keyFiles ?? '').toBe(original.keyFiles ?? '');
+      expect(reparsed!.prdFiles).toEqual(original.prdFiles);
       expect(reparsed!.decisions).toEqual(original.decisions);
       expect(reparsed!.blockers).toEqual(original.blockers);
       expect(reparsed!.notes).toEqual(original.notes);
+      expect(reparsed!.continuationPrompt).toBe(original.continuationPrompt);
     }
 
-    // Should have tested at least 6 clean round-trips + 3 known breakage cases
+    // Should have tested at least 6 clean round-trips.
+    // All previous known breakage cases (inline close tags, backticked XML) are now fixed.
     expect(tested).toBeGreaterThanOrEqual(6);
-    expect(knownBreakage).toBe(3); // full-feature + inline-close-tags + backticked-xml-tags
+    expect(knownBreakage).toBe(0); // All parser bugs fixed!
   });
 });

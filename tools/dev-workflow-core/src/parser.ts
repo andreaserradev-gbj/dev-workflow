@@ -200,6 +200,10 @@ export interface CheckpointResult {
   blockers: string[];
   notes: string[];
   context: string | null;
+  currentState: string | null;
+  keyFiles: string | null;
+  prdFiles: string[];
+  continuationPrompt: string | null;
 }
 
 export async function parseCheckpoint(filePath: string): Promise<CheckpointResult | null> {
@@ -234,6 +238,10 @@ export async function parseCheckpoint(filePath: string): Promise<CheckpointResul
   const blockers = extractXmlListItems(content, 'blockers');
   const notes = extractXmlListItems(content, 'notes');
   const context = extractXmlTag(content, 'context');
+  const currentState = extractXmlTag(content, 'current_state');
+  const keyFiles = extractXmlTag(content, 'key_files');
+  const prdFiles = extractPrdFiles(content);
+  const continuationPrompt = extractContinuationPrompt(content);
 
   return {
     branch,
@@ -245,14 +253,36 @@ export async function parseCheckpoint(filePath: string): Promise<CheckpointResul
     blockers,
     notes,
     context,
+    currentState,
+    keyFiles,
+    prdFiles,
+    continuationPrompt,
   };
 }
 
 function extractXmlTag(content: string, tag: string): string | null {
+  // Replace inline code spans with placeholders to prevent XML tags
+  // inside backtick code (e.g., `<decisions>`) from being matched.
+  // Restoration happens after matching so extracted content preserves
+  // any legitimate inline code.
+  const placeholders: { placeholder: string; original: string }[] = [];
+  let counter = 0;
+  const stripped = content.replace(/`[^`]*`/g, (match) => {
+    const placeholder = `\x00INLINE_CODE_${counter++}\x00`;
+    placeholders.push({ placeholder, original: match });
+    return placeholder;
+  });
+
   const regex = new RegExp(`<${tag}>([\\s\\S]*?)</${tag}>`, 'i');
-  const match = content.match(regex);
+  const match = stripped.match(regex);
   if (!match) return null;
-  return match[1].trim();
+
+  let result = match[1].trim();
+  // Restore any placeholders that appear in the extracted content
+  for (const { placeholder, original } of placeholders) {
+    result = result.replace(placeholder, original);
+  }
+  return result;
 }
 
 function extractXmlListItems(content: string, tag: string): string[] {
@@ -266,11 +296,71 @@ function extractXmlListItems(content: string, tag: string): string[] {
     // Match list items: "- item text"
     const listMatch = trimmed.match(/^-\s+(.+)/);
     if (listMatch) {
-      items.push(listMatch[1].trim());
+      // Strip stray close tags from list items (legacy format where
+      // e.g. "- text</decisions>" appears on the last item before the closing tag)
+      let item = listMatch[1].replace(/<\/(?:decisions|blockers|notes|context|current_state|next_action|key_files)>$/i, '').trim();
+      items.push(item);
     }
   }
 
   return items;
+}
+
+// ─── PRD File List ────────────────────────────────────────────────
+
+/** Extract the PRD file list from the "Read the following PRD files in order:" section. */
+function extractPrdFiles(content: string): string[] {
+  const match = content.match(/Read the following PRD files in order:\s*\n([\s\S]*?)(?:\n\n|\n<)/i);
+  if (!match) return [];
+
+  const files: string[] = [];
+  const lines = match[1].split('\n');
+  for (const line of lines) {
+    const trimmed = line.trim();
+    // Match numbered list items: "1. path/to/file.md"
+    const fileMatch = trimmed.match(/^\d+\.\s+(.+)/);
+    if (fileMatch) {
+      files.push(fileMatch[1].trim());
+    }
+  }
+
+  return files;
+}
+
+// ─── Continuation Prompt ──────────────────────────────────────────
+
+/** Extract the continuation prompt text after the final `---` separator.
+ *  Only searches the body content after the YAML frontmatter, not the
+ *  frontmatter delimiters themselves.
+ */
+function extractContinuationPrompt(content: string): string | null {
+  // Strip YAML frontmatter to avoid matching its --- delimiters.
+  // gray-matter.parse() separates frontmatter from body; we work on body only.
+  let body: string;
+  try {
+    const parsed = matter(content);
+    body = parsed.content;
+  } catch {
+    // If YAML is malformed, fall back to rough stripping: everything after second ---
+    const secondDash = content.indexOf('---', content.indexOf('---') + 3);
+    body = secondDash >= 0 ? content.slice(secondDash + 3) : content;
+  }
+
+  // Find the last `---` on its own line in the body content
+  const separatorRegex = /^---\s*$/gm;
+  let lastSeparatorIndex = -1;
+  let m: RegExpExecArray | null;
+  while ((m = separatorRegex.exec(body)) !== null) {
+    lastSeparatorIndex = m.index;
+  }
+
+  if (lastSeparatorIndex === -1) return null;
+
+  // Text after the last `---` separator in the body
+  const after = body.slice(lastSeparatorIndex + 3).trim();
+  if (!after) return null;
+
+  return after;
 }
 
 // ─── Sub-PRD ───────────────────────────────────────────────────────

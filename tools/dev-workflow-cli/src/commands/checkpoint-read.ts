@@ -32,10 +32,30 @@ export async function checkpointRead(args: string[]): Promise<number> {
       console.log('Context:');
       console.log(checkpoint.context);
     }
+    if (checkpoint.currentState) {
+      console.log();
+      console.log('Current state:');
+      console.log(checkpoint.currentState);
+    }
     if (checkpoint.nextAction) {
       console.log();
       console.log('Next action:');
       console.log(checkpoint.nextAction);
+    }
+    if (checkpoint.keyFiles) {
+      console.log();
+      console.log('Key files:');
+      console.log(checkpoint.keyFiles);
+    }
+    if (checkpoint.prdFiles.length > 0) {
+      console.log();
+      console.log('PRD files:');
+      for (const f of checkpoint.prdFiles) console.log(`  ${f}`);
+    }
+    if (checkpoint.continuationPrompt) {
+      console.log();
+      console.log('Continuation:');
+      console.log(checkpoint.continuationPrompt);
     }
     if (checkpoint.decisions.length > 0) {
       console.log();

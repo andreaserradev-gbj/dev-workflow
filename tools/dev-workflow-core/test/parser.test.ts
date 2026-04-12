@@ -221,6 +221,113 @@ describe('parseCheckpoint', () => {
     const result = await parseCheckpoint(resolve(FIXTURES, 'empty-dev/checkpoint.md'));
     expect(result).toBeNull();
   });
+
+  // ─── Parser Bug Fix Tests ──────────────────────────────────────
+
+  it('extracts <current_state> section from full-feature', async () => {
+    const result = await parseCheckpoint(resolve(FIXTURES, 'full-feature/checkpoint.md'));
+    expect(result).not.toBeNull();
+    expect(result!.currentState).toContain('Phase 1 complete: All 5 steps done');
+    expect(result!.currentState).toContain('✅');
+    expect(result!.currentState).toContain('⬜');
+  });
+
+  it('extracts <key_files> section from full-feature', async () => {
+    const result = await parseCheckpoint(resolve(FIXTURES, 'full-feature/checkpoint.md'));
+    expect(result).not.toBeNull();
+    expect(result!.keyFiles).toContain('src/auth/token-service.ts');
+    expect(result!.keyFiles).toContain('src/auth/jwt-config.ts');
+  });
+
+  it('extracts PRD file list from full-feature', async () => {
+    const result = await parseCheckpoint(resolve(FIXTURES, 'full-feature/checkpoint.md'));
+    expect(result).not.toBeNull();
+    expect(result!.prdFiles).toHaveLength(2);
+    expect(result!.prdFiles[0]).toBe('.dev/auth-system/00-master-plan.md');
+    expect(result!.prdFiles[1]).toBe('.dev/auth-system/01-sub-prd-tokens.md');
+  });
+
+  it('extracts PRD file list from checkpoint-only', async () => {
+    const result = await parseCheckpoint(resolve(FIXTURES, 'checkpoint-only/checkpoint.md'));
+    expect(result).not.toBeNull();
+    expect(result!.prdFiles).toHaveLength(1);
+    expect(result!.prdFiles[0]).toBe('.dev/data-migration/00-master-plan.md');
+  });
+
+  it('extracts continuation prompt from comprehensive fixture', async () => {
+    const result = await parseCheckpoint(resolve(FIXTURES, 'edge-case-checkpoints/comprehensive/checkpoint.md'));
+    expect(result).not.toBeNull();
+    expect(result!.continuationPrompt).toBe('Please continue by monitoring the vendor incident resolution. Check error rate and verify functionality is restored.');
+  });
+
+  it('extracts continuation prompt from backticked-xml-tags fixture', async () => {
+    const result = await parseCheckpoint(resolve(FIXTURES, 'edge-case-checkpoints/backticked-xml-tags/checkpoint.md'));
+    expect(result).not.toBeNull();
+    expect(result!.continuationPrompt).toBe('Please continue with Phase 1 implementation.');
+  });
+
+  it('returns null continuationPrompt when no --- separator in body', async () => {
+    const result = await parseCheckpoint(resolve(FIXTURES, 'full-feature/checkpoint.md'));
+    expect(result).not.toBeNull();
+    expect(result!.continuationPrompt).toBeNull();
+  });
+
+  it('returns empty prdFiles array when no PRD list present', async () => {
+    const result = await parseCheckpoint(resolve(FIXTURES, 'edge-case-checkpoints/inline-close-tags/checkpoint.md'));
+    expect(result).not.toBeNull();
+    expect(result!.prdFiles).toEqual([]);
+  });
+
+  it('does not match XML tags inside backtick code (backticked-xml-tags fixture)', async () => {
+    const result = await parseCheckpoint(resolve(FIXTURES, 'edge-case-checkpoints/backticked-xml-tags/checkpoint.md'));
+    expect(result).not.toBeNull();
+
+    // decisions should contain the actual decisions, not garbage from backtick code
+    expect(result!.decisions).toHaveLength(2);
+    expect(result!.decisions[0]).toBe('Use gray-matter for YAML stringifying');
+    expect(result!.decisions[1]).toBe('Round-trip validation only');
+
+    // notes should contain the actual note text including backtick references
+    expect(result!.notes).toHaveLength(1);
+    expect(result!.notes[0]).toContain('`<decisions>`');
+
+    // nextAction should preserve backtick code within XML content
+    expect(result!.nextAction).toContain('`writeCheckpoint()`');
+    expect(result!.nextAction).toContain('`matter.stringify()`');
+  });
+
+  it('strips stray close tags from inline-close-tags fixture', async () => {
+    const result = await parseCheckpoint(resolve(FIXTURES, 'edge-case-checkpoints/inline-close-tags/checkpoint.md'));
+    expect(result).not.toBeNull();
+
+    // Decisions should not have trailing </decisions>
+    expect(result!.decisions).toEqual(['RS256 over HS256 for JWT signing', 'Redis for refresh token storage']);
+    expect(result!.blockers).toEqual(['Redis connection pooling needs config']);
+    expect(result!.notes).toEqual(['Consider adding PKCE for mobile flows']);
+  });
+
+  it('extracts currentState and keyFiles from all edge-case checkpoints', async () => {
+    const edgeCaseDir = resolve(FIXTURES, 'edge-case-checkpoints');
+    const entries = await import('fs/promises').then(m => m.readdir(edgeCaseDir));
+
+    for (const entry of entries) {
+      const cpPath = resolve(edgeCaseDir, entry, 'checkpoint.md');
+      let content: string;
+      try { content = await import('fs/promises').then(m => m.readFile(cpPath, 'utf-8')); } catch { continue; }
+
+      const result = await parseCheckpoint(cpPath);
+      if (!result) continue;
+
+      // If file contains <current_state>, it should be extracted
+      if (content.includes('<current_state>')) {
+        expect(result.currentState).not.toBeNull();
+      }
+      // If file contains <key_files>, it should be extracted
+      if (content.includes('<key_files>')) {
+        expect(result.keyFiles).not.toBeNull();
+      }
+    }
+  });
 });
 
 // ─── Sub-PRD Parsing ───────────────────────────────────────────────
