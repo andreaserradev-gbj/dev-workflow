@@ -79,59 +79,25 @@ describe('writeCheckpoint round-trip', () => {
   });
 
   it('round-trips the full-feature checkpoint', async () => {
-    const checkpointPath = resolve(FIXTURES, 'full-feature/checkpoint.md');
-    const original = await parseCheckpoint(checkpointPath);
-    expect(original).not.toBeNull();
-
-    const input: CheckpointWriteInput = {
-      branch: original!.branch ?? undefined,
-      lastCommit: original!.lastCommit ?? undefined,
-      uncommittedChanges: original!.uncommittedChanges ?? undefined,
-      checkpointed: original!.checkpointed ?? undefined,
-      prdFiles: original!.prdFiles.length > 0 ? original!.prdFiles : undefined,
-      context: original!.context ?? '',
-      currentState: original!.currentState ?? '',
-      nextAction: original!.nextAction ?? '',
-      keyFiles: original!.keyFiles ?? '',
-      decisions: original!.decisions.length > 0 ? original!.decisions : undefined,
-      blockers: original!.blockers.length > 0 ? original!.blockers : undefined,
-      notes: original!.notes.length > 0 ? original!.notes : undefined,
-      continuationPrompt: original!.continuationPrompt ?? undefined,
-    };
-
-    await mkdir(TMP_DIR, { recursive: true });
-    const tmpPath = join(TMP_DIR, 'full-roundtrip.md');
-    await writeCheckpoint(tmpPath, input);
-
-    const written = await parseCheckpoint(tmpPath);
-    expect(written).not.toBeNull();
-
-    // Frontmatter fields must match
-    expect(written!.branch).toBe(original!.branch);
-    expect(written!.lastCommit).toBe(original!.lastCommit);
-    expect(written!.uncommittedChanges).toBe(original!.uncommittedChanges);
-
-    // XML sections must match
-    expect(written!.context).toBe(original!.context);
-    expect(written!.currentState).toBe(original!.currentState);
-    expect(written!.nextAction).toBe(original!.nextAction);
-    expect(written!.keyFiles).toBe(original!.keyFiles);
-    expect(written!.prdFiles).toEqual(original!.prdFiles);
-    expect(written!.decisions).toEqual(original!.decisions);
-    expect(written!.blockers).toEqual(original!.blockers);
-    expect(written!.notes).toEqual(original!.notes);
-    expect(written!.continuationPrompt).toBe(original!.continuationPrompt);
+    await roundTripTest('full-feature');
   });
 
   it('round-trips the checkpoint-only fixture (no optional sections)', async () => {
+    // Verify precondition: checkpoint-only fixture has no decisions, blockers, or notes
     const checkpointPath = resolve(FIXTURES, 'checkpoint-only/checkpoint.md');
     const original = await parseCheckpoint(checkpointPath);
     expect(original).not.toBeNull();
-
-    // checkpoint-only fixture has no decisions, blockers, or notes
     expect(original!.decisions).toEqual([]);
     expect(original!.blockers).toEqual([]);
     expect(original!.notes).toEqual([]);
+
+    await roundTripTest('checkpoint-only');
+  });
+
+  // Continuation of original test (assertions on written content)
+  it('round-trips checkpoint-only with correct parsed values', async () => {
+    const checkpointPath = resolve(FIXTURES, 'checkpoint-only/checkpoint.md');
+    const original = await parseCheckpoint(checkpointPath);
 
     const input: CheckpointWriteInput = {
       branch: original!.branch ?? undefined,
@@ -962,7 +928,6 @@ describe('writeCheckpoint regression tests', () => {
     const allDirs = [...standardDirs, ...entries];
 
     let tested = 0;
-    let knownBreakage = 0; // Expected failures from known parser limitations
 
     for (const entry of allDirs) {
       const isEdgeCase = entries.includes(entry);
@@ -975,14 +940,6 @@ describe('writeCheckpoint regression tests', () => {
 
       // Skip non-YAML-frontmatter checkpoints
       if (!content.trimStart().startsWith('---')) continue;
-
-      // Track known parser limitations — these parse but break round-trip
-      const hasInlineClose = /^\s*- .+<\/(?:decisions|blockers|notes)>$/m.test(content);
-      const hasBacktickedXml = /\`\u003c(?:decisions|blockers|notes)\u003e\`/.test(content);
-      // All known parser limitations are now fixed:
-      // - Inline close tags: parser strips stray close tags from list items
-      // - Backticked XML tags: extractXmlTag replaces inline code with placeholders
-      const isKnownBreakage = false;
 
       const original = await parseCheckpoint(cpPath);
       if (!original) continue;
@@ -1009,13 +966,6 @@ describe('writeCheckpoint regression tests', () => {
       await writeCheckpoint(tmpPath, input);
       const reparsed = await parseCheckpoint(tmpPath);
 
-      if (isKnownBreakage) {
-        // Known parser limitation: round-trip breaks for inline close tags
-        // and backticked XML tags — just verify the write doesn't throw
-        knownBreakage++;
-        continue;
-      }
-
       tested++;
 
       // All key fields must round-trip
@@ -1038,9 +988,7 @@ describe('writeCheckpoint regression tests', () => {
       expect(reparsed!.continuationPrompt).toBe(original.continuationPrompt);
     }
 
-    // Should have tested at least 6 clean round-trips.
-    // All previous known breakage cases (inline close tags, backticked XML) are now fixed.
+    // Should have tested at least 6 clean round-trips
     expect(tested).toBeGreaterThanOrEqual(6);
-    expect(knownBreakage).toBe(0); // All parser bugs fixed!
   });
 });
