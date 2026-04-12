@@ -18,6 +18,14 @@ const REPO_ROOT = resolve(ROOT, '../..');
 const OUT_DIR = resolve(REPO_ROOT, 'plugins/dev-workflow/bin');
 const OUT_FILE = resolve(OUT_DIR, 'dev-workflow.cjs');
 
+// Skill directories that need a copy of the bundle
+const SKILL_DIRS = [
+  'dev-checkpoint',
+  'dev-plan',
+  'dev-resume',
+];
+const SKILL_COPY_DIR = resolve(REPO_ROOT, 'plugins/dev-workflow/skills');
+
 async function bundle() {
   await mkdir(OUT_DIR, { recursive: true });
 
@@ -37,10 +45,17 @@ async function bundle() {
     ],
   });
 
-  const { statSync } = await import('fs');
+  const { statSync, copyFileSync } = await import('fs');
   const size = statSync(OUT_FILE).size;
   console.log(`dev-workflow.cjs  ${(size / 1024).toFixed(0)} KB`);
   console.log(`\nBundle written to: ${OUT_FILE}`);
+
+  // Sync bundle to skill directories
+  for (const skill of SKILL_DIRS) {
+    const dest = resolve(SKILL_COPY_DIR, skill, 'scripts', 'dev-workflow.cjs');
+    copyFileSync(OUT_FILE, dest);
+    console.log(`Synced to: ${dest}`);
+  }
 }
 
 bundle().catch((err) => {
