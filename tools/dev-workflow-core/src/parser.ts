@@ -1,7 +1,7 @@
 import { readFile, readdir } from 'fs/promises';
 import { resolve, basename } from 'path';
 import matter from 'gray-matter';
-import type { Feature, FeatureStatus, Phase, Progress, SubPrdStep } from './types.js';
+import type { Feature, FeatureStatus, Phase, Progress, SubPrdStep, SessionLogEntry } from './types.js';
 
 // ─── Emoji Shortcode Normalization ──────────────────────────────────
 
@@ -633,6 +633,73 @@ export async function parseSubPrdsAsPhases(featureDir: string): Promise<Phase[]>
   } catch {
     return [];
   }
+}
+
+// ─── Session Log ─────────────────────────────────────────────────
+
+/** Parse session-log.md and return an array of session entries.
+ *
+ *  Session numbers are derived from position in file (Session 1 = first entry).
+ *  Fault-tolerant: skips malformed entries (logs warning to stderr, continues).
+ *  Reuses `extractXmlTag()` and `extractXmlListItems()` from parser.ts.
+ */
+export async function parseSessionLog(filePath: string): Promise<SessionLogEntry[]> {
+  let content: string;
+  try {
+    content = await readFile(filePath, 'utf-8');
+  } catch {
+    return [];
+  }
+
+  if (!content.trim()) return [];
+
+  // Split content into session sections by finding `## Session N` headings
+  // Each section runs from its heading to the next `## Session` heading (or EOF)
+  const sessionRegex = /^## Session\s+\d+\s*—\s*.+/gm;
+  const headings: { index: number; text: string }[] = [];
+
+  let match: RegExpExecArray | null;
+  while ((match = sessionRegex.exec(content)) !== null) {
+    headings.push({ index: match.index, text: match[0] });
+  }
+
+  if (headings.length === 0) return [];
+
+  const entries: SessionLogEntry[] = [];
+
+  for (let i = 0; i < headings.length; i++) {
+    const start = headings[i].index;
+    const end = i + 1 < headings.length ? headings[i + 1].index : content.length;
+    const section = content.slice(start, end);
+
+    try {
+      // Extract date from heading: "## Session N — YYYY-MM-DDT..."
+      const dateMatch = section.match(/^## Session\s+\d+\s*—\s*(.+)/);
+      const date = dateMatch ? dateMatch[1].trim() : '';
+
+      // Extract XML sections using existing parser utilities
+      const context = extractXmlTag(section, 'context');
+      const decisions = extractXmlListItems(section, 'decisions');
+      const blockers = extractXmlListItems(section, 'blockers');
+      const notes = extractXmlListItems(section, 'notes');
+
+      entries.push({
+        session: i + 1, // 1-indexed, derived from position
+        date,
+        context,
+        decisions,
+        blockers,
+        notes,
+      });
+    } catch (err) {
+      // Fault-tolerant: skip malformed entries
+      process.stderr.write(
+        `Warning: skipping malformed session entry at position ${i + 1}: ${err instanceof Error ? err.message : err}\n`,
+      );
+    }
+  }
+
+  return entries;
 }
 
 async function isEmptyFeatureDir(dirPath: string): Promise<boolean> {

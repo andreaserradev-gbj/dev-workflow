@@ -14,6 +14,9 @@ import { featureShow } from './commands/feature-show.js';
 import { progressSummary } from './commands/progress-summary.js';
 import { gateCheck } from './commands/gate-check.js';
 import { checkpointRead } from './commands/checkpoint-read.js';
+import { checkpointWrite } from './commands/checkpoint-write.js';
+import { statusUpdate } from './commands/status-update.js';
+import { resumeContext } from './commands/resume-context.js';
 
 interface Command {
   name: string;
@@ -26,6 +29,9 @@ const commands: Command[] = [
   { name: 'progress-summary', description: 'Show aggregate progress', run: progressSummary },
   { name: 'gate-check', description: 'Check if feature is at a phase gate', run: gateCheck },
   { name: 'checkpoint-read', description: 'Read checkpoint data', run: checkpointRead },
+  { name: 'checkpoint-write', description: 'Write checkpoint from stdin JSON (+session-log)', run: checkpointWrite },
+  { name: 'status-update', description: 'Update PRD status marker', run: statusUpdate },
+  { name: 'resume-context', description: 'Merged resume context packet', run: resumeContext },
 ];
 
 function printUsage(): void {
@@ -36,8 +42,13 @@ function printUsage(): void {
   }
   console.log('\nOptions:');
   console.log('  --json               Output as JSON');
-  console.log('  --dir <path>         Feature directory (default: .dev/ in current project)');
-  console.log('  --feature <name>     Feature name');
+  console.log('  --dir <path>         Feature directory');
+  console.log('  --feature <name>     Feature name under .dev/');
+  console.log('  --stdin              Read input from stdin (checkpoint-write)');
+  console.log('  --phase <number>     Phase number (status-update)');
+  console.log('  --step <number>      Step number (status-update)');
+  console.log('  --marker <done|todo> Marker value (status-update)');
+  console.log('  --sessions <N|all>   Session history limit (resume-context, default: 5)');
 }
 
 export function parseFlags(args: string[]): { flags: Record<string, string | true>; positional: string[] } {
@@ -47,13 +58,21 @@ export function parseFlags(args: string[]): { flags: Record<string, string | tru
   for (let i = 0; i < args.length; i++) {
     const arg = args[i];
     if (arg.startsWith('--')) {
-      const key = arg.slice(2);
-      const next = args[i + 1];
-      if (next && !next.startsWith('--')) {
-        flags[key] = next;
-        i++;
+      const eqIdx = arg.indexOf('=');
+      if (eqIdx !== -1) {
+        // Handle --flag=value syntax
+        const key = arg.slice(2, eqIdx);
+        const value = arg.slice(eqIdx + 1);
+        flags[key] = value || true;
       } else {
-        flags[key] = true;
+        const key = arg.slice(2);
+        const next = args[i + 1];
+        if (next && !next.startsWith('--')) {
+          flags[key] = next;
+          i++;
+        } else {
+          flags[key] = true;
+        }
       }
     } else {
       positional.push(arg);

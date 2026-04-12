@@ -94,6 +94,16 @@ export interface StatusUpdateResult {
   file: string;
 }
 
+// Session log entry from session-log.md
+export interface SessionLogEntry {
+  session: number;
+  date: string;
+  context: string | null;
+  decisions: string[];
+  blockers: string[];
+  notes: string[];
+}
+
 // Status sort order — gate first (needs user action), complete last
 export const STATUS_ORDER: Record<FeatureStatus, number> = {
   gate: 0,

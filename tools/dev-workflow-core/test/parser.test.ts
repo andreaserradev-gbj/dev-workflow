@@ -7,6 +7,7 @@ import {
   parseSubPrdsAsPhases,
   determineFeatureStatus,
   parseFeature,
+  parseSessionLog,
 } from '../src/parser.js';
 import type { Feature } from '../src/types.js';
 
@@ -621,5 +622,63 @@ describe('parseFeature', () => {
 
     expect(result.name).toBe('subprd-gate-no-table');
     expect(result.status).toBe('gate');
+  });
+});
+
+// ─── Session Log Parsing ───────────────────────────────────────────
+
+describe('parseSessionLog', () => {
+  const SESSION_LOG_FIXTURE = resolve(FIXTURES, 'session-log');
+
+  it('returns empty array for non-existent file', async () => {
+    const result = await parseSessionLog('/nonexistent/session-log.md');
+    expect(result).toEqual([]);
+  });
+
+  it('parses a well-formed session-log with multiple sessions', async () => {
+    const result = await parseSessionLog(resolve(SESSION_LOG_FIXTURE, 'session-log.md'));
+
+    expect(result).toHaveLength(3);
+
+    // Session 1
+    expect(result[0].session).toBe(1);
+    expect(result[0].date).toBe('2026-04-10T09:00:00.000Z');
+    expect(result[0].context).toContain('Phase 1 planning');
+    expect(result[0].decisions).toEqual(['Use REST API', 'Skip GraphQL']);
+    expect(result[0].blockers).toEqual([]);
+    expect(result[0].notes).toEqual(['Token expiry edge case']);
+
+    // Session 2
+    expect(result[1].session).toBe(2);
+    expect(result[1].date).toBe('2026-04-11T14:00:00.000Z');
+    expect(result[1].context).toContain('Implementing auth');
+    expect(result[1].decisions).toEqual(['Use JWT']);
+    expect(result[1].blockers).toEqual(['Waiting on Redis']);
+    expect(result[1].notes).toEqual([]);
+
+    // Session 3
+    expect(result[2].session).toBe(3);
+    expect(result[2].date).toBe('2026-04-12T10:00:00.000Z');
+    expect(result[2].context).toContain('Phase 1 complete');
+    expect(result[2].decisions).toEqual(['Use RS256', 'Cache tokens']);
+    expect(result[2].blockers).toEqual([]);
+    expect(result[2].notes).toEqual(['Watch for clock skew']);
+  });
+
+  it('handles session-log with only context (no decisions/blockers/notes)', async () => {
+    const result = await parseSessionLog(resolve(SESSION_LOG_FIXTURE, 'session-log-minimal.md'));
+
+    expect(result).toHaveLength(1);
+    expect(result[0].session).toBe(1);
+    expect(result[0].date).toBe('2026-04-13T08:00:00.000Z');
+    expect(result[0].context).toContain('Simple session');
+    expect(result[0].decisions).toEqual([]);
+    expect(result[0].blockers).toEqual([]);
+    expect(result[0].notes).toEqual([]);
+  });
+
+  it('handles empty file', async () => {
+    const result = await parseSessionLog(resolve(SESSION_LOG_FIXTURE, 'session-log-empty.md'));
+    expect(result).toEqual([]);
   });
 });
