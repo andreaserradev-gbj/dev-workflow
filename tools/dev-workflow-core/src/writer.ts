@@ -137,7 +137,7 @@ export async function updateStatus(
   }
 
   let targetLineIdx = -1;
-  let markerFlipped = false;
+
 
   if (target.step === undefined) {
     // Phase-level marker: flip marker in the phase heading line
@@ -147,14 +147,14 @@ export async function updateStatus(
     if (line.includes(opposite)) {
       // Replace the opposite marker with the target
       lines[targetLineIdx] = line.replace(opposite, marker);
-      markerFlipped = true;
+
     } else if (line.includes(marker)) {
       // Already has the target marker
-      markerFlipped = false;
+
     } else {
       // No marker found — append one
       lines[targetLineIdx] = line.trimEnd() + ' ' + marker;
-      markerFlipped = true;
+
     }
   } else {
     // Step-level marker: find the specific step within the phase section
@@ -192,7 +192,7 @@ export async function updateStatus(
           const oldMarker = numberedMatch[3] as '✅' | '⬜' | '⏭️';
           if (oldMarker !== marker) {
             lines[i] = lines[i].replace(numberedMatch[3], marker);
-            markerFlipped = true;
+      
           }
           break;
         }
@@ -209,7 +209,7 @@ export async function updateStatus(
           const oldMarker = bulletMatch[2] as '✅' | '⬜' | '⏭️';
           if (oldMarker !== marker) {
             lines[i] = lines[i].replace(bulletMatch[2], marker);
-            markerFlipped = true;
+      
           }
           break;
         }
@@ -226,10 +226,10 @@ export async function updateStatus(
           const current = numberedCheckbox[3];
           if (marker === '✅' && current !== 'x') {
             lines[i] = lines[i].replace('[ ]', '[x]').replace('`[ ]`', '`[x]`');
-            markerFlipped = true;
+      
           } else if (marker === '⬜' && current !== ' ') {
             lines[i] = lines[i].replace('[x]', '[ ]').replace('`[x]`', '`[ ]`');
-            markerFlipped = true;
+      
           }
           break;
         }
@@ -246,10 +246,10 @@ export async function updateStatus(
           const current = bulletCheckbox[2];
           if (marker === '✅' && current !== 'x') {
             lines[i] = lines[i].replace('[ ]', '[x]');
-            markerFlipped = true;
+      
           } else if (marker === '⬜' && current !== ' ') {
             lines[i] = lines[i].replace('[x]', '[ ]');
-            markerFlipped = true;
+      
           }
           break;
         }
@@ -265,14 +265,15 @@ export async function updateStatus(
   }
 
   const newContent = lines.join('\n');
+  const fileModified = newContent !== original;
 
   // Write if content changed (marker flip or emoji normalization)
-  if (newContent !== original) {
+  if (fileModified) {
     await writeFile(filePath, newContent, 'utf-8');
   }
 
   return {
-    changed: markerFlipped,
+    changed: fileModified,
     line: targetLineIdx + 1, // 1-indexed
     file: filePath,
   };

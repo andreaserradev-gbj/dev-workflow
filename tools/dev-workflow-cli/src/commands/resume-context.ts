@@ -5,7 +5,6 @@ import { promisify } from 'util';
 import {
   parseFeature,
   parseCheckpoint,
-  parseMasterPlan,
   parseSessionLog,
 } from 'dev-workflow-core';
 import type { SessionLogEntry } from 'dev-workflow-core';
@@ -66,7 +65,14 @@ async function hasUncommittedChanges(): Promise<boolean> {
   }
 }
 
-/** Compute validity based on branch match and checkpoint freshness. */
+/**
+ * Compute validity based on branch match and checkpoint freshness.
+ *
+ * - "drifted": checkpoint branch exists and differs from current branch
+ * - "stale": branches match (or checkpoint has no branch) but checkpoint is >= 3 days old
+ * - "fresh": branches match (or checkpoint has no branch) and checkpoint is < 3 days old
+ *   (also returned when checkpoint has no date — no age info defaults to fresh)
+ */
 function computeValidity(
   checkpointBranch: string | null,
   currentBranch: string,
@@ -185,7 +191,7 @@ export async function resumeContext(args: string[]): Promise<number> {
     return 1;
   }
 
-  // Parse --sessions flag (default: 5, accepts "all")
+  // Parse --sessions flag (default: 5, accepts "all" or 0 for unlimited)
   let maxSessions = 5;
   if (flags.sessions && typeof flags.sessions === 'string') {
     if (flags.sessions.toLowerCase() === 'all') {
@@ -193,7 +199,7 @@ export async function resumeContext(args: string[]): Promise<number> {
     } else {
       const parsed = parseInt(flags.sessions, 10);
       if (!isNaN(parsed) && parsed >= 0) {
-        maxSessions = parsed;
+        maxSessions = parsed === 0 ? Infinity : parsed;
       }
     }
   }
@@ -201,55 +207,33 @@ export async function resumeContext(args: string[]): Promise<number> {
   const featureName =
     (flags.feature as string | undefined) ?? featureDir.split('/').pop()!;
 
-  // 1. Feature data
-  const feature = await parseFeature(featureDir, featureName);
+  // Parallel: all independent data sources at once
+  const masterPlanPath = resolve(featureDir, '00-master-plan.md');
+  const [feature, checkpoint, allSessions, currentBranch, currentUncommitted, masterContent] =
+    await Promise.all([
+      parseFeature(featureDir, featureName),
+      parseCheckpoint(resolve(featureDir, 'checkpoint.md')),
+      parseSessionLog(resolve(featureDir, 'session-log.md')),
+      getCurrentBranch(),
+      hasUncommittedChanges(),
+      readFile(masterPlanPath, 'utf-8').catch(() => null),
+    ]);
 
-  // 2. Checkpoint data
-  const checkpoint = await parseCheckpoint(resolve(featureDir, 'checkpoint.md'));
-
-  // 3. Master plan (for currentPhasePrd and referenceFiles)
-  const masterPlan = await parseMasterPlan(resolve(featureDir, '00-master-plan.md'));
-
-  // 4. Session log
-  const allSessions = await parseSessionLog(resolve(featureDir, 'session-log.md'));
-
-  // 5. Git state
-  const currentBranch = await getCurrentBranch();
-  const currentUncommitted = await hasUncommittedChanges();
-
-  // 6. Compute validity
+  // Compute validity
   const validity = computeValidity(
     checkpoint?.branch ?? null,
     currentBranch,
     checkpoint?.checkpointed ?? null,
   );
 
-  // 7. Extract current phase PRD section
+  // Extract current phase PRD section + reference files from single master plan read
   let currentPhasePrd: string | null = null;
-  if (masterPlan && feature.currentPhase) {
-    try {
-      const masterContent = await readFile(
-        resolve(featureDir, '00-master-plan.md'),
-        'utf-8',
-      );
-      currentPhasePrd = extractCurrentPhasePrd(masterContent, feature.currentPhase.number);
-    } catch {
-      // Master plan file read failed — leave as null
-    }
-  }
-
-  // 8. Parse reference files from master plan
   let referenceFiles: string[] = [];
-  if (masterPlan) {
-    try {
-      const masterContent = await readFile(
-        resolve(featureDir, '00-master-plan.md'),
-        'utf-8',
-      );
-      referenceFiles = parseReferenceFiles(masterContent);
-    } catch {
-      // Leave empty
+  if (masterContent) {
+    if (feature.currentPhase) {
+      currentPhasePrd = extractCurrentPhasePrd(masterContent, feature.currentPhase.number);
     }
+    referenceFiles = parseReferenceFiles(masterContent);
   }
 
   // 9. Session history (last N sessions)

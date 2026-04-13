@@ -215,9 +215,11 @@ export async function parseCheckpoint(filePath: string): Promise<CheckpointResul
   }
 
   let frontmatter: Record<string, unknown> = {};
+  let body = content;
   try {
     const parsed = matter(content);
     frontmatter = parsed.data;
+    body = parsed.content;
   } catch {
     // Malformed YAML — continue with empty frontmatter
   }
@@ -241,7 +243,7 @@ export async function parseCheckpoint(filePath: string): Promise<CheckpointResul
   const currentState = extractXmlTag(content, 'current_state');
   const keyFiles = extractXmlTag(content, 'key_files');
   const prdFiles = extractPrdFiles(content);
-  const continuationPrompt = extractContinuationPrompt(content);
+  const continuationPrompt = extractContinuationPromptFromBody(body);
 
   return {
     branch,
@@ -261,10 +263,16 @@ export async function parseCheckpoint(filePath: string): Promise<CheckpointResul
 }
 
 function extractXmlTag(content: string, tag: string): string | null {
+  const regex = new RegExp(`<${tag}>([\\s\\S]*?)</${tag}>`, 'i');
+
+  // Fast path: no backticks means no risk of matching tags inside inline code
+  if (!content.includes('`')) {
+    const match = content.match(regex);
+    return match ? match[1].trim() : null;
+  }
+
   // Replace inline code spans with placeholders to prevent XML tags
   // inside backtick code (e.g., `<decisions>`) from being matched.
-  // Restoration happens after matching so extracted content preserves
-  // any legitimate inline code.
   const placeholders: { placeholder: string; original: string }[] = [];
   let counter = 0;
   const stripped = content.replace(/`[^`]*`/g, (match) => {
@@ -273,12 +281,10 @@ function extractXmlTag(content: string, tag: string): string | null {
     return placeholder;
   });
 
-  const regex = new RegExp(`<${tag}>([\\s\\S]*?)</${tag}>`, 'i');
   const match = stripped.match(regex);
   if (!match) return null;
 
   let result = match[1].trim();
-  // Restore any placeholders that appear in the extracted content
   for (const { placeholder, original } of placeholders) {
     result = result.replace(placeholder, original);
   }
@@ -298,7 +304,7 @@ function extractXmlListItems(content: string, tag: string): string[] {
     if (listMatch) {
       // Strip stray close tags from list items (legacy format where
       // e.g. "- text</decisions>" appears on the last item before the closing tag)
-      let item = listMatch[1].replace(/<\/(?:decisions|blockers|notes|context|current_state|next_action|key_files)>$/i, '').trim();
+      const item = listMatch[1].replace(/<\/(?:decisions|blockers|notes|context|current_state|next_action|key_files)>$/i, '').trim();
       items.push(item);
     }
   }
@@ -329,24 +335,8 @@ function extractPrdFiles(content: string): string[] {
 
 // ─── Continuation Prompt ──────────────────────────────────────────
 
-/** Extract the continuation prompt text after the final `---` separator.
- *  Only searches the body content after the YAML frontmatter, not the
- *  frontmatter delimiters themselves.
- */
-function extractContinuationPrompt(content: string): string | null {
-  // Strip YAML frontmatter to avoid matching its --- delimiters.
-  // gray-matter.parse() separates frontmatter from body; we work on body only.
-  let body: string;
-  try {
-    const parsed = matter(content);
-    body = parsed.content;
-  } catch {
-    // If YAML is malformed, fall back to rough stripping: everything after second ---
-    const secondDash = content.indexOf('---', content.indexOf('---') + 3);
-    body = secondDash >= 0 ? content.slice(secondDash + 3) : content;
-  }
-
-  // Find the last `---` on its own line in the body content
+/** Extract the continuation prompt from the body (frontmatter already stripped). */
+function extractContinuationPromptFromBody(body: string): string | null {
   const separatorRegex = /^---\s*$/gm;
   let lastSeparatorIndex = -1;
   let m: RegExpExecArray | null;
@@ -356,7 +346,6 @@ function extractContinuationPrompt(content: string): string | null {
 
   if (lastSeparatorIndex === -1) return null;
 
-  // Text after the last `---` separator in the body
   const after = body.slice(lastSeparatorIndex + 3).trim();
   if (!after) return null;
 

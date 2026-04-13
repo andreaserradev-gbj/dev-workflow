@@ -1,4 +1,3 @@
-import { resolve } from 'path';
 import { parseFeature } from 'dev-workflow-core';
 import { resolveFeatureDir } from '../resolve.js';
 import { parseFlags } from '../index.js';

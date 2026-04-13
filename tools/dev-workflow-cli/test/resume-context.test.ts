@@ -1,5 +1,7 @@
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
-import { resolve } from 'path';
+import { resolve, join } from 'path';
+import { mkdtempSync, mkdirSync, rmSync, writeFileSync } from 'fs';
+import { tmpdir } from 'os';
 import { resumeContext } from '../src/commands/resume-context.js';
 
 const FIXTURES = resolve(__dirname, '../../dev-workflow-core/test/fixtures');
@@ -195,6 +197,95 @@ describe('resume-context', () => {
     expect(json.sessionHistory).toHaveLength(3);
   });
 
+
+  it('treats --sessions=0 as unlimited (returns all sessions)', async () => {
+    const code = await resumeContext([
+      '--dir',
+      resolve(FIXTURES, 'full-with-sessions'),
+      '--sessions=0',
+      '--json',
+    ]);
+
+    expect(code).toBe(0);
+    const json = JSON.parse(output.lines.join('\n'));
+
+    // 0 means "no limit" — should return all 3 sessions
+    expect(json.sessionHistory).toHaveLength(3);
+  });
+
+  it('deduplicates decisions that appear in multiple sessions', async () => {
+    // Create a temp feature dir with a session-log containing duplicate decisions
+    const dir = mkdtempSync(join(tmpdir(), 'rc-dedup-'));
+    const sessionLog = [
+      '## Session 1 — 2026-01-01T10:00:00.000Z',
+      '',
+      '<context>',
+      'First session',
+      '</context>',
+      '',
+      '<decisions>',
+      '- Use SQLite',
+      '- Skip ORM',
+      '</decisions>',
+      '',
+      '---',
+      '',
+      '## Session 2 — 2026-01-02T10:00:00.000Z',
+      '',
+      '<context>',
+      'Second session',
+      '</context>',
+      '',
+      '<decisions>',
+      '- Use SQLite',
+      '- Add indexing',
+      '</decisions>',
+      '',
+      '---',
+    ].join('\n');
+
+    const checkpoint = [
+      '---',
+      'branch: feature/dedup-test',
+      'checkpointed: "2026-04-13T10:00:00.000Z"',
+      '---',
+      '',
+      '<context>',
+      'Current session',
+      '</context>',
+      '',
+      '<current_state>',
+      'Working',
+      '</current_state>',
+      '',
+      '<next_action>',
+      'Continue',
+      '</next_action>',
+      '',
+      '<key_files>',
+      'src/main.ts',
+      '</key_files>',
+    ].join('\n');
+
+    writeFileSync(join(dir, 'session-log.md'), sessionLog, 'utf-8');
+    writeFileSync(join(dir, 'checkpoint.md'), checkpoint, 'utf-8');
+
+    try {
+      const code = await resumeContext([
+        '--dir', dir,
+        '--json',
+      ]);
+
+      expect(code).toBe(0);
+      const json = JSON.parse(output.lines.join('\n'));
+
+      // "Use SQLite" appears in both sessions — should be deduplicated
+      expect(json.accumulatedDecisions).toEqual(['Use SQLite', 'Skip ORM', 'Add indexing']);
+      expect(json.accumulatedDecisions).toHaveLength(3); // not 4
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
 
   it('returns exit code 1 when no dir specified', async () => {
     const code = await resumeContext(['--json']);

@@ -9,7 +9,7 @@
     "./types": "./src/types.ts"
   },
   "scripts": {
-    "build": "tsc",
+    "build": "eslint src/ && tsc",
     "test": "vitest run",
     "test:watch": "vitest",
     "lint": "eslint src/",
@@ -25,8 +25,11 @@
     "node": ">=24"
   },
   "devDependencies": {
+    "@eslint/js": "^10.0.1",
     "@types/node": "^22.0.0",
+    "eslint": "^10.2.0",
     "typescript": "^5.6.0",
+    "typescript-eslint": "^8.58.1",
     "vitest": "^3.0.0"
   }
 }

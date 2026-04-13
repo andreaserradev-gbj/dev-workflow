@@ -1,5 +1,5 @@
 import { resolve } from 'path';
-import { readdir } from 'fs/promises';
+import { readdir, readFile, access } from 'fs/promises';
 import { updateStatus as coreUpdateStatus } from 'dev-workflow-core';
 import type { StepTarget, StatusMarker, StatusUpdateResult } from 'dev-workflow-core';
 import { resolveFeatureDir } from '../resolve.js';
@@ -108,7 +108,6 @@ async function resolveTargetPrd(featureDir: string, phaseNum: number): Promise<s
 
   // Check master plan first — it contains `### Phase N:` headers
   try {
-    const { readFile } = await import('fs/promises');
     const content = await readFile(masterPlanPath, 'utf-8');
     const phaseRegex = /#{2,3}\s*Phase\s+(\d+)/i;
     let found = false;
@@ -142,7 +141,6 @@ async function resolveTargetPrd(featureDir: string, phaseNum: number): Promise<s
   // Final fallback: if master plan exists but no Phase N header, still try it
   // (updateStatus will throw a clear error if phase not found)
   try {
-    const { access } = await import('fs/promises');
     await access(masterPlanPath);
     return masterPlanPath;
   } catch {

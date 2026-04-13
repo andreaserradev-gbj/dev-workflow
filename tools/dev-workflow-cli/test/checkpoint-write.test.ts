@@ -4,7 +4,7 @@ import { mkdtempSync, mkdirSync, readFileSync, rmSync, writeFileSync } from 'fs'
 import { tmpdir } from 'os';
 import { join } from 'path';
 import { checkpointWrite, doCheckpointWrite } from '../src/commands/checkpoint-write.js';
-import { parseCheckpoint } from 'dev-workflow-core';
+import { parseCheckpoint, parseSessionLog } from 'dev-workflow-core';
 
 function captureOutput() {
   const lines: string[] = [];
@@ -249,6 +249,61 @@ src/main.ts
     const code = await checkpointWrite(['--stdin']);
     expect(code).toBe(1);
     expect(output.errorLines.join('\n')).toContain('Could not resolve feature directory');
+  });
+
+  it('session-log entries round-trip through parseSessionLog', async () => {
+    const dir = createTempFeatureDir();
+    tempDirs.push(dir);
+
+    // Write first checkpoint
+    await doCheckpointWrite(dir, {
+      branch: 'feature/first',
+      context: 'First session context',
+      currentState: 'Starting out',
+      nextAction: 'Keep going',
+      keyFiles: 'src/a.ts',
+      decisions: ['Use SQLite', 'Skip ORM'],
+      blockers: ['Waiting on schema review'],
+      notes: ['Check edge cases'],
+    });
+
+    // Write second checkpoint (appends first to session-log)
+    await doCheckpointWrite(dir, {
+      branch: 'feature/second',
+      context: 'Second session context',
+      currentState: 'Making progress',
+      nextAction: 'Finish up',
+      keyFiles: 'src/b.ts',
+      decisions: ['Add indexing'],
+    });
+
+    // Write third checkpoint (appends second to session-log)
+    await doCheckpointWrite(dir, {
+      branch: 'feature/third',
+      context: 'Third session context',
+      currentState: 'Almost done',
+      nextAction: 'Final review',
+      keyFiles: 'src/c.ts',
+    });
+
+    // The critical test: parseSessionLog must be able to read what formatSessionEntry wrote
+    const entries = await parseSessionLog(join(dir, 'session-log.md'));
+
+    expect(entries).toHaveLength(2); // first + second (third is current checkpoint, not in log)
+
+    // Session 1 — from first checkpoint
+    expect(entries[0].session).toBe(1);
+    expect(entries[0].context).toBe('First session context');
+    expect(entries[0].decisions).toEqual(['Use SQLite', 'Skip ORM']);
+    expect(entries[0].blockers).toEqual(['Waiting on schema review']);
+    expect(entries[0].notes).toEqual(['Check edge cases']);
+
+    // Session 2 — from second checkpoint
+    expect(entries[1].session).toBe(2);
+    expect(entries[1].context).toBe('Second session context');
+    expect(entries[1].decisions).toEqual(['Add indexing']);
+    expect(entries[1].blockers).toEqual([]);
+    expect(entries[1].notes).toEqual([]);
   });
 
   it('round-trips: writeCheckpoint output parses back identically', async () => {
