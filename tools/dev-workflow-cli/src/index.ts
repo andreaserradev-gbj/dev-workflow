@@ -63,7 +63,9 @@ export function parseFlags(args: string[]): { flags: Record<string, string | tru
         // Handle --flag=value syntax
         const key = arg.slice(2, eqIdx);
         const value = arg.slice(eqIdx + 1);
-        flags[key] = value || true;
+        // Preserve falsy string values like "0" and "false" — only treat
+        // empty string (--flag=) as a boolean flag.
+        flags[key] = value === '' ? true : value;
       } else {
         const key = arg.slice(2);
         const next = args[i + 1];
