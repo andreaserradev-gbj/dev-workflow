@@ -42,6 +42,12 @@ describe('checkpoint-read', () => {
     expect(json.uncommittedChanges).toBe(false);
     expect(json.checkpointed).toMatch(/^2026-03-20T14:30:00/);
     expect(json.nextAction).toContain('refresh token rotation');
+    expect(json.context).toContain('Multi-provider authentication');
+    expect(json.currentState).toContain('Phase 1 complete');
+    expect(json.keyFiles).toContain('src/auth/token-service.ts');
+    expect(json.prdFiles).toHaveLength(2);
+    expect(json.prdFiles[0]).toBe('.dev/auth-system/00-master-plan.md');
+    expect(json.continuationPrompt).toBeNull();
     expect(json.decisions).toHaveLength(2);
     expect(json.decisions[0]).toContain('RS256');
     expect(json.blockers).toHaveLength(1);
@@ -57,6 +63,11 @@ describe('checkpoint-read', () => {
     expect(json.branch).toBe('feature/data-migration');
     expect(json.uncommittedChanges).toBe(true);
     expect(json.nextAction).toContain('Map legacy columns');
+    expect(json.currentState).toContain('Migration scaffold');
+    expect(json.keyFiles).toContain('src/migrate/runner.ts');
+    expect(json.prdFiles).toHaveLength(1);
+    expect(json.prdFiles[0]).toBe('.dev/data-migration/00-master-plan.md');
+    expect(json.continuationPrompt).toBeNull();
   });
 
   it('outputs text format for full-feature', async () => {
@@ -67,8 +78,11 @@ describe('checkpoint-read', () => {
     expect(text).toContain('Branch: feature/auth-system');
     expect(text).toContain('Last commit: Add JWT signing and verification');
     expect(text).toContain('Uncommitted: false');
+    expect(text).toContain('Current state:');
     expect(text).toContain('Next action:');
     expect(text).toContain('refresh token rotation');
+    expect(text).toContain('Key files:');
+    expect(text).toContain('PRD files:');
     expect(text).toContain('Decisions:');
     expect(text).toContain('RS256');
     expect(text).toContain('Blockers:');

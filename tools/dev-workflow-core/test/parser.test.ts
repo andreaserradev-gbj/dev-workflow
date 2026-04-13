@@ -7,6 +7,7 @@ import {
   parseSubPrdsAsPhases,
   determineFeatureStatus,
   parseFeature,
+  parseSessionLog,
 } from '../src/parser.js';
 import type { Feature } from '../src/types.js';
 
@@ -220,6 +221,113 @@ describe('parseCheckpoint', () => {
   it('returns null for missing file', async () => {
     const result = await parseCheckpoint(resolve(FIXTURES, 'empty-dev/checkpoint.md'));
     expect(result).toBeNull();
+  });
+
+  // ─── Parser Bug Fix Tests ──────────────────────────────────────
+
+  it('extracts <current_state> section from full-feature', async () => {
+    const result = await parseCheckpoint(resolve(FIXTURES, 'full-feature/checkpoint.md'));
+    expect(result).not.toBeNull();
+    expect(result!.currentState).toContain('Phase 1 complete: All 5 steps done');
+    expect(result!.currentState).toContain('✅');
+    expect(result!.currentState).toContain('⬜');
+  });
+
+  it('extracts <key_files> section from full-feature', async () => {
+    const result = await parseCheckpoint(resolve(FIXTURES, 'full-feature/checkpoint.md'));
+    expect(result).not.toBeNull();
+    expect(result!.keyFiles).toContain('src/auth/token-service.ts');
+    expect(result!.keyFiles).toContain('src/auth/jwt-config.ts');
+  });
+
+  it('extracts PRD file list from full-feature', async () => {
+    const result = await parseCheckpoint(resolve(FIXTURES, 'full-feature/checkpoint.md'));
+    expect(result).not.toBeNull();
+    expect(result!.prdFiles).toHaveLength(2);
+    expect(result!.prdFiles[0]).toBe('.dev/auth-system/00-master-plan.md');
+    expect(result!.prdFiles[1]).toBe('.dev/auth-system/01-sub-prd-tokens.md');
+  });
+
+  it('extracts PRD file list from checkpoint-only', async () => {
+    const result = await parseCheckpoint(resolve(FIXTURES, 'checkpoint-only/checkpoint.md'));
+    expect(result).not.toBeNull();
+    expect(result!.prdFiles).toHaveLength(1);
+    expect(result!.prdFiles[0]).toBe('.dev/data-migration/00-master-plan.md');
+  });
+
+  it('extracts continuation prompt from comprehensive fixture', async () => {
+    const result = await parseCheckpoint(resolve(FIXTURES, 'edge-case-checkpoints/comprehensive/checkpoint.md'));
+    expect(result).not.toBeNull();
+    expect(result!.continuationPrompt).toBe('Please continue by monitoring the vendor incident resolution. Check error rate and verify functionality is restored.');
+  });
+
+  it('extracts continuation prompt from backticked-xml-tags fixture', async () => {
+    const result = await parseCheckpoint(resolve(FIXTURES, 'edge-case-checkpoints/backticked-xml-tags/checkpoint.md'));
+    expect(result).not.toBeNull();
+    expect(result!.continuationPrompt).toBe('Please continue with Phase 1 implementation.');
+  });
+
+  it('returns null continuationPrompt when no --- separator in body', async () => {
+    const result = await parseCheckpoint(resolve(FIXTURES, 'full-feature/checkpoint.md'));
+    expect(result).not.toBeNull();
+    expect(result!.continuationPrompt).toBeNull();
+  });
+
+  it('returns empty prdFiles array when no PRD list present', async () => {
+    const result = await parseCheckpoint(resolve(FIXTURES, 'edge-case-checkpoints/inline-close-tags/checkpoint.md'));
+    expect(result).not.toBeNull();
+    expect(result!.prdFiles).toEqual([]);
+  });
+
+  it('does not match XML tags inside backtick code (backticked-xml-tags fixture)', async () => {
+    const result = await parseCheckpoint(resolve(FIXTURES, 'edge-case-checkpoints/backticked-xml-tags/checkpoint.md'));
+    expect(result).not.toBeNull();
+
+    // decisions should contain the actual decisions, not garbage from backtick code
+    expect(result!.decisions).toHaveLength(2);
+    expect(result!.decisions[0]).toBe('Use gray-matter for YAML stringifying');
+    expect(result!.decisions[1]).toBe('Round-trip validation only');
+
+    // notes should contain the actual note text including backtick references
+    expect(result!.notes).toHaveLength(1);
+    expect(result!.notes[0]).toContain('`<decisions>`');
+
+    // nextAction should preserve backtick code within XML content
+    expect(result!.nextAction).toContain('`writeCheckpoint()`');
+    expect(result!.nextAction).toContain('`matter.stringify()`');
+  });
+
+  it('strips stray close tags from inline-close-tags fixture', async () => {
+    const result = await parseCheckpoint(resolve(FIXTURES, 'edge-case-checkpoints/inline-close-tags/checkpoint.md'));
+    expect(result).not.toBeNull();
+
+    // Decisions should not have trailing </decisions>
+    expect(result!.decisions).toEqual(['RS256 over HS256 for JWT signing', 'Redis for refresh token storage']);
+    expect(result!.blockers).toEqual(['Redis connection pooling needs config']);
+    expect(result!.notes).toEqual(['Consider adding PKCE for mobile flows']);
+  });
+
+  it('extracts currentState and keyFiles from all edge-case checkpoints', async () => {
+    const edgeCaseDir = resolve(FIXTURES, 'edge-case-checkpoints');
+    const entries = await import('fs/promises').then(m => m.readdir(edgeCaseDir));
+
+    for (const entry of entries) {
+      const cpPath = resolve(edgeCaseDir, entry, 'checkpoint.md');
+      let content: string;
+      try { content = await import('fs/promises').then(m => m.readFile(cpPath, 'utf-8')); } catch { continue; }
+
+      const result = await parseCheckpoint(cpPath);
+      if (!result) continue;
+
+      // If file contains <current_state>, it should be extracted
+      if (content.includes('<current_state>')) {
+        expect(result.currentState).not.toBeNull();
+      }
+      // If file contains <key_files>, it should be extracted
+      if (content.includes('<key_files>')) {
+        expect(result.keyFiles).not.toBeNull();
+      }
+    }
   });
 });
 
@@ -514,5 +622,63 @@ describe('parseFeature', () => {
 
     expect(result.name).toBe('subprd-gate-no-table');
     expect(result.status).toBe('gate');
+  });
+});
+
+// ─── Session Log Parsing ───────────────────────────────────────────
+
+describe('parseSessionLog', () => {
+  const SESSION_LOG_FIXTURE = resolve(FIXTURES, 'session-log');
+
+  it('returns empty array for non-existent file', async () => {
+    const result = await parseSessionLog('/nonexistent/session-log.md');
+    expect(result).toEqual([]);
+  });
+
+  it('parses a well-formed session-log with multiple sessions', async () => {
+    const result = await parseSessionLog(resolve(SESSION_LOG_FIXTURE, 'session-log.md'));
+
+    expect(result).toHaveLength(3);
+
+    // Session 1
+    expect(result[0].session).toBe(1);
+    expect(result[0].date).toBe('2026-04-10T09:00:00.000Z');
+    expect(result[0].context).toContain('Phase 1 planning');
+    expect(result[0].decisions).toEqual(['Use REST API', 'Skip GraphQL']);
+    expect(result[0].blockers).toEqual([]);
+    expect(result[0].notes).toEqual(['Token expiry edge case']);
+
+    // Session 2
+    expect(result[1].session).toBe(2);
+    expect(result[1].date).toBe('2026-04-11T14:00:00.000Z');
+    expect(result[1].context).toContain('Implementing auth');
+    expect(result[1].decisions).toEqual(['Use JWT']);
+    expect(result[1].blockers).toEqual(['Waiting on Redis']);
+    expect(result[1].notes).toEqual([]);
+
+    // Session 3
+    expect(result[2].session).toBe(3);
+    expect(result[2].date).toBe('2026-04-12T10:00:00.000Z');
+    expect(result[2].context).toContain('Phase 1 complete');
+    expect(result[2].decisions).toEqual(['Use RS256', 'Cache tokens']);
+    expect(result[2].blockers).toEqual([]);
+    expect(result[2].notes).toEqual(['Watch for clock skew']);
+  });
+
+  it('handles session-log with only context (no decisions/blockers/notes)', async () => {
+    const result = await parseSessionLog(resolve(SESSION_LOG_FIXTURE, 'session-log-minimal.md'));
+
+    expect(result).toHaveLength(1);
+    expect(result[0].session).toBe(1);
+    expect(result[0].date).toBe('2026-04-13T08:00:00.000Z');
+    expect(result[0].context).toContain('Simple session');
+    expect(result[0].decisions).toEqual([]);
+    expect(result[0].blockers).toEqual([]);
+    expect(result[0].notes).toEqual([]);
+  });
+
+  it('handles empty file', async () => {
+    const result = await parseSessionLog(resolve(SESSION_LOG_FIXTURE, 'session-log-empty.md'));
+    expect(result).toEqual([]);
   });
 });

@@ -1,12 +1,12 @@
 import { readFile, readdir } from 'fs/promises';
 import { resolve, basename } from 'path';
 import matter from 'gray-matter';
-import type { Feature, FeatureStatus, Phase, Progress, SubPrdStep } from './types.js';
+import type { Feature, FeatureStatus, Phase, Progress, SubPrdStep, SessionLogEntry } from './types.js';
 
 // ─── Emoji Shortcode Normalization ──────────────────────────────────
 
 /** Replace common GitHub emoji shortcodes with their Unicode equivalents. */
-function normalizeEmoji(text: string): string {
+export function normalizeEmoji(text: string): string {
   return text
     .replace(/:white_check_mark:/g, '✅')
     .replace(/:white_large_square:/g, '⬜')
@@ -200,6 +200,10 @@ export interface CheckpointResult {
   blockers: string[];
   notes: string[];
   context: string | null;
+  currentState: string | null;
+  keyFiles: string | null;
+  prdFiles: string[];
+  continuationPrompt: string | null;
 }
 
 export async function parseCheckpoint(filePath: string): Promise<CheckpointResult | null> {
@@ -211,9 +215,11 @@ export async function parseCheckpoint(filePath: string): Promise<CheckpointResul
   }
 
   let frontmatter: Record<string, unknown> = {};
+  let body = content;
   try {
     const parsed = matter(content);
     frontmatter = parsed.data;
+    body = parsed.content;
   } catch {
     // Malformed YAML — continue with empty frontmatter
   }
@@ -234,6 +240,10 @@ export async function parseCheckpoint(filePath: string): Promise<CheckpointResul
   const blockers = extractXmlListItems(content, 'blockers');
   const notes = extractXmlListItems(content, 'notes');
   const context = extractXmlTag(content, 'context');
+  const currentState = extractXmlTag(content, 'current_state');
+  const keyFiles = extractXmlTag(content, 'key_files');
+  const prdFiles = extractPrdFiles(content);
+  const continuationPrompt = extractContinuationPromptFromBody(body);
 
   return {
     branch,
@@ -245,14 +255,40 @@ export async function parseCheckpoint(filePath: string): Promise<CheckpointResul
     blockers,
     notes,
     context,
+    currentState,
+    keyFiles,
+    prdFiles,
+    continuationPrompt,
   };
 }
 
 function extractXmlTag(content: string, tag: string): string | null {
   const regex = new RegExp(`<${tag}>([\\s\\S]*?)</${tag}>`, 'i');
-  const match = content.match(regex);
+
+  // Fast path: no backticks means no risk of matching tags inside inline code
+  if (!content.includes('`')) {
+    const match = content.match(regex);
+    return match ? match[1].trim() : null;
+  }
+
+  // Replace inline code spans with placeholders to prevent XML tags
+  // inside backtick code (e.g., `<decisions>`) from being matched.
+  const placeholders: { placeholder: string; original: string }[] = [];
+  let counter = 0;
+  const stripped = content.replace(/`[^`]*`/g, (match) => {
+    const placeholder = `\x00INLINE_CODE_${counter++}\x00`;
+    placeholders.push({ placeholder, original: match });
+    return placeholder;
+  });
+
+  const match = stripped.match(regex);
   if (!match) return null;
-  return match[1].trim();
+
+  let result = match[1].trim();
+  for (const { placeholder, original } of placeholders) {
+    result = result.replace(placeholder, original);
+  }
+  return result;
 }
 
 function extractXmlListItems(content: string, tag: string): string[] {
@@ -266,11 +302,54 @@ function extractXmlListItems(content: string, tag: string): string[] {
     // Match list items: "- item text"
     const listMatch = trimmed.match(/^-\s+(.+)/);
     if (listMatch) {
-      items.push(listMatch[1].trim());
+      // Strip stray close tags from list items (legacy format where
+      // e.g. "- text</decisions>" appears on the last item before the closing tag)
+      const item = listMatch[1].replace(/<\/(?:decisions|blockers|notes|context|current_state|next_action|key_files)>$/i, '').trim();
+      items.push(item);
     }
   }
 
   return items;
+}
+
+// ─── PRD File List ────────────────────────────────────────────────
+
+/** Extract the PRD file list from the "Read the following PRD files in order:" section. */
+function extractPrdFiles(content: string): string[] {
+  const match = content.match(/Read the following PRD files in order:\s*\n([\s\S]*?)(?:\n\n|\n<)/i);
+  if (!match) return [];
+
+  const files: string[] = [];
+  const lines = match[1].split('\n');
+  for (const line of lines) {
+    const trimmed = line.trim();
+    // Match numbered list items: "1. path/to/file.md"
+    const fileMatch = trimmed.match(/^\d+\.\s+(.+)/);
+    if (fileMatch) {
+      files.push(fileMatch[1].trim());
+    }
+  }
+
+  return files;
+}
+
+// ─── Continuation Prompt ──────────────────────────────────────────
+
+/** Extract the continuation prompt from the body (frontmatter already stripped). */
+function extractContinuationPromptFromBody(body: string): string | null {
+  const separatorRegex = /^---\s*$/gm;
+  let lastSeparatorIndex = -1;
+  let m: RegExpExecArray | null;
+  while ((m = separatorRegex.exec(body)) !== null) {
+    lastSeparatorIndex = m.index;
+  }
+
+  if (lastSeparatorIndex === -1) return null;
+
+  const after = body.slice(lastSeparatorIndex + 3).trim();
+  if (!after) return null;
+
+  return after;
 }
 
 // ─── Sub-PRD ───────────────────────────────────────────────────────
@@ -543,6 +622,73 @@ export async function parseSubPrdsAsPhases(featureDir: string): Promise<Phase[]>
   } catch {
     return [];
   }
+}
+
+// ─── Session Log ─────────────────────────────────────────────────
+
+/** Parse session-log.md and return an array of session entries.
+ *
+ *  Session numbers are derived from position in file (Session 1 = first entry).
+ *  Fault-tolerant: skips malformed entries (logs warning to stderr, continues).
+ *  Reuses `extractXmlTag()` and `extractXmlListItems()` from parser.ts.
+ */
+export async function parseSessionLog(filePath: string): Promise<SessionLogEntry[]> {
+  let content: string;
+  try {
+    content = await readFile(filePath, 'utf-8');
+  } catch {
+    return [];
+  }
+
+  if (!content.trim()) return [];
+
+  // Split content into session sections by finding `## Session N` headings
+  // Each section runs from its heading to the next `## Session` heading (or EOF)
+  const sessionRegex = /^## Session\s+\d+\s*—\s*.+/gm;
+  const headings: { index: number; text: string }[] = [];
+
+  let match: RegExpExecArray | null;
+  while ((match = sessionRegex.exec(content)) !== null) {
+    headings.push({ index: match.index, text: match[0] });
+  }
+
+  if (headings.length === 0) return [];
+
+  const entries: SessionLogEntry[] = [];
+
+  for (let i = 0; i < headings.length; i++) {
+    const start = headings[i].index;
+    const end = i + 1 < headings.length ? headings[i + 1].index : content.length;
+    const section = content.slice(start, end);
+
+    try {
+      // Extract date from heading: "## Session N — YYYY-MM-DDT..."
+      const dateMatch = section.match(/^## Session\s+\d+\s*—\s*(.+)/);
+      const date = dateMatch ? dateMatch[1].trim() : '';
+
+      // Extract XML sections using existing parser utilities
+      const context = extractXmlTag(section, 'context');
+      const decisions = extractXmlListItems(section, 'decisions');
+      const blockers = extractXmlListItems(section, 'blockers');
+      const notes = extractXmlListItems(section, 'notes');
+
+      entries.push({
+        session: i + 1, // 1-indexed, derived from position
+        date,
+        context,
+        decisions,
+        blockers,
+        notes,
+      });
+    } catch (err) {
+      // Fault-tolerant: skip malformed entries
+      process.stderr.write(
+        `Warning: skipping malformed session entry at position ${i + 1}: ${err instanceof Error ? err.message : err}\n`,
+      );
+    }
+  }
+
+  return entries;
 }
 
 async function isEmptyFeatureDir(dirPath: string): Promise<boolean> {

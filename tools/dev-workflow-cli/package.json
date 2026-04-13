@@ -9,8 +9,10 @@
   "scripts": {
     "test": "vitest run",
     "test:watch": "vitest",
-    "build": "tsc",
-    "bundle": "node scripts/bundle.js"
+    "build": "eslint src/ && tsc",
+    "bundle": "node scripts/bundle.js",
+    "lint": "eslint src/",
+    "lint:fix": "eslint src/ --fix"
   },
   "dependencies": {
     "dev-workflow-core": "file:../dev-workflow-core"
@@ -19,9 +21,12 @@
     "node": ">=24"
   },
   "devDependencies": {
+    "@eslint/js": "^10.0.1",
     "@types/node": "^22.0.0",
     "esbuild": "^0.27.4",
+    "eslint": "^10.2.0",
     "typescript": "^5.6.0",
+    "typescript-eslint": "^8.58.1",
     "vitest": "^3.0.0"
   }
 }
