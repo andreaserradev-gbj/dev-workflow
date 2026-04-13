@@ -80,6 +80,8 @@ Parse the JSON output. It contains all the data previously gathered across multi
 
 The LLM no longer calls: `git-state.sh`, `checkpoint-read --json`, `feature-show --json`. It no longer compares branches manually. It no longer reads the full master plan (`currentPhasePrd` contains just the relevant section).
 
+**Check the exit code.** A non-zero exit code means the command failed (e.g., feature directory not found, no checkpoint). **Never ignore a non-zero exit** — if `resume-context` fails, stop and report the error. Do not attempt to reconstruct the data from separate tool calls.
+
 ### Step 3: Check Context Validity
 
 Read the `validity` field from the `resume-context` output:

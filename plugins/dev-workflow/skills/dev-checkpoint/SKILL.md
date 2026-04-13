@@ -120,7 +120,9 @@ Where `$CLI` is the absolute path to `scripts/dev-workflow.cjs` within this skil
 - `--step M` — the step number within that phase (omit for phase-level markers)
 - `--marker done` — marks the step as ✅ complete
 
-The CLI handles emoji normalization and surgical in-place editing. It reports `{ changed, line, file }` — track these results for the Step 9 summary. If `changed` is false, the marker was already ✅.
+The CLI reports `{ changed, line, file }` as JSON when `--json` is passed, or a text summary otherwise. Track these results for the Step 9 summary. If `changed` is false, the marker was already ✅.
+
+**Check the exit code.** A non-zero exit code means the command failed (e.g., phase not found, invalid path). **Never ignore a non-zero exit** — if a `status-update` call fails, stop and report the error before continuing.
 
 If nothing was completed, state: "No PRD updates needed."
 
@@ -198,6 +200,8 @@ The CLI will:
 1. **Read the existing `checkpoint.md`** (if it exists) and append it to `session-log.md` as a session entry
 2. **Write the new `checkpoint.md`** with proper YAML frontmatter and XML section formatting
 3. **Return** `{ success, file }` confirming the write
+
+**Check the exit code.** A non-zero exit code means the command failed (e.g., invalid JSON, missing required fields, directory not found). **Never ignore a non-zero exit** — if `checkpoint-write` fails, stop and report the error. The checkpoint was NOT saved.
 
 **Do NOT manually write `checkpoint.md` or `session-log.md`** — the CLI ensures format compatibility and handles session-log accumulation automatically.
 
