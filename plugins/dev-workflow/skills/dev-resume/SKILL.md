@@ -2,8 +2,9 @@
 name: dev-resume
 description: >-
   Resume work from a previous session checkpoint.
-  Loads checkpoint.md, verifies git state, and presents
-  a resumption summary before continuing.
+  Uses `resume-context` CLI to load feature, checkpoint, git state,
+  and session history in a single call, then synthesizes a
+  focused resumption summary before continuing.
   Use at the start of a new session to restore context from a previous checkpoint.
 argument-hint: <feature name>
 allowed-tools: Bash(bash:*) Bash(node:*) Read
@@ -41,7 +42,7 @@ Pass `$ARGUMENTS` as the third argument only if the user provided one; omit it o
 
 - If the script exits non-zero (no `.dev/` directory): inform the user, stop.
 - If output is empty: no checkpoints found, ask what to work on.
-- If one line: use as `$CHECKPOINT_PATH`.
+- If one line: use as `$FEATURE_DIR` (directory containing the checkpoint).
 - If multiple lines: ask which feature to resume.
 
 Never construct paths from raw `$ARGUMENTS`. Use only paths from script output.
@@ -54,69 +55,62 @@ bash "$VALIDATE" checkpoint-path "$CHECKPOINT_PATH" "$PROJECT_ROOT"
 
 Where `$VALIDATE` is the absolute path to `scripts/validate.sh` within this skill's directory. Apply the path safety rules from Step 0 (`$HOME`, copy from output). Outputs `$FEATURE_NAME` on success; on failure, **STOP immediately** — do not continue with an unvalidated path.
 
-### Step 2: Gather Git State
+Set `$FEATURE_DIR` to `$PROJECT_ROOT/.dev/$FEATURE_NAME`.
 
-Run the [git state script](scripts/git-state.sh):
+### Step 2: Load Context via `resume-context`
 
-```bash
-bash "$GIT_STATE" brief
-```
-
-Where `$GIT_STATE` is the absolute path to `scripts/git-state.sh` within this skill's directory. Apply the path safety rules from Step 0 (`$HOME`, copy from output).
-
-Parse the output lines:
-- `git:false` → not a git repo, skip git-related checks
-- `branch:<name>` → store as `$CURRENT_BRANCH`
-- `uncommitted:<true|false>` → store as `$HAS_UNCOMMITTED`
-
-### Step 3: Load Checkpoint and Feature Data via CLI
-
-Run the CLI to get structured checkpoint and feature data:
+Make a single call to `resume-context` — this replaces the previous Steps 2–5 (git-state, checkpoint-read, feature-show, validity comparison):
 
 ```bash
-node "$CLI" checkpoint-read --json --dir "$FEATURE_DIR"
+node "$CLI" resume-context --json --dir "$FEATURE_DIR"
 ```
 
-```bash
-node "$CLI" feature-show --json --dir "$FEATURE_DIR"
+Where `$CLI` is the absolute path to `scripts/dev-workflow.cjs` within this skill's directory. Apply the path safety rules from Step 0 (`$HOME`, copy from output).
+
+Parse the JSON output. It contains all the data previously gathered across multiple tool calls:
+
+- **`feature`**: `{ name, status, progress {done, total, percent}, currentPhase {number, total, title} }`
+- **`checkpoint`**: `{ context, nextAction, decisions[], blockers[], notes[] }`
+- **`validity`**: `"fresh"` | `"stale"` | `"drifted"` — pre-computed branch match + freshness check
+- **`validityDetails`**: `{ checkpointBranch, currentBranch, checkpointUncommitted, currentUncommitted }`
+- **`currentPhasePrd`**: Extracted markdown section for the current phase only (not the full master plan)
+- **`referenceFiles`**: File paths from the master plan's "Reference Files" section
+- **`sessionHistory`**: Last N sessions from `session-log.md` (default 5, use `--sessions=all` for all)
+- **`accumulatedDecisions`**: Union of all `<decisions>` across all sessions, deduplicated
+
+The LLM no longer calls: `git-state.sh`, `checkpoint-read --json`, `feature-show --json`. It no longer compares branches manually. It no longer reads the full master plan (`currentPhasePrd` contains just the relevant section).
+
+### Step 3: Check Context Validity
+
+Read the `validity` field from the `resume-context` output:
+
+- **`fresh`**: Branch matches, checkpoint is recent (< 3 days old). Proceed normally.
+- **`stale`**: Branch matches but checkpoint is old. Show an informational warning, then proceed.
+- **`drifted`**: Branch mismatch. Warn and ask: "Checkpoint was on `X`, you're on `Y`. Switch or continue?" Wait for user response before proceeding.
+
+If `"drifted"`, the `validityDetails` field shows both branch names for the prompt.
+
+### Step 4: Present Resumption Summary
+
+Synthesize the resumption summary from the `resume-context` output. **This is the irreplaceable LLM step** — the CLI handles the mechanics; the LLM handles the judgment.
+
+```
+**Status**: [feature.currentPhase.title] — [feature.progress.done]/[feature.progress.total] ([feature.progress.percent]%)
+**Last session**: [Derive from checkpoint.context field]
+**Decisions**: [checkpoint.decisions, or "None recorded"]
+**Session history**: [sessionHistory.length sessions tracked, accumulatedDecisions.length total decisions]
+**Watch out for**: [checkpoint.blockers, or "Nothing flagged"]
+
+**Current phase PRD**: [currentPhasePrd — summarize or reference; don't re-read the full master plan]
+
+**Start with**: [First concrete action from checkpoint.nextAction field]
 ```
 
-Where `$CLI` is the absolute path to `scripts/dev-workflow.cjs` within this skill's directory. Apply the path safety rules from Step 0 (`$HOME`, copy from output). `$FEATURE_DIR` is the parent directory of `$CHECKPOINT_PATH`.
-
-Parse the JSON output:
-- **checkpoint-read** returns: `branch`, `lastCommit`, `uncommittedChanges`, `checkpointed`, `context`, `nextAction`, `decisions[]`, `blockers[]`, `notes[]`
-- **feature-show** returns: `name`, `status`, `progress {done, total, percent}`, `currentPhase {number, total, title}`, `lastCheckpoint`, `nextAction`, `summary`
-
-### Step 4: Check Context Validity
-
-Compare the checkpoint data against the current git state from Step 2:
-
-| Check | Checkpoint value | Current | Match? |
-|-------|-----------------|---------|--------|
-| Branch | `branch` from checkpoint-read | `$CURRENT_BRANCH` | Compare |
-| Uncommitted | `uncommittedChanges` from checkpoint-read | `$HAS_UNCOMMITTED` | Compare |
-
-Determine status:
-- **Fresh**: Branch matches, checkpoint is recent (< 3 days old based on `checkpointed` timestamp)
-- **Stale**: Branch matches but checkpoint is old (informational warning)
-- **Drifted**: Branch mismatch → warn and ask: "Checkpoint was on `X`, you're on `Y`. Switch or continue?"
-
-### Step 5: Present Resumption Summary
-
-Build the summary from the CLI output:
-
-```
-**Status**: [currentPhase from feature-show] — [progress.done]/[progress.total] ([progress.percent]%)
-**Last session**: [Derive from checkpoint context field]
-**Decisions**: [decisions array from checkpoint-read, or "None recorded"]
-**Watch out for**: [blockers array from checkpoint-read, or "Nothing flagged"]
-
-**Start with**: [First concrete action from nextAction field]
-```
+Incorporate `accumulatedDecisions` when relevant — decisions from earlier sessions may contextualize the current step.
 
 **Wait for go-ahead** — do not proceed until the user confirms.
 
-### Step 6: Handling Discrepancies
+### Step 5: Handling Discrepancies
 
 | Situation | Action |
 |-----------|--------|
@@ -125,16 +119,16 @@ Build the summary from the CLI output:
 | New files not in checkpoint | Proceed, mention them |
 | PRD files missing | **STOP** — cannot resume without PRD |
 
-### Step 7: Read Key Files and Reference Patterns
+### Step 6: Read Key Files and Reference Patterns
 
 Before beginning work:
-1. Read the main PRD (`00-master-plan.md`), current sub-PRD, and key implementation files
-2. Find 2-3 similar implementations from the PRD's "Reference Files" or "Codebase Patterns" sections
-3. Read those files and match their conventions (naming, structure, APIs, error handling) in new code
+1. The `currentPhasePrd` field from `resume-context` contains the relevant phase section — read it instead of the full master plan
+2. Use `referenceFiles` from the `resume-context` output to identify which files to read — these are the PRD's recommended reference implementations
+3. Read 2-3 of those reference files and match their conventions (naming, structure, APIs, error handling) in new code
 
 Never write new code from scratch when similar code already exists in the codebase.
 
-### Step 8: Begin Work
+### Step 7: Begin Work
 
 After confirmation, proceed with the first action from the agent's summary. Follow the PRD phases and gates.
 

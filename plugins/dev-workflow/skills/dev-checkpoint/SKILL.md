@@ -108,14 +108,23 @@ Cross-reference with the CLI progress data to verify accuracy. The CLI provides 
 
 ### Step 4: Update PRD Status Markers (REQUIRED)
 
-For each PRD file in `.dev/$FEATURE_NAME/`:
-1. Read the file
-2. Change `⬜` to `✅` for completed items; update "Status" fields
-3. Save changes
+For each completed item identified in Step 3, run the CLI:
 
-Track what was updated (file + markers changed) — reported in Step 9.
+```bash
+node "$CLI" status-update --phase N --step M --marker done --dir "$FEATURE_DIR"
+```
+
+Where `$CLI` is the absolute path to `scripts/dev-workflow.cjs` within this skill's directory. Apply the path safety rules from Step 0 (`$HOME`, copy from output). `$FEATURE_DIR` is `$PROJECT_ROOT/.dev/$FEATURE_NAME`.
+
+- `--phase N` — the phase number containing the completed step
+- `--step M` — the step number within that phase (omit for phase-level markers)
+- `--marker done` — marks the step as ✅ complete
+
+The CLI handles emoji normalization and surgical in-place editing. It reports `{ changed, line, file }` — track these results for the Step 9 summary. If `changed` is false, the marker was already ✅.
 
 If nothing was completed, state: "No PRD updates needed."
+
+**Do NOT manually edit PRD files** — the `status-update` CLI ensures format compatibility with the parser.
 
 ### Step 5: Capture Git State
 
@@ -128,10 +137,10 @@ bash "$GIT_STATE" full
 Where `$GIT_STATE` is the absolute path to `scripts/git-state.sh` within this skill's directory. Apply the path safety rules from Step 0 (`$HOME`, copy from output).
 
 Parse the output lines:
-- `git:false` → not a git repo; omit `branch`, `last_commit`, `uncommitted_changes` from frontmatter.
-- `branch:<name>` → store for frontmatter
-- `commit:<oneline>` → store as last commit
-- `status:<line>` → each is one line of `git status --short`; if no `status:` lines, working tree is clean
+- `git:false` → not a git repo; omit `branch`, `lastCommit`, `uncommittedChanges` from the checkpoint JSON.
+- `branch:<name>` → store for checkpoint JSON `branch` field
+- `commit:<oneline>` → store as checkpoint JSON `lastCommit` field
+- `status:<line>` → each is one line of `git status --short`; if no `status:` lines, set `uncommittedChanges` to `false`
 
 ### Step 6: Confirm Session Context
 
@@ -143,19 +152,54 @@ If a category is empty, omit it.
 
 **STOP. Wait for explicit confirmation before proceeding to Step 7. If the user mentions new bugs or issues during this step, add them to the checkpoint notes — do NOT investigate or fix them.**
 
-### Step 7: Generate Continuation Prompt
+### Step 7: Compose Checkpoint Data
 
 **Rules**:
-- Always include `<context>`, `<current_state>`, `<next_action>`, `<key_files>`. Omit `<decisions>`, `<blockers>`, `<notes>` if empty.
+- Always include `context`, `currentState`, `nextAction`, `keyFiles`. Omit `decisions`, `blockers`, `notes` if empty (empty arrays, not omitted keys).
 - No absolute paths with usernames → use relative paths. No secrets/credentials → use placeholders.
+- The `prdFiles` array lists PRD files in the feature directory (e.g. `["00-master-plan.md"]`).
 
-Create a continuation prompt following the template in [checkpoint-template.md](references/checkpoint-template.md).
+Construct a JSON object matching the `CheckpointWriteInput` schema:
 
-### Step 8: Save Checkpoint
+```json
+{
+  "branch": "<from git state>",
+  "lastCommit": "<from git state>",
+  "uncommittedChanges": <true|false>,
+  "prdFiles": ["00-master-plan.md"],
+  "context": "## Context\n\n**Goal**: ...\n**Current phase**: ...\n**Key completions**: ...",
+  "currentState": "## Current Progress\n\n- ✅ Phase 1: ...\n- ⬜ Phase 2: ...",
+  "nextAction": "## Next Steps\n\n1. First task\n2. Second task",
+  "keyFiles": "## Key Files\n\n- Master PRD: path\n- Key file: path",
+  "decisions": ["Decision 1", "Decision 2"],
+  "blockers": ["Blocker 1"],
+  "notes": ["Note 1"],
+  "continuationPrompt": "Please continue with ..."
+}
+```
+
+The LLM **composes** the content (decisions, blockers, context — this requires judgment). The **CLI** handles YAML frontmatter, XML section formatting, file writing, and session-log appending. Do **not** format as markdown or write YAML frontmatter manually.
+
+Reference the [checkpoint-template.md](references/checkpoint-template.md) for the *semantic structure* of each section, but let the CLI handle the formatting.
+
+### Step 8: Save Checkpoint via CLI
 
 Check if `$PROJECT_ROOT/.dev/$FEATURE_NAME/checkpoint.md` already exists. Remember whether the file existed as `$IS_FIRST_CHECKPOINT` (true if the file did NOT exist, false if it did).
 
-If it exists, read it first (the Write tool requires reading before overwriting). Then write the continuation prompt to that path.
+Pipe the JSON from Step 7 to the CLI:
+
+```bash
+echo '<JSON from Step 7>' | node "$CLI" checkpoint-write --dir "$FEATURE_DIR" --stdin
+```
+
+Where `$CLI` is the absolute path to `scripts/dev-workflow.cjs` within this skill's directory. Apply the path safety rules from Step 0 (`$HOME`, copy from output). `$FEATURE_DIR` is `$PROJECT_ROOT/.dev/$FEATURE_NAME`.
+
+The CLI will:
+1. **Read the existing `checkpoint.md`** (if it exists) and append it to `session-log.md` as a session entry
+2. **Write the new `checkpoint.md`** with proper YAML frontmatter and XML section formatting
+3. **Return** `{ success, file }` confirming the write
+
+**Do NOT manually write `checkpoint.md` or `session-log.md`** — the CLI ensures format compatibility and handles session-log accumulation automatically.
 
 ### Step 9: Summary
 
