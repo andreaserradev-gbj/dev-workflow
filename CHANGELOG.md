@@ -6,19 +6,26 @@ All notable changes to this project should be documented in this file.
 
 ## v1.28.0 - 2026-04-13
 
-### Added
+### Smarter checkpoints, faster resumes
 
-- **Deterministic markdown writer** — `writeCheckpoint()` and `updateStatus()` in `dev-workflow-core` produce parser-compatible markdown without LLM intervention. Round-trip and diff tests validate format fidelity.
-- **`checkpoint-write` CLI command** — writes checkpoints via `--stdin` JSON, auto-appends previous checkpoint to `session-log.md` before overwriting. Replaces LLM-generated markdown.
-- **`status-update` CLI command** — flips `⬜`↔`✅` markers in PRD files with emoji normalization. Surgical in-place edit, no other content changes.
-- **`resume-context` CLI command** — single-call JSON packet combining feature, checkpoint, git state, current-phase PRD, reference files, session history, and accumulated decisions. Collapses 6 tool calls and ~11-16K tokens into one response.
-- **Session log** — `session-log.md` accumulates checkpoint history across sessions. `resume-context` reads it for `sessionHistory` and `accumulatedDecisions` (deduplicated across all sessions).
+Checkpoints and resumes are now powered by deterministic CLI commands instead of LLM-generated markdown. This means your checkpoint files are always format-compatible with the parser — no more drift from hand-edited markdown — and resuming a session takes **one tool call** instead of six.
+
+**What you'll notice:**
+- **`/dev-checkpoint`** no longer writes markdown by hand. It composes structured data and pipes it to a CLI that handles formatting, writing, and session-log appending. Your checkpoints are guaranteed compatible with the parser every time.
+- **`/dev-checkpoint`** also marks PRD steps as complete using a CLI command (`status-update --step N --marker done`) instead of manual file edits — no risk of accidentally changing other content.
+- **`/dev-resume`** loads everything in a single call (`resume-context`). Instead of making 6 separate tool calls and reading the full master plan, it receives a pre-organized context packet with your current phase PRD, session history, and accumulated decisions across all sessions.
+- **Session continuity** — each checkpoint automatically archives the previous one to `session-log.md`. When you resume, you see decisions and context from *every* session, not just the most recent one. No more re-typing or hallucinating past decisions.
+- **Better error handling** — both skills now explicitly check CLI exit codes. If a command fails, you'll see the error instead of silently continuing with missing data.
 
 ### Changed
+- `dev-checkpoint` skill — Steps 4, 7-8 delegate to CLI commands. LLM composes *what* to say; CLI handles *how* it's formatted and written.
+- `dev-resume` skill — Steps 2-5 collapsed into single `resume-context` call. Step numbering simplified from 0-8 to 0-7.
 
-- **`dev-checkpoint` skill** — Step 4 delegates PRD marker updates to `status-update` CLI. Steps 7–8 compose JSON and pipe to `checkpoint-write --stdin`. The CLI handles YAML frontmatter, XML section formatting, and session-log appending. Explicit CLI exit-code checks prevent silent failures.
-- **`dev-resume` skill** — Steps 2–5 collapsed into single `resume-context --json` call. Validity is pre-computed (fresh/stale/drifted). Resumption summary incorporates session history and accumulated decisions. Step 6 references `currentPhasePrd` and `referenceFiles` from the packet instead of reading the full master plan.
-- **ESLint** added to `dev-workflow-core` and `dev-workflow-cli` build pipelines (catches dead code, unused imports).
+### Internal
+- Added `writeCheckpoint()`, `updateStatus()`, `parseSessionLog()` to `dev-workflow-core`
+- Added `checkpoint-write`, `status-update`, `resume-context` CLI commands to `dev-workflow-cli`
+- ESLint added to core and CLI build pipelines
+- 162 tests passing (105 core + 57 CLI)
 
 ## v1.27.2 - 2026-04-11
 
