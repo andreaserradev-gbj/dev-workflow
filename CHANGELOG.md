@@ -4,6 +4,22 @@ All notable changes to this project should be documented in this file.
 
 <!-- LOCAL-RELEASES-START -->
 
+## v1.28.0 - 2026-04-13
+
+### Added
+
+- **Deterministic markdown writer** — `writeCheckpoint()` and `updateStatus()` in `dev-workflow-core` produce parser-compatible markdown without LLM intervention. Round-trip and diff tests validate format fidelity.
+- **`checkpoint-write` CLI command** — writes checkpoints via `--stdin` JSON, auto-appends previous checkpoint to `session-log.md` before overwriting. Replaces LLM-generated markdown.
+- **`status-update` CLI command** — flips `⬜`↔`✅` markers in PRD files with emoji normalization. Surgical in-place edit, no other content changes.
+- **`resume-context` CLI command** — single-call JSON packet combining feature, checkpoint, git state, current-phase PRD, reference files, session history, and accumulated decisions. Collapses 6 tool calls and ~11-16K tokens into one response.
+- **Session log** — `session-log.md` accumulates checkpoint history across sessions. `resume-context` reads it for `sessionHistory` and `accumulatedDecisions` (deduplicated across all sessions).
+
+### Changed
+
+- **`dev-checkpoint` skill** — Step 4 delegates PRD marker updates to `status-update` CLI. Steps 7–8 compose JSON and pipe to `checkpoint-write --stdin`. The CLI handles YAML frontmatter, XML section formatting, and session-log appending. Explicit CLI exit-code checks prevent silent failures.
+- **`dev-resume` skill** — Steps 2–5 collapsed into single `resume-context --json` call. Validity is pre-computed (fresh/stale/drifted). Resumption summary incorporates session history and accumulated decisions. Step 6 references `currentPhasePrd` and `referenceFiles` from the packet instead of reading the full master plan.
+- **ESLint** added to `dev-workflow-core` and `dev-workflow-cli` build pipelines (catches dead code, unused imports).
+
 ## v1.27.2 - 2026-04-11
 
 ### Fixed
@@ -96,6 +112,12 @@ All notable changes to this project should be documented in this file.
 <!-- LOCAL-RELEASES-END -->
 
 <!-- GITHUB-RELEASES-START -->
+
+## v1.27.2 - 2026-04-11
+
+### Fixed
+
+- `gate-check` now always exits 0 on success (uses JSON `atGate` field for status instead of exit code 2). Prevents parallel tool call cancellation when LLM runs `gate-check` alongside other commands.
 
 ## v1.27.1 - 2026-04-09
 
