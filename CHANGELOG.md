@@ -130,6 +130,29 @@ Checkpoints and resumes are now powered by deterministic CLI commands instead of
 
 <!-- GITHUB-RELEASES-START -->
 
+## v1.28.0 - 2026-04-13
+
+### Smarter checkpoints, faster resumes
+
+Checkpoints and resumes are now powered by deterministic CLI commands instead of LLM-generated markdown. This means your checkpoint files are always format-compatible with the parser — no more drift from hand-edited markdown — and resuming a session takes **one tool call** instead of six.
+
+**What you'll notice:**
+- **`/dev-checkpoint`** no longer writes markdown by hand. It composes structured data and pipes it to a CLI that handles formatting, writing, and session-log appending. Your checkpoints are guaranteed compatible with the parser every time.
+- **`/dev-checkpoint`** also marks PRD steps as complete using a CLI command (`status-update --step N --marker done`) instead of manual file edits — no risk of accidentally changing other content.
+- **`/dev-resume`** loads everything in a single call (`resume-context`). Instead of making 6 separate tool calls and reading the full master plan, it receives a pre-organized context packet with your current phase PRD, session history, and accumulated decisions across all sessions.
+- **Session continuity** — each checkpoint automatically archives the previous one to `session-log.md`. When you resume, you see decisions and context from *every* session, not just the most recent one. No more re-typing or hallucinating past decisions.
+- **Better error handling** — both skills now explicitly check CLI exit codes. If a command fails, you'll see the error instead of silently continuing with missing data.
+
+### Changed
+- `dev-checkpoint` skill — Steps 4, 7-8 delegate to CLI commands. LLM composes *what* to say; CLI handles *how* it's formatted and written.
+- `dev-resume` skill — Steps 2-5 collapsed into single `resume-context` call. Step numbering simplified from 0-8 to 0-7.
+
+### Internal
+- Added `writeCheckpoint()`, `updateStatus()`, `parseSessionLog()` to `dev-workflow-core`
+- Added `checkpoint-write`, `status-update`, `resume-context` CLI commands to `dev-workflow-cli`
+- ESLint added to core and CLI build pipelines
+- 162 tests passing (105 core + 57 CLI)
+
 ## v1.27.2 - 2026-04-11
 
 ### Fixed
