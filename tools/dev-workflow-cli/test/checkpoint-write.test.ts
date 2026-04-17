@@ -239,16 +239,88 @@ src/main.ts
   });
 
   // CLI-level flag validation tests (don't need stdin)
-  it('returns exit code 1 when no --stdin flag', async () => {
+  it('returns exit code 1 when neither --stdin nor --input-file is provided', async () => {
     const code = await checkpointWrite(['--dir', '/tmp/test']);
     expect(code).toBe(1);
-    expect(output.errorLines.join('\n')).toContain('--stdin flag is required');
+    expect(output.errorLines.join('\n')).toContain('Must pass either --stdin or --input-file');
+  });
+
+  it('returns exit code 1 when --stdin and --input-file are both provided', async () => {
+    const code = await checkpointWrite(['--dir', '/tmp/test', '--stdin', '--input-file', '/tmp/x.json']);
+    expect(code).toBe(1);
+    expect(output.errorLines.join('\n')).toContain('mutually exclusive');
   });
 
   it('returns exit code 1 when no dir specified', async () => {
     const code = await checkpointWrite(['--stdin']);
     expect(code).toBe(1);
     expect(output.errorLines.join('\n')).toContain('Could not resolve feature directory');
+  });
+
+  it('reads checkpoint input from --input-file and writes successfully', async () => {
+    const dir = createTempFeatureDir();
+    tempDirs.push(dir);
+
+    // JSON whose string values contain literal newlines and tabs — exactly the
+    // shape that breaks `echo '...' | node ...` via shell escaping.
+    const inputData = {
+      branch: 'feature/input-file',
+      lastCommit: 'abc input-file',
+      uncommittedChanges: false,
+      context: '## Context\n\n**Goal**: test the --input-file path.\n\tIndented line.',
+      currentState: '## Current Progress\n\n- Phase 1 done\n- Phase 2 pending',
+      nextAction: '## Next Steps\n\n1. First\n2. Second',
+      keyFiles: '## Key Files\n\n- src/a.ts\n- src/b.ts',
+      decisions: ['Use --input-file'],
+    };
+    const inputPath = join(dir, '.checkpoint-input.json');
+    writeFileSync(inputPath, JSON.stringify(inputData, null, 2), 'utf-8');
+
+    const code = await checkpointWrite([
+      '--dir',
+      dir,
+      '--input-file',
+      inputPath,
+      '--json',
+    ]);
+
+    expect(code).toBe(0);
+    expect(output.errorLines.join('\n')).toBe('');
+
+    const parsed = await parseCheckpoint(join(dir, 'checkpoint.md'));
+    expect(parsed).not.toBeNull();
+    expect(parsed!.branch).toBe('feature/input-file');
+    expect(parsed!.context).toContain('test the --input-file path');
+    expect(parsed!.context).toContain('Indented line');
+    expect(parsed!.decisions).toEqual(['Use --input-file']);
+  });
+
+  it('returns exit code 1 when --input-file does not exist', async () => {
+    const dir = createTempFeatureDir();
+    tempDirs.push(dir);
+
+    const code = await checkpointWrite([
+      '--dir',
+      dir,
+      '--input-file',
+      join(dir, 'does-not-exist.json'),
+    ]);
+
+    expect(code).toBe(1);
+    expect(output.errorLines.join('\n')).toContain('Failed to read input file');
+  });
+
+  it('returns exit code 1 when --input-file contains invalid JSON', async () => {
+    const dir = createTempFeatureDir();
+    tempDirs.push(dir);
+
+    const inputPath = join(dir, '.checkpoint-input.json');
+    writeFileSync(inputPath, '{not valid json', 'utf-8');
+
+    const code = await checkpointWrite(['--dir', dir, '--input-file', inputPath]);
+
+    expect(code).toBe(1);
+    expect(output.errorLines.join('\n')).toContain('Failed to read input file');
   });
 
   it('session-log entries round-trip through parseSessionLog', async () => {

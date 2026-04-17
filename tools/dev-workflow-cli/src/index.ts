@@ -45,6 +45,7 @@ function printUsage(): void {
   console.log('  --dir <path>         Feature directory');
   console.log('  --feature <name>     Feature name under .dev/');
   console.log('  --stdin              Read input from stdin (checkpoint-write)');
+  console.log('  --input-file <path>  Read input JSON from file (checkpoint-write)');
   console.log('  --phase <number>     Phase number (status-update)');
   console.log('  --step <number>      Step number (status-update)');
   console.log('  --marker <done|todo> Marker value (status-update)');

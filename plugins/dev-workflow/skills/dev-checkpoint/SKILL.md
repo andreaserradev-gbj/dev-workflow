@@ -6,7 +6,7 @@ description: >-
   and writes checkpoint.md for the next session.
   Use at the end of a session or before switching context.
 argument-hint: <feature name>
-allowed-tools: Bash(bash:*) Bash(node:*) Bash(git add:*) Bash(git commit:*) Bash(git log:*) Bash(git status:*) Read
+allowed-tools: Bash(bash:*) Bash(node:*) Bash(git add:*) Bash(git commit:*) Bash(git log:*) Bash(git status:*) Bash(rm:*) Read Write
 ---
 
 ## Checkpoint Current Session
@@ -188,11 +188,20 @@ Reference the [checkpoint-template.md](references/checkpoint-template.md) for th
 
 Check if `$PROJECT_ROOT/.dev/$FEATURE_NAME/checkpoint.md` already exists. Remember whether the file existed as `$IS_FIRST_CHECKPOINT` (true if the file did NOT exist, false if it did).
 
-Pipe the JSON from Step 7 to the CLI:
+**Use `--input-file`, not `echo | --stdin`.** Multi-line JSON string values (the `context`, `currentState`, etc. sections contain `\n`) cannot be piped reliably through `echo '...'` — unescaped literal newlines in the shell become real U+000A bytes inside JSON string literals and `JSON.parse` rejects them as "Bad control character". Write the JSON to a file, then pass the path to the CLI.
 
-```bash
-echo '<JSON from Step 7>' | node "$CLI" checkpoint-write --dir "$FEATURE_DIR" --stdin
-```
+1. **Write** the Step 7 JSON to `$FEATURE_DIR/.checkpoint-input.json` using the `Write` tool. The file can contain real newlines — `Write` is not a shell and does not mangle the content.
+2. **Run** the CLI against that file:
+
+   ```bash
+   node "$CLI" checkpoint-write --dir "$FEATURE_DIR" --input-file "$FEATURE_DIR/.checkpoint-input.json"
+   ```
+
+3. **Delete** the input file once the CLI reports success:
+
+   ```bash
+   rm -f "$FEATURE_DIR/.checkpoint-input.json"
+   ```
 
 Where `$CLI` is the absolute path to `scripts/dev-workflow.cjs` within this skill's directory. Apply the path safety rules from Step 0 (`$HOME`, copy from output). `$FEATURE_DIR` is `$PROJECT_ROOT/.dev/$FEATURE_NAME`.
 
@@ -201,7 +210,7 @@ The CLI will:
 2. **Write the new `checkpoint.md`** with proper YAML frontmatter and XML section formatting
 3. **Return** `{ success, file }` confirming the write
 
-**Check the exit code.** A non-zero exit code means the command failed (e.g., invalid JSON, missing required fields, directory not found). **Never ignore a non-zero exit** — if `checkpoint-write` fails, stop and report the error. The checkpoint was NOT saved.
+**Check the exit code.** A non-zero exit code means the command failed (e.g., invalid JSON, missing required fields, directory not found). **Never ignore a non-zero exit** — if `checkpoint-write` fails, stop and report the error. The checkpoint was NOT saved, and `.checkpoint-input.json` is left on disk for inspection (do not delete it on failure).
 
 **Do NOT manually write `checkpoint.md` or `session-log.md`** — the CLI ensures format compatibility and handles session-log accumulation automatically.
 

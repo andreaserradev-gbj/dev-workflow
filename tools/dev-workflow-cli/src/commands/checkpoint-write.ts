@@ -14,6 +14,11 @@ async function readStdin(): Promise<string> {
   return Buffer.concat(chunks).toString('utf-8');
 }
 
+/** Read a JSON input file as a UTF-8 string. */
+async function readInputFile(path: string): Promise<string> {
+  return readFile(path, 'utf-8');
+}
+
 /** Format an existing checkpoint as a session-log entry. */
 async function formatSessionEntry(
   checkpoint: {
@@ -100,13 +105,18 @@ export async function doCheckpointWrite(
 /**
  * CLI entry point for checkpoint-write command.
  *
- * Accepts `--dir`, `--json`, `--stdin` flags.
- * Reads CheckpointWriteInput JSON from stdin when --stdin is provided.
+ * Accepts `--dir`, `--json`, `--stdin`, `--input-file <path>` flags.
+ * Reads CheckpointWriteInput JSON from stdin (`--stdin`) or from a file
+ * on disk (`--input-file`). Exactly one of the two must be provided.
+ *
+ * `--input-file` is preferred from inside skills because it avoids the
+ * shell-escaping pitfalls of piping multi-line JSON through `echo`.
  */
 export async function checkpointWrite(args: string[]): Promise<number> {
   const { flags } = parseFlags(args);
   const json = flags.json === true;
   const useStdin = flags.stdin === true;
+  const inputFile = typeof flags['input-file'] === 'string' ? (flags['input-file'] as string) : null;
 
   const featureDir = resolveFeatureDir(flags);
   if (!featureDir) {
@@ -114,19 +124,24 @@ export async function checkpointWrite(args: string[]): Promise<number> {
     return 1;
   }
 
-  // --stdin is required — checkpoint data must be piped as JSON
-  if (!useStdin) {
-    console.error('--stdin flag is required. Pipe CheckpointWriteInput JSON via stdin.');
+  // Exactly one of --stdin or --input-file must be provided.
+  if (useStdin && inputFile) {
+    console.error('--stdin and --input-file are mutually exclusive. Pass exactly one.');
+    return 1;
+  }
+  if (!useStdin && !inputFile) {
+    console.error('Must pass either --stdin or --input-file <path> with CheckpointWriteInput JSON.');
     return 1;
   }
 
-  // Read JSON input from stdin
+  // Read JSON input from stdin or from the file on disk.
   let inputData: CheckpointWriteInput;
   try {
-    const stdinContent = await readStdin();
-    inputData = JSON.parse(stdinContent);
+    const raw = useStdin ? await readStdin() : await readInputFile(inputFile!);
+    inputData = JSON.parse(raw);
   } catch (err) {
-    console.error(`Failed to parse stdin JSON: ${err instanceof Error ? err.message : err}`);
+    const source = useStdin ? 'stdin' : `input file (${inputFile})`;
+    console.error(`Failed to read ${source} JSON: ${err instanceof Error ? err.message : err}`);
     return 1;
   }
 

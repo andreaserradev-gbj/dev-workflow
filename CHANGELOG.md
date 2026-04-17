@@ -4,6 +4,16 @@ All notable changes to this project should be documented in this file.
 
 <!-- LOCAL-RELEASES-START -->
 
+## v1.28.1 - 2026-04-17
+
+### Fixed
+
+- `/dev-checkpoint` no longer fails with `Bad control character in string literal` when the checkpoint context contains multi-line markdown. Step 8 now writes the JSON to `.checkpoint-input.json` and passes its path to the CLI instead of piping it through `echo '...'`, which was mangling literal newlines inside string values.
+
+### Changed
+
+- `checkpoint-write` CLI accepts `--input-file <path>` in addition to `--stdin`. Exactly one of the two is required. `--stdin` still works for programmatic callers that can produce escaped JSON reliably.
+
 ## v1.28.0 - 2026-04-13
 
 ### Smarter checkpoints, faster resumes
