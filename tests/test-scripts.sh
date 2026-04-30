@@ -200,9 +200,9 @@ check_sync() {
   done
 }
 
-check_sync discover.sh dev-plan dev-resume dev-wrapup dev-quiz
-check_sync validate.sh dev-plan dev-resume dev-quiz
-check_sync git-state.sh dev-resume
+check_sync discover.sh dev-plan dev-resume dev-wrapup dev-quiz dev-judge
+check_sync validate.sh dev-plan dev-resume dev-quiz dev-judge
+check_sync git-state.sh dev-resume dev-judge
 
 BIN_DIR="$(cd "$(dirname "$0")/../plugins/dev-workflow/bin" && pwd)"
 
@@ -226,7 +226,7 @@ check_bin_sync() {
   done
 }
 
-check_bin_sync dev-workflow.cjs dev-checkpoint dev-plan dev-resume
+check_bin_sync dev-workflow.cjs dev-checkpoint dev-judge dev-plan dev-resume
 
 echo ""
 echo "=== Results: $PASS passed, $FAIL failed ==="

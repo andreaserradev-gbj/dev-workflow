@@ -6,6 +6,7 @@
   "description": "Plan features with structured PRDs, checkpoint progress, and resume across sessions.",
   "agents": [
     "./skills/dev-plan/agents/prd-researcher.md",
-    "./skills/dev-plan/agents/prd-planner.md"
+    "./skills/dev-plan/agents/prd-planner.md",
+    "./skills/dev-judge/agents/phase-reviewer.md"
   ]
 }

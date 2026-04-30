@@ -21,6 +21,7 @@ const OUT_FILE = resolve(OUT_DIR, 'dev-workflow.cjs');
 // Skill directories that need a copy of the bundle
 const SKILL_DIRS = [
   'dev-checkpoint',
+  'dev-judge',
   'dev-plan',
   'dev-resume',
 ];
