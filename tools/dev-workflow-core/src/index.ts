@@ -4,3 +4,4 @@ export * from './parser.js';
 export * from './scanner.js';
 export * from './writer.js';
 export * from './run-status.js';
+export * from './afk-runnable.js';

@@ -18,6 +18,7 @@ import { checkpointWrite } from './commands/checkpoint-write.js';
 import { statusUpdate } from './commands/status-update.js';
 import { resumeContext } from './commands/resume-context.js';
 import { run } from './commands/run.js';
+import { list } from './commands/list.js';
 
 interface Command {
   name: string;
@@ -34,6 +35,7 @@ const commands: Command[] = [
   { name: 'status-update', description: 'Update PRD status marker', run: statusUpdate },
   { name: 'resume-context', description: 'Merged resume context packet', run: resumeContext },
   { name: 'run', description: 'AFK orchestrator: loop a feature until done', run: (args) => run(args) },
+  { name: 'list', description: 'List features and AFK-runnable status', run: list },
 ];
 
 function printUsage(): void {
@@ -56,6 +58,11 @@ function printUsage(): void {
   console.log('  --max-phases <N>     Cap phases per invocation (run)');
   console.log('  --phase-timeout-ms <N>  Per-phase subprocess timeout (run, default: 1800000)');
   console.log('  --retry-cap <N>      Retries on revise verdict (run, default: 2)');
+  console.log('  --scan <dir>         Scan directory (list)');
+  console.log('  --afk                Show only AFK-runnable features (list)');
+  console.log('  --all                Include archived and non-runnable features (list)');
+  console.log('  --project <name>     Filter project by name or path (list)');
+  console.log('  --status <status>    Filter feature status (list)');
 }
 
 export function parseFlags(args: string[]): { flags: Record<string, string | true>; positional: string[] } {
