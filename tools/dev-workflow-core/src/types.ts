@@ -54,6 +54,43 @@ export interface Feature {
   nextAction: string | null;
   branch: string | null;
   summary: string | null;
+  runStatus: RunStatus | null;
+}
+
+// ─── AFK orchestrator run state ────────────────────────────────────
+
+export type RunStatusValue =
+  | 'idle'
+  | 'planning'
+  | 'implementing'
+  | 'judging'
+  | 'done'
+  | 'escalated'
+  | 'timeout';
+
+export type Verdict = 'pass' | 'revise' | 'escalate';
+
+export interface PhaseAttempt {
+  phase: string;
+  attempt: number;
+  startedAt: string;
+  finishedAt: string | null;
+  verdict: Verdict | null;
+  feedback: string | null;
+  durationMs: number | null;
+}
+
+export interface RunStatus {
+  runId: string;
+  status: RunStatusValue;
+  currentPhase: string | null;
+  attempt: number;
+  startedAt: string;
+  updatedAt: string;
+  lastVerdict: Verdict | null;
+  lastFeedback: string | null;
+  exitReason: string | null;
+  phaseHistory: PhaseAttempt[];
 }
 
 // Project groups features by parent directory

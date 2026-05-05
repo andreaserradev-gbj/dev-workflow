@@ -2,6 +2,7 @@ import { readFile, readdir } from 'fs/promises';
 import { resolve, basename } from 'path';
 import matter from 'gray-matter';
 import type { Feature, FeatureStatus, Phase, Progress, SubPrdStep, SessionLogEntry } from './types.js';
+import { readRunStatus } from './run-status.js';
 
 // ─── Emoji Shortcode Normalization ──────────────────────────────────
 
@@ -508,6 +509,7 @@ export async function parseFeature(featureDir: string, name: string): Promise<Fe
 
   const masterPlan = await parseMasterPlan(resolve(featureDir, '00-master-plan.md'));
   const checkpoint = await parseCheckpoint(resolve(featureDir, 'checkpoint.md'));
+  const runStatus = await readRunStatus(featureDir).catch(() => null);
 
   // If master plan has 0 inline steps, fall back to sub-PRD progress, then phase counts
   let progress: Progress | null = masterPlan?.progress ?? null;
@@ -574,6 +576,7 @@ export async function parseFeature(featureDir: string, name: string): Promise<Fe
     nextAction: checkpoint?.nextAction ?? null,
     branch: checkpoint?.branch ?? null,
     summary: masterPlan?.summary ?? null,
+    runStatus,
   };
 }
 
@@ -699,7 +702,8 @@ export async function parseSessionLog(filePath: string): Promise<SessionLogEntry
 
 // ─── Verdict (dev-quiz / dev-judge) ───────────────────────────────
 
-export type Verdict = 'pass' | 'revise' | 'escalate';
+export type { Verdict } from './types.js';
+import type { Verdict } from './types.js';
 
 /** Parse a `<verdict>pass|revise|escalate</verdict>` block. Reuses
  *  `extractXmlTag`, which applies last-match semantics so any earlier

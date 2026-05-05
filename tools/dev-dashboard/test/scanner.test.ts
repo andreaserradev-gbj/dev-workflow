@@ -68,6 +68,21 @@ beforeAll(async () => {
   await mkdir(join(tempDir, 'project-alpha/.dev/feature-one'), { recursive: true });
   await writeFile(join(tempDir, 'project-alpha/.dev/feature-one/00-master-plan.md'), MASTER_PLAN);
   await writeFile(join(tempDir, 'project-alpha/.dev/feature-one/checkpoint.md'), CHECKPOINT);
+  await writeFile(
+    join(tempDir, 'project-alpha/.dev/feature-one/.run-status.json'),
+    JSON.stringify({
+      runId: 'scanner-test-run',
+      status: 'implementing',
+      currentPhase: '1',
+      attempt: 1,
+      startedAt: '2026-04-30T10:00:00Z',
+      updatedAt: '2026-04-30T10:05:00Z',
+      lastVerdict: null,
+      lastFeedback: null,
+      exitReason: null,
+      phaseHistory: [],
+    }),
+  );
 
   await mkdir(join(tempDir, 'project-alpha/.dev/feature-two'), { recursive: true });
   await writeFile(join(tempDir, 'project-alpha/.dev/feature-two/checkpoint.md'), CHECKPOINT);
@@ -137,6 +152,23 @@ describe('scanProjects', () => {
     expect(featureTwo).toBeDefined();
     expect(featureTwo!.status).toBe('checkpoint-only');
     expect(featureTwo!.progress).toBeNull();
+  });
+
+  it('attaches .run-status.json sidecar to the Feature record', async () => {
+    const projects = await scanProjects([tempDir]);
+    const alpha = projects.find((p) => p.name === 'project-alpha');
+    const featureOne = alpha!.features.find((f) => f.name === 'feature-one');
+    expect(featureOne!.runStatus).not.toBeNull();
+    expect(featureOne!.runStatus!.runId).toBe('scanner-test-run');
+    expect(featureOne!.runStatus!.status).toBe('implementing');
+    expect(featureOne!.runStatus!.currentPhase).toBe('1');
+  });
+
+  it('returns runStatus: null for features with no sidecar', async () => {
+    const projects = await scanProjects([tempDir]);
+    const alpha = projects.find((p) => p.name === 'project-alpha');
+    const featureTwo = alpha!.features.find((f) => f.name === 'feature-two');
+    expect(featureTwo!.runStatus).toBeNull();
   });
 
   it('excludes node_modules directories', async () => {
