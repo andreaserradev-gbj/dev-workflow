@@ -150,7 +150,7 @@ function implementerPrompt(featureName: string, phaseId: string, feedback: strin
     : '';
   return `You are continuing the dev-workflow feature \`${featureName}\`.
 
-1. Run the \`/dev-resume\` skill on this feature to load context from disk.
+1. Run the \`/dev-resume\` skill on this feature to load context from disk. If \`/dev-resume\` reports no checkpoint exists yet (fresh feature, first phase), read \`.dev/${featureName}/00-master-plan.md\` directly to understand the feature instead.
 2. Implement the phase whose ID is \`${phaseId}\` from the master plan.${feedbackBlock}
 3. When the phase is implemented and verified, run \`/dev-checkpoint\` to persist state.
 
@@ -323,6 +323,12 @@ export async function run(args: string[], deps: RunDeps = {}): Promise<number> {
           return 3;
         }
 
+        if (implResult.exitCode !== 0) {
+          const reason = nonZeroExitReason('implementer', phaseId, attempt, implResult.exitCode, implResult.stderr);
+          await recordTerminal(featureDir, lastKnownStatus, 'escalated', reason, now);
+          return 2;
+        }
+
         // ── Judge ──
         lastKnownStatus = { ...lastKnownStatus, status: 'judging' };
         await writeRunStatus(featureDir, lastKnownStatus);
@@ -337,6 +343,12 @@ export async function run(args: string[], deps: RunDeps = {}): Promise<number> {
           const reason = `timeout (${phaseTimeoutMs}ms) on phase ${phaseId} attempt ${attempt} (judge)`;
           await recordTerminal(featureDir, lastKnownStatus, 'timeout', reason, now);
           return 3;
+        }
+
+        if (judgeResult.exitCode !== 0) {
+          const reason = nonZeroExitReason('judge', phaseId, attempt, judgeResult.exitCode, judgeResult.stderr);
+          await recordTerminal(featureDir, lastKnownStatus, 'escalated', reason, now);
+          return 2;
         }
 
         const verdict: Verdict | null = parseVerdict(judgeResult.stdout);
@@ -438,4 +450,19 @@ function numberFlag(
   if (typeof v !== 'string') return fallback;
   const n = Number(v);
   return Number.isFinite(n) ? n : fallback;
+}
+
+const STDERR_TAIL_BYTES = 500;
+
+function nonZeroExitReason(
+  stage: 'implementer' | 'judge',
+  phaseId: string,
+  attempt: number,
+  exitCode: number | null,
+  stderr: string,
+): string {
+  const code = exitCode === null ? 'spawn-error' : String(exitCode);
+  const tail = stderr.slice(-STDERR_TAIL_BYTES).trim();
+  const suffix = tail ? `: ${tail}` : '';
+  return `claude exited ${code} on phase ${phaseId} attempt ${attempt} (${stage})${suffix}`;
 }

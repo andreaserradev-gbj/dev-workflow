@@ -109,6 +109,13 @@ const timeoutResult = (): SpawnClaudeResult => ({
   timedOut: true,
 });
 
+const nonZeroExitResult = (exitCode: number, stderr = ''): SpawnClaudeResult => ({
+  stdout: '',
+  stderr,
+  exitCode,
+  timedOut: false,
+});
+
 describe('run command', () => {
   let output: ReturnType<typeof captureOutput>;
   let tempDirs: string[];
@@ -406,6 +413,76 @@ Step 2 missing tests — add tests covering the edge case.
     const sidecar = await readRunStatus(dir);
     expect(sidecar!.status).toBe('timeout');
     expect(sidecar!.exitReason).toMatch(/\(judge\)/);
+  });
+
+  // ─── Non-zero exit ────────────────────────────────────────
+
+  it('implementer non-zero exit: escalates immediately, exit 2, phase NOT marked', async () => {
+    const dir = createTempFeatureDir(SINGLE_PHASE_PLAN);
+    tempDirs.push(dir);
+
+    const { fn, calls } = mockSpawnClaude([
+      { result: nonZeroExitResult(1, 'auth: missing API key') },
+    ]);
+
+    const code = await run(
+      ['--dir', dir, '--json'],
+      { spawnClaude: fn, installSignalHandlers: false },
+    );
+
+    expect(code).toBe(2);
+    expect(calls).toHaveLength(1); // Judge never called
+
+    const sidecar = await readRunStatus(dir);
+    expect(sidecar!.status).toBe('escalated');
+    expect(sidecar!.exitReason).toMatch(/claude exited 1 on phase 1 attempt 1 \(implementer\)/);
+    expect(sidecar!.exitReason).toContain('auth: missing API key');
+
+    const updated = readFileSync(join(dir, '00-master-plan.md'), 'utf-8');
+    expect(updated).not.toMatch(/### Phase 1: Setup\s*✅/);
+  });
+
+  it('judge non-zero exit: escalates immediately, exit 2, phase NOT marked', async () => {
+    const dir = createTempFeatureDir(SINGLE_PHASE_PLAN);
+    tempDirs.push(dir);
+
+    const { fn, calls } = mockSpawnClaude([
+      { result: okResult('impl ran') },
+      { result: nonZeroExitResult(127, 'claude: command not found') },
+    ]);
+
+    const code = await run(
+      ['--dir', dir, '--json'],
+      { spawnClaude: fn, installSignalHandlers: false },
+    );
+
+    expect(code).toBe(2);
+    expect(calls).toHaveLength(2);
+
+    const sidecar = await readRunStatus(dir);
+    expect(sidecar!.status).toBe('escalated');
+    expect(sidecar!.exitReason).toMatch(/claude exited 127 on phase 1 attempt 1 \(judge\)/);
+
+    const updated = readFileSync(join(dir, '00-master-plan.md'), 'utf-8');
+    expect(updated).not.toMatch(/### Phase 1: Setup\s*✅/);
+  });
+
+  it('implementer prompt instructs fresh-feature fallback to direct master-plan read', async () => {
+    const dir = createTempFeatureDir(SINGLE_PHASE_PLAN);
+    tempDirs.push(dir);
+
+    const { fn, calls } = mockSpawnClaude([
+      { result: okResult('working') },
+      { result: okResult('<verdict>pass</verdict>') },
+    ]);
+
+    await run(
+      ['--dir', dir, '--json'],
+      { spawnClaude: fn, installSignalHandlers: false },
+    );
+
+    expect(calls[0].prompt).toMatch(/no checkpoint exists yet/);
+    expect(calls[0].prompt).toMatch(/00-master-plan\.md/);
   });
 
   // ─── Sidecar transitions ──────────────────────────────────
