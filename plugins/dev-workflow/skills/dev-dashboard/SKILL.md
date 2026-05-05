@@ -10,9 +10,13 @@ allowed-tools: Bash(bash:*)
 ## Start Dev Dashboard
 
 Start the dev-dashboard server (or reuse an existing instance) and display the URL.
-On first run, install or refresh the local `dev-dashboard` and `dev-dashboard-stop`
-commands before launching so the skill and terminal path share the same bundled
-launcher.
+On first run, install or refresh the local terminal commands before launching so
+the skill and the terminal path share the same bundled launcher. Three commands
+are managed:
+
+- `dev-dashboard` — start the dashboard
+- `dev-dashboard-stop` — stop the dashboard
+- `dev-workflow` — bundled CLI for orchestrator + checkpoint + resume + AFK runs
 
 ### Step 1: Check Install State
 
@@ -25,33 +29,48 @@ bash "$SCRIPTS/check-install.sh"
 Where `$SCRIPTS` is the absolute path to `scripts/` within this skill's directory. Use `$HOME` instead of literal home paths.
 
 Parse these output lines:
-- `status:<installed|missing|stale>`
+- `status:<installed|missing|stale>` — describes only the dashboard start/stop shims
 - `bin_dir:<path>`
 - `on_path:<true|false>`
 - `start_shim:<path>`
 - `stop_shim:<path>`
+- `workflow_status:<installed|missing|stale|conflict>`
+- `workflow_shim:<path>`
+- `workflow_target:<path>`
+- `workflow_conflict:<path>` — only when `workflow_status:conflict`
 - `error:<message>`
 
 If the check emits `error:<message>`, stop and report the error.
 
+The top-level `status` line covers only the dashboard shims, so an unrelated
+`dev-workflow` command on `PATH` does not block dashboard launch — that case
+surfaces via `workflow_status:conflict` and `workflow_conflict:<path>` instead.
+
 ### Step 2: Install When Needed
 
-If `status` is `missing` or `stale`, run:
+If `status` is `missing` or `stale`, OR `workflow_status` is `missing` or
+`stale`, run:
 
 ```bash
 bash "$SCRIPTS/install.sh"
 ```
 
 Parse these output lines:
-- `installed:<bin-dir>`
+- `installed:<bin-dir>` — dashboard shims created or updated
+- `workflow_installed:<path>` — dev-workflow shim created or refreshed
+- `workflow_conflict:<path>` — dev-workflow already exists and is unmanaged; dashboard shims still installed
 - `path_warning:<bin-dir>`
 - `error:<message>`
 
-If install emits `error:<message>`, stop and report the error.
+If install emits `error:<message>` AND no `installed:<bin-dir>` line follows, stop
+and report the error. If `error:` describes a missing `dev-workflow` CLI bundle
+but `installed:` is also reported, dashboard install succeeded — report the
+workflow error and continue.
 
 Treat install as explicit one-time onboarding:
-- Tell the user local dashboard commands were installed or refreshed
-- Mention `dev-dashboard` and `dev-dashboard-stop` are now the normal terminal commands
+- Tell the user local commands were installed or refreshed
+- Mention `dev-dashboard`, `dev-dashboard-stop`, and `dev-workflow` are now the normal terminal commands
+- If `workflow_conflict:<path>` appears, tell the user dashboard setup completed but `dev-workflow` was not installed because an unrelated command at that path already exists. Do not abort the launch.
 - If `path_warning:<bin-dir>` appears, note that the install succeeded but that directory is not currently on `PATH`
 
 After install, run `bash "$SCRIPTS/check-install.sh"` again and use the returned `start_shim`

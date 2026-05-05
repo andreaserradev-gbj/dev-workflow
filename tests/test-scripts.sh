@@ -229,5 +229,17 @@ check_bin_sync() {
 check_bin_sync dev-workflow.cjs dev-checkpoint dev-judge dev-plan dev-resume
 
 echo ""
+echo "--- dev-dashboard installer regression tests ---"
+INSTALLER_TESTS="$(cd "$(dirname "$0")" && pwd)/test-dev-dashboard-install.sh"
+if bash "$INSTALLER_TESTS" >/tmp/dev-dashboard-install.log 2>&1; then
+  echo "PASS: tests/test-dev-dashboard-install.sh"
+  PASS=$((PASS + 1))
+else
+  echo "FAIL: tests/test-dev-dashboard-install.sh (see /tmp/dev-dashboard-install.log)"
+  cat /tmp/dev-dashboard-install.log
+  FAIL=$((FAIL + 1))
+fi
+
+echo ""
 echo "=== Results: $PASS passed, $FAIL failed ==="
 [ "$FAIL" -eq 0 ] || exit 1
