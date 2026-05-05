@@ -79,7 +79,10 @@ Each skill directory contains a `SKILL.md` with YAML frontmatter (`name`, `descr
 | `dev-plan` | Plan a new feature with structured PRD documentation |
 | `dev-checkpoint` | Save progress and generate a continuation prompt |
 | `dev-resume` | Resume work from a previous session checkpoint |
-| `dev-status` | Show status of all features and offer to archive completed ones |
+| `dev-quiz` | Critique a feature plan against a fixed rubric and emit a `<verdict>` block |
+| `dev-judge` | Critique a completed phase's diff against acceptance criteria and emit a `<verdict>` block |
+| `dev-wrapup` | Review the conversation for learnings worth keeping |
+| `dev-dashboard` | Start the bundled dashboard server and show its URL |
 
 ### Usage
 
@@ -120,10 +123,16 @@ use dev-resume to pick up where I left off on oauth-login
 resume my previous session
 ```
 
-**dev-status:**
+**dev-quiz:**
 ```
-use dev-status to check progress across all features
-show dev status
+use dev-quiz to grill the oauth-login plan
+critique my latest PRD
+```
+
+**dev-judge:**
+```
+use dev-judge on the phase I just finished
+review the diff against the sub-PRD
 ```
 
 ### Workflow
@@ -132,7 +141,11 @@ The intended workflow is: **plan -> build -> checkpoint -> resume -> build -> ch
 
 ## Agent Compatibility
 
-Some skills reference Claude Code subagents via the `Task` tool (e.g., `subagent_type=dev-workflow:prd-researcher`). Gemini CLI doesn't have this mechanism, so agent delegation steps will be skipped. The skills still provide structured workflow instructions -- phases, templates, and guidance all work -- but parallel agent research won't execute. This has minimal impact on `dev-checkpoint`, `dev-resume`, and `dev-status`. For `dev-plan`, the research phase will need to be done manually or through direct prompting instead of agent delegation.
+Some skills reference Claude Code subagents via the `Task` tool (e.g., `subagent_type=dev-workflow:prd-researcher`, `subagent_type=dev-workflow:phase-reviewer`). Gemini CLI doesn't have this mechanism, so agent delegation steps will be skipped. The skills still provide structured workflow instructions -- phases, templates, rubrics, and guidance all work -- but parallel agent research and the `dev-judge` reviewer agent won't execute. For `dev-plan`, the research phase needs to be done manually or through direct prompting instead. For `dev-judge`, the rubric in the skill body is enough to drive an inline critique.
+
+## AFK Mode (Claude CLI only)
+
+The `dev-workflow run` orchestrator spawns headless `claude -p` subprocesses to implement and judge each phase. It assumes the local `claude` CLI is installed and authenticated, so it is only useful in environments where Claude Code is also available. The companion `dev-workflow list` command just reads `.dev/` folders and works regardless of which agent you use.
 
 ## Updating
 
@@ -155,7 +168,10 @@ After updating, run `/skills reload` in Gemini CLI to refresh the skill catalog.
 gemini skills uninstall dev-plan
 gemini skills uninstall dev-checkpoint
 gemini skills uninstall dev-resume
-gemini skills uninstall dev-status
+gemini skills uninstall dev-quiz
+gemini skills uninstall dev-judge
+gemini skills uninstall dev-wrapup
+gemini skills uninstall dev-dashboard
 ```
 
 **Clone + link / manual symlink users:**

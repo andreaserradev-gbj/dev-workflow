@@ -16,10 +16,18 @@ plugins/dev-workflow/           # Plugin package
       references/prd-templates.md
       scripts/discover.sh, validate.sh, dev-workflow.cjs
       agents/prd-researcher.md, prd-planner.md
+    dev-quiz/
+      SKILL.md
+      references/quiz-rubric.md
+      scripts/discover.sh, validate.sh
     dev-checkpoint/
       SKILL.md
       references/checkpoint-template.md, worktree-guide.md
       scripts/discover.sh, validate.sh, git-state.sh, worktree-setup.sh, dev-workflow.cjs
+    dev-judge/
+      SKILL.md
+      scripts/discover.sh, validate.sh, git-state.sh, dev-workflow.cjs
+      agents/phase-reviewer.md
     dev-resume/
       SKILL.md
       scripts/discover.sh, validate.sh, git-state.sh, dev-workflow.cjs
@@ -28,7 +36,7 @@ plugins/dev-workflow/           # Plugin package
       scripts/discover.sh
     dev-dashboard/
       SKILL.md
-      scripts/start.sh
+      scripts/start.sh, check-install.sh, install.sh
       dashboard/                    # Bundled server + client (committed build artifact)
         server/index.cjs
         client/

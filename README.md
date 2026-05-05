@@ -3,7 +3,7 @@
 # dev-workflow
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
-[![Version](https://img.shields.io/badge/version-1.26.2-green.svg)](.claude-plugin/marketplace.json)
+[![Version](https://img.shields.io/badge/version-1.29.0-green.svg)](.claude-plugin/marketplace.json)
 [![AgentSkills.io](https://img.shields.io/badge/standard-AgentSkills.io-purple.svg)](https://agentskills.io)
 
 **AI coding agents forget everything between sessions. This fixes that.**
@@ -150,6 +150,28 @@ Reconstructs context from a checkpoint:
 /dev-resume oauth-login
 ```
 
+### `/dev-quiz` — Stress-test a plan
+
+Critiques a `.dev/<feature>/` PRD against a 7-criterion rubric — structural (decision-tree resolved, acceptance criteria, scope) plus substantive (load-bearing assumptions, failure modes, counterfactual sanity). Emits a single `<verdict>` block (`pass`, `revise`, or `escalate`) with falsifiable feedback.
+
+Use after `/dev-plan` to surface gaps before you start implementing.
+
+```
+/dev-quiz
+/dev-quiz oauth-login
+```
+
+### `/dev-judge` — Second-opinion gate on a phase
+
+Critiques a completed phase's diff against the sub-PRD's acceptance criteria. Pulls the diff since the last ✅ phase, the latest checkpoint, and (when available) test output. Emits the same `<verdict>` block as `/dev-quiz`.
+
+Use after a phase is implemented as a sanity check before marking it done.
+
+```
+/dev-judge
+/dev-judge oauth-login
+```
+
 ### `/dev-wrapup` — Extract session learnings
 
 Reviews the conversation for insights worth keeping:
@@ -229,6 +251,51 @@ This installer-backed path is the primary terminal UX for this release. Manual
 shell snippets are no longer the recommended default.
 
 </details>
+
+---
+
+## AFK Mode (experimental)
+
+Pair `/dev-quiz` and `/dev-judge` as automated reviewers, and the CLI can implement and judge phases without you in the loop.
+
+This is an experiment. v1 stays small on purpose: branch-only execution (no worktrees), local `claude` CLI only (no Docker, no sandbox, no API key handling), one runner per repo at a time.
+
+`dev-workflow` is a shim installed by `/dev-dashboard` first-run onboarding. If it isn't on `PATH` yet, run `/dev-dashboard` once to install it.
+
+### `dev-workflow list` — See what's runnable
+
+Scans `.dev/` folders across your projects and groups features by AFK state: `READY`, `RUNNING`, `ATTENTION`, `BLOCKED`. Mirrors the dashboard's main view in the terminal.
+
+```bash
+dev-workflow list                    # all features, grouped by project
+dev-workflow list --afk              # only features safe to start now
+dev-workflow list --json --afk       # stable JSON for scripts
+dev-workflow list --scan ~/code      # override scan dirs
+dev-workflow list --status archived  # surface archived features
+```
+
+Without `--scan`, the CLI reads scan directories from `~/.config/dev-dashboard/config.json` and falls back to the current directory.
+
+### `dev-workflow run` — Loop until done
+
+Picks the next pending phase, spawns a fresh `claude -p` to implement it (which reloads context via `/dev-resume`), then a second `claude -p` to judge the diff. On `pass`, the phase is marked ✅ and the loop advances. On `revise`, the orchestrator retries with the judge's feedback (default cap: 2). On `escalate`, no verdict, or non-zero `claude` exit, the loop stops with a non-zero exit code and the phase is left ⬜.
+
+```bash
+dev-workflow run --feature oauth-login
+dev-workflow run --feature oauth-login --dry-run        # show planned phases, spawn nothing
+dev-workflow run --feature oauth-login --max-phases 1   # one phase at a time
+dev-workflow run --feature oauth-login --retry-cap 3
+dev-workflow run --feature oauth-login --phase-timeout-ms 1800000
+```
+
+Run state lives in a `.run-status.json` sidecar next to the master plan. The dashboard reads it and renders a live panel per feature: status badge (`planning` → `implementing` → `judging` → `done`), current phase and attempt count, last verdict, and terminal exit reason. Open the dashboard in a second window to watch a run move.
+
+**Operating notes:**
+
+- Each phase runs as a fresh `claude -p` process. There is no cross-phase session memory; state flows only through files (`checkpoint.md`, PRD markers, sidecar).
+- Non-zero `claude` exits (auth error, missing binary, crash) escalate immediately with no retry. The sidecar records the exit code plus a 500-byte stderr tail in `exitReason`.
+- Two orchestrators against the same working tree is a user-level race, the same as two `claude` CLI sessions. Use separate clones, branches, or worktrees.
+- Ctrl-C in the orchestrator's terminal kills the in-flight `claude` child via process group, flushes the sidecar to `idle`, and exits 130. The PRD is not modified mid-phase.
 
 ---
 
