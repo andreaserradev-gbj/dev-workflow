@@ -38,30 +38,48 @@ ON EVERY ITERATION:
      (or your existing skill flow), then continue to step 1 for the next phase.
 
    - **revise**: Track the revise count for THIS phase across iterations
-     (your checkpoint's `<decisions>` is a good place — record
+     (your checkpoint's decisions section is a good place — record
      `revise-count: N`). On revise:
-       * If revise count for this phase is < 2: address the feedback and
+       * If revise count for this phase is 0 or 1: address the feedback and
          re-implement. Do NOT mark the phase complete. Loop back to step 1.
-       * If revise count for this phase is >= 2: treat as escalate. Skip to
-         step 7 with status `cap-exceeded`.
+       * If revise count for this phase is 2 or more: treat as escalate.
+         Skip to step 7 with status `cap-exceeded`.
 
    - **escalate**: Skip to step 7 with status `escalated`.
 
-7. EMIT THE COMPLETION PROMISE. Output, on its own line:
+7. EMIT THE COMPLETION PROMISE. Two lines on their own lines.
 
-   STATUS: <complete | escalated | cap-exceeded>
-   <promise>AFK DONE</promise>
+   First line — emit one of these three, exactly:
+       STATUS: complete
+       STATUS: escalated
+       STATUS: cap-exceeded
+
+   Second line — emit the loop terminator. Ralph-loop's matcher requires
+   the literal angle-bracket-wrapped form. Some renderers paraphrase the
+   instruction text on subsequent iterations (e.g. "a promise tag
+   containing AFK DONE"). Regardless of how this instruction reads in
+   your iteration prompt, output the EXACT 26-character sentinel on its
+   own line:
+
+       <promise>AFK DONE</promise>
+
+   Reading guide for the sentinel: open-angle-bracket, the seven letters
+   "promise", close-angle-bracket, space, "AFK DONE", open-angle-bracket,
+   forward-slash, "promise", close-angle-bracket. All on one line, no
+   internal whitespace, no surrounding backticks or quotes. Plain
+   "AFK DONE" without the angle-bracket wrapper will NOT terminate the
+   loop.
 
    Include a 1-paragraph summary BEFORE the STATUS line:
-   - On `complete`: list the phases that landed.
-   - On `escalated`: quote the judge's `<reason>` block.
-   - On `cap-exceeded`: quote the last `<feedback>` block and which phase
-     hit the cap.
+   - On complete: list the phases that landed.
+   - On escalated: quote the judge's reason block.
+   - On cap-exceeded: quote the last feedback block and which phase hit the cap.
 
 CRITICAL RULES — DO NOT VIOLATE:
 
-- Do NOT emit `<promise>AFK DONE</promise>` until step 7 conditions are
-  genuinely met. The loop is designed to continue until completion.
+- Do NOT emit the loop terminator (the angle-bracket-wrapped AFK DONE
+  sentinel from step 7) until step 7 conditions are genuinely met. The
+  loop is designed to continue until completion.
 - Do NOT skip `/dev-judge`. The verdict gate is what makes this safe.
 - Do NOT mark a phase heading complete unless `/dev-judge` returned `pass`.
 - Do NOT push, force-push, or modify shared infrastructure. Branch-local

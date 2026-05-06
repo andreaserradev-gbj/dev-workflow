@@ -107,16 +107,37 @@ disrupting the session:
 
 The loop stops when:
 
-- `<promise>AFK DONE</promise>` is emitted (prompt instructs the agent to
-  emit it on success, escalate, or retry-cap exhaustion — surrounding text
-  carries the status detail)
-- `--max-iterations` is reached
-- The user runs `/cancel-ralph`
+- The agent emits the literal terminator `<promise>AFK DONE</promise>`
+  (the prompt template instructs this on success, escalate, or
+  retry-cap exhaustion; surrounding `STATUS:` text carries the detail).
+  Ralph-loop matches the exact angle-bracket-wrapped string. The
+  per-iteration prompt-rendering pipeline can paraphrase angle-bracket
+  syntax into prose ("a promise tag containing AFK DONE"), so the
+  prompt template includes a defensive reading guide that walks the
+  agent through the literal characters even when the surrounding
+  instruction text has been paraphrased.
+- `--max-iterations` is reached.
+- The user runs `/cancel-ralph`.
 
 Ralph re-feeds the same prompt every iteration. Files on disk (PRD,
 checkpoint, session log) are the authoritative state carrier between
 iterations — the loop intentionally relies on `/dev-resume` for fresh
 context-from-disk on every pass.
+
+### Known limitations
+
+- **Manual-verification acceptance criteria.** Phases whose acceptance
+  depends on live runtime checks (browser DevTools, dev tunnels,
+  human visual diff) cannot be satisfied by the loop. The judge will
+  return `revise` on iteration 1, the agent will re-emit an identical
+  diff on iteration 2 (no code changes can close a manual-verification
+  gap), the judge will escalate, and the loop exits with
+  `STATUS: escalated`. The work landed cleanly is preserved; the human
+  picks up the manual verification step.
+- **Best for code-only acceptance criteria.** AFK shines on phases
+  whose acceptance is fully verifiable from the diff (lint, build,
+  test). For mixed phases, expect at least two iterations of judge
+  cost before escalation.
 
 ### PRIVACY RULES
 
