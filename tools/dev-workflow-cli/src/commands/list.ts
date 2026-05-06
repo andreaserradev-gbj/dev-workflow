@@ -13,13 +13,10 @@ import {
 } from 'dev-workflow-core';
 import { parseFlags } from '../index.js';
 
-// AFK state sort order: runnable first (the operator question), then running,
-// then needs-attention, then everything else.
+// AFK state sort order: runnable first (the operator question), then everything else.
 const AFK_STATE_ORDER: Record<AfkRunnableState, number> = {
   runnable: 0,
-  running: 1,
-  'needs-attention': 2,
-  'not-runnable': 3,
+  'not-runnable': 1,
 };
 
 const VALID_STATUSES: ReadonlySet<FeatureStatus> = new Set([
@@ -232,7 +229,6 @@ function featureJson(row: ListedFeature, projectPath: string) {
     status: f.status,
     progress: f.progress,
     currentPhase: f.currentPhase,
-    runStatus: f.runStatus,
     afk: row.afk,
   };
 }
@@ -254,8 +250,6 @@ function printText(
 
   const stateLabel: Record<AfkRunnableState, string> = {
     runnable: 'READY',
-    running: 'RUNNING',
-    'needs-attention': 'ATTENTION',
     'not-runnable': 'BLOCKED',
   };
 

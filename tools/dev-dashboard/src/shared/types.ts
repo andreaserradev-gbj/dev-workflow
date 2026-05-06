@@ -8,10 +8,6 @@ export type {
   SubPrd,
   Feature,
   Project,
-  RunStatus,
-  RunStatusValue,
-  Verdict,
-  PhaseAttempt,
 } from 'dev-workflow-core/types';
 export { STATUS_ORDER } from 'dev-workflow-core/types';
 

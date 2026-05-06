@@ -196,10 +196,7 @@ export async function createWatcher(
     const hasDevDir =
       filePath.includes(`${sep}.dev${sep}`) || filePath.includes(`${sep}.dev-archive${sep}`);
     if (!hasDevDir) return false;
-    // Track PRD/checkpoint markdown plus the AFK orchestrator's run-status sidecar.
-    const isMd = filePath.endsWith('.md');
-    const isRunStatus = filePath.endsWith(`${sep}.run-status.json`);
-    if (!isMd && !isRunStatus) return false;
+    if (!filePath.endsWith('.md')) return false;
     if (filePath.includes(`${sep}node_modules${sep}`)) return false;
     return true;
   }

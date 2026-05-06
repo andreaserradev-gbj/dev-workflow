@@ -66,43 +66,6 @@ checkpointed: 2099-01-01T10:00:00Z
 <next_action>do thing</next_action>
 `;
 
-const RECENT_CHECKPOINT_OLDER = `---
-branch: feature/older
-last_commit: def456
-uncommitted_changes: false
-checkpointed: 2098-06-01T10:00:00Z
----
-
-<context>noop</context>
-<next_action>do thing</next_action>
-`;
-
-const RUNNING_SIDECAR = JSON.stringify({
-  runId: 'r1',
-  status: 'implementing',
-  currentPhase: '1',
-  attempt: 1,
-  startedAt: '2099-01-01T10:00:00Z',
-  updatedAt: '2099-01-01T10:00:00Z',
-  lastVerdict: null,
-  lastFeedback: null,
-  exitReason: null,
-  phaseHistory: [],
-});
-
-const ESCALATED_SIDECAR = JSON.stringify({
-  runId: 'r2',
-  status: 'escalated',
-  currentPhase: '1',
-  attempt: 2,
-  startedAt: '2099-01-01T10:00:00Z',
-  updatedAt: '2099-01-01T10:00:00Z',
-  lastVerdict: 'revise',
-  lastFeedback: null,
-  exitReason: 'retry cap (2) exceeded',
-  phaseHistory: [],
-});
-
 let tempScan: string;
 
 beforeAll(() => {
@@ -110,8 +73,6 @@ beforeAll(() => {
   //   tempScan/
   //     project-alpha/.dev/
   //       runnable/   active, currentPhase pending, fresh checkpoint
-  //       running/    implementing run-status
-  //       attention/  escalated run-status
   //     project-alpha/.dev-archive/
   //       old-feature/   archived
   //     project-beta/.dev/
@@ -125,16 +86,6 @@ beforeAll(() => {
   mkdirSync(join(alphaDev, 'runnable'), { recursive: true });
   writeFileSync(join(alphaDev, 'runnable', '00-master-plan.md'), ACTIVE_PLAN);
   writeFileSync(join(alphaDev, 'runnable', 'checkpoint.md'), FRESH_CHECKPOINT);
-
-  mkdirSync(join(alphaDev, 'running'), { recursive: true });
-  writeFileSync(join(alphaDev, 'running', '00-master-plan.md'), ACTIVE_PLAN);
-  writeFileSync(join(alphaDev, 'running', 'checkpoint.md'), RECENT_CHECKPOINT_OLDER);
-  writeFileSync(join(alphaDev, 'running', '.run-status.json'), RUNNING_SIDECAR);
-
-  mkdirSync(join(alphaDev, 'attention'), { recursive: true });
-  writeFileSync(join(alphaDev, 'attention', '00-master-plan.md'), ACTIVE_PLAN);
-  writeFileSync(join(alphaDev, 'attention', 'checkpoint.md'), RECENT_CHECKPOINT_OLDER);
-  writeFileSync(join(alphaDev, 'attention', '.run-status.json'), ESCALATED_SIDECAR);
 
   const alphaArchive = join(alpha, '.dev-archive', 'old-feature');
   mkdirSync(alphaArchive, { recursive: true });
@@ -176,15 +127,11 @@ describe('list', () => {
       expect(text).toContain('Project: project-alpha');
       expect(text).toContain('Project: project-beta');
       expect(text).toContain('runnable');
-      expect(text).toContain('running');
-      expect(text).toContain('attention');
       expect(text).toContain('complete');
       // archived hidden by default
       expect(text).not.toContain('old-feature');
       // reason text appears
       expect(text).toContain('ready: next phase');
-      expect(text).toContain('already running: implementing');
-      expect(text).toContain('needs attention: retry cap');
     });
 
     it('--afk filters to runnable features only', async () => {
@@ -193,8 +140,6 @@ describe('list', () => {
 
       expect(code).toBe(0);
       expect(text).toContain('runnable');
-      expect(text).not.toContain('already running');
-      expect(text).not.toContain('needs attention');
       expect(text).not.toContain('complete');
     });
 
@@ -253,12 +198,13 @@ describe('list', () => {
       });
       expect(runnable.afk.reason).toMatch(/ready: next phase \d+/);
 
-      const running = alpha.features.find((f: { name: string }) => f.name === 'running');
-      expect(running.afk.state).toBe('running');
-
-      const attention = alpha.features.find((f: { name: string }) => f.name === 'attention');
-      expect(attention.afk.state).toBe('needs-attention');
-      expect(attention.afk.reason).toContain('retry cap');
+      const beta = json.projects.find((p: { name: string }) => p.name === 'project-beta');
+      const complete = beta.features.find((f: { name: string }) => f.name === 'complete');
+      expect(complete.afk).toMatchObject({
+        state: 'not-runnable',
+        runnable: false,
+        reason: 'complete',
+      });
     });
 
     it('--json --afk includes only runnable features', async () => {

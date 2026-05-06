@@ -180,26 +180,6 @@ describe('createWatcher', () => {
     expect(featureUpdated.length).toBeGreaterThanOrEqual(1);
   });
 
-  it('fires onFeatureUpdated when .run-status.json changes', async () => {
-    const projectDir = join(tempDir, 'project-runstatus');
-    const featureDir = join(projectDir, '.dev', 'my-feature');
-    await mkdir(featureDir, { recursive: true });
-    await writeFile(join(featureDir, '00-master-plan.md'), MASTER_PLAN);
-
-    watcher = await createWatcher([tempDir], callbacks);
-    await waitForEvents(300);
-    featureUpdated.length = 0;
-
-    await writeFile(
-      join(featureDir, '.run-status.json'),
-      JSON.stringify({ runId: 'r1', status: 'planning' }),
-    );
-    await waitForEvents(500);
-
-    expect(featureUpdated.length).toBeGreaterThanOrEqual(1);
-    expect(featureUpdated[0].featureName).toBe('my-feature');
-  });
-
   it('ignores changes outside .dev/ directories', async () => {
     const projectDir = join(tempDir, 'project-f');
     await mkdir(join(projectDir, '.dev', 'some-feature'), { recursive: true });

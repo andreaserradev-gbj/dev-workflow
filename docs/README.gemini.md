@@ -143,9 +143,9 @@ The intended workflow is: **plan -> build -> checkpoint -> resume -> build -> ch
 
 Some skills reference Claude Code subagents via the `Task` tool (e.g., `subagent_type=dev-workflow:prd-researcher`, `subagent_type=dev-workflow:phase-reviewer`). Gemini CLI doesn't have this mechanism, so agent delegation steps will be skipped. The skills still provide structured workflow instructions -- phases, templates, rubrics, and guidance all work -- but parallel agent research and the `dev-judge` reviewer agent won't execute. For `dev-plan`, the research phase needs to be done manually or through direct prompting instead. For `dev-judge`, the rubric in the skill body is enough to drive an inline critique.
 
-## AFK Mode (Claude CLI only)
+## AFK Mode (Claude Code only)
 
-The `dev-workflow run` orchestrator spawns headless `claude -p` subprocesses to implement and judge each phase. It assumes the local `claude` CLI is installed and authenticated, so it is only useful in environments where Claude Code is also available. The companion `dev-workflow list` command just reads `.dev/` folders and works regardless of which agent you use.
+The `/dev-afk` skill loops a feature's pending phases inside a Claude Code session by composing `/dev-resume`, `/dev-checkpoint`, and `/dev-judge` and handing the loop to the [`ralph-loop` plugin](https://github.com/anthropics/claude-plugins-official). It depends on Claude Code's slash-command and Stop-hook machinery, so it does not run under Gemini CLI. The companion `dev-workflow list` command just reads `.dev/` folders and works regardless of which agent you use.
 
 ## Updating
 

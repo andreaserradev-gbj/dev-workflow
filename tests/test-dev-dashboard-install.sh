@@ -85,7 +85,7 @@ echo
 echo "--- dev-workflow --help reaches the bundled CLI ---"
 HELP_OUT="$("$BIN_A/dev-workflow" --help 2>&1)"
 assert_contains "dev-workflow --help: usage line" "Usage: dev-workflow" "$HELP_OUT"
-assert_contains "dev-workflow --help: lists run command" "run " "$HELP_OUT"
+assert_contains "dev-workflow --help: lists list command" "list " "$HELP_OUT"
 
 echo
 echo "--- re-running install is idempotent ---"

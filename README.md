@@ -256,15 +256,16 @@ shell snippets are no longer the recommended default.
 
 ## AFK Mode (experimental)
 
-Pair `/dev-quiz` and `/dev-judge` as automated reviewers, and the CLI can implement and judge phases without you in the loop.
+Drive a feature's pending phases unattended, with `/dev-judge` gating each one. Two pieces:
 
-This is an experiment. v1 stays small on purpose: branch-only execution (no worktrees), local `claude` CLI only (no Docker, no sandbox, no API key handling), one runner per repo at a time.
+1. `dev-workflow list` — terminal preflight that shows which features are ready to start.
+2. `/dev-afk` — composes `/dev-resume` → implement → `/dev-checkpoint` → `/dev-judge` and hands the loop to the [`ralph-loop` plugin](https://github.com/anthropics/claude-plugins-official) from the official Claude marketplace.
 
 `dev-workflow` is a shim installed by `/dev-dashboard` first-run onboarding. If it isn't on `PATH` yet, run `/dev-dashboard` once to install it.
 
 ### `dev-workflow list` — See what's runnable
 
-Scans `.dev/` folders across your projects and groups features by AFK state: `READY`, `RUNNING`, `ATTENTION`, `BLOCKED`. Mirrors the dashboard's main view in the terminal.
+Scans `.dev/` folders across your projects and shows which features are AFK-runnable.
 
 ```bash
 dev-workflow list                    # all features, grouped by project
@@ -276,26 +277,26 @@ dev-workflow list --status archived  # surface archived features
 
 Without `--scan`, the CLI reads scan directories from `~/.config/dev-dashboard/config.json` and falls back to the current directory.
 
-### `dev-workflow run` — Loop until done
+### `/dev-afk <feature-name>` — Loop until done
 
-Picks the next pending phase, spawns a fresh `claude -p` to implement it (which reloads context via `/dev-resume`), then a second `claude -p` to judge the diff. On `pass`, the phase is marked ✅ and the loop advances. On `revise`, the orchestrator retries with the judge's feedback (default cap: 2). On `escalate`, no verdict, or non-zero `claude` exit, the loop stops with a non-zero exit code and the phase is left ⬜.
+Verifies the feature is `READY` via `dev-workflow list --afk`, composes a prompt that drives the next pending phase end-to-end (`/dev-resume`, implement, `/dev-checkpoint`, `/dev-judge`), and starts a `/ralph-loop` with that prompt and a `<promise>AFK DONE</promise>` completion gate.
 
-```bash
-dev-workflow run --feature oauth-login
-dev-workflow run --feature oauth-login --dry-run        # show planned phases, spawn nothing
-dev-workflow run --feature oauth-login --max-phases 1   # one phase at a time
-dev-workflow run --feature oauth-login --retry-cap 3
-dev-workflow run --feature oauth-login --phase-timeout-ms 1800000
+```
+/dev-afk oauth-login
+/dev-afk oauth-login --max-iterations 30
 ```
 
-Run state lives in a `.run-status.json` sidecar next to the master plan. The dashboard reads it and renders a live panel per feature: status badge (`planning` → `implementing` → `judging` → `done`), current phase and attempt count, last verdict, and terminal exit reason. Open the dashboard in a second window to watch a run move.
+The judge gates every phase: only `pass` advances the heading marker; `revise` retries with feedback (cap: 2); `escalate` or cap-exhaustion ends the loop with a status note before the completion promise.
+
+**Scale guidance:** best fit is **1–3 phase features**. Ralph-loop runs in your current Claude Code session, so context accumulates across iterations — auto-compaction can degrade fidelity exactly when the agent needs to re-read its own checkpoints. For long features, split them or run phases manually with `/dev-resume`.
+
+**Requires the [`ralph-loop` plugin](https://github.com/anthropics/claude-plugins-official).** Install it from the official marketplace before running `/dev-afk`.
 
 **Operating notes:**
 
-- Each phase runs as a fresh `claude -p` process. There is no cross-phase session memory; state flows only through files (`checkpoint.md`, PRD markers, sidecar).
-- Non-zero `claude` exits (auth error, missing binary, crash) escalate immediately with no retry. The sidecar records the exit code plus a 500-byte stderr tail in `exitReason`.
-- Two orchestrators against the same working tree is a user-level race, the same as two `claude` CLI sessions. Use separate clones, branches, or worktrees.
-- Ctrl-C in the orchestrator's terminal kills the in-flight `claude` child via process group, flushes the sidecar to `idle`, and exits 130. The PRD is not modified mid-phase.
+- Each iteration calls `/dev-resume` — files on disk are the authoritative state carrier between iterations, not conversation context.
+- The session stays bound to the loop until `<promise>AFK DONE</promise>` is emitted, `--max-iterations` is hit, or you run `/cancel-ralph`.
+- Two `/dev-afk` loops against the same working tree is a user-level race. Use separate clones, branches, or worktrees.
 
 ---
 

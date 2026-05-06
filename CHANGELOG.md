@@ -6,35 +6,28 @@ All notable changes to this project should be documented in this file.
 
 ## v1.29.0 - 2026-05-05
 
-### AFK orchestrator: loop feature phases unattended (experimental)
+### Plan and phase review skills, AFK preflight CLI, AFK loop via ralph-loop
 
-A new `dev-workflow run` CLI loops a feature's PRD phases without human approval at every gate. It spawns a headless `claude -p` to implement each phase, then a second `claude -p` to judge the diff, parses a structured verdict block, and either advances, retries with feedback, or escalates. Two new review skills (`dev-quiz` for plans, `dev-judge` for phases) work standalone in the manual workflow first. The dashboard gets a live panel that watches the run.
-
-This is an experiment. v1 stays small on purpose: branch-only execution (no worktrees), local `claude` CLI only (no Docker, no sandbox, no API key handling), one runner per repo at a time.
+Two new review skills (`dev-quiz` for plans, `dev-judge` for phases), a `dev-workflow list` terminal preflight that mirrors the dashboard, and a `/dev-afk` skill that drives unattended phase implementation through the [`ralph-loop`](https://github.com/anthropics/claude-plugins-official) plugin from the official Claude marketplace.
 
 **What you'll notice:**
 - New `/dev-quiz` skill grills a `.dev/<feature>/` plan against a 7-criterion rubric (structural plus substantive: load-bearing assumptions, failure modes, counterfactual sanity) and emits `<verdict>pass|revise|escalate</verdict>` with concrete feedback.
 - New `/dev-judge` skill does the same for a completed phase's diff, judging it against the sub-PRD's acceptance criteria. Ships a `phase-reviewer` agent.
-- New `dev-workflow run --feature <name>` loops pending phases. Each iteration is a fresh `claude -p` process that reloads context via `/dev-resume`, so there is no cross-phase session memory and state flows only through files.
-- Default retry cap is 2 (`--retry-cap`), default per-phase timeout is 30 minutes (`--phase-timeout-ms`), and `--dry-run` prints the planned phase list without spawning anything.
-- `/dev-dashboard` first-run install now manages three commands instead of two: `dev-dashboard`, `dev-dashboard-stop`, and `dev-workflow`. An unrelated pre-existing `dev-workflow` on `PATH` is reported as a conflict and dashboard install still completes; the dashboard is never blocked by an AFK-CLI conflict.
-- The dashboard now shows a live run panel per feature: status badge (planning, implementing, judging, done, escalated, timeout, idle), current phase and attempt count, last verdict, terminal exit reason, and a collapsible feedback block.
+- New `dev-workflow list` CLI command lists features grouped by project and flags which are AFK-runnable (`--afk`), with JSON output (`--json`), scan-dir overrides (`--scan`), and status filters.
+- New `/dev-afk` skill loops a feature's pending phases unattended by composing `/dev-resume` → implement → `/dev-checkpoint` → `/dev-judge` and handing the loop to `/ralph-loop`. Best fit is 1-3 phase features; longer features hit ralph's session-context limits.
+- `/dev-dashboard` first-run install now manages three commands instead of two: `dev-dashboard`, `dev-dashboard-stop`, and `dev-workflow`. An unrelated pre-existing `dev-workflow` on `PATH` is reported as a conflict and dashboard install still completes; the dashboard is never blocked by a workflow-CLI conflict.
 
 ### Added
 
-- `dev-workflow run` CLI command with `--feature`, `--dir`, `--dry-run`, `--max-phases`, `--retry-cap`, `--phase-timeout-ms`, and `--json` flags.
-- `.run-status.json` sidecar written next to each feature's master plan. Atomic write through a temp file plus rename. The file is the recovery primitive for partial runs and the source the dashboard reads from.
+- `dev-workflow list` CLI command with `--scan`, `--afk`, `--all`, `--project`, `--status`, `--json`, and `--dir` flags. Reads scan dirs from `~/.config/dev-dashboard/config.json` when `--scan` is omitted.
+- `getAfkRunnableInfo` classifier in `dev-workflow-core` — pure helper that consumes a `Feature` shape and returns a runnable / not-runnable verdict with a reason string. Shared between the CLI and any future runner.
 - `parseVerdict` and `parseFeedback` helpers in `dev-workflow-core`. Verdict parsing is first-class, not stdout-grep.
-- `LiveRunPanel` Preact component in the dashboard client, wired into each feature panel below the status bar.
-- Two skills under `plugins/dev-workflow/skills/`: `dev-quiz/` (plan rubric + REVIEW-ONLY guard) and `dev-judge/` (phase rubric + `phase-reviewer` agent).
+- Three skills under `plugins/dev-workflow/skills/`: `dev-quiz/` (plan rubric + REVIEW-ONLY guard), `dev-judge/` (phase rubric + `phase-reviewer` agent), and `dev-afk/` (ralph-loop driver + prompt template).
 
 ### Changed
 
-- `extractXmlTag` in `dev-workflow-core` returns the last match instead of the first, so quoted example `<verdict>` blocks in SKILL.md or rubric.md cannot contaminate orchestrator decisions when an implementer is editing the skill files. Single-occurrence checkpoint tags (`<context>`, `<decisions>`, etc.) are unaffected.
-- `/dev-dashboard` first-run install contract was extended to cover the new `dev-workflow` shim, with new `workflow_status` (`installed | missing | stale | conflict`), `workflow_shim`, `workflow_target`, and `workflow_conflict` lines from `check-install.sh`. Dashboard install is decoupled from AFK-CLI install state so the dashboard always launches.
-- Subprocess spawn is now `detached: true` and timeout / SIGINT cleanup uses `process.kill(-pid, signal)` to kill the whole process group. Grandchildren no longer keep stdio pipes open and stall the close event after a kill.
-- Non-zero `claude` exit (implementer or judge) is treated as infrastructural and escalates immediately, with no retry. The sidecar records the exit code plus a 500-byte stderr tail in `exitReason`. Retrying a crashed `claude` process burns time and credits without addressing the cause.
-- Implementer prompt now falls back to reading `.dev/<feature>/00-master-plan.md` directly when `/dev-resume` reports no checkpoint exists yet (fresh feature, first phase). Lowest-blast-radius fix for the fresh-feature gap.
+- `extractXmlTag` in `dev-workflow-core` returns the last match instead of the first, so quoted example `<verdict>` blocks in SKILL.md or rubric.md cannot contaminate verdict parsing. Single-occurrence checkpoint tags (`<context>`, `<decisions>`, etc.) are unaffected.
+- `/dev-dashboard` first-run install contract was extended to cover the new `dev-workflow` shim, with new `workflow_status` (`installed | missing | stale | conflict`), `workflow_shim`, `workflow_target`, and `workflow_conflict` lines from `check-install.sh`. Dashboard install is decoupled from workflow-CLI install state so the dashboard always launches.
 
 ## v1.28.1 - 2026-04-17
 

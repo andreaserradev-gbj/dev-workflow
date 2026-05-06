@@ -1,7 +1,6 @@
 import type { Feature, Phase, SubPrd } from '@shared/types.js';
 import { useFeatureDetail } from '../hooks/useFeatureDetail.js';
 import { PrimaryActionButton } from './ActionButton.js';
-import { LiveRunPanel } from './LiveRunPanel.js';
 
 interface Props {
   project: string;
@@ -81,9 +80,6 @@ export function FeaturePanel({ project, projectPath, featureName, feature }: Pro
           </>
         )}
       </div>
-
-      {/* AFK orchestrator live run */}
-      {detail.runStatus && <LiveRunPanel runStatus={detail.runStatus} />}
 
       {/* Next Action */}
       {detail.checkpoint?.nextAction && (
