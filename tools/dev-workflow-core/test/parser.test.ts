@@ -1,4 +1,4 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi, beforeAll, afterAll } from 'vitest';
 import { readFile } from 'fs/promises';
 import { resolve } from 'path';
 import {
@@ -542,6 +542,18 @@ describe('determineFeatureStatus', () => {
 // ─── Full Feature Parsing (integration) ────────────────────────────
 
 describe('parseFeature', () => {
+  // Freeze "now" to a date when the fixtures were fresh. Without this, the
+  // 30-day staleness threshold in determineFeatureStatus turns fixtures with
+  // hardcoded 2026-03-x dates into "stale" once the file ages past the wall
+  // clock — flipping tests that assert "active" status.
+  beforeAll(() => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date('2026-03-23T04:00:00Z'));
+  });
+  afterAll(() => {
+    vi.useRealTimers();
+  });
+
   it('parses full-feature into a complete Feature object', async () => {
     const result = await parseFeature(resolve(FIXTURES, 'full-feature'), 'full-feature');
 

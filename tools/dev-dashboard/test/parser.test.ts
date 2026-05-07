@@ -1,4 +1,4 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi, beforeAll, afterAll } from 'vitest';
 import { resolve } from 'path';
 import {
   parseMasterPlan,
@@ -388,6 +388,16 @@ describe('determineFeatureStatus', () => {
 // ─── Full Feature Parsing (integration) ────────────────────────────
 
 describe('parseFeature', () => {
+  // Freeze "now" so fixtures with hardcoded 2026-03-x dates don't drift past
+  // the 30-day staleness threshold and flip "active" assertions to "stale".
+  beforeAll(() => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date('2026-03-23T04:00:00Z'));
+  });
+  afterAll(() => {
+    vi.useRealTimers();
+  });
+
   it('parses full-feature into a complete Feature object', async () => {
     const result = await parseFeature(resolve(FIXTURES, 'full-feature'), 'full-feature');
 

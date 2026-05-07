@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach, afterEach, beforeAll, afterAll } from 'vitest';
 import { resolve } from 'path';
 import { featureShow } from '../src/commands/feature-show.js';
 
@@ -23,6 +23,16 @@ function captureOutput() {
 
 describe('feature-show', () => {
   let output: ReturnType<typeof captureOutput>;
+
+  // Freeze "now" so fixtures with hardcoded 2026-03-x dates don't drift past
+  // the 30-day staleness threshold and flip "active" assertions to "stale".
+  beforeAll(() => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date('2026-03-23T04:00:00Z'));
+  });
+  afterAll(() => {
+    vi.useRealTimers();
+  });
 
   beforeEach(() => {
     output = captureOutput();
