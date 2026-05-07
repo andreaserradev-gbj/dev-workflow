@@ -4,35 +4,6 @@ All notable changes to this project should be documented in this file.
 
 <!-- LOCAL-RELEASES-START -->
 
-## v1.29.0 - 2026-05-05
-
-### Plan and phase review skills, AFK preflight CLI, AFK loop via ralph-loop
-
-Two new review skills (`dev-quiz` for plans, `dev-judge` for phases), a `dev-workflow list` terminal preflight that mirrors the dashboard, and a `/dev-afk` skill that drives unattended phase implementation through the [`ralph-loop`](https://github.com/anthropics/claude-plugins-official) plugin from the official Claude marketplace.
-
-**What you'll notice:**
-- New `/dev-quiz` skill grills a `.dev/<feature>/` plan against a 7-criterion rubric (structural plus substantive: load-bearing assumptions, failure modes, counterfactual sanity) and emits `<verdict>pass|revise|escalate</verdict>` with concrete feedback.
-- New `/dev-judge` skill does the same for a completed phase's diff, judging it against the sub-PRD's acceptance criteria. Ships a `phase-reviewer` agent.
-- New `dev-workflow list` CLI command lists features grouped by project and flags which are AFK-runnable (`--afk`), with JSON output (`--json`), scan-dir overrides (`--scan`), and status filters.
-- New `/dev-afk` skill loops a feature's pending phases unattended by composing `/dev-resume` → implement → `/dev-checkpoint` → `/dev-judge` and handing the loop to `/ralph-loop`. Best fit is 1-3 phase features; longer features hit ralph's session-context limits.
-- `/dev-dashboard` first-run install now manages three commands instead of two: `dev-dashboard`, `dev-dashboard-stop`, and `dev-workflow`. An unrelated pre-existing `dev-workflow` on `PATH` is reported as a conflict and dashboard install still completes; the dashboard is never blocked by a workflow-CLI conflict.
-
-### Added
-
-- `dev-workflow list` CLI command with `--scan`, `--afk`, `--all`, `--project`, `--status`, `--json`, and `--dir` flags. Reads scan dirs from `~/.config/dev-dashboard/config.json` when `--scan` is omitted.
-- `getAfkRunnableInfo` classifier in `dev-workflow-core` — pure helper that consumes a `Feature` shape and returns a runnable / not-runnable verdict with a reason string. Shared between the CLI and any future runner.
-- `parseVerdict` and `parseFeedback` helpers in `dev-workflow-core`. Verdict parsing is first-class, not stdout-grep.
-- Three skills under `plugins/dev-workflow/skills/`: `dev-quiz/` (plan rubric + REVIEW-ONLY guard), `dev-judge/` (phase rubric + `phase-reviewer` agent), and `dev-afk/` (ralph-loop driver + prompt template).
-
-### Changed
-
-- `extractXmlTag` in `dev-workflow-core` returns the last match instead of the first, so quoted example `<verdict>` blocks in SKILL.md or rubric.md cannot contaminate verdict parsing. Single-occurrence checkpoint tags (`<context>`, `<decisions>`, etc.) are unaffected.
-- `/dev-dashboard` first-run install contract was extended to cover the new `dev-workflow` shim, with new `workflow_status` (`installed | missing | stale | conflict`), `workflow_shim`, `workflow_target`, and `workflow_conflict` lines from `check-install.sh`. Dashboard install is decoupled from workflow-CLI install state so the dashboard always launches.
-
-### Fixed
-
-- `/dev-afk` prompt template stripped of backticks (and any shell-active characters). The composed prompt is interpolated into ralph-loop's `$ARGUMENTS` and re-evaluated by zsh in a double-quoted context downstream — backticks were silently triggering command substitution and replacing every `/dev-resume`, `/dev-judge`, and feature-name reference with empty strings, so the loop would activate with a broken prompt. Added a regression check in `tests/test-scripts.sh` that asserts the prompt body has no `` ` ``, `$`, or `!`.
-
 ## v1.28.1 - 2026-04-17
 
 ### Fixed
@@ -158,6 +129,35 @@ Checkpoints and resumes are now powered by deterministic CLI commands instead of
 <!-- LOCAL-RELEASES-END -->
 
 <!-- GITHUB-RELEASES-START -->
+
+## v1.29.0 - 2026-05-07
+
+### Plan and phase review skills, AFK preflight CLI, AFK loop via ralph-loop
+
+Two new review skills (`dev-quiz` for plans, `dev-judge` for phases), a `dev-workflow list` terminal preflight that mirrors the dashboard, and a `/dev-afk` skill that drives unattended phase implementation through the [`ralph-loop`](https://github.com/anthropics/claude-plugins-official) plugin from the official Claude marketplace.
+
+**What you'll notice:**
+- New `/dev-quiz` skill grills a `.dev/<feature>/` plan against a 7-criterion rubric (structural plus substantive: load-bearing assumptions, failure modes, counterfactual sanity) and emits `<verdict>pass|revise|escalate</verdict>` with concrete feedback.
+- New `/dev-judge` skill does the same for a completed phase's diff, judging it against the sub-PRD's acceptance criteria. Ships a `phase-reviewer` agent.
+- New `dev-workflow list` CLI command lists features grouped by project and flags which are AFK-runnable (`--afk`), with JSON output (`--json`), scan-dir overrides (`--scan`), and status filters.
+- New `/dev-afk` skill loops a feature's pending phases unattended by composing `/dev-resume` → implement → `/dev-checkpoint` → `/dev-judge` and handing the loop to `/ralph-loop`. Best fit is 1-3 phase features; longer features hit ralph's session-context limits.
+- `/dev-dashboard` first-run install now manages three commands instead of two: `dev-dashboard`, `dev-dashboard-stop`, and `dev-workflow`. An unrelated pre-existing `dev-workflow` on `PATH` is reported as a conflict and dashboard install still completes; the dashboard is never blocked by a workflow-CLI conflict.
+
+### Added
+
+- `dev-workflow list` CLI command with `--scan`, `--afk`, `--all`, `--project`, `--status`, `--json`, and `--dir` flags. Reads scan dirs from `~/.config/dev-dashboard/config.json` when `--scan` is omitted.
+- `getAfkRunnableInfo` classifier in `dev-workflow-core` — pure helper that consumes a `Feature` shape and returns a runnable / not-runnable verdict with a reason string. Shared between the CLI and any future runner.
+- `parseVerdict` and `parseFeedback` helpers in `dev-workflow-core`. Verdict parsing is first-class, not stdout-grep.
+- Three skills under `plugins/dev-workflow/skills/`: `dev-quiz/` (plan rubric + REVIEW-ONLY guard), `dev-judge/` (phase rubric + `phase-reviewer` agent), and `dev-afk/` (ralph-loop driver + prompt template).
+
+### Changed
+
+- `extractXmlTag` in `dev-workflow-core` returns the last match instead of the first, so quoted example `<verdict>` blocks in SKILL.md or rubric.md cannot contaminate verdict parsing. Single-occurrence checkpoint tags (`<context>`, `<decisions>`, etc.) are unaffected.
+- `/dev-dashboard` first-run install contract was extended to cover the new `dev-workflow` shim, with new `workflow_status` (`installed | missing | stale | conflict`), `workflow_shim`, `workflow_target`, and `workflow_conflict` lines from `check-install.sh`. Dashboard install is decoupled from workflow-CLI install state so the dashboard always launches.
+
+### Fixed
+
+- `/dev-afk` prompt template stripped of backticks (and any shell-active characters). The composed prompt is interpolated into ralph-loop's `$ARGUMENTS` and re-evaluated by zsh in a double-quoted context downstream — backticks were silently triggering command substitution and replacing every `/dev-resume`, `/dev-judge`, and feature-name reference with empty strings, so the loop would activate with a broken prompt. Added a regression check in `tests/test-scripts.sh` that asserts the prompt body has no `` ` ``, `$`, or `!`.
 
 ## v1.28.1 - 2026-04-17
 
