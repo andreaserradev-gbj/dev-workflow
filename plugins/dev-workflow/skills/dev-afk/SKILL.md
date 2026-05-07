@@ -102,6 +102,9 @@ disrupting the session:
 > Monitor with: `head -10 .claude/ralph-loop.local.md` (current iteration)
 > Or watch the dashboard: features change as `/dev-checkpoint` updates land.
 > To cancel: `/cancel-ralph` or hit the iteration cap.
+> If the terminator-race fires (loop keeps iterating after the agent emits
+> `<promise>AFK DONE</promise>`), `rm .claude/ralph-loop.local.md` to break
+> out — the work on disk is preserved.
 
 ### Stops and Gates
 
@@ -138,6 +141,19 @@ context-from-disk on every pass.
   whose acceptance is fully verifiable from the diff (lint, build,
   test). For mixed phases, expect at least two iterations of judge
   cost before escalation.
+- **Terminator-race on the final iteration.** Ralph-loop's stop hook
+  greps the JSONL transcript for `<promise>AFK DONE</promise>` in the
+  last assistant text block. The hook can fire ~250–400 ms after the
+  agent's text token, sometimes BEFORE Claude Code flushes that text
+  block to disk — so the matcher reads stale data ending at the prior
+  `thinking` block and misses the terminator. Symptom: agent emits the
+  correct sentinel, ralph-loop ignores it and feeds the prompt back.
+  The loop continues until either (a) the next iteration emits the
+  sentinel and wins the race, (b) `--max-iterations` is hit, or (c) you
+  `rm .claude/ralph-loop.local.md` manually. The work on disk is
+  preserved either way; the cost is a few extra iterations of `gate-check`
+  + emission. Root cause is upstream (transcript flush timing); not
+  fixable in this skill's prompt.
 
 ### PRIVACY RULES
 
