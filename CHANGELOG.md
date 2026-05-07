@@ -29,6 +29,10 @@ Two new review skills (`dev-quiz` for plans, `dev-judge` for phases), a `dev-wor
 - `extractXmlTag` in `dev-workflow-core` returns the last match instead of the first, so quoted example `<verdict>` blocks in SKILL.md or rubric.md cannot contaminate verdict parsing. Single-occurrence checkpoint tags (`<context>`, `<decisions>`, etc.) are unaffected.
 - `/dev-dashboard` first-run install contract was extended to cover the new `dev-workflow` shim, with new `workflow_status` (`installed | missing | stale | conflict`), `workflow_shim`, `workflow_target`, and `workflow_conflict` lines from `check-install.sh`. Dashboard install is decoupled from workflow-CLI install state so the dashboard always launches.
 
+### Fixed
+
+- `/dev-afk` prompt template stripped of backticks (and any shell-active characters). The composed prompt is interpolated into ralph-loop's `$ARGUMENTS` and re-evaluated by zsh in a double-quoted context downstream — backticks were silently triggering command substitution and replacing every `/dev-resume`, `/dev-judge`, and feature-name reference with empty strings, so the loop would activate with a broken prompt. Added a regression check in `tests/test-scripts.sh` that asserts the prompt body has no `` ` ``, `$`, or `!`.
+
 ## v1.28.1 - 2026-04-17
 
 ### Fixed

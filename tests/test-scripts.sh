@@ -229,6 +229,26 @@ check_bin_sync() {
 check_bin_sync dev-workflow.cjs dev-checkpoint dev-judge dev-plan dev-resume dev-afk
 
 echo ""
+echo "--- dev-afk prompt template ---"
+
+# The composed prompt is interpolated into ralph-loop's $ARGUMENTS and
+# re-evaluated by zsh in a double-quoted context. Backticks trigger command
+# substitution; $ triggers variable expansion; ! triggers history expansion.
+# Any of those silently mangles the rendered prompt at runtime.
+PROMPT_TEMPLATE="$SKILLS_DIR/dev-afk/references/prompt-template.md"
+PROMPT_BODY="$(awk '/^```$/{flag=!flag; next} flag' "$PROMPT_TEMPLATE")"
+
+if printf '%s' "$PROMPT_BODY" | grep -qE '[`$!]'; then
+  echo "FAIL: dev-afk prompt body contains shell-active characters (backtick, \$, or !)"
+  echo "      offending lines:"
+  printf '%s\n' "$PROMPT_BODY" | grep -nE '[`$!]' | sed 's/^/        /'
+  FAIL=$((FAIL + 1))
+else
+  echo "PASS: dev-afk prompt body free of shell-active characters"
+  PASS=$((PASS + 1))
+fi
+
+echo ""
 echo "--- dev-dashboard installer regression tests ---"
 INSTALLER_TESTS="$(cd "$(dirname "$0")" && pwd)/test-dev-dashboard-install.sh"
 if bash "$INSTALLER_TESTS" >/tmp/dev-dashboard-install.log 2>&1; then

@@ -80,6 +80,16 @@ Read [the prompt template](references/prompt-template.md) and substitute
 - Completion-promise emission rules (single promise, surrounding status text
   carries pass/escalate/cap-exceeded detail)
 
+**Shell-injection safety.** `/ralph-loop` interpolates the prompt into
+`$ARGUMENTS`, which is re-evaluated by zsh inside a double-quoted context
+downstream. The template body in `references/prompt-template.md` is already
+sanitised — no backticks, no `$`, no `!`. Do NOT add any of those to the
+prompt during substitution. If you need to emphasise a token, write it
+ALL_CAPS or wrap it in single quotes. Backticks in particular trigger
+command substitution and silently strip code references (zsh runs them as
+shell commands, replaces with empty stdout, and the loop activates with a
+broken prompt).
+
 ### Step 5: Invoke `/ralph-loop`
 
 Default iteration cap is `--max-iterations 20`. If the user supplied
@@ -93,6 +103,13 @@ completion promise `AFK DONE`:
 ```
 
 The prompt is multi-line. Pass it as the positional argument to `/ralph-loop`.
+
+After invoking, verify the rendered prompt landed intact by reading the
+first ~20 lines of `.claude/ralph-loop.local.md`. The feature name and
+slash-command references should appear verbatim. If they're missing or
+empty, the prompt was mangled (most likely by an unsanitised character
+slipping into the template) — run `/cancel-ralph`,
+`rm .claude/ralph-loop.local.md`, fix the prompt, and re-invoke.
 
 ### Step 6: Print Monitoring Tip
 
