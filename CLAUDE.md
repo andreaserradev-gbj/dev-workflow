@@ -16,19 +16,31 @@ plugins/dev-workflow/           # Plugin package
       references/prd-templates.md
       scripts/discover.sh, validate.sh, dev-workflow.cjs
       agents/prd-researcher.md, prd-planner.md
+    dev-quiz/
+      SKILL.md
+      references/quiz-rubric.md
+      scripts/discover.sh, validate.sh
     dev-checkpoint/
       SKILL.md
       references/checkpoint-template.md, worktree-guide.md
       scripts/discover.sh, validate.sh, git-state.sh, worktree-setup.sh, dev-workflow.cjs
+    dev-judge/
+      SKILL.md
+      scripts/discover.sh, validate.sh, git-state.sh, dev-workflow.cjs
+      agents/phase-reviewer.md
     dev-resume/
       SKILL.md
       scripts/discover.sh, validate.sh, git-state.sh, dev-workflow.cjs
     dev-wrapup/
       SKILL.md
       scripts/discover.sh
+    dev-afk/
+      SKILL.md
+      references/prompt-template.md
+      scripts/discover.sh, validate.sh, dev-workflow.cjs
     dev-dashboard/
       SKILL.md
-      scripts/start.sh
+      scripts/start.sh, check-install.sh, install.sh
       dashboard/                    # Bundled server + client (committed build artifact)
         server/index.cjs
         client/
@@ -103,13 +115,7 @@ After modifying `tools/dev-workflow-cli/` or `tools/dev-workflow-core/`, rebuild
 cd tools/dev-workflow-cli && npm run bundle
 ```
 
-This esbuild-bundles the CLI into `plugins/dev-workflow/bin/dev-workflow.cjs` (canonical copy). Each skill that uses the CLI (`dev-resume`, `dev-checkpoint`, `dev-plan`) has its own copy at `scripts/dev-workflow.cjs` to stay self-contained. After rebuilding, copy the canonical bundle to each skill:
-
-```bash
-cp plugins/dev-workflow/bin/dev-workflow.cjs plugins/dev-workflow/skills/dev-resume/scripts/dev-workflow.cjs
-cp plugins/dev-workflow/bin/dev-workflow.cjs plugins/dev-workflow/skills/dev-checkpoint/scripts/dev-workflow.cjs
-cp plugins/dev-workflow/bin/dev-workflow.cjs plugins/dev-workflow/skills/dev-plan/scripts/dev-workflow.cjs
-```
+This esbuild-bundles the CLI into `plugins/dev-workflow/bin/dev-workflow.cjs` (canonical copy) and copies it to each skill that uses the CLI (`dev-afk`, `dev-checkpoint`, `dev-judge`, `dev-plan`, `dev-resume`). The bundle script handles the per-skill copies automatically — no manual `cp` needed.
 
 The pre-commit hook blocks commits where CLI source changed without updating the bundle. The test suite (`tests/test-scripts.sh`) blocks commits where the per-skill copies differ from the canonical `bin/dev-workflow.cjs`.
 

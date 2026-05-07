@@ -263,11 +263,16 @@ export async function parseCheckpoint(filePath: string): Promise<CheckpointResul
 }
 
 function extractXmlTag(content: string, tag: string): string | null {
-  const regex = new RegExp(`<${tag}>([\\s\\S]*?)</${tag}>`, 'i');
+  // Last-match semantics: when a document contains multiple `<tag>...</tag>`
+  // blocks (e.g., the AFK runner's stdout where a SKILL.md or rubric quotes
+  // example `<verdict>` blocks before the implementer emits its own as the
+  // final block), the last occurrence governs.
+  const regex = new RegExp(`<${tag}>([\\s\\S]*?)</${tag}>`, 'gi');
 
   // Fast path: no backticks means no risk of matching tags inside inline code
   if (!content.includes('`')) {
-    const match = content.match(regex);
+    const matches = [...content.matchAll(regex)];
+    const match = matches[matches.length - 1];
     return match ? match[1].trim() : null;
   }
 
@@ -275,13 +280,14 @@ function extractXmlTag(content: string, tag: string): string | null {
   // inside backtick code (e.g., `<decisions>`) from being matched.
   const placeholders: { placeholder: string; original: string }[] = [];
   let counter = 0;
-  const stripped = content.replace(/`[^`]*`/g, (match) => {
+  const stripped = content.replace(/`[^`]*`/g, (m) => {
     const placeholder = `\x00INLINE_CODE_${counter++}\x00`;
-    placeholders.push({ placeholder, original: match });
+    placeholders.push({ placeholder, original: m });
     return placeholder;
   });
 
-  const match = stripped.match(regex);
+  const matches = [...stripped.matchAll(regex)];
+  const match = matches[matches.length - 1];
   if (!match) return null;
 
   let result = match[1].trim();
@@ -689,6 +695,30 @@ export async function parseSessionLog(filePath: string): Promise<SessionLogEntry
   }
 
   return entries;
+}
+
+// ─── Verdict (dev-quiz / dev-judge) ───────────────────────────────
+
+export type { Verdict } from './types.js';
+import type { Verdict } from './types.js';
+
+/** Parse a `<verdict>pass|revise|escalate</verdict>` block. Reuses
+ *  `extractXmlTag`, which applies last-match semantics so any earlier
+ *  example blocks (in a quoted SKILL.md/rubric) are ignored. Returns
+ *  null on malformed or missing input. */
+export function parseVerdict(text: string): Verdict | null {
+  const value = extractXmlTag(text, 'verdict');
+  if (value === 'pass' || value === 'revise' || value === 'escalate') return value;
+  return null;
+}
+
+/** Parse the feedback companion to a verdict: `<feedback>` for `revise`,
+ *  falling back to `<reason>` for `escalate`. Returns null when neither
+ *  is present. */
+export function parseFeedback(text: string): string | null {
+  const feedback = extractXmlTag(text, 'feedback');
+  if (feedback) return feedback;
+  return extractXmlTag(text, 'reason');
 }
 
 async function isEmptyFeatureDir(dirPath: string): Promise<boolean> {

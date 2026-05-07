@@ -3,7 +3,7 @@
 # dev-workflow
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
-[![Version](https://img.shields.io/badge/version-1.26.2-green.svg)](.claude-plugin/marketplace.json)
+[![Version](https://img.shields.io/badge/version-1.29.0-green.svg)](.claude-plugin/marketplace.json)
 [![AgentSkills.io](https://img.shields.io/badge/standard-AgentSkills.io-purple.svg)](https://agentskills.io)
 
 **AI coding agents forget everything between sessions. This fixes that.**
@@ -150,6 +150,28 @@ Reconstructs context from a checkpoint:
 /dev-resume oauth-login
 ```
 
+### `/dev-quiz` — Stress-test a plan
+
+Critiques a `.dev/<feature>/` PRD against a 7-criterion rubric — structural (decision-tree resolved, acceptance criteria, scope) plus substantive (load-bearing assumptions, failure modes, counterfactual sanity). Emits a single `<verdict>` block (`pass`, `revise`, or `escalate`) with falsifiable feedback.
+
+Use after `/dev-plan` to surface gaps before you start implementing.
+
+```
+/dev-quiz
+/dev-quiz oauth-login
+```
+
+### `/dev-judge` — Second-opinion gate on a phase
+
+Critiques a completed phase's diff against the sub-PRD's acceptance criteria. Pulls the diff since the last ✅ phase, the latest checkpoint, and (when available) test output. Emits the same `<verdict>` block as `/dev-quiz`.
+
+Use after a phase is implemented as a sanity check before marking it done.
+
+```
+/dev-judge
+/dev-judge oauth-login
+```
+
 ### `/dev-wrapup` — Extract session learnings
 
 Reviews the conversation for insights worth keeping:
@@ -229,6 +251,52 @@ This installer-backed path is the primary terminal UX for this release. Manual
 shell snippets are no longer the recommended default.
 
 </details>
+
+---
+
+## AFK Mode (experimental)
+
+Drive a feature's pending phases unattended, with `/dev-judge` gating each one. Two pieces:
+
+1. `dev-workflow list` — terminal preflight that shows which features are ready to start.
+2. `/dev-afk` — composes `/dev-resume` → implement → `/dev-checkpoint` → `/dev-judge` and hands the loop to the [`ralph-loop` plugin](https://github.com/anthropics/claude-plugins-official) from the official Claude marketplace.
+
+`dev-workflow` is a shim installed by `/dev-dashboard` first-run onboarding. If it isn't on `PATH` yet, run `/dev-dashboard` once to install it.
+
+### `dev-workflow list` — See what's runnable
+
+Scans `.dev/` folders across your projects and shows which features are AFK-runnable.
+
+```bash
+dev-workflow list                    # all features, grouped by project
+dev-workflow list --afk              # only features safe to start now
+dev-workflow list --json --afk       # stable JSON for scripts
+dev-workflow list --scan ~/code      # override scan dirs
+dev-workflow list --status archived  # surface archived features
+```
+
+Without `--scan`, the CLI reads scan directories from `~/.config/dev-dashboard/config.json` and falls back to the current directory.
+
+### `/dev-afk <feature-name>` — Loop until done
+
+Verifies the feature is `READY` via `dev-workflow list --afk`, composes a prompt that drives the next pending phase end-to-end (`/dev-resume`, implement, `/dev-checkpoint`, `/dev-judge`), and starts a `/ralph-loop` with that prompt and a `<promise>AFK DONE</promise>` completion gate.
+
+```
+/dev-afk oauth-login
+/dev-afk oauth-login --max-iterations 30
+```
+
+The judge gates every phase: only `pass` advances the heading marker; `revise` retries with feedback (cap: 2); `escalate` or cap-exhaustion ends the loop with a status note before the completion promise.
+
+**Scale guidance:** best fit is **1–3 phase features**. Ralph-loop runs in your current Claude Code session, so context accumulates across iterations — auto-compaction can degrade fidelity exactly when the agent needs to re-read its own checkpoints. For long features, split them or run phases manually with `/dev-resume`.
+
+**Requires the [`ralph-loop` plugin](https://github.com/anthropics/claude-plugins-official).** Install it from the official marketplace before running `/dev-afk`.
+
+**Operating notes:**
+
+- Each iteration calls `/dev-resume` — files on disk are the authoritative state carrier between iterations, not conversation context.
+- The session stays bound to the loop until `<promise>AFK DONE</promise>` is emitted, `--max-iterations` is hit, or you run `/cancel-ralph`.
+- Two `/dev-afk` loops against the same working tree is a user-level race. Use separate clones, branches, or worktrees.
 
 ---
 

@@ -195,7 +195,8 @@ export async function createWatcher(
   function isDevMd(filePath: string): boolean {
     const hasDevDir =
       filePath.includes(`${sep}.dev${sep}`) || filePath.includes(`${sep}.dev-archive${sep}`);
-    if (!hasDevDir || !filePath.endsWith('.md')) return false;
+    if (!hasDevDir) return false;
+    if (!filePath.endsWith('.md')) return false;
     if (filePath.includes(`${sep}node_modules${sep}`)) return false;
     return true;
   }

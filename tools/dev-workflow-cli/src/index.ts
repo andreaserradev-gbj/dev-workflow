@@ -17,6 +17,7 @@ import { checkpointRead } from './commands/checkpoint-read.js';
 import { checkpointWrite } from './commands/checkpoint-write.js';
 import { statusUpdate } from './commands/status-update.js';
 import { resumeContext } from './commands/resume-context.js';
+import { list } from './commands/list.js';
 
 interface Command {
   name: string;
@@ -32,6 +33,7 @@ const commands: Command[] = [
   { name: 'checkpoint-write', description: 'Write checkpoint from stdin JSON (+session-log)', run: checkpointWrite },
   { name: 'status-update', description: 'Update PRD status marker', run: statusUpdate },
   { name: 'resume-context', description: 'Merged resume context packet', run: resumeContext },
+  { name: 'list', description: 'List features and AFK-runnable status', run: list },
 ];
 
 function printUsage(): void {
@@ -50,6 +52,11 @@ function printUsage(): void {
   console.log('  --step <number>      Step number (status-update)');
   console.log('  --marker <done|todo> Marker value (status-update)');
   console.log('  --sessions <N|all>   Session history limit (resume-context, default: 5)');
+  console.log('  --scan <dir>         Scan directory (list)');
+  console.log('  --afk                Show only AFK-runnable features (list)');
+  console.log('  --all                Include archived and non-runnable features (list)');
+  console.log('  --project <name>     Filter project by name or path (list)');
+  console.log('  --status <status>    Filter feature status (list)');
 }
 
 export function parseFlags(args: string[]): { flags: Record<string, string | true>; positional: string[] } {
