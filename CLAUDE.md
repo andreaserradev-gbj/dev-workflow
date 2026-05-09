@@ -128,6 +128,7 @@ The dashboard is AI-tool-agnostic — it works with any tool that reads/writes `
 **Server-side actions** (executed via API with confirmation prompt):
 - **Archive** — moves a completed feature from `.dev/` to `.dev-archive/` (`POST /api/projects/:project/features/:feature/archive`)
 - **Restore** — moves an archived feature back from `.dev-archive/` to `.dev/` (`POST /api/projects/:project/features/:feature/restore`)
+- **Open externally** — opens the feature's `checkpoint.md` in an external app (`POST /api/projects/:project/features/:feature/open` with body `{ mode: 'open' | 'reveal' | 'terminal' }`). Per-platform launchers: `darwin` uses `open` / `open -R` / `open -a Terminal`; `linux` uses `xdg-open` (file-select not supported on the reveal mode) and best-effort `x-terminal-emulator`; `win32` uses `explorer` / `explorer /select,…` and best-effort `wt.exe`. **Security**: client only sends `projectName` + `featureName` URL params + a mode enum — never paths. Server resolves the absolute path from `state.getProject()` and invokes via `execFile` with a discrete arg array — never `exec`, never `{ shell: true }`. Mirrors the Archive/Restore security pattern; new modes must keep the enum + arg-array invariant.
 
 **Clipboard utility**:
 - **Copy as Markdown** — copies the activity report as a formatted markdown table (in Report view)

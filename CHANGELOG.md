@@ -4,6 +4,29 @@ All notable changes to this project should be documented in this file.
 
 <!-- LOCAL-RELEASES-START -->
 
+## v1.30.0 - 2026-05-09
+
+### Dashboard detail panel polish
+
+The feature detail panel in `/dev-dashboard` gets three coordinated upgrades that change how you read your in-flight work.
+
+**What you'll notice:**
+- **Markdown rendering for NEXT ACTION, DECISIONS, and BLOCKERS.** Headings render as small uppercase sky-tinted labels, numbered lists get muted Plex Mono numerals, and inline `code` shows up as cyan terminal chips — your checkpoint markdown finally renders the way you wrote it instead of as one wall of plain text.
+- **Open-externally toolbar.** Three ghost icon buttons in the new panel header open the feature's `checkpoint.md` in the OS default app, reveal it in Finder/Explorer, or open a terminal at the feature directory. macOS and Linux paths are clean; Windows terminal mode is best-effort (`wt.exe` if present). The Archive/Restore button moves to the far right of the same header bar.
+- **Session History collapsible.** A new section at the bottom of the panel surfaces parsed `session-log.md` entries — newest first, sky border + LATEST pill on the freshest entry, slate on older ones. Each entry has its own collapse state; the top two newest start expanded.
+
+### Added
+- `POST /api/projects/:project/features/:feature/open` route in the dashboard server. Takes a mode enum (`open` | `reveal` | `terminal`) and dispatches per-platform launchers via `execFile` with discrete arg arrays — the client never sends a path, so there's no shell-injection surface.
+- `marked@^15` for client-side markdown rendering. Scoped CSS lives under `@layer components` in `styles.css` so Tailwind utilities still win the cascade if you need to override on a specific instance.
+- `sessionLog` field on `FeatureDetail` API responses (populated array when `session-log.md` exists, `null` when absent).
+- `parseSessionLog` and `SessionLogEntry` re-exported from the dashboard server's parser.
+- Mockup at `.dev/dashboard-detail-ui-enhancements/mockup.html` (gitignored) — visual reference for the redesigned panel.
+
+### Internal
+- 116 dashboard tests passing (108 prior + 6 markdown helpers + 7 open route + 2 sessionLog API).
+- New `tools/dev-dashboard/src/client/lib/markdown.ts` with `render()` / `renderInline()` helpers, configured once at module load with `{ gfm: true, breaks: false }`. Trust boundary documented inline (local PRD content; layer DOMPurify here if the surface ever extends to remote content).
+- The existing watcher already picks up `session-log.md` changes — no extension needed.
+
 ## v1.28.1 - 2026-04-17
 
 ### Fixed

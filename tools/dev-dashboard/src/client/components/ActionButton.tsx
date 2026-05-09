@@ -48,6 +48,27 @@ async function executeAction(
   }
 }
 
+export type OpenMode = 'open' | 'reveal' | 'terminal';
+
+export async function executeOpenAction(
+  projectName: string,
+  featureName: string,
+  mode: OpenMode,
+): Promise<void> {
+  const res = await fetch(
+    `/api/projects/${encodeURIComponent(projectName)}/features/${encodeURIComponent(featureName)}/open`,
+    {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ mode }),
+    },
+  );
+  if (!res.ok) {
+    const body = await res.json().catch(() => ({ error: 'Unknown error' }));
+    throw new Error(body.error ?? `open (${mode}) failed`);
+  }
+}
+
 // ─── Primary action button (shown in FeatureRow) ────────────────
 
 interface PrimaryProps {

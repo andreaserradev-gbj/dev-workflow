@@ -4,6 +4,7 @@ export {
   parseMasterPlan,
   parseCheckpoint,
   parseSubPrd,
+  parseSessionLog,
   determineFeatureStatus,
   parseFeature,
 } from 'dev-workflow-core';
@@ -12,5 +13,6 @@ export type {
   MasterPlanResult,
   CheckpointResult,
   SubPrdResult,
+  SessionLogEntry,
   StatusInput,
 } from 'dev-workflow-core';
