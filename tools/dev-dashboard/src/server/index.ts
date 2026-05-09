@@ -25,6 +25,7 @@ async function main(): Promise<void> {
   // Scan projects
   const projects = await scanProjects(config.scanDirs);
   state.setProjects(projects);
+  state.setTerminal(config.terminal);
 
   // Mount API routes
   registerApiRoutes(app, state);

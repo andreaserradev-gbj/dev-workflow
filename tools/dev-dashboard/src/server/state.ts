@@ -1,4 +1,4 @@
-import type { Feature, Project } from '../shared/types.js';
+import type { Feature, Project, TerminalConfig } from '../shared/types.js';
 import { STATUS_ORDER } from '../shared/types.js';
 
 /** Sort features by status priority, then projects by most recently active. Pure function. */
@@ -27,12 +27,25 @@ export function sortProjects(projects: Project[]): Project[] {
 
 export class DashboardState {
   private projects = new Map<string, Project>();
+  private terminal: TerminalConfig = {};
 
   setProjects(projects: Project[]): void {
     this.projects.clear();
     for (const project of projects) {
       this.projects.set(project.path, project);
     }
+  }
+
+  // Terminal config cache — populated from disk at startup (index.ts) and
+  // refreshed on POST /api/config. The watcher does NOT diff this field;
+  // external config.json edits propagate via cold reads of GET /api/config
+  // (which also refreshes the cache).
+  getTerminal(): TerminalConfig {
+    return this.terminal;
+  }
+
+  setTerminal(terminal: TerminalConfig): void {
+    this.terminal = terminal;
   }
 
   getProjects(): Project[] {

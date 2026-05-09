@@ -509,7 +509,14 @@ export async function parseFeature(featureDir: string, name: string): Promise<Fe
   const masterPlan = await parseMasterPlan(resolve(featureDir, '00-master-plan.md'));
   const checkpoint = await parseCheckpoint(resolve(featureDir, 'checkpoint.md'));
 
-  // If master plan has 0 inline steps, fall back to sub-PRD progress, then phase counts
+  // Progress resolution:
+  //   1. Master plan with inline steps still pending → master plan progress (sub-PRDs
+  //      typically document master-plan work in detail; combining would double-count).
+  //   2. Master plan with inline steps all complete + sub-PRD with pending steps →
+  //      add the sub-PRD steps (treat sub-PRD as an extension landing after the
+  //      original feature shipped).
+  //   3. Master plan with 0 inline steps → fall back to sub-PRD aggregation, then
+  //      to phase-level ✅ markers.
   let progress: Progress | null = masterPlan?.progress ?? null;
   if (masterPlan && masterPlan.progress.total === 0) {
     const subPrdProgress = await aggregateSubPrdProgress(featureDir);
@@ -519,6 +526,18 @@ export async function parseFeature(featureDir: string, name: string): Promise<Fe
       // Use phases themselves as progress units (for plans with title-level ✅ markers)
       const done = masterPlan.phases.filter((p) => p.status === 'complete').length;
       const total = masterPlan.phases.length;
+      progress = { done, total, percent: Math.round((done / total) * 100) };
+    }
+  } else if (
+    masterPlan &&
+    masterPlan.progress.total > 0 &&
+    masterPlan.progress.done === masterPlan.progress.total
+  ) {
+    // Master plan finished — add any sub-PRD steps as additive extension work.
+    const subPrdProgress = await aggregateSubPrdProgress(featureDir);
+    if (subPrdProgress && subPrdProgress.total > 0) {
+      const done = masterPlan.progress.done + subPrdProgress.done;
+      const total = masterPlan.progress.total + subPrdProgress.total;
       progress = { done, total, percent: Math.round((done / total) * 100) };
     }
   }
@@ -548,7 +567,10 @@ export async function parseFeature(featureDir: string, name: string): Promise<Fe
     progressDone: progress?.done,
   });
 
-  // Find current phase (first in-progress, or first not-started)
+  // Find current phase (first in-progress, or first not-started). When all
+  // master plan phases are complete but a sub-PRD still has pending phases,
+  // surface the first pending sub-PRD phase so AFK and the dashboard can pick
+  // up extension work.
   let currentPhase: Feature['currentPhase'] = null;
   if (masterPlan) {
     const inProgress = masterPlan.phases.find((p) => p.status === 'in-progress');
@@ -560,6 +582,18 @@ export async function parseFeature(featureDir: string, name: string): Promise<Fe
         total: masterPlan.phases.length,
         title: active.title,
       };
+    } else if (!allComplete) {
+      const subPrdPhases = await parseSubPrdsAsPhases(featureDir);
+      const subActive =
+        subPrdPhases.find((p) => p.status === 'in-progress') ??
+        subPrdPhases.find((p) => p.status === 'not-started');
+      if (subActive) {
+        currentPhase = {
+          number: subActive.number,
+          total: subPrdPhases.length,
+          title: subActive.title,
+        };
+      }
     }
   }
 

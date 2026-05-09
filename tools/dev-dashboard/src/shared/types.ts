@@ -8,12 +8,13 @@ export type {
   SubPrd,
   Feature,
   Project,
+  SessionLogEntry,
 } from 'dev-workflow-core/types';
 export { STATUS_ORDER } from 'dev-workflow-core/types';
 
 // ─── Dashboard-only types (API/UI concerns) ──────────────────────
 
-import type { Feature, Phase, Project, SubPrd } from 'dev-workflow-core/types';
+import type { Feature, Phase, Project, SessionLogEntry, SubPrd } from 'dev-workflow-core/types';
 
 // GET /api/projects response
 export interface ProjectsResponse {
@@ -31,6 +32,9 @@ export interface FeatureDetail extends Feature {
   } | null;
   phases: Phase[];
   subPrds: SubPrd[];
+  // Parsed session-log.md entries in file order (Session 1 = oldest, last = newest).
+  // null when session-log.md is absent or empty; populated array otherwise.
+  sessionLog: SessionLogEntry[] | null;
 }
 
 // Feature annotated with project name (for cross-project report view)
@@ -52,12 +56,36 @@ export interface HealthResponse {
   features: number;
 }
 
+// User's terminal-launch setting per platform.
+//   - string  → preset id (server's terminal-presets registry resolves it).
+//   - object  → literal { cmd, args }; args may contain '{{cwd}}' which the
+//     server substitutes with the feature dir before execFile.
+// The discrete-args invariant is preserved end-to-end — `args` stays an
+// array, never a single shell string.
+export type TerminalSetting = string | { cmd: string; args: string[] };
+
+export interface TerminalConfig {
+  darwin?: TerminalSetting;
+  linux?: TerminalSetting;
+  win32?: TerminalSetting;
+}
+
 // Dashboard config (~/.config/dev-dashboard/config.json)
 export interface DashboardConfig {
   scanDirs: string[];
   port: number;
   notifications: boolean;
   scanDirsConfigured: boolean;
+  terminal: TerminalConfig;
+}
+
+// GET /api/config response wrapper. Carries the persisted DashboardConfig
+// alongside platform/version/configPath so the client About tab and the
+// platform-aware Terminal tab can read them in one round-trip.
+export interface DashboardConfigResponse extends DashboardConfig {
+  platform: NodeJS.Platform;
+  version: string;
+  configPath: string;
 }
 
 // WebSocket event types pushed to clients
