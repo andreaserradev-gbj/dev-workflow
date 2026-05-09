@@ -176,8 +176,6 @@ export function ProjectCard({
             <div key={feature.name}>
               <FeatureRow
                 feature={feature}
-                projectPath={project.path}
-                projectName={project.name}
                 id={`feature-${project.name}-${feature.name}`}
                 expanded={expandedFeature === feature.name}
                 onClick={() =>
@@ -212,8 +210,6 @@ export function ProjectCard({
                   <div key={feature.name}>
                     <FeatureRow
                       feature={feature}
-                      projectPath={project.path}
-                      projectName={project.name}
                       id={`feature-${project.name}-${feature.name}`}
                       expanded={expandedFeature === feature.name}
                       onClick={() =>

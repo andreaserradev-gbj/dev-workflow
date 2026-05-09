@@ -69,7 +69,7 @@ export async function executeOpenAction(
   }
 }
 
-// ─── Primary action button (shown in FeatureRow) ────────────────
+// ─── Primary action button (Archive / Restore) ──────────────────
 
 interface PrimaryProps {
   status: FeatureStatus;
