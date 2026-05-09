@@ -5,14 +5,19 @@ import { promisify } from 'node:util';
 import type { FastifyInstance, FastifyReply } from 'fastify';
 import type {
   DashboardConfig,
+  DashboardConfigResponse,
   FeatureDetail,
   Project,
   ReportFeature,
   ReportResponse,
+  TerminalConfig,
+  TerminalSetting,
 } from '../shared/types.js';
 import type { DashboardState } from './state.js';
-import { ConfigReadError, readStoredConfig, updateConfig } from './config.js';
+import { ConfigReadError, getConfigPath, readStoredConfig, updateConfig } from './config.js';
 import { parseCheckpoint, parseMasterPlan, parseSessionLog, parseSubPrd } from './parser.js';
+import { resolveTerminalCommand } from './terminal-presets.js';
+import { VERSION } from './version.js';
 
 const execFile = promisify(execFileCb);
 
@@ -28,7 +33,10 @@ interface PlatformOpenCommand {
 // Per-platform launchers for the three open-externally modes.
 // Always invoked via execFile with a discrete arg array — never `exec`,
 // never `{ shell: true }` — so paths can never be reinterpreted by a shell.
-function buildOpenCommand(
+// Exported so terminal-presets.test.ts can exercise the fallback path
+// without route plumbing, and so the open-route handler can call it as the
+// fallback when resolveTerminalCommand returns null.
+export function buildOpenCommand(
   platform: NodeJS.Platform,
   mode: OpenMode,
   filePath: string,
@@ -198,7 +206,18 @@ export function registerApiRoutes(app: FastifyInstance, state: DashboardState): 
 
   app.get('/api/config', async (_request, reply: FastifyReply) => {
     try {
-      return await readStoredConfig();
+      const config = await readStoredConfig();
+      const response: DashboardConfigResponse = {
+        ...config,
+        platform: process.platform,
+        version: VERSION,
+        configPath: getConfigPath(),
+      };
+      // Keep state cache in sync with disk on every read — covers cold-start
+      // before index.ts wires the cache and acts as a safety net if external
+      // config.json edits happened between watcher fires.
+      state.setTerminal(config.terminal);
+      return response;
     } catch (error) {
       if (error instanceof ConfigReadError) {
         return reply.status(500).send({
@@ -212,9 +231,13 @@ export function registerApiRoutes(app: FastifyInstance, state: DashboardState): 
   });
 
   app.post<{
-    Body: { notifications?: boolean; scanDirs?: string[] };
+    Body: {
+      notifications?: boolean;
+      scanDirs?: string[];
+      terminal?: Partial<TerminalConfig>;
+    };
   }>('/api/config', async (request) => {
-    const { notifications, scanDirs } = request.body ?? {};
+    const { notifications, scanDirs, terminal } = request.body ?? {};
     const patch: Partial<DashboardConfig> = {};
     if (typeof notifications === 'boolean') {
       patch.notifications = notifications;
@@ -222,8 +245,33 @@ export function registerApiRoutes(app: FastifyInstance, state: DashboardState): 
     if (Array.isArray(scanDirs)) {
       patch.scanDirs = scanDirs;
     }
+    if (terminal && typeof terminal === 'object' && !Array.isArray(terminal)) {
+      // Merge into existing terminal config so a save from one platform
+      // doesn't wipe out other platforms' settings — the multi-OS dotfile
+      // case from the design decisions.
+      const existing = await readStoredConfig();
+      const merged: TerminalConfig = { ...existing.terminal };
+      for (const platform of ['darwin', 'linux', 'win32'] as const) {
+        if (platform in terminal) {
+          const value = terminal[platform] as TerminalSetting | undefined;
+          if (value === undefined || value === null) {
+            delete merged[platform];
+          } else {
+            merged[platform] = value;
+          }
+        }
+      }
+      patch.terminal = merged;
+    }
     const updated = await updateConfig(patch);
-    return updated;
+    state.setTerminal(updated.terminal);
+    const response: DashboardConfigResponse = {
+      ...updated,
+      platform: process.platform,
+      version: VERSION,
+      configPath: getConfigPath(),
+    };
+    return response;
   });
 
   // ─── Archive / Restore ────────────────────────────────────────
@@ -319,7 +367,19 @@ export function registerApiRoutes(app: FastifyInstance, state: DashboardState): 
       return reply.status(404).send({ error: `checkpoint.md not found for "${featureName}"` });
     }
 
-    const command = buildOpenCommand(process.platform, mode as OpenMode, checkpointPath);
+    // Terminal mode consults the user's configured terminal first; falls
+    // back to the hardcoded buildOpenCommand recipe if no setting is set
+    // or the preset id is unknown. open/reveal modes always use the
+    // hardcoded launcher — they're not user-configurable in v1.
+    const featureDir = dirname(checkpointPath);
+    let command: PlatformOpenCommand | null = null;
+    if (mode === 'terminal') {
+      const userSetting = state.getTerminal()?.[process.platform as 'darwin' | 'linux' | 'win32'];
+      command = resolveTerminalCommand(userSetting, process.platform, featureDir);
+    }
+    if (!command) {
+      command = buildOpenCommand(process.platform, mode as OpenMode, checkpointPath);
+    }
     if (!command) {
       return reply
         .status(501)

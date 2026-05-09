@@ -329,12 +329,21 @@ describe('GET /api/config', () => {
     const res = await app.inject({ method: 'GET', url: '/api/config' });
 
     expect(res.statusCode).toBe(200);
-    expect(res.json()).toEqual({
+    const body = res.json();
+    // Persisted config fields
+    expect(body).toMatchObject({
       scanDirs: [],
       port: 3141,
       notifications: false,
       scanDirsConfigured: false,
+      terminal: {},
     });
+    // Wrapper fields
+    expect(body.platform).toBe(process.platform);
+    expect(typeof body.version).toBe('string');
+    expect(body.version.length).toBeGreaterThan(0);
+    expect(typeof body.configPath).toBe('string');
+    expect(body.configPath).toContain('dev-dashboard');
   });
 
   it('returns a non-destructive error for malformed config', async () => {
@@ -364,12 +373,17 @@ describe('POST /api/config', () => {
     });
 
     expect(res.statusCode).toBe(200);
-    expect(res.json()).toEqual({
+    const body = res.json();
+    expect(body).toMatchObject({
       scanDirs: ['~/code', '~/work'],
       port: 3141,
       notifications: false,
       scanDirsConfigured: true,
+      terminal: {},
     });
+    // Wrapper fields ride on every POST response too.
+    expect(body.platform).toBe(process.platform);
+    expect(typeof body.version).toBe('string');
 
     const raw = await readFile(
       join(process.env.XDG_CONFIG_HOME!, 'dev-dashboard', 'config.json'),
@@ -378,6 +392,102 @@ describe('POST /api/config', () => {
     expect(JSON.parse(raw)).toMatchObject({
       scanDirs: ['~/code', '~/work'],
       scanDirsConfigured: true,
+    });
+  });
+
+  it('persists notifications: true and round-trips via GET', async () => {
+    const post = await app.inject({
+      method: 'POST',
+      url: '/api/config',
+      payload: { notifications: true },
+    });
+    expect(post.statusCode).toBe(200);
+    expect(post.json().notifications).toBe(true);
+
+    const get = await app.inject({ method: 'GET', url: '/api/config' });
+    expect(get.json().notifications).toBe(true);
+  });
+
+  describe('terminal field', () => {
+    it('persists a darwin preset id and round-trips via GET', async () => {
+      const post = await app.inject({
+        method: 'POST',
+        url: '/api/config',
+        payload: { terminal: { darwin: 'wezterm' } },
+      });
+      expect(post.statusCode).toBe(200);
+      expect(post.json().terminal).toEqual({ darwin: 'wezterm' });
+
+      const get = await app.inject({ method: 'GET', url: '/api/config' });
+      expect(get.json().terminal).toEqual({ darwin: 'wezterm' });
+    });
+
+    it('merges a second platform without clobbering the first', async () => {
+      // darwin already set by the previous test — adding linux must keep darwin.
+      const post = await app.inject({
+        method: 'POST',
+        url: '/api/config',
+        payload: { terminal: { linux: 'gnome-terminal' } },
+      });
+      expect(post.statusCode).toBe(200);
+      expect(post.json().terminal).toEqual({
+        darwin: 'wezterm',
+        linux: 'gnome-terminal',
+      });
+    });
+
+    it('persists a custom { cmd, args } object', async () => {
+      const post = await app.inject({
+        method: 'POST',
+        url: '/api/config',
+        payload: {
+          terminal: {
+            win32: { cmd: 'wezterm', args: ['start', '--cwd', '{{cwd}}'] },
+          },
+        },
+      });
+      expect(post.statusCode).toBe(200);
+      expect(post.json().terminal.win32).toEqual({
+        cmd: 'wezterm',
+        args: ['start', '--cwd', '{{cwd}}'],
+      });
+    });
+
+    it('drops invalid terminal shapes via the normalizer (silent-drop semantics)', async () => {
+      const post = await app.inject({
+        method: 'POST',
+        url: '/api/config',
+        payload: {
+          terminal: {
+            darwin: { cmd: 'wezterm' /* no args */ } as unknown,
+            linux: 42, // wrong type
+            win32: 'kitty', // valid, should pass through
+          },
+        },
+      });
+      expect(post.statusCode).toBe(200);
+      const persisted = post.json().terminal;
+      expect(persisted.darwin).toBeUndefined();
+      expect(persisted.linux).toBeUndefined();
+      expect(persisted.win32).toBe('kitty');
+    });
+
+    it('removes a platform when payload sets it to null', async () => {
+      // First seed darwin + linux.
+      await app.inject({
+        method: 'POST',
+        url: '/api/config',
+        payload: { terminal: { darwin: 'wezterm', linux: 'gnome-terminal' } },
+      });
+      // Null on darwin should remove it; linux should stay.
+      const post = await app.inject({
+        method: 'POST',
+        url: '/api/config',
+        payload: { terminal: { darwin: null } },
+      });
+      expect(post.statusCode).toBe(200);
+      expect(post.json().terminal).toMatchObject({ linux: 'gnome-terminal' });
+      expect(post.json().terminal.darwin).toBeUndefined();
     });
   });
 });
@@ -483,5 +593,150 @@ describe('POST /api/projects/:project/features/:feature/open', () => {
       expect(res.statusCode).toBe(200);
     }
     expect(mockExecFile).toHaveBeenCalledTimes(3);
+  });
+
+  describe('terminal mode (preset + fallback)', () => {
+    const currentPlatform = process.platform as 'darwin' | 'linux' | 'win32';
+
+    it('uses the user-configured preset when terminal config is set for current platform', async () => {
+      // wezterm is in all three platforms' registries — works regardless of CI OS.
+      await app.inject({
+        method: 'POST',
+        url: '/api/config',
+        payload: { terminal: { [currentPlatform]: 'wezterm' } },
+      });
+
+      const mockExecFile = vi.mocked(execFile);
+      mockExecFile.mockClear();
+
+      const res = await app.inject({
+        method: 'POST',
+        url: '/api/projects/api-server/features/auth-system/open',
+        payload: { mode: 'terminal' },
+      });
+
+      expect(res.statusCode).toBe(200);
+      expect(mockExecFile).toHaveBeenCalledTimes(1);
+
+      const [cmd, args] = mockExecFile.mock.calls[0];
+      expect(cmd).toBe('wezterm');
+      expect(Array.isArray(args)).toBe(true);
+      const featureDir = resolve(apiServerPath, '.dev/auth-system');
+      expect(args as string[]).toEqual(['start', '--cwd', featureDir]);
+    });
+
+    it('substitutes {{cwd}} in custom args before invoking execFile', async () => {
+      await app.inject({
+        method: 'POST',
+        url: '/api/config',
+        payload: {
+          terminal: {
+            [currentPlatform]: { cmd: 'echo', args: ['featureDir={{cwd}}'] },
+          },
+        },
+      });
+
+      const mockExecFile = vi.mocked(execFile);
+      mockExecFile.mockClear();
+
+      const res = await app.inject({
+        method: 'POST',
+        url: '/api/projects/api-server/features/auth-system/open',
+        payload: { mode: 'terminal' },
+      });
+
+      expect(res.statusCode).toBe(200);
+      const [cmd, args] = mockExecFile.mock.calls[0];
+      expect(cmd).toBe('echo');
+      const featureDir = resolve(apiServerPath, '.dev/auth-system');
+      expect(args as string[]).toEqual([`featureDir=${featureDir}`]);
+    });
+
+    it('falls back to buildOpenCommand when no terminal preset is set for current platform', async () => {
+      // Clear current platform's terminal setting.
+      await app.inject({
+        method: 'POST',
+        url: '/api/config',
+        payload: { terminal: { [currentPlatform]: null } },
+      });
+
+      const mockExecFile = vi.mocked(execFile);
+      mockExecFile.mockClear();
+
+      const res = await app.inject({
+        method: 'POST',
+        url: '/api/projects/api-server/features/auth-system/open',
+        payload: { mode: 'terminal' },
+      });
+
+      expect(res.statusCode).toBe(200);
+      expect(mockExecFile).toHaveBeenCalledTimes(1);
+
+      const [cmd, args, options] = mockExecFile.mock.calls[0];
+      // Fallback shape is platform-specific; assert only the security
+      // invariants that hold across platforms.
+      expect(typeof cmd).toBe('string');
+      expect(Array.isArray(args)).toBe(true);
+      if (options && typeof options === 'object') {
+        expect(options as Record<string, unknown>).not.toHaveProperty('shell', true);
+      }
+    });
+
+    it('preserves the security invariant — args is always an array, never a shell string', async () => {
+      await app.inject({
+        method: 'POST',
+        url: '/api/config',
+        payload: { terminal: { [currentPlatform]: 'wezterm' } },
+      });
+
+      const mockExecFile = vi.mocked(execFile);
+      mockExecFile.mockClear();
+
+      const res = await app.inject({
+        method: 'POST',
+        url: '/api/projects/api-server/features/auth-system/open',
+        payload: { mode: 'terminal' },
+      });
+      expect(res.statusCode).toBe(200);
+
+      const [, args, options] = mockExecFile.mock.calls[0];
+      expect(Array.isArray(args)).toBe(true);
+      // No single arg should encode an entire command line — the args
+      // array should be split on logical token boundaries.
+      for (const arg of args as string[]) {
+        // Arg may contain a space (e.g. literal path with space) but
+        // should NOT match the "binary -flag" command-line shape.
+        expect(arg).not.toMatch(/^[a-z]+\s+--?[a-z]/i);
+      }
+      if (options && typeof options === 'object') {
+        expect(options as Record<string, unknown>).not.toHaveProperty('shell', true);
+      }
+    });
+
+    it('returns the configured cwd from the spawn options for custom mode', async () => {
+      await app.inject({
+        method: 'POST',
+        url: '/api/config',
+        payload: {
+          terminal: {
+            [currentPlatform]: { cmd: 'echo', args: ['hi'] },
+          },
+        },
+      });
+
+      const mockExecFile = vi.mocked(execFile);
+      mockExecFile.mockClear();
+
+      const res = await app.inject({
+        method: 'POST',
+        url: '/api/projects/api-server/features/auth-system/open',
+        payload: { mode: 'terminal' },
+      });
+      expect(res.statusCode).toBe(200);
+
+      const [, , options] = mockExecFile.mock.calls[0];
+      const featureDir = resolve(apiServerPath, '.dev/auth-system');
+      expect(options).toMatchObject({ cwd: featureDir });
+    });
   });
 });

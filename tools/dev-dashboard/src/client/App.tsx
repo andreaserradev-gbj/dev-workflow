@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from 'preact/hooks';
-import type { DashboardConfig, FeatureStatus } from '@shared/types.js';
+import type { DashboardConfigResponse, FeatureStatus } from '@shared/types.js';
 import { ProjectCard } from './components/ProjectCard.js';
 import { ProjectRail } from './components/ProjectRail.js';
 import { ReportView } from './components/ReportView.js';
@@ -8,6 +8,12 @@ import { ConnectionOverlay } from './components/ConnectionOverlay.js';
 import { ConfigurationPanel } from './components/ConfigurationPanel.js';
 import { useWebSocket } from './hooks/useWebSocket.js';
 import { BUILD_INFO } from './buildInfo.js';
+import {
+  deriveTerminalDraft,
+  draftToSetting,
+  EMPTY_TERMINAL_DRAFT,
+  type TerminalDraft,
+} from './terminal-presets.js';
 
 const FILTER_PILLS: { key: FeatureStatus | 'all'; label: string }[] = [
   { key: 'all', label: 'All' },
@@ -136,13 +142,19 @@ export function App() {
   const [activeView, setActiveView] = useState<ActiveView>(readHashView);
   const [projectViewMode, setProjectViewMode] = useState<ProjectViewMode>(readProjectViewMode);
   const [railCollapsed, setRailCollapsed] = useState(readRailCollapsed);
-  const [dashboardConfig, setDashboardConfig] = useState<DashboardConfig | null>(null);
+  const [dashboardConfig, setDashboardConfig] = useState<DashboardConfigResponse | null>(null);
   const [configLoading, setConfigLoading] = useState(true);
   const [configError, setConfigError] = useState<string | null>(null);
   const [scanDirsDraft, setScanDirsDraft] = useState('');
   const [scanDirsEditorOpen, setScanDirsEditorOpen] = useState(false);
   const [savingScanDirs, setSavingScanDirs] = useState(false);
   const [saveScanDirsError, setSaveScanDirsError] = useState<string | null>(null);
+  const [terminalDraft, setTerminalDraft] = useState<TerminalDraft>(EMPTY_TERMINAL_DRAFT);
+  const [savingTerminal, setSavingTerminal] = useState(false);
+  const [saveTerminalError, setSaveTerminalError] = useState<string | null>(null);
+  const [notificationsDraft, setNotificationsDraft] = useState(false);
+  const [savingNotifications, setSavingNotifications] = useState(false);
+  const [saveNotificationsError, setSaveNotificationsError] = useState<string | null>(null);
   const [archivedProjectsCollapsed, setArchivedProjectsCollapsed] = useState(() => {
     try {
       return localStorage.getItem(ARCHIVED_PROJECTS_KEY) !== '0';
@@ -176,9 +188,11 @@ export function App() {
         }
         return res.json();
       })
-      .then((config: DashboardConfig) => {
+      .then((config: DashboardConfigResponse) => {
         setDashboardConfig(config);
         setScanDirsDraft(config.scanDirs.join('\n'));
+        setTerminalDraft(deriveTerminalDraft(config.terminal, config.platform));
+        setNotificationsDraft(config.notifications);
         setConfigLoading(false);
         setConfigError(null);
       })
@@ -294,6 +308,11 @@ export function App() {
     [projects, selectedProject],
   );
 
+  const totalFeaturesCount = useMemo(
+    () => projects.reduce((n, p) => n + p.features.length, 0),
+    [projects],
+  );
+
   // Count features per status within the scoped projects
   const statusCounts = useMemo(() => {
     const counts: Partial<Record<FeatureStatus, number>> = {};
@@ -380,7 +399,7 @@ export function App() {
           throw new Error(body.error ?? 'Failed to save scan directories');
         }
 
-        const config: DashboardConfig = await res.json();
+        const config: DashboardConfigResponse = await res.json();
         setDashboardConfig(config);
         setScanDirsDraft(config.scanDirs.join('\n'));
         setScanDirsEditorOpen(false);
@@ -394,6 +413,92 @@ export function App() {
     },
     [scanDirsDraft],
   );
+
+  const handleSaveTerminal = useCallback(
+    async (e: Event) => {
+      e.preventDefault();
+      if (!dashboardConfig) return;
+      const platform = dashboardConfig.platform;
+      let setting;
+      try {
+        setting = draftToSetting(terminalDraft);
+      } catch (err: unknown) {
+        setSaveTerminalError(err instanceof Error ? err.message : 'Invalid terminal setting.');
+        return;
+      }
+
+      setSavingTerminal(true);
+      setSaveTerminalError(null);
+      try {
+        const res = await fetch('/api/config', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ terminal: { [platform]: setting } }),
+        });
+
+        if (!res.ok) {
+          const body = await res.json().catch(() => ({ error: 'Failed to save terminal setting' }));
+          throw new Error(body.error ?? 'Failed to save terminal setting');
+        }
+
+        const updated: DashboardConfigResponse = await res.json();
+        setDashboardConfig(updated);
+        setTerminalDraft(deriveTerminalDraft(updated.terminal, updated.platform));
+      } catch (err: unknown) {
+        setSaveTerminalError(
+          err instanceof Error ? err.message : 'Failed to save terminal setting',
+        );
+      } finally {
+        setSavingTerminal(false);
+      }
+    },
+    [dashboardConfig, terminalDraft],
+  );
+
+  const handleCancelTerminal = useCallback(() => {
+    if (!dashboardConfig) return;
+    setTerminalDraft(deriveTerminalDraft(dashboardConfig.terminal, dashboardConfig.platform));
+    setSaveTerminalError(null);
+  }, [dashboardConfig]);
+
+  const handleSaveNotifications = useCallback(
+    async (e: Event) => {
+      e.preventDefault();
+      setSavingNotifications(true);
+      setSaveNotificationsError(null);
+      try {
+        const res = await fetch('/api/config', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ notifications: notificationsDraft }),
+        });
+
+        if (!res.ok) {
+          const body = await res
+            .json()
+            .catch(() => ({ error: 'Failed to save notifications setting' }));
+          throw new Error(body.error ?? 'Failed to save notifications setting');
+        }
+
+        const updated: DashboardConfigResponse = await res.json();
+        setDashboardConfig(updated);
+        setNotificationsDraft(updated.notifications);
+      } catch (err: unknown) {
+        setSaveNotificationsError(
+          err instanceof Error ? err.message : 'Failed to save notifications setting',
+        );
+      } finally {
+        setSavingNotifications(false);
+      }
+    },
+    [notificationsDraft],
+  );
+
+  const handleCancelNotifications = useCallback(() => {
+    if (!dashboardConfig) return;
+    setNotificationsDraft(dashboardConfig.notifications);
+    setSaveNotificationsError(null);
+  }, [dashboardConfig]);
 
   const needsScanDirOnboarding =
     !!dashboardConfig &&
@@ -523,6 +628,20 @@ export function App() {
               saveError={saveScanDirsError}
               configError={configError}
               configLoading={configLoading}
+              terminalDraft={terminalDraft}
+              onTerminalDraftChange={setTerminalDraft}
+              onSubmitTerminal={handleSaveTerminal}
+              onCancelTerminal={handleCancelTerminal}
+              savingTerminal={savingTerminal}
+              saveTerminalError={saveTerminalError}
+              notificationsDraft={notificationsDraft}
+              onNotificationsDraftChange={setNotificationsDraft}
+              onSubmitNotifications={handleSaveNotifications}
+              onCancelNotifications={handleCancelNotifications}
+              savingNotifications={savingNotifications}
+              saveNotificationsError={saveNotificationsError}
+              projectsCount={projects.length}
+              featuresCount={totalFeaturesCount}
             />
           )}
 

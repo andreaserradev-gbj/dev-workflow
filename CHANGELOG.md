@@ -31,6 +31,31 @@ The feature detail panel in `/dev-dashboard` gets three coordinated upgrades tha
 - The existing watcher already picks up `session-log.md` changes — no extension needed.
 - New parser fixture `master-complete-subprd-pending` covering the additive aggregation case (4 master plan steps done + 3 sub-PRD steps pending → 4/7, status `active`).
 
+### Configurable terminal + tabbed Configuration panel
+
+The Configuration panel that opened from the gear icon used to be a single scan-dirs form. It now hosts four tabs, and the previously-hardcoded terminal that opens from the feature toolbar's terminal icon is finally user-pickable.
+
+**What you'll notice:**
+- **Pick your terminal app.** Configuration → Terminal lets you choose from a preset dropdown (Terminal, iTerm2, WezTerm, Ghostty, Kitty, Alacritty, Warp on macOS; gnome-terminal, Konsole, WezTerm, Kitty, Alacritty on Linux; Windows Terminal, WezTerm, Alacritty on Windows). Custom… reveals discrete Command + Arguments fields with `{{cwd}}` substitution at launch. The setting persists per platform, so a synced `~/.config/dev-dashboard/config.json` keeps each OS's preference intact when you save from another.
+- **Tabbed Configuration.** Scan directories / Terminal / Notifications / About, with proper WAI-ARIA `role="tablist"` semantics and arrow-key navigation (Left/Right/Home/End cycle focus and activate).
+- **Notifications toggle.** A new `role="switch"` control persists your preference alongside the rest of the dashboard config. The runtime daemon hasn't shipped yet — the toggle just remembers the choice for when it does.
+- **About tab.** Read-only summary of the plugin version, config file path, platform, and counts of watched projects and features. Useful when reporting issues or sanity-checking what the dashboard is actually scanning.
+
+### Added
+- `terminal: { darwin?, linux?, win32? }` field on `DashboardConfig`, with each entry either a preset id string or `{ cmd, args[] }` for custom mode. POSTs merge per-platform so a save from one OS doesn't clobber the others; sending `null` for a platform clears that entry.
+- `DashboardConfigResponse` wrapper on `GET` and `POST /api/config` carrying `platform` / `version` / `configPath` alongside the persisted config — the client About tab and the platform-aware Terminal tab fetch in one round-trip.
+- `tools/dev-dashboard/src/server/terminal-presets.ts` with `KNOWN_TERMINALS` registry and a pure `resolveTerminalCommand()` resolver. Each preset carries a `(cwd) => { cmd, args }` recipe; the open-route's terminal mode consults the user's setting first and falls back to `buildOpenCommand` when nothing's configured. Discrete-args invariant preserved end-to-end — no shell parsing, no `.split(' ')`, never an `exec()` call.
+- `tools/dev-dashboard/src/client/terminal-presets.ts` with the matching label table plus form-state helpers (`TerminalDraft`, `deriveTerminalDraft`, `draftToSetting`, `isTerminalDraftDirty`).
+- Inline `Toggle` primitive in `ConfigurationPanel.tsx` (`<button role="switch">` with `aria-checked` + `aria-labelledby`, native Space/Enter, focus ring) — single-consumer for now, ready to lift when a second toggle appears.
+- `tools/dev-dashboard/src/server/version.ts` exporting `VERSION` via an esbuild `define: { __VERSION__ }` that reads `.claude-plugin/marketplace.json` at bundle time, so the About tab shows the user-installed plugin version instead of `tools/dev-dashboard/package.json`'s internal `0.1.0`.
+- Mockups at `.dev/dashboard-detail-ui-enhancements/terminal-config-mockup-v2.html` and the v1 (gitignored) — visual reference for the tabbed panel.
+
+### Internal
+- 150 dashboard tests passing (116 prior + 23 preset-resolver cases in the new `terminal-presets.test.ts` + 11 GET/POST round-trip and security cases in `api.test.ts`).
+- `ConfigurationPanel.tsx` refactored from a single form into a tabbed shell. All four tab subcomponents (`ScanDirsTab` / `TerminalTab` / `NotificationsTab` / `AboutTab`) live inline per the single-consumer rule. Tab panels mount unconditionally and toggle visibility via the `hidden` attribute, keeping DOM stable across switches.
+- `App.tsx` form state for terminal and notifications mirrors the scan-dirs trio (`{draft, saving, saveError}`); response from `POST /api/config` is treated as authoritative for `dashboardConfig`, then the local draft is re-derived from the server's view.
+- Per-platform `terminal` payload merge happens server-side in `api.ts` after a fresh `readStoredConfig()`, so two clients editing different platforms never race past each other.
+
 ## v1.28.1 - 2026-04-17
 
 ### Fixed

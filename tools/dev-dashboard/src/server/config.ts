@@ -2,7 +2,7 @@ import { readFile, writeFile, mkdir, access } from 'fs/promises';
 import { resolve, join, dirname } from 'path';
 import { homedir } from 'os';
 import chokidar from 'chokidar';
-import type { DashboardConfig } from '../shared/types.js';
+import type { DashboardConfig, TerminalConfig, TerminalSetting } from '../shared/types.js';
 
 export function getConfigDir(): string {
   return join(process.env.XDG_CONFIG_HOME ?? join(homedir(), '.config'), 'dev-dashboard');
@@ -19,6 +19,7 @@ export const DEFAULT_CONFIG: DashboardConfig = {
   port: 3141,
   notifications: false,
   scanDirsConfigured: false,
+  terminal: {},
 };
 export const DEFAULT_PORT = DEFAULT_CONFIG.port;
 
@@ -49,6 +50,7 @@ export async function loadConfig(
     port: overrides.port ?? storedConfig.port,
     notifications: storedConfig.notifications,
     scanDirsConfigured: overrides.scan ? scanDirs.length > 0 : storedConfig.scanDirsConfigured,
+    terminal: storedConfig.terminal,
   };
 
   await validateScanDirs(config.scanDirs);
@@ -227,7 +229,39 @@ function normalizeStoredConfig(fileConfig: Partial<DashboardConfig>): DashboardC
     port: fileConfig.port ?? DEFAULT_CONFIG.port,
     notifications: fileConfig.notifications ?? DEFAULT_CONFIG.notifications,
     scanDirsConfigured,
+    terminal: normalizeTerminal(fileConfig.terminal),
   };
+}
+
+// Whitelist + per-platform validation for the `terminal` field. Drops anything
+// not matching `string | { cmd: string, args: string[] }` per platform key, so
+// hand-edited config.json files can't smuggle unexpected shapes through to
+// execFile. Mirrors the silent-drop semantics of normalizeScanDirs.
+function normalizeTerminal(raw: unknown): TerminalConfig {
+  if (!raw || typeof raw !== 'object' || Array.isArray(raw)) return {};
+  const out: TerminalConfig = {};
+  for (const platform of ['darwin', 'linux', 'win32'] as const) {
+    const setting = (raw as Record<string, unknown>)[platform];
+    const normalized = normalizeTerminalSetting(setting);
+    if (normalized !== null) out[platform] = normalized;
+  }
+  return out;
+}
+
+function normalizeTerminalSetting(raw: unknown): TerminalSetting | null {
+  if (typeof raw === 'string') {
+    const trimmed = raw.trim();
+    return trimmed ? trimmed : null;
+  }
+  if (raw && typeof raw === 'object' && !Array.isArray(raw)) {
+    const obj = raw as Record<string, unknown>;
+    const cmd = typeof obj.cmd === 'string' ? obj.cmd.trim() : '';
+    if (!cmd) return null;
+    if (!Array.isArray(obj.args)) return null;
+    if (!obj.args.every((a) => typeof a === 'string')) return null;
+    return { cmd, args: obj.args.slice() };
+  }
+  return null;
 }
 
 function normalizeScanDirs(scanDirs: string[] | undefined): string[] {
