@@ -638,6 +638,21 @@ describe('parseFeature', () => {
     expect(result.name).toBe('subprd-gate-no-table');
     expect(result.status).toBe('gate');
   });
+
+  it('combines master-plan + sub-PRD progress when master plan is complete and sub-PRD has pending steps', async () => {
+    const result = await parseFeature(
+      resolve(FIXTURES, 'master-complete-subprd-pending'),
+      'master-complete-subprd-pending',
+    );
+
+    expect(result.name).toBe('master-complete-subprd-pending');
+    // 4 master plan steps (all done) + 3 sub-PRD steps (none done) = 4/7
+    expect(result.progress).toMatchObject({ done: 4, total: 7, percent: 57 });
+    // Not 'complete' because sub-PRD still has pending work
+    expect(result.status).not.toBe('complete');
+    // currentPhase falls back to first pending sub-PRD phase
+    expect(result.currentPhase).toMatchObject({ number: 1, title: 'Extras' });
+  });
 });
 
 // ─── Session Log Parsing ───────────────────────────────────────────

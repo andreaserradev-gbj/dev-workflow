@@ -22,10 +22,14 @@ The feature detail panel in `/dev-dashboard` gets three coordinated upgrades tha
 - `parseSessionLog` and `SessionLogEntry` re-exported from the dashboard server's parser.
 - Mockup at `.dev/dashboard-detail-ui-enhancements/mockup.html` (gitignored) — visual reference for the redesigned panel.
 
+### Fixed
+- Features with a complete master plan and a pending sub-PRD no longer show as `complete`. The parser was only consulting sub-PRD step counts when the master plan had zero inline steps, so any sub-PRD added as an extension after the original feature shipped was invisible to the dashboard, the CLI, and `/dev-afk`. `parseFeature` now adds sub-PRD step counts to the master plan total whenever the master plan is fully complete, and `currentPhase` falls back to the first pending sub-PRD phase so AFK can pick up the work. The in-progress case is unchanged — sub-PRDs there typically describe master-plan work in detail and combining the two would double-count.
+
 ### Internal
 - 116 dashboard tests passing (108 prior + 6 markdown helpers + 7 open route + 2 sessionLog API).
 - New `tools/dev-dashboard/src/client/lib/markdown.ts` with `render()` / `renderInline()` helpers, configured once at module load with `{ gfm: true, breaks: false }`. Trust boundary documented inline (local PRD content; layer DOMPurify here if the surface ever extends to remote content).
 - The existing watcher already picks up `session-log.md` changes — no extension needed.
+- New parser fixture `master-complete-subprd-pending` covering the additive aggregation case (4 master plan steps done + 3 sub-PRD steps pending → 4/7, status `active`).
 
 ## v1.28.1 - 2026-04-17
 
