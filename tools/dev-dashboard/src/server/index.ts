@@ -95,17 +95,41 @@ async function main(): Promise<void> {
 
   // File watcher — re-parse changed features and push updates via WebSocket
   let featureWatcher = await createWatcher(config.scanDirs, watcherCallbacks);
+  let currentScanDirs = config.scanDirs;
 
   // Config watcher — reload scanDirs on config file changes
   watchConfig(cliOverrides, config.scanDirs, async (newDirs) => {
     console.log(`Config changed — rescanning: ${newDirs.join(', ')}`);
     await featureWatcher.close();
+    currentScanDirs = newDirs;
     const projects = await scanProjects(newDirs);
     state.setProjects(projects);
     featureWatcher = await createWatcher(newDirs, watcherCallbacks);
     broadcaster.broadcast({ type: 'full_refresh', data: { projects: state.getProjects() } });
     console.log(`Reloaded: ${state.projectCount} projects with ${state.featureCount} features`);
   });
+
+  // Periodic full rescan — safety net for missed watcher events. chokidar v4
+  // (no bundled fsevents) silently drops fs.watch events on macOS, especially
+  // across sleep/wake cycles on long-running processes. We diff against the
+  // current in-memory state and only broadcast when something actually changed.
+  const FULL_RESCAN_INTERVAL_MS = 5 * 60 * 1000;
+  setInterval(async () => {
+    try {
+      const before = JSON.stringify(state.getProjects());
+      const projects = await scanProjects(currentScanDirs);
+      state.setProjects(projects);
+      const after = JSON.stringify(state.getProjects());
+      if (before !== after) {
+        broadcaster.broadcast({ type: 'full_refresh', data: { projects: state.getProjects() } });
+        console.log(
+          `Periodic rescan picked up changes: ${state.projectCount} projects with ${state.featureCount} features`,
+        );
+      }
+    } catch (err) {
+      console.error('Periodic rescan failed:', err);
+    }
+  }, FULL_RESCAN_INTERVAL_MS);
 
   console.log(
     `dev-dashboard running at http://localhost:${config.port} — scanning ${config.scanDirs.length} directories`,
