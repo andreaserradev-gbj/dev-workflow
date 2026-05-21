@@ -154,6 +154,40 @@ describe('parseMasterPlan', () => {
     expect(result!.progress).toMatchObject({ done: 3, total: 3, percent: 100 });
   });
 
+  it('recognizes leading prose status markers in master+sub-PRD shape', async () => {
+    const result = await parseMasterPlan(
+      resolve(FIXTURES, 'master-with-prose-status/00-master-plan.md'),
+    );
+
+    expect(result).not.toBeNull();
+    expect(result!.phases).toHaveLength(5);
+
+    // Phase 0: enumerated ✅ steps — takes precedence over any prose marker.
+    expect(result!.phases[0]).toMatchObject({ number: 0, done: 3, total: 3, status: 'complete' });
+
+    // Phase 1: `✅ **DONE**` leading line under a `See [sub-prd]` pointer.
+    expect(result!.phases[1]).toMatchObject({ number: 1, done: 0, total: 0, status: 'complete' });
+
+    // Phase 2: `❌ **DROPPED**` → resolved (treated as complete for rollup purposes).
+    expect(result!.phases[2]).toMatchObject({ number: 2, done: 0, total: 0, status: 'complete' });
+
+    // Phase 3: `⬜ **NOT STARTED**` → not-started.
+    expect(result!.phases[3]).toMatchObject({
+      number: 3,
+      done: 0,
+      total: 0,
+      status: 'not-started',
+    });
+
+    // Phase 4: `⬜ **IN PROGRESS**` → in-progress.
+    expect(result!.phases[4]).toMatchObject({
+      number: 4,
+      done: 0,
+      total: 0,
+      status: 'in-progress',
+    });
+  });
+
   it('counts numbered checkbox steps (plain and backtick-wrapped)', async () => {
     const result = await parseMasterPlan(resolve(FIXTURES, 'numbered-checkbox/00-master-plan.md'));
 

@@ -102,9 +102,12 @@ function extractPhases(rawContent: string): Phase[] {
       // Fall back to phase-level marker when no individual steps found
       status = titleMarker === '✅' ? 'complete' : 'not-started';
     } else {
-      // Fall back to **Status** field in section (e.g., "- **Status**: `[x]` done")
+      // Master+sub-PRD shape: phase body is a pointer to a sub-PRD with the
+      // status written as a leading prose line, e.g. `✅ **DONE** (date): …`.
+      // Recognize that as the phase status before falling back to **Status**.
+      const proseMarker = extractInlineStatusMarker(section);
       const sectionStatus = extractSectionStatus(section);
-      status = sectionStatus ?? 'not-started';
+      status = proseMarker ?? sectionStatus ?? 'not-started';
     }
 
     phases.push({
@@ -186,6 +189,67 @@ function extractSectionStatus(section: string): Phase['status'] | null {
   const match = section.match(/\*\*Status\*\*:\s*`?\[( |x)\]`?/i);
   if (!match) return null;
   return match[1] === 'x' ? 'complete' : 'not-started';
+}
+
+/** Detect a phase-level prose status marker placed as a leading line inside the
+ *  section, used by the master + sub-PRD shape where a phase delegates to a
+ *  sub-PRD and the master plan records status as text instead of enumerated
+ *  steps. Examples that resolve to `complete`:
+ *
+ *      ✅ **DONE** (2026-05-21): all three tracks shipped.
+ *      ✅ **SHIPPED**
+ *      ❌ **DROPPED** — superseded by sub-PRD 01.
+ *      ⏭️ **SKIPPED**
+ *
+ *  Examples that resolve to `not-started`:
+ *
+ *      ⬜ **NOT STARTED**
+ *      ⬜ **TODO**
+ *
+ *  Examples that resolve to `in-progress`:
+ *
+ *      ⬜ **IN PROGRESS**
+ *
+ *  Only the first content line after the heading is inspected (skipping
+ *  blank lines and a single `See [link]` pointer), so unrelated emoji deeper
+ *  in the section don't accidentally retag the phase. */
+function extractInlineStatusMarker(section: string): Phase['status'] | null {
+  const lines = section.split('\n');
+  let i = 0;
+
+  // Skip the heading line.
+  while (i < lines.length && lines[i].trim() === '') i++;
+  if (i < lines.length && lines[i].trim().startsWith('#')) i++;
+
+  for (; i < lines.length; i++) {
+    const t = lines[i].trim();
+    if (t === '') continue;
+    if (t.startsWith('#')) return null; // next heading — no marker
+    if (t.startsWith('⏸️')) return null; // hit the GATE line first
+    if (/^\d+\.\s/.test(t)) return null; // numbered step
+    if (/^-\s/.test(t)) return null; // bullet
+    if (t.startsWith('|')) return null; // table
+
+    // "See [sub-prd-link]" pointer common in master+sub-PRD shape — skip past it.
+    if (/^See\s+\[/i.test(t)) continue;
+
+    // Match: leading emoji + (optional bold) status word.
+    const m = t.match(
+      /^(✅|⬜|❌|⏭️)\s*\**\s*(DONE|SHIPPED|COMPLETE|COMPLETED|DROPPED|SKIPPED|NOT[\s-]?STARTED|TODO|IN[\s-]?PROGRESS)\b/i,
+    );
+    if (!m) return null;
+
+    const emoji = m[1];
+    const word = m[2].toUpperCase().replace(/[\s-]/g, '');
+
+    if (word === 'INPROGRESS') return 'in-progress';
+    if (word === 'NOTSTARTED' || word === 'TODO') return 'not-started';
+    // DONE / SHIPPED / COMPLETE / COMPLETED / DROPPED / SKIPPED → resolved
+    if (emoji === '⬜') return 'not-started'; // mismatched emoji + word: trust emoji
+    return 'complete';
+  }
+
+  return null;
 }
 
 // ─── Checkpoint ────────────────────────────────────────────────────
