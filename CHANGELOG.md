@@ -200,6 +200,12 @@ Checkpoints and resumes are now powered by deterministic CLI commands instead of
 
 <!-- GITHUB-RELEASES-START -->
 
+## v1.30.2 - 2026-05-21
+
+### Fixed
+
+- `/dev-dashboard` and the CLI now read phase status correctly for master + sub-PRD plans. When a phase in `00-master-plan.md` delegates to a sub-PRD (no enumerated steps in the body — just a `See [sub-prd]` pointer and a status sentence like `✅ **DONE** (date): …`), the parser previously read the phase as `not-started`, so `currentPhase` could stay stuck on a phase that had actually shipped across many sessions. `extractPhases` in `tools/dev-workflow-core/src/parser.ts` now scans the first content line under each phase heading (skipping blanks and an optional `See [link]` pointer) for an emoji status marker plus one of DONE / SHIPPED / COMPLETE / DROPPED / SKIPPED / NOT STARTED / TODO / IN PROGRESS. Unrelated emoji deeper in the section don't trigger the fallback. New parser fixture `master-with-prose-status` covers the five common marker shapes.
+
 ## v1.30.1 - 2026-05-13
 
 ### Fixed
