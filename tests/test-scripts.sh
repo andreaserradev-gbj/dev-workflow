@@ -261,5 +261,17 @@ else
 fi
 
 echo ""
+echo "--- dev-dashboard stop.sh regression tests ---"
+STOP_TESTS="$(cd "$(dirname "$0")" && pwd)/test-dev-dashboard-stop.sh"
+if bash "$STOP_TESTS" >/tmp/dev-dashboard-stop.log 2>&1; then
+  echo "PASS: tests/test-dev-dashboard-stop.sh"
+  PASS=$((PASS + 1))
+else
+  echo "FAIL: tests/test-dev-dashboard-stop.sh (see /tmp/dev-dashboard-stop.log)"
+  cat /tmp/dev-dashboard-stop.log
+  FAIL=$((FAIL + 1))
+fi
+
+echo ""
 echo "=== Results: $PASS passed, $FAIL failed ==="
 [ "$FAIL" -eq 0 ] || exit 1
