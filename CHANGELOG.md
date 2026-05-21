@@ -4,6 +4,12 @@ All notable changes to this project should be documented in this file.
 
 <!-- LOCAL-RELEASES-START -->
 
+## v1.30.4 - 2026-05-21
+
+### Fixed
+
+- `dev-dashboard-stop` now stops a dashboard server still running from a prior version's cache path after `/plugin update`. The `find_pids()` helper in `plugins/dev-workflow/skills/dev-dashboard/scripts/stop.sh` previously matched processes against the current install's absolute `SERVER_ENTRY` path, so a server launched from `…/cache/dev-workflow/dev-workflow/1.30.3/skills/dev-dashboard/dashboard/server/index.cjs` was invisible to a `dev-dashboard-stop` invoked from the 1.30.4 cache — the stale process kept the port and the next `dev-dashboard` start either failed or silently picked a different port. The helper now matches on `SERVER_ENTRY_PATTERN="/skills/dev-dashboard/dashboard/server/index.cjs"`, the stable path suffix shared by every cached or contributor-mode install. This is the same class of cross-version staleness fixed for the workflow CLI shim in v1.30.3. New `tests/test-dev-dashboard-stop.sh` regression test spawns a fake bundled server at a cross-version-shaped path and asserts the pattern matches it via `pgrep -f`; the test deliberately does not invoke `stop.sh` end-to-end so it never disturbs a developer's real running dashboard.
+
 ## v1.30.3 - 2026-05-21
 
 ### Fixed
