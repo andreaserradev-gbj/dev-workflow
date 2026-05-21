@@ -115,6 +115,27 @@ SHIM_BODY="$(cat "$BIN_B/dev-workflow")"
 assert_contains "stale post-check: shim body now points at canonical target" "$CLI_TARGET" "$SHIM_BODY"
 
 echo
+echo "--- stale cached-install dev-workflow shim is refreshed across versions ---"
+BIN_CACHE="$(next_bin)"
+mkdir -p "$BIN_CACHE"
+{
+  printf '%s\n' '#!/usr/bin/env bash' \
+    'set -euo pipefail' \
+    'exec node "/Users/someone/.claude/plugins/cache/dev-workflow/dev-workflow/1.29.0/bin/dev-workflow.cjs" "$@"'
+} >"$BIN_CACHE/dev-workflow"
+chmod +x "$BIN_CACHE/dev-workflow"
+CHECK_CACHE_PRE="$(DEV_DASHBOARD_BIN_DIR="$BIN_CACHE" bash "$CHECK" 2>&1)"
+assert_contains "cached-stale pre-check: workflow_status:stale" "workflow_status:stale" "$CHECK_CACHE_PRE"
+assert_not_contains "cached-stale pre-check: no workflow_conflict line" "workflow_conflict:" "$CHECK_CACHE_PRE"
+INSTALL_CACHE_OUT="$(DEV_DASHBOARD_BIN_DIR="$BIN_CACHE" bash "$INSTALL" 2>&1)"
+assert_contains "cached-stale install: workflow_installed line" "workflow_installed:$BIN_CACHE/dev-workflow" "$INSTALL_CACHE_OUT"
+CHECK_CACHE_POST="$(DEV_DASHBOARD_BIN_DIR="$BIN_CACHE" bash "$CHECK" 2>&1)"
+assert_contains "cached-stale post-check: workflow_status:installed" "workflow_status:installed" "$CHECK_CACHE_POST"
+CACHE_SHIM_BODY="$(cat "$BIN_CACHE/dev-workflow")"
+assert_contains "cached-stale post-check: shim body now points at canonical target" "$CLI_TARGET" "$CACHE_SHIM_BODY"
+assert_not_contains "cached-stale post-check: old version path replaced" "1.29.0" "$CACHE_SHIM_BODY"
+
+echo
 echo "--- unrelated dev-workflow produces conflict; dashboard still installs ---"
 BIN_C="$(next_bin)"
 mkdir -p "$BIN_C"

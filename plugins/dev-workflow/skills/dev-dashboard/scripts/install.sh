@@ -89,6 +89,13 @@ is_managed_workflow_shim() {
 
   grep -Fq "exec node \"$target_path\"" "$shim_path" && return 0
   grep -Fq '/plugins/dev-workflow/bin/dev-workflow.cjs' "$shim_path" && return 0
+  # Any prior marketplace-cached install of the same plugin. Without this
+  # match an older version's shim looks foreign and the next install run
+  # cannot refresh it across version upgrades.
+  if grep -Fq '/cache/dev-workflow/dev-workflow/' "$shim_path" \
+    && grep -Fq '/bin/dev-workflow.cjs' "$shim_path"; then
+    return 0
+  fi
 
   return 1
 }
