@@ -206,6 +206,12 @@ Checkpoints and resumes are now powered by deterministic CLI commands instead of
 
 <!-- GITHUB-RELEASES-START -->
 
+## v1.30.3 - 2026-05-21
+
+### Fixed
+
+- `/dev-dashboard`'s install script now refreshes the `dev-workflow` CLI shim across plugin upgrades instead of marking it as `conflict`. `is_managed_workflow_shim()` (in `plugins/dev-workflow/skills/dev-dashboard/scripts/install.sh`) and its companion `workflow_is_managed()` (in `check-install.sh`) previously only recognized a shim as theirs if it pointed at the *current* version's exact target path or the contributor-mode `/plugins/dev-workflow/bin/dev-workflow.cjs`. Any shim written by a prior version (e.g. one pointing at `…/cache/dev-workflow/dev-workflow/1.29.0/bin/dev-workflow.cjs`) was treated as foreign, so terminal calls to `dev-workflow` stayed pinned to the old bundle even after `/plugin update` brought down the new version. The matchers now also accept any shim whose body contains both `/cache/dev-workflow/dev-workflow/` and `/bin/dev-workflow.cjs`, so the installer rewrites it to the current target on the next run. New regression test in `tests/test-dev-dashboard-install.sh` locks in the cross-version refresh path while keeping the existing "unrelated command" conflict guard intact.
+
 ## v1.30.2 - 2026-05-21
 
 ### Fixed
