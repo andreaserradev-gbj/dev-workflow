@@ -194,6 +194,12 @@ Checkpoints and resumes are now powered by deterministic CLI commands instead of
 
 <!-- GITHUB-RELEASES-START -->
 
+## v1.30.1 - 2026-05-13
+
+### Fixed
+
+- `/dev-dashboard` no longer goes stale when chokidar misses a filesystem event. The watcher in `tools/dev-dashboard/src/server/watcher.ts` reacts to `add`/`change`/`unlink` events from chokidar v4, which on macOS uses Node's native `fs.watch` (no fsevents) and can silently drop events — especially across sleep/wake on long-running processes. New features added to `.dev/` after the dashboard started could remain invisible until restart. A 5-minute periodic rescan in `tools/dev-dashboard/src/server/index.ts` now calls `scanProjects()` against the current scan dirs, diffs the result against the in-memory state, and broadcasts `full_refresh` only when something changed (no needless client re-renders on idle ticks).
+
 ## v1.30.0 - 2026-05-09
 
 ### Dashboard detail panel polish
