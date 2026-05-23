@@ -51,6 +51,7 @@ export async function loadConfig(
     notifications: storedConfig.notifications,
     scanDirsConfigured: overrides.scan ? scanDirs.length > 0 : storedConfig.scanDirsConfigured,
     terminal: storedConfig.terminal,
+    wikiDir: expandHome(storedConfig.wikiDir ?? join(homedir(), '.dev-wiki')),
   };
 
   await validateScanDirs(config.scanDirs);
@@ -230,6 +231,7 @@ function normalizeStoredConfig(fileConfig: Partial<DashboardConfig>): DashboardC
     notifications: fileConfig.notifications ?? DEFAULT_CONFIG.notifications,
     scanDirsConfigured,
     terminal: normalizeTerminal(fileConfig.terminal),
+    wikiDir: typeof fileConfig.wikiDir === 'string' ? fileConfig.wikiDir : undefined,
   };
 }
 

@@ -77,6 +77,7 @@ export interface DashboardConfig {
   notifications: boolean;
   scanDirsConfigured: boolean;
   terminal: TerminalConfig;
+  wikiDir?: string;
 }
 
 // GET /api/config response wrapper. Carries the persisted DashboardConfig

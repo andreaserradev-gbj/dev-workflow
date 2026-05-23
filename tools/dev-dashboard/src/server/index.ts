@@ -9,6 +9,7 @@ import { registerApiRoutes } from './api.js';
 import { createWsBroadcaster } from './ws.js';
 import { createWatcher } from './watcher.js';
 import { parseFeature } from './parser.js';
+import { generateWiki } from 'dev-workflow-core';
 
 // Works in both ESM (dev/tsc build) and CJS (esbuild bundle)
 const __dirname = import.meta.url
@@ -22,10 +23,34 @@ async function main(): Promise<void> {
   const app = Fastify({ logger: false });
   const state = new DashboardState();
 
+  // Wiki regeneration helper (debounced for watcher bursts)
+  let wikiTimer: ReturnType<typeof setTimeout> | null = null;
+  function scheduleWikiRegen(): void {
+    if (!config.wikiDir) return;
+    if (wikiTimer) clearTimeout(wikiTimer);
+    const wikiDir = config.wikiDir;
+    wikiTimer = setTimeout(async () => {
+      try {
+        await generateWiki(state.getProjects(), wikiDir);
+      } catch (err) {
+        console.error('Wiki generation failed:', err);
+      }
+    }, 500);
+  }
+
   // Scan projects
   const projects = await scanProjects(config.scanDirs);
   state.setProjects(projects);
   state.setTerminal(config.terminal);
+
+  // Initial wiki generation (with README + Obsidian stub)
+  if (config.wikiDir) {
+    try {
+      await generateWiki(projects, config.wikiDir, { includeReadme: true, initObsidian: true });
+    } catch (err) {
+      console.error('Initial wiki generation failed:', err);
+    }
+  }
 
   // Mount API routes
   registerApiRoutes(app, state);
@@ -70,6 +95,7 @@ async function main(): Promise<void> {
         feature: featureName,
         data: feature,
       });
+      scheduleWikiRegen();
     },
     onFeatureAdded: async (projectPath: string, featureName: string, archived: boolean) => {
       const subdir = archived ? '.dev-archive' : '.dev';
@@ -82,6 +108,7 @@ async function main(): Promise<void> {
         project: projectPath,
         feature,
       });
+      scheduleWikiRegen();
     },
     onFeatureRemoved: (projectPath: string, featureName: string) => {
       state.removeFeature(projectPath, featureName);
@@ -90,6 +117,7 @@ async function main(): Promise<void> {
         project: projectPath,
         feature: featureName,
       });
+      scheduleWikiRegen();
     },
   };
 
@@ -106,6 +134,13 @@ async function main(): Promise<void> {
     state.setProjects(projects);
     featureWatcher = await createWatcher(newDirs, watcherCallbacks);
     broadcaster.broadcast({ type: 'full_refresh', data: { projects: state.getProjects() } });
+    if (config.wikiDir) {
+      try {
+        await generateWiki(state.getProjects(), config.wikiDir);
+      } catch (err) {
+        console.error('Wiki generation failed after config reload:', err);
+      }
+    }
     console.log(`Reloaded: ${state.projectCount} projects with ${state.featureCount} features`);
   });
 
@@ -122,6 +157,7 @@ async function main(): Promise<void> {
       const after = JSON.stringify(state.getProjects());
       if (before !== after) {
         broadcaster.broadcast({ type: 'full_refresh', data: { projects: state.getProjects() } });
+        scheduleWikiRegen();
         console.log(
           `Periodic rescan picked up changes: ${state.projectCount} projects with ${state.featureCount} features`,
         );

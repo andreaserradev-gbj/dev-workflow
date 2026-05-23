@@ -200,8 +200,8 @@ check_sync() {
   done
 }
 
-check_sync discover.sh dev-plan dev-resume dev-wrapup dev-quiz dev-judge dev-afk
-check_sync validate.sh dev-plan dev-resume dev-quiz dev-judge dev-afk
+check_sync discover.sh dev-plan dev-resume dev-wrapup dev-quiz dev-judge dev-afk dev-wiki
+check_sync validate.sh dev-plan dev-resume dev-quiz dev-judge dev-afk dev-wiki
 check_sync git-state.sh dev-resume dev-judge
 
 BIN_DIR="$(cd "$(dirname "$0")/../plugins/dev-workflow/bin" && pwd)"
@@ -226,7 +226,7 @@ check_bin_sync() {
   done
 }
 
-check_bin_sync dev-workflow.cjs dev-checkpoint dev-judge dev-plan dev-resume dev-afk
+check_bin_sync dev-workflow.cjs dev-checkpoint dev-judge dev-plan dev-resume dev-afk dev-wiki
 
 echo ""
 echo "--- dev-afk prompt template ---"

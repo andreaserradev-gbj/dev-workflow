@@ -18,6 +18,7 @@ import { checkpointWrite } from './commands/checkpoint-write.js';
 import { statusUpdate } from './commands/status-update.js';
 import { resumeContext } from './commands/resume-context.js';
 import { list } from './commands/list.js';
+import { wikiIndex } from './commands/wiki-index.js';
 
 interface Command {
   name: string;
@@ -34,6 +35,7 @@ const commands: Command[] = [
   { name: 'status-update', description: 'Update PRD status marker', run: statusUpdate },
   { name: 'resume-context', description: 'Merged resume context packet', run: resumeContext },
   { name: 'list', description: 'List features and AFK-runnable status', run: list },
+  { name: 'wiki-index', description: 'Generate cross-project wiki index', run: wikiIndex },
 ];
 
 function printUsage(): void {
@@ -57,6 +59,8 @@ function printUsage(): void {
   console.log('  --all                Include archived and non-runnable features (list)');
   console.log('  --project <name>     Filter project by name or path (list)');
   console.log('  --status <status>    Filter feature status (list)');
+  console.log('  --generate           Write wiki files to disk (wiki-index)');
+  console.log('  --out <dir>          Output directory (wiki-index)');
 }
 
 export function parseFlags(args: string[]): { flags: Record<string, string | true>; positional: string[] } {

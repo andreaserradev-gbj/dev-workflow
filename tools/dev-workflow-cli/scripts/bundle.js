@@ -25,6 +25,7 @@ const SKILL_DIRS = [
   'dev-judge',
   'dev-plan',
   'dev-resume',
+  'dev-wiki',
 ];
 const SKILL_COPY_DIR = resolve(REPO_ROOT, 'plugins/dev-workflow/skills');
 

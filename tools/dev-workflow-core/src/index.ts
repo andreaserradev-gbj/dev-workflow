@@ -4,3 +4,5 @@ export * from './parser.js';
 export * from './scanner.js';
 export * from './writer.js';
 export * from './afk-runnable.js';
+export * from './wiki.js';
+export * from './wiki-templates.js';

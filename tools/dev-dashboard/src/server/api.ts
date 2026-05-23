@@ -1,6 +1,7 @@
-import { access, mkdir, readdir, rename } from 'fs/promises';
-import { dirname, resolve } from 'path';
+import { access, mkdir, readdir, readFile, rename } from 'fs/promises';
+import { dirname, join, resolve } from 'path';
 import { execFile as execFileCb } from 'node:child_process';
+import { homedir } from 'os';
 import { promisify } from 'node:util';
 import type { FastifyInstance, FastifyReply } from 'fastify';
 import type {
@@ -14,7 +15,13 @@ import type {
   TerminalSetting,
 } from '../shared/types.js';
 import type { DashboardState } from './state.js';
-import { ConfigReadError, getConfigPath, readStoredConfig, updateConfig } from './config.js';
+import {
+  ConfigReadError,
+  expandHome,
+  getConfigPath,
+  readStoredConfig,
+  updateConfig,
+} from './config.js';
 import { parseCheckpoint, parseMasterPlan, parseSessionLog, parseSubPrd } from './parser.js';
 import { resolveTerminalCommand } from './terminal-presets.js';
 import { VERSION } from './version.js';
@@ -74,6 +81,24 @@ export function registerApiRoutes(app: FastifyInstance, state: DashboardState): 
       projects: state.projectCount,
       features: state.featureCount,
     };
+  });
+
+  app.get('/api/wiki', async (_request, reply) => {
+    const config = await readStoredConfig();
+    const wikiDir = expandHome(config.wikiDir ?? join(homedir(), '.dev-wiki'));
+
+    try {
+      const [index, log] = await Promise.all([
+        readFile(join(wikiDir, 'index.md'), 'utf-8'),
+        readFile(join(wikiDir, 'log.md'), 'utf-8'),
+      ]);
+      return { index, log, wikiDir };
+    } catch {
+      return reply.status(404).send({
+        error: 'Wiki not yet generated. Start the dashboard server to auto-generate.',
+        wikiDir,
+      });
+    }
   });
 
   app.get('/api/projects', async () => {
