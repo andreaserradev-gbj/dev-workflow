@@ -62,6 +62,7 @@ Each skill directory contains a `SKILL.md` with YAML frontmatter (`name`, `descr
 | `dev-judge` | Critique a completed phase's diff against acceptance criteria and emit a `<verdict>` block |
 | `dev-wrapup` | Review the conversation for learnings worth keeping |
 | `dev-dashboard` | Start the bundled dashboard server and show its URL |
+| `dev-wiki` | Generate a cross-project markdown wiki from `.dev/` PRDs |
 
 ### Usage
 

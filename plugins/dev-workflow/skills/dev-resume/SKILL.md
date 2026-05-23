@@ -127,6 +127,7 @@ Before beginning work:
 1. The `currentPhasePrd` field from `resume-context` contains the relevant phase section — read it instead of the full master plan
 2. Use `referenceFiles` from the `resume-context` output to identify which files to read — these are the PRD's recommended reference implementations
 3. Read 2-3 of those reference files and match their conventions (naming, structure, APIs, error handling) in new code
+4. Optionally, check `$HOME/.dev-wiki/index.md` for cross-project context (related features, prior art). Skip silently if absent.
 
 Never write new code from scratch when similar code already exists in the codebase.
 
