@@ -86,6 +86,19 @@ Rules:
 - Never use raw `$ARGUMENTS` directly in file paths.
 - Use `$FEATURE_NAME` for all `.dev/` path references.
 
+## PHASE 1.8: WIKI CONSULTATION (optional)
+
+Before researching, check the cross-project wiki for prior art:
+
+```bash
+cat "$HOME/.dev-wiki/index.md" 2>/dev/null
+```
+
+- If the file exists, scan it for features related to the current task — similar names, overlapping domains, reusable patterns. Mention any relevant prior art when briefing the research agents.
+- If the file does not exist, skip silently and proceed to Phase 2.
+
+This step is informational only. Do not block on wiki absence.
+
 ## PHASE 2: RESEARCH
 
 Launch **2-3 prd-researcher agents in parallel** using the Task tool with different focuses:

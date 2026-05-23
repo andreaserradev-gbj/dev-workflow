@@ -3,7 +3,7 @@
 # dev-workflow
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
-[![Version](https://img.shields.io/badge/version-1.29.0-green.svg)](.claude-plugin/marketplace.json)
+[![Version](https://img.shields.io/badge/version-1.31.0-green.svg)](.claude-plugin/marketplace.json)
 [![AgentSkills.io](https://img.shields.io/badge/standard-AgentSkills.io-purple.svg)](https://agentskills.io)
 
 **AI coding agents forget everything between sessions. This fixes that.**
@@ -199,6 +199,8 @@ Starts the server (or reuses an existing instance) and displays the URL. No setu
 On first run, `/dev-dashboard` also installs local `dev-dashboard` and `dev-dashboard-stop`
 commands so future terminal launches reuse the same bundled launcher.
 
+The dashboard also auto-generates a cross-project wiki (see `/dev-wiki` below).
+
 **Dashboard actions:**
 
 | Action               | Where                                   | What it does                                                  |
@@ -226,6 +228,7 @@ Config lives at `~/.config/dev-dashboard/config.json` (created automatically on 
 | `scanDirs`           | `string[]` | `[]`    | Directories to scan for projects containing `.dev/` folders          |
 | `port`               | `number`   | `3141`  | HTTP server port                                                     |
 | `notifications`      | `boolean`  | `false` | Reserved for future notification support                             |
+| `wikiDir`            | `string`   | `~/.dev-wiki` | Output directory for the auto-generated wiki                         |
 | `scanDirsConfigured` | `boolean`  | `false` | Marks whether first-run scan-directory onboarding has been completed |
 
 See [tools/dev-dashboard/README.md](tools/dev-dashboard/README.md) for CLI flags and more details.
@@ -251,6 +254,37 @@ This installer-backed path is the primary terminal UX for this release. Manual
 shell snippets are no longer the recommended default.
 
 </details>
+
+### `/dev-wiki` — Cross-project wiki
+
+Generates a markdown wiki from all `.dev/` and `.dev-archive/` PRDs across your projects. The wiki is a set of markdown files at `~/.dev-wiki/` (configurable) with symlinks back to the original PRD directories.
+
+```
+/dev-wiki
+```
+
+**What it produces:**
+
+| File | Contents |
+| ---- | -------- |
+| `index.md` | Per-project feature tables with status, progress, and summaries |
+| `log.md` | Chronological activity log across all projects |
+| `README.md` | Obsidian setup instructions |
+| `projects/` | Symlinks to each project's `.dev/` and `.dev-archive/` directories |
+
+**Automatic generation:** When the dashboard server is running, the wiki regenerates automatically on every state change (500ms debounce). The `/dev-wiki` skill is for on-demand generation when the dashboard isn't running.
+
+**Obsidian integration:** Open `~/.dev-wiki/` as an Obsidian vault for graph view, backlinks, and Dataview queries across all your features. The wiki uses standard CommonMark — no Obsidian-specific syntax.
+
+**Skill integration:** `/dev-plan` automatically consults the wiki index for prior art before researching. `/dev-resume` optionally references it for cross-project context. Both skip silently when the wiki doesn't exist.
+
+The CLI equivalent is also available:
+
+```bash
+dev-workflow wiki-index              # scan and show summary
+dev-workflow wiki-index --generate   # generate wiki files
+dev-workflow wiki-index --json       # JSON output for scripts
+```
 
 ---
 

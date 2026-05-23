@@ -38,6 +38,9 @@ plugins/dev-workflow/           # Plugin package
       SKILL.md
       references/prompt-template.md
       scripts/discover.sh, validate.sh, dev-workflow.cjs
+    dev-wiki/
+      SKILL.md
+      scripts/discover.sh, validate.sh, dev-workflow.cjs
     dev-dashboard/
       SKILL.md
       scripts/start.sh, check-install.sh, install.sh
