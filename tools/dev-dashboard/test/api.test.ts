@@ -740,3 +740,82 @@ describe('POST /api/projects/:project/features/:feature/open', () => {
     });
   });
 });
+
+describe('GET /api/search', () => {
+  it('returns hits for a matching query', async () => {
+    const res = await app.inject({ method: 'GET', url: '/api/search?q=auth' });
+    expect(res.statusCode).toBe(200);
+
+    const body = res.json();
+    expect(body.query).toBe('auth');
+    expect(body.hits.length).toBeGreaterThanOrEqual(1);
+
+    const hit = body.hits[0];
+    expect(hit).toHaveProperty('name');
+    expect(hit).toHaveProperty('projectName');
+    expect(hit).toHaveProperty('status');
+    expect(hit).toHaveProperty('snippet');
+    expect(hit).toHaveProperty('matchedFields');
+  });
+
+  it('returns empty hits for empty query', async () => {
+    const res = await app.inject({ method: 'GET', url: '/api/search?q=' });
+    expect(res.statusCode).toBe(200);
+
+    const body = res.json();
+    expect(body.query).toBe('');
+    expect(body.hits).toEqual([]);
+  });
+
+  it('returns empty hits for no-match query', async () => {
+    const res = await app.inject({ method: 'GET', url: '/api/search?q=zzzznotfound' });
+    expect(res.statusCode).toBe(200);
+
+    const body = res.json();
+    expect(body.hits).toEqual([]);
+  });
+
+  it('filters by project', async () => {
+    const res = await app.inject({
+      method: 'GET',
+      url: '/api/search?q=auth&project=api-server',
+    });
+    expect(res.statusCode).toBe(200);
+
+    const body = res.json();
+    for (const hit of body.hits) {
+      expect(hit.projectName).toBe('api-server');
+    }
+  });
+
+  it('filters by status', async () => {
+    const res = await app.inject({
+      method: 'GET',
+      url: '/api/search?q=notification&status=stale',
+    });
+    expect(res.statusCode).toBe(200);
+
+    const body = res.json();
+    for (const hit of body.hits) {
+      expect(hit.status).toBe('stale');
+    }
+  });
+
+  it('response shape matches SearchResponse interface', async () => {
+    const res = await app.inject({ method: 'GET', url: '/api/search?q=dashboard' });
+    expect(res.statusCode).toBe(200);
+
+    const body = res.json();
+    expect(body).toHaveProperty('query');
+    expect(body).toHaveProperty('hits');
+    expect(Array.isArray(body.hits)).toBe(true);
+
+    if (body.hits.length > 0) {
+      const hit = body.hits[0];
+      expect(typeof hit.name).toBe('string');
+      expect(typeof hit.projectName).toBe('string');
+      expect(typeof hit.status).toBe('string');
+      expect(Array.isArray(hit.matchedFields)).toBe(true);
+    }
+  });
+});

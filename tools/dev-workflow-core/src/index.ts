@@ -6,3 +6,4 @@ export * from './writer.js';
 export * from './afk-runnable.js';
 export * from './wiki.js';
 export * from './wiki-templates.js';
+export * from './search.js';

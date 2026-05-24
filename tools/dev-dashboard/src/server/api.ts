@@ -7,10 +7,12 @@ import type { FastifyInstance, FastifyReply } from 'fastify';
 import type {
   DashboardConfig,
   DashboardConfigResponse,
+  DashboardSearchHit,
   FeatureDetail,
   Project,
   ReportFeature,
   ReportResponse,
+  SearchResponse,
   TerminalConfig,
   TerminalSetting,
 } from '../shared/types.js';
@@ -23,6 +25,7 @@ import {
   updateConfig,
 } from './config.js';
 import { parseCheckpoint, parseMasterPlan, parseSessionLog, parseSubPrd } from './parser.js';
+import { searchFeatures } from 'dev-workflow-core';
 import { resolveTerminalCommand } from './terminal-presets.js';
 import { VERSION } from './version.js';
 
@@ -227,6 +230,42 @@ export function registerApiRoutes(app: FastifyInstance, state: DashboardState): 
       to: request.query.to,
     };
     return reply.send(response);
+  });
+
+  app.get<{
+    Querystring: { q?: string; project?: string; status?: string };
+  }>('/api/search', async (request, reply) => {
+    const { q = '', project, status } = request.query;
+
+    let projects = state.getProjects();
+    if (project) {
+      projects = projects.filter((p) => p.name === project);
+    }
+    if (status) {
+      projects = projects
+        .map((p) => ({ ...p, features: p.features.filter((f) => f.status === status) }))
+        .filter((p) => p.features.length > 0);
+    }
+
+    const hits = searchFeatures(projects, { query: q });
+
+    const searchResponse: SearchResponse = {
+      query: q,
+      hits: hits.map(
+        (h): DashboardSearchHit => ({
+          name: h.feature.name,
+          projectName: h.project,
+          status: h.feature.status,
+          progress: h.feature.progress
+            ? { done: h.feature.progress.done, total: h.feature.progress.total }
+            : null,
+          currentPhase: h.feature.currentPhase?.title ?? null,
+          snippet: h.matches[0]?.snippet ?? null,
+          matchedFields: h.matches.map((m) => m.field),
+        }),
+      ),
+    };
+    return reply.send(searchResponse);
   });
 
   app.get('/api/config', async (_request, reply: FastifyReply) => {
