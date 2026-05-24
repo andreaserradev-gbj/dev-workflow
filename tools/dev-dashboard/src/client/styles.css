@@ -33,6 +33,10 @@ body {
   animation: fadeIn 0.35s ease-out both;
 }
 
+.animate-fade-in {
+  animation: fadeIn 0.15s ease-out both;
+}
+
 @keyframes slideDown {
   from {
     opacity: 0;

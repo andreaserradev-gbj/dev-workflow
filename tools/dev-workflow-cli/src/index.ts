@@ -18,6 +18,7 @@ import { checkpointWrite } from './commands/checkpoint-write.js';
 import { statusUpdate } from './commands/status-update.js';
 import { resumeContext } from './commands/resume-context.js';
 import { list } from './commands/list.js';
+import { search } from './commands/search.js';
 import { wikiIndex } from './commands/wiki-index.js';
 
 interface Command {
@@ -35,6 +36,7 @@ const commands: Command[] = [
   { name: 'status-update', description: 'Update PRD status marker', run: statusUpdate },
   { name: 'resume-context', description: 'Merged resume context packet', run: resumeContext },
   { name: 'list', description: 'List features and AFK-runnable status', run: list },
+  { name: 'search', description: 'Search features by content', run: search },
   { name: 'wiki-index', description: 'Generate cross-project wiki index', run: wikiIndex },
 ];
 
@@ -59,6 +61,8 @@ function printUsage(): void {
   console.log('  --all                Include archived and non-runnable features (list)');
   console.log('  --project <name>     Filter project by name or path (list)');
   console.log('  --status <status>    Filter feature status (list)');
+  console.log('  --query <text>       Search query (search)');
+  console.log('  --max <number>       Max results (search, default: 20)');
   console.log('  --generate           Write wiki files to disk (wiki-index)');
   console.log('  --out <dir>          Output directory (wiki-index)');
 }

@@ -107,6 +107,26 @@ export interface SessionLogEntry {
   notes: string[];
 }
 
+// Search input options
+export interface SearchOptions {
+  query: string;
+  maxResults?: number;
+}
+
+// A single search hit with context
+export interface SearchHit {
+  project: string;
+  feature: Feature;
+  matches: SearchMatch[];
+  score: number;
+}
+
+// Where a match was found
+export interface SearchMatch {
+  field: string;
+  snippet: string;
+}
+
 // Status sort order — gate first (needs user action), complete last
 export const STATUS_ORDER: Record<FeatureStatus, number> = {
   gate: 0,

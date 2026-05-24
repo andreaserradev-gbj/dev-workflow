@@ -89,6 +89,22 @@ export interface DashboardConfigResponse extends DashboardConfig {
   configPath: string;
 }
 
+// GET /api/search response
+export interface DashboardSearchHit {
+  name: string;
+  projectName: string;
+  status: string;
+  progress: { done: number; total: number } | null;
+  currentPhase: string | null;
+  snippet: string | null;
+  matchedFields: string[];
+}
+
+export interface SearchResponse {
+  query: string;
+  hits: DashboardSearchHit[];
+}
+
 // WebSocket event types pushed to clients
 export type WsEvent =
   | { type: 'feature_updated'; project: string; feature: string; data: Feature }

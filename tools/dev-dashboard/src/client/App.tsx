@@ -7,6 +7,8 @@ import { SessionBar } from './components/SessionBar.js';
 import { ConnectionOverlay } from './components/ConnectionOverlay.js';
 import { ConfigurationPanel } from './components/ConfigurationPanel.js';
 import { useWebSocket } from './hooks/useWebSocket.js';
+import { useSearch } from './hooks/useSearch.js';
+import { SearchPanel } from './components/SearchPanel.js';
 import { BUILD_INFO } from './buildInfo.js';
 import {
   deriveTerminalDraft,
@@ -168,6 +170,8 @@ export function App() {
     const timer = setTimeout(() => setSearchQuery(searchInput), 150);
     return () => clearTimeout(timer);
   }, [searchInput]);
+
+  const { hits: searchHits, loading: searchLoading } = useSearch(searchQuery);
 
   useEffect(() => {
     writeProjectViewMode(projectViewMode);
@@ -821,6 +825,15 @@ export function App() {
                               <path d="M5.28 4.22a.75.75 0 0 0-1.06 1.06L6.94 8l-2.72 2.72a.75.75 0 1 0 1.06 1.06L8 9.06l2.72 2.72a.75.75 0 1 0 1.06-1.06L9.06 8l2.72-2.72a.75.75 0 0 0-1.06-1.06L8 6.94 5.28 4.22Z" />
                             </svg>
                           </button>
+                        )}
+                        {searchQuery && (
+                          <SearchPanel
+                            query={searchQuery}
+                            hits={searchHits}
+                            loading={searchLoading}
+                            onSelectFeature={handleSelectFeature}
+                            onClose={() => setSearchInput('')}
+                          />
                         )}
                       </div>
                     </div>
