@@ -225,6 +225,15 @@ Checkpoints and resumes are now powered by deterministic CLI commands instead of
 
 <!-- GITHUB-RELEASES-START -->
 
+## v1.32.0 - 2026-05-24
+
+### Added
+- Cross-project full-text search across core, CLI, server API, and dashboard UI. Type natural queries like "forge migration" in the dashboard search box to instantly find matching features across all projects with status badges, progress bars, and contextual snippets.
+- `searchFeatures()` pure function in `dev-workflow-core` with multi-word AND matching across name, summary, nextAction, branch, and currentPhase fields.
+- `search` CLI command with `--query`, `--project`, `--status`, `--scan`, `--max`, `--json` flags.
+- `GET /api/search?q=&project=&status=` server route backed by in-memory project state.
+- SearchPanel overlay component with keyboard navigation, term highlighting, loading skeletons, and results grouped by project.
+
 ## v1.31.0 - 2026-05-23
 
 ### Added
