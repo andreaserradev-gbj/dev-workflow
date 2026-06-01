@@ -148,11 +148,12 @@ function countSteps(section: string): { done: number; total: number } {
     // Skip headings, table rows, and other non-step lines
     if (trimmed.startsWith('#') || trimmed.startsWith('|')) continue;
 
-    // Numbered steps: "1. ✅ ..." or "1. ⬜ ..."
-    const numberedMatch = trimmed.match(/^\d+\.\s*(✅|⬜|⏭️)/);
+    // Numbered steps: "1. ✅ ..." or "1. ⬜ ..." (⛔ Dropped counts as resolved)
+    const numberedMatch = trimmed.match(/^\d+\.\s*(✅|⬜|⏭️|⛔)/);
     if (numberedMatch) {
       total++;
-      if (numberedMatch[1] === '✅' || numberedMatch[1] === '⏭️') done++;
+      if (numberedMatch[1] === '✅' || numberedMatch[1] === '⏭️' || numberedMatch[1] === '⛔')
+        done++;
       continue;
     }
 
@@ -164,11 +165,11 @@ function countSteps(section: string): { done: number; total: number } {
       continue;
     }
 
-    // Bullet steps: "- ✅ ..." or "- ⬜ ..."
-    const bulletMatch = trimmed.match(/^-\s+(✅|⬜|⏭️)/);
+    // Bullet steps: "- ✅ ..." or "- ⬜ ..." (⛔ Dropped counts as resolved)
+    const bulletMatch = trimmed.match(/^-\s+(✅|⬜|⏭️|⛔)/);
     if (bulletMatch) {
       total++;
-      if (bulletMatch[1] === '✅' || bulletMatch[1] === '⏭️') done++;
+      if (bulletMatch[1] === '✅' || bulletMatch[1] === '⏭️' || bulletMatch[1] === '⛔') done++;
       continue;
     }
 
@@ -455,30 +456,20 @@ export async function parseSubPrd(filePath: string): Promise<SubPrdResult | null
 
   if (tableMatch) {
     const tableBody = tableMatch[1];
-    const rowRegex = /\|\s*\*\*(\d+)\*\*\s*\|[^|]*\|\s*(✅|⬜|⏭️)[^|]*\|/g;
+    // Step rows. The identifier may be bold or plain (`1` or `**1**`) and need
+    // not be purely numeric — track-lettered/dotted IDs like `3A`, `3A.1`, `3G`
+    // are all valid step labels; we only require it to start with a digit so the
+    // `| Step |` header and `|---|` separator rows never match. The status cell's
+    // first glyph is the marker; `⛔` (Dropped) counts as resolved, like `⏭️`.
+    const rowRegex = /\|\s*\*{0,2}(\d[\w.]*)\*{0,2}\s*\|([^|]*)\|\s*(✅|⬜|⏭️|⛔)[^|]*\|/g;
     let rowMatch: RegExpExecArray | null;
     while ((rowMatch = rowRegex.exec(tableBody)) !== null) {
-      const stepNum = parseInt(rowMatch[1], 10);
-      const marker = rowMatch[2];
+      const marker = rowMatch[3];
       steps.push({
-        number: stepNum,
-        description: '', // Not needed for status
-        status: marker === '✅' || marker === '⏭️' ? 'done' : 'pending',
+        number: rowMatch[1],
+        description: rowMatch[2].trim(),
+        status: marker === '✅' || marker === '⏭️' || marker === '⛔' ? 'done' : 'pending',
       });
-    }
-  }
-
-  // Also extract step descriptions
-  if (steps.length > 0) {
-    // Re-parse to get descriptions from the table
-    const rowDescRegex = /\|\s*\*\*(\d+)\*\*\s*\|\s*([^|]+)\|/g;
-    let descMatch: RegExpExecArray | null;
-    while ((descMatch = rowDescRegex.exec(content)) !== null) {
-      const num = parseInt(descMatch[1], 10);
-      const step = steps.find((s) => s.number === num);
-      if (step) {
-        step.description = descMatch[2].trim();
-      }
     }
   }
 

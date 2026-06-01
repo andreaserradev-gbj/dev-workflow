@@ -27,7 +27,8 @@ export interface Phase {
 
 // Sub-PRD step
 export interface SubPrdStep {
-  number: number;
+  /** Step identifier as written in the table — e.g. `"1"`, `"3A"`, `"3A.1"`. */
+  number: string;
   description: string;
   status: 'done' | 'pending';
 }

@@ -234,8 +234,8 @@ describe('parseSubPrd', () => {
     expect(result!.total).toBe(5);
     expect(result!.status).toBe('in-progress');
     expect(result!.steps).toHaveLength(5);
-    expect(result!.steps[0]).toMatchObject({ number: 1, status: 'done' });
-    expect(result!.steps[3]).toMatchObject({ number: 4, status: 'pending' });
+    expect(result!.steps[0]).toMatchObject({ number: '1', status: 'done' });
+    expect(result!.steps[3]).toMatchObject({ number: '4', status: 'pending' });
   });
 
   it('returns null for missing file', async () => {
