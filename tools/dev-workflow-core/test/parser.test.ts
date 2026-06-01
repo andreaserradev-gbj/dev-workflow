@@ -380,8 +380,22 @@ describe('parseSubPrd', () => {
     expect(result!.total).toBe(5);
     expect(result!.status).toBe('in-progress');
     expect(result!.steps).toHaveLength(5);
-    expect(result!.steps[0]).toMatchObject({ number: 1, status: 'done' });
-    expect(result!.steps[3]).toMatchObject({ number: 4, status: 'pending' });
+    expect(result!.steps[0]).toMatchObject({ number: '1', status: 'done' });
+    expect(result!.steps[3]).toMatchObject({ number: '4', status: 'pending' });
+  });
+
+  it('counts track-lettered, plain (non-bold), and ⛔-dropped step rows', async () => {
+    const result = await parseSubPrd(resolve(FIXTURES, 'subprd-mixed-steps/01-sub-prd-mixed.md'));
+
+    expect(result).not.toBeNull();
+    // 1 ⬜, 2 ⬜, 3A ✅, 3B ⛔(resolved), 4 (plain, non-bold) ✅  →  3/5
+    expect(result!.total).toBe(5);
+    expect(result!.done).toBe(3);
+    expect(result!.status).toBe('in-progress');
+    expect(result!.steps.map((s) => s.number)).toEqual(['1', '2', '3A', '3B', '4']);
+    expect(result!.steps[2]).toMatchObject({ number: '3A', status: 'done' });
+    expect(result!.steps[3]).toMatchObject({ number: '3B', status: 'done' }); // ⛔ Dropped
+    expect(result!.steps[4]).toMatchObject({ number: '4', status: 'done' }); // plain `| 4 |`
   });
 
   it('returns null for missing file', async () => {
