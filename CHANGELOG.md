@@ -4,6 +4,17 @@ All notable changes to this project should be documented in this file.
 
 <!-- LOCAL-RELEASES-START -->
 
+## v1.34.0 - 2026-06-03
+
+### Changed
+
+- User-local command shims (`dev-workflow`, `dev-dashboard`, `dev-dashboard-stop`) installed by the dev-dashboard skill are now **self-resolving across versions**. Previously each shim baked the absolute path of the marketplace-cache version it was installed from (`…/cache/dev-workflow/dev-workflow/<version>/…`), so every `/plugin update` left the shims pointing at the old, now-superseded bundle until the install script happened to be re-run — the standalone `dev-workflow` command and any shim-launched dashboard silently kept running stale code. For a cached install the shim now bakes only the version-stripped root and resolves the newest installed version at runtime, so a `/plugin update` is picked up with zero reinstall. The body is version-independent, so `check-install.sh` no longer reports a freshly-updated install as `stale`, and an older version-pinned shim upgrades cleanly to the self-resolving form on the next install run. Contributor-mode shims (pointing at the repo's `plugins/` tree) are unchanged.
+
+### Added
+
+- `dev-dashboard --restart` (and `start.sh --restart`): stop any running bundled dashboard server — across cache versions — then start a fresh one from the newest bundle, in a single command. Intended for use right after a `/plugin update` to reload the long-lived server, which a code update alone can't refresh.
+- Regression coverage: the install suite builds a fake multi-version marketplace cache and asserts a shim installed from an older version runs the newest at runtime and tracks a newly-appeared version with no reinstall; the stop suite statically asserts the `--restart` wiring without spawning or killing a server (so it can't disturb a developer's real dashboard).
+
 ## v1.33.0 - 2026-06-03
 
 ### Added
