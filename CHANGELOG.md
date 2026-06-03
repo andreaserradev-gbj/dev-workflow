@@ -4,6 +4,14 @@ All notable changes to this project should be documented in this file.
 
 <!-- LOCAL-RELEASES-START -->
 
+## v1.33.0 - 2026-06-03
+
+### Added
+
+- The status-marker parser now recognizes `⏹️` (emoji) and the words `MERGED`, `CLOSED`, and `DEFERRED` as resolved markers, alongside the existing `✅`/`⏭️`/`⛔`/`DONE`/`SHIPPED`/`DROPPED`/`SKIPPED` set. These show up naturally when an effort is wrapped up — a phase noted `✅ MERGED end-to-end`, an investigation `✅ CLOSED`, a track `⏹️ DEFERRED` to a future PRD — but were previously invisible to the parser, so a feature that was genuinely done still read as `gate`/`in-progress` and never surfaced the dashboard's Archive action. The new tokens are added everywhere markers are counted: numbered and bullet step counters, the sub-PRD Implementation Progress table, the leading prose phase-marker line, and the `**Status**:` header fallback. Deferred work is treated as terminal (resolved), consistent with how `⛔ Dropped` and `⏭️ Skipped` already behaved.
+- `normalizeEmoji()` maps the `:stop_button:` shortcode to `⏹️`.
+- Test fixtures extended to cover the new markers: `master-with-prose-status/` gains `✅ MERGED`, `⏹️ DEFERRED`, and `✅ CLOSED` phases, and `subprd-mixed-steps/` gains a `⏹️ Deferred` step row.
+
 ## v1.32.1 - 2026-06-01
 
 ### Fixed
@@ -232,6 +240,14 @@ Checkpoints and resumes are now powered by deterministic CLI commands instead of
 <!-- LOCAL-RELEASES-END -->
 
 <!-- GITHUB-RELEASES-START -->
+
+## v1.32.1 - 2026-06-01
+
+### Fixed
+
+- Sub-PRD step counting in `dev-workflow-core` no longer silently drops steps whose row format deviates from `| **N** |`. The Implementation Progress row regex in `parseSubPrd()` previously required a purely-numeric, bold step identifier, so any track-lettered or dotted ID (`3A`, `3A.1`, `3G`) and any non-bold ID (`| 1 |`) was skipped — undercounting totals and, worse, hiding completed work (e.g. a shipped `✅` step labelled `3G` reported the whole sub-PRD as `0/3 Not Started`). The regex now accepts an optionally-bold identifier that merely starts with a digit (`\*{0,2}(\d[\w.]*)\*{0,2}`), so the `| Step |` header and `|---|` separator rows still never match. `SubPrdStep.number` changed from `number` to `string` to preserve IDs faithfully (`"3A.1"`), and step descriptions are now captured in the same pass instead of a second whole-document scan.
+- The `⛔` (Dropped) marker is now recognized everywhere step markers are counted — both the sub-PRD table and the phase-level numbered/bullet step counters — and counts as resolved (like `⏭️` Skipped), so a sub-PRD with a dropped track can still reach `complete` instead of being stuck `in-progress`.
+- New regression fixture `subprd-mixed-steps/` exercises track-lettered, plain non-bold, and `⛔`-dropped rows in one table.
 
 ## v1.32.0 - 2026-05-24
 

@@ -14,9 +14,10 @@
 | **3A** | Implement Track A | ✅ Done |
 | **3B** | Implement Track B | ⛔ Dropped — hypothesis invalidated |
 | 4 | Reship bundle | ✅ Done |
+| **5** | Implement Track C | ⏹️ Deferred — parked for a future PRD |
 
 ---
 
 ## Goal
 
-Exercise track-lettered IDs, a plain (non-bold) numeric ID, and a `⛔` Dropped marker.
+Exercise track-lettered IDs, a plain (non-bold) numeric ID, a `⛔` Dropped marker, and a `⏹️` Deferred marker.

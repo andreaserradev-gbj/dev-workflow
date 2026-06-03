@@ -55,3 +55,25 @@ See [03-sub-prd-fanout.md](./03-sub-prd-fanout.md).
 ⬜ **IN PROGRESS** — partial work landed last session.
 
 ⏸️ **GATE**: Phase complete or `/dev-checkpoint`.
+
+---
+
+### Phase 5: Execute sub-PRD 5 — Preview render
+
+See [05-sub-prd-preview.md](./05-sub-prd-preview.md).
+
+✅ **MERGED** end-to-end — Claude Desktop render confirmed.
+
+---
+
+### Phase 6: Execute sub-PRD 6 — Pagination
+
+See [06-sub-prd-pagination.md](./06-sub-prd-pagination.md).
+
+⏹️ **DEFERRED** (session 47 close-out): parked for a future, regression-gated PRD.
+
+---
+
+### Phase 7: Investigation
+
+✅ **CLOSED** — blocked upstream; nothing to do here.
