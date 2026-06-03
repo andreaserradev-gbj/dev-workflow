@@ -160,7 +160,7 @@ describe('parseMasterPlan', () => {
     );
 
     expect(result).not.toBeNull();
-    expect(result!.phases).toHaveLength(5);
+    expect(result!.phases).toHaveLength(8);
 
     // Phase 0: enumerated ✅ steps — takes precedence over any prose marker.
     expect(result!.phases[0]).toMatchObject({ number: 0, done: 3, total: 3, status: 'complete' });
@@ -186,6 +186,15 @@ describe('parseMasterPlan', () => {
       total: 0,
       status: 'in-progress',
     });
+
+    // Phase 5: `✅ **MERGED**` → resolved.
+    expect(result!.phases[5]).toMatchObject({ number: 5, done: 0, total: 0, status: 'complete' });
+
+    // Phase 6: `⏹️ **DEFERRED**` → resolved (deferred work is terminal, not pending).
+    expect(result!.phases[6]).toMatchObject({ number: 6, done: 0, total: 0, status: 'complete' });
+
+    // Phase 7: `✅ **CLOSED**` → resolved.
+    expect(result!.phases[7]).toMatchObject({ number: 7, done: 0, total: 0, status: 'complete' });
   });
 
   it('counts numbered checkbox steps (plain and backtick-wrapped)', async () => {
@@ -384,18 +393,19 @@ describe('parseSubPrd', () => {
     expect(result!.steps[3]).toMatchObject({ number: '4', status: 'pending' });
   });
 
-  it('counts track-lettered, plain (non-bold), and ⛔-dropped step rows', async () => {
+  it('counts track-lettered, plain (non-bold), ⛔-dropped, and ⏹️-deferred step rows', async () => {
     const result = await parseSubPrd(resolve(FIXTURES, 'subprd-mixed-steps/01-sub-prd-mixed.md'));
 
     expect(result).not.toBeNull();
-    // 1 ⬜, 2 ⬜, 3A ✅, 3B ⛔(resolved), 4 (plain, non-bold) ✅  →  3/5
-    expect(result!.total).toBe(5);
-    expect(result!.done).toBe(3);
+    // 1 ⬜, 2 ⬜, 3A ✅, 3B ⛔(resolved), 4 (plain) ✅, 5 ⏹️(resolved)  →  4/6
+    expect(result!.total).toBe(6);
+    expect(result!.done).toBe(4);
     expect(result!.status).toBe('in-progress');
-    expect(result!.steps.map((s) => s.number)).toEqual(['1', '2', '3A', '3B', '4']);
+    expect(result!.steps.map((s) => s.number)).toEqual(['1', '2', '3A', '3B', '4', '5']);
     expect(result!.steps[2]).toMatchObject({ number: '3A', status: 'done' });
     expect(result!.steps[3]).toMatchObject({ number: '3B', status: 'done' }); // ⛔ Dropped
     expect(result!.steps[4]).toMatchObject({ number: '4', status: 'done' }); // plain `| 4 |`
+    expect(result!.steps[5]).toMatchObject({ number: '5', status: 'done' }); // ⏹️ Deferred
   });
 
   it('returns null for missing file', async () => {

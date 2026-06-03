@@ -10,7 +10,8 @@ export function normalizeEmoji(text: string): string {
   return text
     .replace(/:white_check_mark:/g, '✅')
     .replace(/:white_large_square:/g, '⬜')
-    .replace(/:next_track_button:|:track_next:/g, '⏭️');
+    .replace(/:next_track_button:|:track_next:/g, '⏭️')
+    .replace(/:stop_button:/g, '⏹️');
 }
 
 // ─── Master Plan ───────────────────────────────────────────────────
@@ -148,12 +149,11 @@ function countSteps(section: string): { done: number; total: number } {
     // Skip headings, table rows, and other non-step lines
     if (trimmed.startsWith('#') || trimmed.startsWith('|')) continue;
 
-    // Numbered steps: "1. ✅ ..." or "1. ⬜ ..." (⛔ Dropped counts as resolved)
-    const numberedMatch = trimmed.match(/^\d+\.\s*(✅|⬜|⏭️|⛔)/);
+    // Numbered steps: "1. ✅ ..." or "1. ⬜ ..." (⏭️ Skipped / ⛔ Dropped / ⏹️ Deferred all count as resolved)
+    const numberedMatch = trimmed.match(/^\d+\.\s*(✅|⬜|⏭️|⛔|⏹️)/);
     if (numberedMatch) {
       total++;
-      if (numberedMatch[1] === '✅' || numberedMatch[1] === '⏭️' || numberedMatch[1] === '⛔')
-        done++;
+      if (numberedMatch[1] !== '⬜') done++;
       continue;
     }
 
@@ -165,11 +165,11 @@ function countSteps(section: string): { done: number; total: number } {
       continue;
     }
 
-    // Bullet steps: "- ✅ ..." or "- ⬜ ..." (⛔ Dropped counts as resolved)
-    const bulletMatch = trimmed.match(/^-\s+(✅|⬜|⏭️|⛔)/);
+    // Bullet steps: "- ✅ ..." or "- ⬜ ..." (⏭️ Skipped / ⛔ Dropped / ⏹️ Deferred all count as resolved)
+    const bulletMatch = trimmed.match(/^-\s+(✅|⬜|⏭️|⛔|⏹️)/);
     if (bulletMatch) {
       total++;
-      if (bulletMatch[1] === '✅' || bulletMatch[1] === '⏭️' || bulletMatch[1] === '⛔') done++;
+      if (bulletMatch[1] !== '⬜') done++;
       continue;
     }
 
@@ -199,8 +199,11 @@ function extractSectionStatus(section: string): Phase['status'] | null {
  *
  *      ✅ **DONE** (2026-05-21): all three tracks shipped.
  *      ✅ **SHIPPED**
+ *      ✅ **MERGED** end-to-end.
+ *      ✅ **CLOSED** — effort wrapped up.
  *      ❌ **DROPPED** — superseded by sub-PRD 01.
  *      ⏭️ **SKIPPED**
+ *      ⏹️ **DEFERRED** — parked for a future, regression-gated PRD.
  *
  *  Examples that resolve to `not-started`:
  *
@@ -236,7 +239,7 @@ function extractInlineStatusMarker(section: string): Phase['status'] | null {
 
     // Match: leading emoji + (optional bold) status word.
     const m = t.match(
-      /^(✅|⬜|❌|⏭️)\s*\**\s*(DONE|SHIPPED|COMPLETE|COMPLETED|DROPPED|SKIPPED|NOT[\s-]?STARTED|TODO|IN[\s-]?PROGRESS)\b/i,
+      /^(✅|⬜|❌|⏭️|⏹️)\s*\**\s*(DONE|SHIPPED|MERGED|CLOSED|COMPLETE|COMPLETED|DROPPED|SKIPPED|DEFERRED|NOT[\s-]?STARTED|TODO|IN[\s-]?PROGRESS)\b/i,
     );
     if (!m) return null;
 
@@ -245,7 +248,7 @@ function extractInlineStatusMarker(section: string): Phase['status'] | null {
 
     if (word === 'INPROGRESS') return 'in-progress';
     if (word === 'NOTSTARTED' || word === 'TODO') return 'not-started';
-    // DONE / SHIPPED / COMPLETE / COMPLETED / DROPPED / SKIPPED → resolved
+    // DONE / SHIPPED / MERGED / CLOSED / COMPLETE / COMPLETED / DROPPED / SKIPPED / DEFERRED → resolved
     if (emoji === '⬜') return 'not-started'; // mismatched emoji + word: trust emoji
     return 'complete';
   }
@@ -460,15 +463,16 @@ export async function parseSubPrd(filePath: string): Promise<SubPrdResult | null
     // not be purely numeric — track-lettered/dotted IDs like `3A`, `3A.1`, `3G`
     // are all valid step labels; we only require it to start with a digit so the
     // `| Step |` header and `|---|` separator rows never match. The status cell's
-    // first glyph is the marker; `⛔` (Dropped) counts as resolved, like `⏭️`.
-    const rowRegex = /\|\s*\*{0,2}(\d[\w.]*)\*{0,2}\s*\|([^|]*)\|\s*(✅|⬜|⏭️|⛔)[^|]*\|/g;
+    // first glyph is the marker; `⏭️` (Skipped), `⛔` (Dropped), and `⏹️` (Deferred)
+    // all count as resolved, like `✅`. Only `⬜` is pending.
+    const rowRegex = /\|\s*\*{0,2}(\d[\w.]*)\*{0,2}\s*\|([^|]*)\|\s*(✅|⬜|⏭️|⛔|⏹️)[^|]*\|/g;
     let rowMatch: RegExpExecArray | null;
     while ((rowMatch = rowRegex.exec(tableBody)) !== null) {
       const marker = rowMatch[3];
       steps.push({
         number: rowMatch[1],
         description: rowMatch[2].trim(),
-        status: marker === '✅' || marker === '⏭️' || marker === '⛔' ? 'done' : 'pending',
+        status: marker === '⬜' ? 'pending' : 'done',
       });
     }
   }
@@ -492,7 +496,8 @@ function extractSubPrdHeaderStatus(content: string): SubPrdResult['status'] | nu
   const match = content.match(/\*\*Status\*\*:\s*(.+)/i);
   if (!match) return null;
   const val = match[1].trim().toLowerCase();
-  if (val === 'complete' || val === 'completed' || val === 'done') return 'complete';
+  const resolved = ['complete', 'completed', 'done', 'shipped', 'merged', 'closed', 'deferred', 'dropped', 'skipped'];
+  if (resolved.includes(val)) return 'complete';
   if (val.startsWith('in progress') || val.startsWith('in-progress')) return 'in-progress';
   if (val === 'not started' || val === 'not-started' || val === 'pending') return 'not-started';
   return null;
