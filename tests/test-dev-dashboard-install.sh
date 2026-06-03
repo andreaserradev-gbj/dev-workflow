@@ -163,6 +163,59 @@ INSTALL_D_OUT="$(DEV_DASHBOARD_BIN_DIR="$BIN_D" bash "$INSTALL" 2>&1)"
 assert_contains "path_warning: present when temp bin not on PATH" "path_warning:$BIN_D" "$INSTALL_D_OUT"
 
 echo
+echo "--- self-resolving shim across marketplace-cache versions ---"
+# Build a fake marketplace cache with two installed versions, install from the
+# OLDER one, and confirm the resulting shim resolves the NEWEST version at
+# runtime — and keeps doing so when a newer version appears, with no reinstall.
+# Only the stub CLI is exec'd here; no server is ever spawned.
+CACHE_ROOT="$TMP_ROOT/cache/dev-workflow/dev-workflow"
+make_version() {
+  local ver="$1"
+  local vdir="$CACHE_ROOT/$ver"
+  mkdir -p "$vdir/bin" "$vdir/skills/dev-dashboard/scripts"
+  printf 'console.log("dev-workflow %s");\n' "$ver" >"$vdir/bin/dev-workflow.cjs"
+  # install.sh / check-install.sh need start.sh + stop.sh present alongside them.
+  cp "$SCRIPTS/install.sh" "$SCRIPTS/check-install.sh" "$SCRIPTS/start.sh" "$SCRIPTS/stop.sh" \
+    "$vdir/skills/dev-dashboard/scripts/"
+}
+make_version 1.0.0
+make_version 1.1.0
+
+BIN_SR="$(next_bin)"
+SR_INSTALL_OUT="$(DEV_DASHBOARD_BIN_DIR="$BIN_SR" bash "$CACHE_ROOT/1.0.0/skills/dev-dashboard/scripts/install.sh" 2>&1)"
+assert_contains "self-resolving: workflow_installed line" "workflow_installed:$BIN_SR/dev-workflow" "$SR_INSTALL_OUT"
+
+SR_BODY="$(cat "$BIN_SR/dev-workflow")"
+assert_contains "self-resolving: body bakes version-stripped root" "root=\"$CACHE_ROOT\"" "$SR_BODY"
+assert_not_contains "self-resolving: body has no pinned version path" "1.0.0/bin/dev-workflow.cjs" "$SR_BODY"
+
+SR_RUN="$("$BIN_SR/dev-workflow" 2>&1)"
+assert_contains "self-resolving: runs newest installed version (1.1.0)" "dev-workflow 1.1.0" "$SR_RUN"
+
+# A newer version lands (simulating /plugin update) — picked up with NO reinstall.
+make_version 1.2.0
+SR_RUN2="$("$BIN_SR/dev-workflow" 2>&1)"
+assert_contains "self-resolving: picks up 1.2.0 with no reinstall" "dev-workflow 1.2.0" "$SR_RUN2"
+
+# Version-independent body: check-install run from ANY version reports installed.
+SR_CHECK_OLD="$(DEV_DASHBOARD_BIN_DIR="$BIN_SR" bash "$CACHE_ROOT/1.0.0/skills/dev-dashboard/scripts/check-install.sh" 2>&1)"
+assert_contains "self-resolving: check from old version says installed" "workflow_status:installed" "$SR_CHECK_OLD"
+SR_CHECK_NEW="$(DEV_DASHBOARD_BIN_DIR="$BIN_SR" bash "$CACHE_ROOT/1.2.0/skills/dev-dashboard/scripts/check-install.sh" 2>&1)"
+assert_contains "self-resolving: check from new version says installed (no spurious stale)" "workflow_status:installed" "$SR_CHECK_NEW"
+
+# A stale version-pinned shim from an older release upgrades cleanly to self-resolving.
+{
+  printf '%s\n' '#!/usr/bin/env bash' \
+    'set -euo pipefail' \
+    "exec node \"$CACHE_ROOT/1.0.0/bin/dev-workflow.cjs\" \"\$@\""
+} >"$BIN_SR/dev-workflow"
+chmod +x "$BIN_SR/dev-workflow"
+SR_UPGRADE_OUT="$(DEV_DASHBOARD_BIN_DIR="$BIN_SR" bash "$CACHE_ROOT/1.2.0/skills/dev-dashboard/scripts/install.sh" 2>&1)"
+assert_contains "pinned->self-resolving: refreshed (not conflict)" "workflow_installed:$BIN_SR/dev-workflow" "$SR_UPGRADE_OUT"
+SR_UPGRADE_RUN="$("$BIN_SR/dev-workflow" 2>&1)"
+assert_contains "pinned->self-resolving: now tracks newest (1.2.0)" "dev-workflow 1.2.0" "$SR_UPGRADE_RUN"
+
+echo
 echo "--- summary ---"
 echo "PASS: $PASS"
 echo "FAIL: $FAIL"

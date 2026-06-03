@@ -12,6 +12,13 @@
 #                                   dashboard shims still installed
 #   path_warning:<bin-dir>       — install succeeded but bin dir is not on PATH
 #   error:<message>              — install failed (or workflow CLI bundle missing)
+#
+# Shims are self-resolving across versions: when the target lives under a
+# marketplace cache (`…/cache/dev-workflow/dev-workflow/<version>/…`), the shim
+# bakes the version-stripped root and resolves the newest installed version at
+# runtime, so a `/plugin update` is picked up with no reinstall. For a
+# contributor-mode target (the repo's `plugins/…` tree, no versioned cache
+# segment) the shim execs the path directly.
 
 set -euo pipefail
 
@@ -38,33 +45,63 @@ fi
 
 mkdir -p "$BIN_DIR"
 
-write_shim() {
-  local target_path="$1"
-  local shim_path="$2"
-  local extra_args="$3"
-  local tmp_path
+# Render a shim body. For a marketplace-cached target the body resolves the
+# newest installed plugin version at runtime (version-independent output, so
+# every version writes a byte-identical shim). For a contributor-mode target the
+# body execs the path directly. Kept byte-for-byte in sync with the matching
+# generator in check-install.sh.
+render_shim_body() {
+  local kind="$1" target="$2" extra_args="$3"
+  local runner root="" sub=""
 
-  tmp_path="$(mktemp "${TMPDIR:-/tmp}/dev-dashboard-shim.XXXXXX")"
-  cat >"$tmp_path" <<EOF
+  case "$kind" in
+    node) runner="node" ;;
+    *) runner="bash" ;;
+  esac
+
+  case "$target" in
+    */cache/*/bin/dev-workflow.cjs)
+      root="${target%/*/bin/dev-workflow.cjs}"
+      sub="bin/dev-workflow.cjs"
+      ;;
+    */cache/*/skills/dev-dashboard/scripts/start.sh)
+      root="${target%/*/skills/dev-dashboard/scripts/start.sh}"
+      sub="skills/dev-dashboard/scripts/start.sh"
+      ;;
+    */cache/*/skills/dev-dashboard/scripts/stop.sh)
+      root="${target%/*/skills/dev-dashboard/scripts/stop.sh}"
+      sub="skills/dev-dashboard/scripts/stop.sh"
+      ;;
+  esac
+
+  if [ -n "$root" ]; then
+    cat <<EOF
 #!/usr/bin/env bash
 set -euo pipefail
-exec bash "$target_path"$extra_args "\$@"
+# Resolve the newest installed plugin version at runtime so a marketplace
+# update is picked up without reinstalling this shim.
+root="$root"
+v="\$(ls -1 "\$root" 2>/dev/null | grep -E '^[0-9]+\.[0-9]+\.[0-9]+\$' | sort -t. -k1,1n -k2,2n -k3,3n | tail -1)"
+if [ -z "\$v" ] || [ ! -e "\$root/\$v/$sub" ]; then
+  echo "dev-workflow: no installed version found under \$root" >&2
+  exit 1
+fi
+exec $runner "\$root/\$v/$sub"$extra_args "\$@"
 EOF
-  chmod +x "$tmp_path"
-  mv "$tmp_path" "$shim_path"
+  else
+    cat <<EOF
+#!/usr/bin/env bash
+set -euo pipefail
+exec $runner "$target"$extra_args "\$@"
+EOF
+  fi
 }
 
-write_workflow_shim() {
-  local target_path="$1"
-  local shim_path="$2"
+write_shim_file() {
+  local kind="$1" target="$2" shim_path="$3" extra_args="$4"
   local tmp_path
-
   tmp_path="$(mktemp "${TMPDIR:-/tmp}/dev-workflow-shim.XXXXXX")"
-  cat >"$tmp_path" <<EOF
-#!/usr/bin/env bash
-set -euo pipefail
-exec node "$target_path" "\$@"
-EOF
+  render_shim_body "$kind" "$target" "$extra_args" >"$tmp_path"
   chmod +x "$tmp_path"
   mv "$tmp_path" "$shim_path"
 }
@@ -89,11 +126,12 @@ is_managed_workflow_shim() {
 
   grep -Fq "exec node \"$target_path\"" "$shim_path" && return 0
   grep -Fq '/plugins/dev-workflow/bin/dev-workflow.cjs' "$shim_path" && return 0
-  # Any prior marketplace-cached install of the same plugin. Without this
-  # match an older version's shim looks foreign and the next install run
-  # cannot refresh it across version upgrades.
-  if grep -Fq '/cache/dev-workflow/dev-workflow/' "$shim_path" \
-    && grep -Fq '/bin/dev-workflow.cjs' "$shim_path"; then
+  # Any prior marketplace-cached install of the same plugin — version-pinned
+  # (`…/dev-workflow/<version>/bin/dev-workflow.cjs`) or self-resolving
+  # (`root="…/dev-workflow"`). Without this match an older version's shim looks
+  # foreign and the next install run cannot refresh it across version upgrades.
+  if grep -Fq '/cache/dev-workflow/dev-workflow' "$shim_path" \
+    && grep -Fq 'dev-workflow.cjs' "$shim_path"; then
     return 0
   fi
 
@@ -120,8 +158,8 @@ refuse_unrelated_target() {
 refuse_unrelated_target "$START_SHIM" "$START_SCRIPT" 'dev-dashboard'
 refuse_unrelated_target "$STOP_SHIM" "$STOP_SCRIPT" 'dev-dashboard-stop'
 
-write_shim "$START_SCRIPT" "$START_SHIM" ' --open'
-write_shim "$STOP_SCRIPT" "$STOP_SHIM" ''
+write_shim_file bash "$START_SCRIPT" "$START_SHIM" ' --open'
+write_shim_file bash "$STOP_SCRIPT" "$STOP_SHIM" ''
 
 echo "installed:${BIN_DIR}"
 
@@ -132,7 +170,7 @@ if [ ! -f "$CLI_TARGET" ]; then
 elif [ -e "$WORKFLOW_SHIM" ] && ! is_managed_workflow_shim "$WORKFLOW_SHIM" "$CLI_TARGET"; then
   echo "workflow_conflict:${WORKFLOW_SHIM}"
 else
-  write_workflow_shim "$CLI_TARGET" "$WORKFLOW_SHIM"
+  write_shim_file node "$CLI_TARGET" "$WORKFLOW_SHIM" ''
   echo "workflow_installed:${WORKFLOW_SHIM}"
 fi
 

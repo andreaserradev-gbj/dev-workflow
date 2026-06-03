@@ -1,8 +1,11 @@
 #!/usr/bin/env bash
 # Start the dev-dashboard server, reusing an existing instance if found.
 #
-# Usage: bash start.sh [--open]
+# Usage: bash start.sh [--open] [--restart]
 #   Resolves the bundled server relative to this script's location.
+#   --restart first stops any running bundled server (across cache versions),
+#   then starts a fresh one — use it after a `/plugin update` to reload the
+#   dashboard from the newest bundle in a single command.
 #
 # Output (one of):
 #   running:<port>    — our server is already running on this port
@@ -14,6 +17,7 @@
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+STOP_SCRIPT="$SCRIPT_DIR/stop.sh"
 # scripts/ -> skills/dev-dashboard/dashboard/
 DASHBOARD_DIR="$(cd "$SCRIPT_DIR/.." && pwd)/dashboard"
 SERVER_ENTRY="$DASHBOARD_DIR/server/index.cjs"
@@ -23,11 +27,16 @@ CONFIG_PATH="$CONFIG_DIR/config.json"
 DEFAULT_PORT=3141
 MAX_TRIES=10
 OPEN_BROWSER=false
+RESTART=false
 
 while [ "$#" -gt 0 ]; do
   case "$1" in
     --open)
       OPEN_BROWSER=true
+      shift
+      ;;
+    --restart)
+      RESTART=true
       shift
       ;;
     *)
@@ -36,6 +45,14 @@ while [ "$#" -gt 0 ]; do
       ;;
   esac
 done
+
+# --restart: stop any running bundled server first so we don't reuse a stale one
+# (e.g. a server still bound to a prior version's bundle after a plugin update).
+if [ "$RESTART" = "true" ] && [ -f "$STOP_SCRIPT" ]; then
+  bash "$STOP_SCRIPT" >/dev/null 2>&1 || true
+  # Give the OS a moment to release the port before we re-scan.
+  sleep 1
+fi
 
 read_configured_port() {
   if [ ! -f "$CONFIG_PATH" ]; then

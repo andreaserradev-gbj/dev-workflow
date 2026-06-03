@@ -32,23 +32,54 @@ START_SHIM="$BIN_DIR/dev-dashboard"
 STOP_SHIM="$BIN_DIR/dev-dashboard-stop"
 WORKFLOW_SHIM="$BIN_DIR/dev-workflow"
 
-expected_shim_body() {
-  local target_path="$1"
-  local extra_args="$2"
-  cat <<EOF
-#!/usr/bin/env bash
-set -euo pipefail
-exec bash "$target_path"$extra_args "\$@"
-EOF
-}
+# Render a shim body — kept byte-for-byte in sync with install.sh's generator.
+# Cache targets produce a self-resolving (version-independent) body; contributor
+# targets exec the path directly. See install.sh for the rationale.
+render_shim_body() {
+  local kind="$1" target="$2" extra_args="$3"
+  local runner root="" sub=""
 
-expected_workflow_shim_body() {
-  local target_path="$1"
-  cat <<EOF
+  case "$kind" in
+    node) runner="node" ;;
+    *) runner="bash" ;;
+  esac
+
+  case "$target" in
+    */cache/*/bin/dev-workflow.cjs)
+      root="${target%/*/bin/dev-workflow.cjs}"
+      sub="bin/dev-workflow.cjs"
+      ;;
+    */cache/*/skills/dev-dashboard/scripts/start.sh)
+      root="${target%/*/skills/dev-dashboard/scripts/start.sh}"
+      sub="skills/dev-dashboard/scripts/start.sh"
+      ;;
+    */cache/*/skills/dev-dashboard/scripts/stop.sh)
+      root="${target%/*/skills/dev-dashboard/scripts/stop.sh}"
+      sub="skills/dev-dashboard/scripts/stop.sh"
+      ;;
+  esac
+
+  if [ -n "$root" ]; then
+    cat <<EOF
 #!/usr/bin/env bash
 set -euo pipefail
-exec node "$target_path" "\$@"
+# Resolve the newest installed plugin version at runtime so a marketplace
+# update is picked up without reinstalling this shim.
+root="$root"
+v="\$(ls -1 "\$root" 2>/dev/null | grep -E '^[0-9]+\.[0-9]+\.[0-9]+\$' | sort -t. -k1,1n -k2,2n -k3,3n | tail -1)"
+if [ -z "\$v" ] || [ ! -e "\$root/\$v/$sub" ]; then
+  echo "dev-workflow: no installed version found under \$root" >&2
+  exit 1
+fi
+exec $runner "\$root/\$v/$sub"$extra_args "\$@"
 EOF
+  else
+    cat <<EOF
+#!/usr/bin/env bash
+set -euo pipefail
+exec $runner "$target"$extra_args "\$@"
+EOF
+  fi
 }
 
 matches_expected() {
@@ -60,7 +91,7 @@ matches_expected() {
   [ -x "$shim_path" ] || return 1
 
   local expected
-  expected="$(expected_shim_body "$target_path" "$extra_args")"
+  expected="$(render_shim_body bash "$target_path" "$extra_args")"
   local actual
   actual="$(cat "$shim_path")"
 
@@ -75,7 +106,7 @@ matches_expected_workflow() {
   [ -x "$shim_path" ] || return 1
 
   local expected
-  expected="$(expected_workflow_shim_body "$target_path")"
+  expected="$(render_shim_body node "$target_path" '')"
   local actual
   actual="$(cat "$shim_path")"
 
@@ -90,11 +121,11 @@ workflow_is_managed() {
 
   grep -Fq "exec node \"$target_path\"" "$shim_path" && return 0
   grep -Fq '/plugins/dev-workflow/bin/dev-workflow.cjs' "$shim_path" && return 0
-  # Any prior marketplace-cached install of the same plugin. Without this
-  # match an older version's shim is reported as `conflict` and the install
-  # script refuses to refresh it across version upgrades.
-  if grep -Fq '/cache/dev-workflow/dev-workflow/' "$shim_path" \
-    && grep -Fq '/bin/dev-workflow.cjs' "$shim_path"; then
+  # Any prior marketplace-cached install of the same plugin — version-pinned or
+  # self-resolving. Without this match an older version's shim is reported as
+  # `conflict` and the install script refuses to refresh it across upgrades.
+  if grep -Fq '/cache/dev-workflow/dev-workflow' "$shim_path" \
+    && grep -Fq 'dev-workflow.cjs' "$shim_path"; then
     return 0
   fi
 

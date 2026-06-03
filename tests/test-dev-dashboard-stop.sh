@@ -78,6 +78,26 @@ else
   echo "SKIP: pgrep not available; cannot exercise pattern match"
 fi
 
+# 3. start.sh --restart wiring — checked statically. Running it would invoke
+#    stop.sh's system-wide pgrep and could kill the developer's real dashboard,
+#    so we only assert the source wires --restart to a stop before the start.
+START_SH="$REPO_ROOT/plugins/dev-workflow/skills/dev-dashboard/scripts/start.sh"
+START_SRC="$(cat "$START_SH")"
+if [[ "$START_SRC" == *"--restart)"* ]]; then
+  echo "PASS: start.sh accepts a --restart flag"
+  PASS=$((PASS + 1))
+else
+  echo "FAIL: start.sh does not accept --restart"
+  FAIL=$((FAIL + 1))
+fi
+if [[ "$START_SRC" == *'bash "$STOP_SCRIPT"'* ]]; then
+  echo "PASS: start.sh --restart path invokes stop.sh"
+  PASS=$((PASS + 1))
+else
+  echo "FAIL: start.sh --restart path does not invoke stop.sh"
+  FAIL=$((FAIL + 1))
+fi
+
 echo
 echo "PASS: $PASS"
 echo "FAIL: $FAIL"
