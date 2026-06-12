@@ -1,4 +1,0 @@
-The diff contains changes to `tools/dev-workflow-core/src/scanner.ts` that are not mentioned in the phase's acceptance criteria, and the changes appear to alter unrelated cache semantics. This is out of scope for the stated phase, and the consequences extend beyond what an automated retry can correct.
-
-<verdict>escalate</verdict>
-<reason>Out-of-scope changes to `scanner.ts` cache behavior require human judgment about whether to keep, split, or revert.</reason>

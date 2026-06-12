@@ -9,8 +9,6 @@ import {
   determineFeatureStatus,
   parseFeature,
   parseSessionLog,
-  parseVerdict,
-  parseFeedback,
 } from '../src/parser.js';
 import type { Feature } from '../src/types.js';
 
@@ -768,65 +766,5 @@ describe('parseSessionLog', () => {
   it('handles empty file', async () => {
     const result = await parseSessionLog(resolve(SESSION_LOG_FIXTURE, 'session-log-empty.md'));
     expect(result).toEqual([]);
-  });
-});
-
-// ─── Verdict Parsing (dev-quiz / dev-judge) ────────────────────────
-
-describe('parseVerdict / parseFeedback', () => {
-  const VERDICTS = resolve(FIXTURES, 'verdicts');
-
-  it('parses a pass verdict and returns null feedback', async () => {
-    const text = await readFile(resolve(VERDICTS, 'pass.txt'), 'utf-8');
-    expect(parseVerdict(text)).toBe('pass');
-    expect(parseFeedback(text)).toBeNull();
-  });
-
-  it('parses a revise verdict and returns the trimmed feedback string', async () => {
-    const text = await readFile(resolve(VERDICTS, 'revise.txt'), 'utf-8');
-    expect(parseVerdict(text)).toBe('revise');
-    const feedback = parseFeedback(text);
-    expect(feedback).not.toBeNull();
-    expect(feedback).toContain('parseVerdict, parseFeedback');
-    expect(feedback).toContain('index.ts');
-    expect(feedback!.startsWith(' ')).toBe(false);
-    expect(feedback!.endsWith(' ')).toBe(false);
-  });
-
-  it('parses an escalate verdict and falls back to <reason> for feedback', async () => {
-    const text = await readFile(resolve(VERDICTS, 'escalate.txt'), 'utf-8');
-    expect(parseVerdict(text)).toBe('escalate');
-    const reason = parseFeedback(text);
-    expect(reason).not.toBeNull();
-    expect(reason).toContain('Out-of-scope');
-    expect(reason).toContain('scanner.ts');
-  });
-
-  it('returns null for malformed verdict values without throwing', async () => {
-    const text = await readFile(resolve(VERDICTS, 'malformed.txt'), 'utf-8');
-    expect(parseVerdict(text)).toBeNull();
-    expect(parseFeedback(text)).toBeNull();
-  });
-
-  it('returns null for empty input', () => {
-    expect(parseVerdict('')).toBeNull();
-    expect(parseFeedback('')).toBeNull();
-  });
-
-  it('returns null when no verdict block is present', () => {
-    expect(parseVerdict('Just some prose with no verdict.')).toBeNull();
-  });
-
-  it('honors the last-match rule when the input quotes example verdict blocks', async () => {
-    const text = await readFile(resolve(VERDICTS, 'last-match.txt'), 'utf-8');
-    // Earlier blocks: pass, revise (with example feedback). Final block: revise + real feedback.
-    expect(parseVerdict(text)).toBe('revise');
-    const feedback = parseFeedback(text);
-    expect(feedback).toContain('Criterion 2');
-    expect(feedback).not.toContain('Example feedback');
-  });
-
-  it('parses a verdict from a single-line input', () => {
-    expect(parseVerdict('<verdict>pass</verdict>')).toBe('pass');
   });
 });

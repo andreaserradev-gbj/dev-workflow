@@ -152,6 +152,7 @@ At every gate (whether detected by `gate-check` or by `⏸️ **GATE**:` markers
 2. **Report** what was accomplished
 3. **Ask**: "Phase [N] complete. Continue to Phase [N+1] or `/dev-checkpoint`?"
 4. **Wait** for explicit user response before continuing
+   - If `gate-check` returned `allComplete: true` — or the next phase is the final verification/testing phase — extend the gate question with: "This was the last implementation phase. Consider running `/dev-review` for a PRD-vs-implementation alignment report before final testing."
 
 **STEP-LEVEL STOPS**
 

@@ -130,17 +130,6 @@ describe('list', () => {
       expect(text).toContain('complete');
       // archived hidden by default
       expect(text).not.toContain('old-feature');
-      // reason text appears
-      expect(text).toContain('ready: next phase');
-    });
-
-    it('--afk filters to runnable features only', async () => {
-      const code = await list(['--scan', tempScan, '--afk']);
-      const text = output.lines.join('\n');
-
-      expect(code).toBe(0);
-      expect(text).toContain('runnable');
-      expect(text).not.toContain('complete');
     });
 
     it('--all includes archived features', async () => {
@@ -179,7 +168,7 @@ describe('list', () => {
   });
 
   describe('--json', () => {
-    it('emits stable JSON with afk classification per feature', async () => {
+    it('emits stable JSON per feature', async () => {
       const code = await list(['--scan', tempScan, '--json']);
       const json = JSON.parse(output.lines.join('\n'));
 
@@ -192,28 +181,19 @@ describe('list', () => {
 
       const runnable = alpha.features.find((f: { name: string }) => f.name === 'runnable');
       expect(runnable).toBeDefined();
-      expect(runnable.afk).toMatchObject({
-        state: 'runnable',
-        runnable: true,
-      });
-      expect(runnable.afk.reason).toMatch(/ready: next phase \d+/);
+      expect(runnable.name).toBe('runnable');
+      expect(runnable.path).toContain('runnable');
+      expect(runnable.status).toBeDefined();
+      expect(runnable.progress).toBeDefined();
+      expect(runnable.currentPhase).toBeDefined();
+      // afk classification removed
+      expect(runnable.afk).toBeUndefined();
 
       const beta = json.projects.find((p: { name: string }) => p.name === 'project-beta');
       const complete = beta.features.find((f: { name: string }) => f.name === 'complete');
-      expect(complete.afk).toMatchObject({
-        state: 'not-runnable',
-        runnable: false,
-        reason: 'complete',
-      });
-    });
-
-    it('--json --afk includes only runnable features', async () => {
-      const code = await list(['--scan', tempScan, '--json', '--afk']);
-      const json = JSON.parse(output.lines.join('\n'));
-
-      expect(code).toBe(0);
-      const alpha = json.projects.find((p: { name: string }) => p.name === 'project-alpha');
-      expect(alpha.features.map((f: { name: string }) => f.name)).toEqual(['runnable']);
+      expect(complete).toBeDefined();
+      expect(complete.status).toBe('complete');
+      expect(complete.afk).toBeUndefined();
     });
   });
 
@@ -298,17 +278,6 @@ describe('list', () => {
         const code = await list(['--scan', empty]);
         expect(code).toBe(0);
         expect(output.lines.join('\n')).toContain('No features found');
-      } finally {
-        rmSync(empty, { recursive: true, force: true });
-      }
-    });
-
-    it('exits 0 with afk-specific message when --afk and no runnable', async () => {
-      const empty = mkdtempSync(join(tmpdir(), 'list-empty-afk-'));
-      try {
-        const code = await list(['--scan', empty, '--afk']);
-        expect(code).toBe(0);
-        expect(output.lines.join('\n')).toContain('No AFK-runnable features found');
       } finally {
         rmSync(empty, { recursive: true, force: true });
       }

@@ -20,11 +20,10 @@ const OUT_FILE = resolve(OUT_DIR, 'dev-workflow.cjs');
 
 // Skill directories that need a copy of the bundle
 const SKILL_DIRS = [
-  'dev-afk',
   'dev-checkpoint',
-  'dev-judge',
   'dev-plan',
   'dev-resume',
+  'dev-review',
   'dev-wiki',
 ];
 const SKILL_COPY_DIR = resolve(REPO_ROOT, 'plugins/dev-workflow/skills');

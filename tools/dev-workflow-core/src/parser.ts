@@ -791,30 +791,6 @@ export async function parseSessionLog(filePath: string): Promise<SessionLogEntry
   return entries;
 }
 
-// ─── Verdict (dev-quiz / dev-judge) ───────────────────────────────
-
-export type { Verdict } from './types.js';
-import type { Verdict } from './types.js';
-
-/** Parse a `<verdict>pass|revise|escalate</verdict>` block. Reuses
- *  `extractXmlTag`, which applies last-match semantics so any earlier
- *  example blocks (in a quoted SKILL.md/rubric) are ignored. Returns
- *  null on malformed or missing input. */
-export function parseVerdict(text: string): Verdict | null {
-  const value = extractXmlTag(text, 'verdict');
-  if (value === 'pass' || value === 'revise' || value === 'escalate') return value;
-  return null;
-}
-
-/** Parse the feedback companion to a verdict: `<feedback>` for `revise`,
- *  falling back to `<reason>` for `escalate`. Returns null when neither
- *  is present. */
-export function parseFeedback(text: string): string | null {
-  const feedback = extractXmlTag(text, 'feedback');
-  if (feedback) return feedback;
-  return extractXmlTag(text, 'reason');
-}
-
 async function isEmptyFeatureDir(dirPath: string): Promise<boolean> {
   try {
     const entries = await readdir(dirPath);

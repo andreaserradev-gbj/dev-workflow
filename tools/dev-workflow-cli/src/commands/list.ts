@@ -3,21 +3,11 @@ import { homedir } from 'os';
 import { join, resolve } from 'path';
 import {
   scanProjects,
-  getAfkRunnableInfo,
   STATUS_ORDER,
   type Feature,
   type FeatureStatus,
-  type Project,
-  type AfkRunnableState,
-  type AfkRunnableInfo,
 } from 'dev-workflow-core';
 import { parseFlags } from '../index.js';
-
-// AFK state sort order: runnable first (the operator question), then everything else.
-const AFK_STATE_ORDER: Record<AfkRunnableState, number> = {
-  runnable: 0,
-  'not-runnable': 1,
-};
 
 const VALID_STATUSES: ReadonlySet<FeatureStatus> = new Set([
   'gate',
@@ -30,22 +20,16 @@ const VALID_STATUSES: ReadonlySet<FeatureStatus> = new Set([
   'archived',
 ]);
 
-interface ListedFeature {
-  feature: Feature;
-  afk: AfkRunnableInfo;
-}
-
 interface ListedProject {
   name: string;
   path: string;
-  features: ListedFeature[];
+  features: Feature[];
 }
 
 export async function list(args: string[]): Promise<number> {
   const { flags } = parseFlags(args);
 
   const json = flags.json === true;
-  const afkOnly = flags.afk === true;
   const all = flags.all === true;
   const projectFilter = typeof flags.project === 'string' ? flags.project : null;
   const statusFilter = typeof flags.status === 'string' ? (flags.status as FeatureStatus) : null;
@@ -61,18 +45,12 @@ export async function list(args: string[]): Promise<number> {
   const scanDirs = await resolveScanDirs(scanOverride);
   const projects = await scanProjects(scanDirs);
 
-  // Annotate each feature with its AFK classification
-  const annotated: ListedProject[] = projects.map((p) => ({
-    name: p.name,
-    path: p.path,
-    features: p.features.map((f) => ({ feature: f, afk: getAfkRunnableInfo(f) })),
-  }));
-
   // Apply filters
-  const filtered = annotated
+  const filtered = projects
     .map((p) => ({
-      ...p,
-      features: p.features.filter((row) => keepFeature(row, { afkOnly, all, statusFilter })),
+      name: p.name,
+      path: p.path,
+      features: p.features.filter((f) => keepFeature(f, { all, statusFilter })),
     }))
     .filter((p) => {
       if (projectFilter && !matchesProject(p, projectFilter)) return false;
@@ -87,14 +65,14 @@ export async function list(args: string[]): Promise<number> {
       projects: filtered.map((p) => ({
         name: p.name,
         path: p.path,
-        features: p.features.map((row) => featureJson(row, p.path)),
+        features: p.features.map((f) => featureJson(f, p.path)),
       })),
     };
     console.log(JSON.stringify(payload, null, 2));
     return 0;
   }
 
-  printText(filtered, scanDirs, { afkOnly, all });
+  printText(filtered, scanDirs);
   return 0;
 }
 
@@ -157,19 +135,16 @@ function expandHome(dir: string): string {
 // ─── Filtering ─────────────────────────────────────────────────────────
 
 interface FilterOpts {
-  afkOnly: boolean;
   all: boolean;
   statusFilter: FeatureStatus | null;
 }
 
-function keepFeature(row: ListedFeature, opts: FilterOpts): boolean {
-  const { afkOnly, all, statusFilter } = opts;
+function keepFeature(f: Feature, opts: FilterOpts): boolean {
+  const { all, statusFilter } = opts;
 
-  if (statusFilter) return row.feature.status === statusFilter;
+  if (statusFilter) return f.status === statusFilter;
 
-  if (afkOnly) return row.afk.state === 'runnable';
-
-  if (!all && row.feature.status === 'archived') return false;
+  if (!all && f.status === 'archived') return false;
 
   return true;
 }
@@ -185,11 +160,9 @@ function matchesProject(p: ListedProject, filter: string): boolean {
 function sortListing(projects: ListedProject[]): void {
   for (const p of projects) {
     p.features.sort((a, b) => {
-      const stateDelta = AFK_STATE_ORDER[a.afk.state] - AFK_STATE_ORDER[b.afk.state];
-      if (stateDelta !== 0) return stateDelta;
-      const statusDelta = STATUS_ORDER[a.feature.status] - STATUS_ORDER[b.feature.status];
+      const statusDelta = STATUS_ORDER[a.status] - STATUS_ORDER[b.status];
       if (statusDelta !== 0) return statusDelta;
-      return a.feature.name.localeCompare(b.feature.name);
+      return a.name.localeCompare(b.name);
     });
   }
 
@@ -210,8 +183,8 @@ function sortListing(projects: ListedProject[]): void {
 
 function mostRecentCheckpoint(p: ListedProject): number | null {
   let max = 0;
-  for (const row of p.features) {
-    const cp = row.feature.lastCheckpoint;
+  for (const f of p.features) {
+    const cp = f.lastCheckpoint;
     if (!cp) continue;
     const ms = new Date(cp).getTime();
     if (Number.isFinite(ms) && ms > max) max = ms;
@@ -221,50 +194,32 @@ function mostRecentCheckpoint(p: ListedProject): number | null {
 
 // ─── Output ────────────────────────────────────────────────────────────
 
-function featureJson(row: ListedFeature, projectPath: string) {
-  const f = row.feature;
+function featureJson(f: Feature, projectPath: string) {
   return {
     name: f.name,
     path: join(projectPath, f.status === 'archived' ? '.dev-archive' : '.dev', f.name),
     status: f.status,
     progress: f.progress,
     currentPhase: f.currentPhase,
-    afk: row.afk,
   };
 }
 
-function printText(
-  projects: ListedProject[],
-  scanDirs: string[],
-  opts: { afkOnly: boolean; all: boolean },
-): void {
+function printText(projects: ListedProject[], scanDirs: string[]): void {
   if (projects.length === 0) {
     const where = scanDirs.join(', ');
-    if (opts.afkOnly) {
-      console.log(`No AFK-runnable features found under: ${where}`);
-    } else {
-      console.log(`No features found under: ${where}`);
-    }
+    console.log(`No features found under: ${where}`);
     return;
   }
-
-  const stateLabel: Record<AfkRunnableState, string> = {
-    runnable: 'READY',
-    'not-runnable': 'BLOCKED',
-  };
 
   for (let i = 0; i < projects.length; i++) {
     const p = projects[i];
     if (i > 0) console.log('');
     console.log(`Project: ${p.name} (${p.path})`);
 
-    const labelWidth = Math.max(...p.features.map((r) => stateLabel[r.afk.state].length));
-    const nameWidth = Math.max(...p.features.map((r) => r.feature.name.length));
-    const statusWidth = Math.max(...p.features.map((r) => r.feature.status.length));
+    const nameWidth = Math.max(...p.features.map((f) => f.name.length));
+    const statusWidth = Math.max(...p.features.map((f) => f.status.length));
 
-    for (const row of p.features) {
-      const f = row.feature;
-      const label = stateLabel[row.afk.state].padEnd(labelWidth);
+    for (const f of p.features) {
       const name = f.name.padEnd(nameWidth);
       const status = f.status.padEnd(statusWidth);
       const progress = f.progress
@@ -273,9 +228,7 @@ function printText(
       const phase = f.currentPhase
         ? `Phase ${f.currentPhase.number}/${f.currentPhase.total}`
         : '-';
-      console.log(
-        `  ${label}  ${name}  ${status}  ${progress.padEnd(7)} ${phase.padEnd(13)} ${row.afk.reason}`,
-      );
+      console.log(`  ${name}  ${status}  ${progress.padEnd(7)} ${phase.padEnd(13)}`);
     }
   }
 }

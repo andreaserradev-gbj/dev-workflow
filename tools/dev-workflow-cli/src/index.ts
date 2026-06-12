@@ -57,8 +57,7 @@ function printUsage(): void {
   console.log('  --marker <done|todo> Marker value (status-update)');
   console.log('  --sessions <N|all>   Session history limit (resume-context, default: 5)');
   console.log('  --scan <dir>         Scan directory (list)');
-  console.log('  --afk                Show only AFK-runnable features (list)');
-  console.log('  --all                Include archived and non-runnable features (list)');
+  console.log('  --all                Include archived features (list)');
   console.log('  --project <name>     Filter project by name or path (list)');
   console.log('  --status <status>    Filter feature status (list)');
   console.log('  --query <text>       Search query (search)');

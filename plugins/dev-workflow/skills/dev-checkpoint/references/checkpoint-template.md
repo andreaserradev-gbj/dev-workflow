@@ -4,8 +4,8 @@ Use this format for the continuation prompt written to `checkpoint.md`:
 
 ```
 ---
-branch: [branch name from Step 5]
-last_commit: [last commit summary from Step 5]
+branch: [branch name from Step 9]
+last_commit: [last commit summary from Step 9]
 uncommitted_changes: [true/false]
 checkpointed: [ISO 8601 timestamp]
 ---

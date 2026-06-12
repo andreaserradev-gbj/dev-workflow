@@ -1,4 +1,0 @@
-Acceptance criterion 3 ("export the helpers from the package index") has no corresponding hunk in the diff. The helpers are defined in `parser.ts` but `index.ts` was not modified, so downstream consumers cannot import them.
-
-<verdict>revise</verdict>
-<feedback>Add `export { parseVerdict, parseFeedback } from './parser.js';` and `export type { Verdict } from './parser.js';` to `tools/dev-workflow-core/src/index.ts`. Then re-run the bundle.</feedback>

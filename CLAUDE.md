@@ -16,28 +16,20 @@ plugins/dev-workflow/           # Plugin package
       references/prd-templates.md
       scripts/discover.sh, validate.sh, dev-workflow.cjs
       agents/prd-researcher.md, prd-planner.md
-    dev-quiz/
-      SKILL.md
-      references/quiz-rubric.md
-      scripts/discover.sh, validate.sh
     dev-checkpoint/
       SKILL.md
       references/checkpoint-template.md, worktree-guide.md
       scripts/discover.sh, validate.sh, git-state.sh, worktree-setup.sh, dev-workflow.cjs
-    dev-judge/
+    dev-review/
       SKILL.md
       scripts/discover.sh, validate.sh, git-state.sh, dev-workflow.cjs
-      agents/phase-reviewer.md
+      agents/feature-reporter.md
     dev-resume/
       SKILL.md
       scripts/discover.sh, validate.sh, git-state.sh, dev-workflow.cjs
     dev-wrapup/
       SKILL.md
       scripts/discover.sh
-    dev-afk/
-      SKILL.md
-      references/prompt-template.md
-      scripts/discover.sh, validate.sh, dev-workflow.cjs
     dev-wiki/
       SKILL.md
       scripts/discover.sh, validate.sh, dev-workflow.cjs
@@ -118,7 +110,7 @@ After modifying `tools/dev-workflow-cli/` or `tools/dev-workflow-core/`, rebuild
 cd tools/dev-workflow-cli && npm run bundle
 ```
 
-This esbuild-bundles the CLI into `plugins/dev-workflow/bin/dev-workflow.cjs` (canonical copy) and copies it to each skill that uses the CLI (`dev-afk`, `dev-checkpoint`, `dev-judge`, `dev-plan`, `dev-resume`). The bundle script handles the per-skill copies automatically — no manual `cp` needed.
+This esbuild-bundles the CLI into `plugins/dev-workflow/bin/dev-workflow.cjs` (canonical copy) and copies it to each skill that uses the CLI (`dev-checkpoint`, `dev-plan`, `dev-resume`, `dev-review`, `dev-wiki`). The bundle script handles the per-skill copies automatically — no manual `cp` needed.
 
 The pre-commit hook blocks commits where CLI source changed without updating the bundle. The test suite (`tests/test-scripts.sh`) blocks commits where the per-skill copies differ from the canonical `bin/dev-workflow.cjs`.
 
