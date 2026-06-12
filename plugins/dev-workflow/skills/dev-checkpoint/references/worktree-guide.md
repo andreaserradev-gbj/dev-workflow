@@ -1,16 +1,18 @@
 # Workflow Setup Guide
 
-Instructions for offering and executing worktree or branch setup during first checkpoint.
+Instructions for offering and executing worktree or branch setup during first checkpoint (Step 6).
 
 ## Check Eligibility
 
 Run the worktree script:
 
 ```bash
-bash "$WORKTREE" check "$FEATURE_NAME" "$PROJECT_ROOT" "$BRANCH"
+bash "$WORKTREE" check "$FEATURE_NAME" "$PROJECT_ROOT"
 ```
 
-Where `$WORKTREE` is the absolute path to `scripts/worktree-setup.sh` within this skill's directory. `$BRANCH` is the branch from Step 5 (or empty if not a git repo). Apply the path safety rules from Step 0 (`$HOME`, copy from output).
+Where `$WORKTREE` is the absolute path to `scripts/worktree-setup.sh` within this skill's directory. Apply the path safety rules from Step 0 (`$HOME`, copy from output).
+
+The branch argument is omitted: in the commit-first order git state is not captured until Step 9, so no `$BRANCH` is available yet. The script falls back to `git branch --show-current` to decide eligibility.
 
 - If output starts with `skip:` → skip this step entirely.
 - If output is `offer` → present the offer below.
@@ -25,7 +27,7 @@ Present the following to the user and wait for their response:
 > 2. **Branch** — Creates and switches to branch `feature/$FEATURE_NAME` in the current directory.
 > 3. **Skip** — Stay on the current branch.
 
-**If the user chooses Skip or declines**: End the skill normally — no further action.
+**If the user chooses Skip or declines**: continue to Step 7 on the current branch — no further setup.
 
 ## Execute Worktree Setup
 
@@ -35,9 +37,13 @@ If the user chooses **Worktree**:
 bash "$WORKTREE" execute "$FEATURE_NAME" "$PROJECT_ROOT"
 ```
 
-Parse output: `worktree:<path>` gives the worktree location.
+Parse output: `worktree:<path>` gives the worktree location. Capture it as `$WORKTREE_PATH`.
 
-### Report (Worktree)
+This **moves** `$PROJECT_ROOT/.dev/$FEATURE_NAME` into the worktree. Back in Step 6, retarget `$PROJECT_ROOT` and `$FEATURE_DIR` to the worktree so the commit, PRD updates, git-state capture, and checkpoint write all land there.
+
+### Acknowledge (Worktree)
+
+Confirm setup, but do **not** tell the user to leave yet — the checkpoint has not been written:
 
 > Worktree setup complete.
 >
@@ -45,10 +51,9 @@ Parse output: `worktree:<path>` gives the worktree location.
 > - Worktree: `<path from output>`
 > - PRD files moved and committed
 >
-> **Next**: End this session, then start a new one:
-> ```
-> cd "<path from output>" && claude
-> ```
+> Continuing the checkpoint inside the worktree. The restart instruction comes at the end.
+
+The "end this session and `cd` into the worktree" instruction is reported in the **Step 12 summary**, after `checkpoint.md` has been written into the worktree.
 
 ## Execute Branch Setup
 
@@ -66,4 +71,4 @@ Parse output: `branch:<name>` gives the branch name.
 >
 > - Branch: `<name from output>`
 >
-> You are now on the feature branch. Continue working in the current directory.
+> You are now on the feature branch. Continuing the checkpoint here — the commit (Step 7) lands on this branch.

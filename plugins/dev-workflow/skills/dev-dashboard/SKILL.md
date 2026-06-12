@@ -16,7 +16,7 @@ are managed:
 
 - `dev-dashboard` — start the dashboard
 - `dev-dashboard-stop` — stop the dashboard
-- `dev-workflow` — bundled CLI for orchestrator + checkpoint + resume + AFK runs
+- `dev-workflow` — bundled CLI for orchestrator + checkpoint + resume
 
 ### Step 1: Check Install State
 

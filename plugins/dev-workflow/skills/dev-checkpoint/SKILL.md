@@ -20,7 +20,11 @@ This skill analyzes and saves. It does NOT fix, investigate, or implement anythi
 - Do NOT investigate bugs or errors mentioned during the session
 - Do NOT start implementing fixes or next steps
 - Do NOT move to the next phase or task
-- If the user mentions bugs during confirmation (Step 6), note them in `<blockers>` or `<notes>` but do NOT attempt to fix them
+- If the user mentions bugs during confirmation (Step 4), note them in `<blockers>` or `<notes>` but do NOT attempt to fix them
+
+### Why commit-first ordering
+
+The branch/worktree decision and the optional commit happen **before** PRD markers are updated and the checkpoint is written. This way the saved checkpoint records the branch and commit the session actually ends on — a branch created *after* the checkpoint would make the next `/dev-resume` report `drifted`. The PRD-marker edits and `checkpoint.md`/`session-log.md` written after the commit are honestly recorded as `uncommittedChanges: true`; they get swept into the next session's commit.
 
 ### Step 0: Discover Project Root
 
@@ -73,18 +77,18 @@ bash "$VALIDATE" normalize "$USER_INPUT"
 
 Outputs `$FEATURE_NAME` on success; on failure, STOP and report the error.
 
-The checkpoint will be saved to `$PROJECT_ROOT/.dev/$FEATURE_NAME/checkpoint.md`.
+Set `$FEATURE_DIR` to `$PROJECT_ROOT/.dev/$FEATURE_NAME`. The checkpoint will be saved to `$FEATURE_DIR/checkpoint.md`. (If a worktree is set up in Step 6, both `$PROJECT_ROOT` and `$FEATURE_DIR` are retargeted there.)
 
 ### Step 2: Gather Feature State via CLI
 
 Run the CLI to get structured progress and gate data:
 
 ```bash
-node "$CLI" progress-summary --json --dir "$PROJECT_ROOT/.dev/$FEATURE_NAME"
+node "$CLI" progress-summary --json --dir "$FEATURE_DIR"
 ```
 
 ```bash
-node "$CLI" gate-check --json --dir "$PROJECT_ROOT/.dev/$FEATURE_NAME"
+node "$CLI" gate-check --json --dir "$FEATURE_DIR"
 ```
 
 Where `$CLI` is the absolute path to `scripts/dev-workflow.cjs` within this skill's directory. Apply the path safety rules from Step 0 (`$HOME`, copy from output).
@@ -106,7 +110,88 @@ Review the current conversation to extract:
 
 Cross-reference with the CLI progress data to verify accuracy. The CLI provides the ground truth for PRD status markers; your session review adds decisions, blockers, and context that only the conversation contains.
 
-### Step 4: Update PRD Status Markers (REQUIRED)
+### Step 4: Confirm Session Context
+
+Present the agent's findings (decisions, blockers, notes) and end with an explicit question:
+
+> "Does this look right? Reply **yes** to continue, or tell me what to add or change."
+
+If a category is empty, omit it.
+
+The **completed items** and **current phase** confirmed here anchor the commit message composed in Step 7 — note them.
+
+**STOP. Wait for explicit confirmation before proceeding to Step 5. If the user mentions new bugs or issues during this step, add them to the checkpoint notes — do NOT investigate or fix them.**
+
+### Step 5: Determine First-Checkpoint Status
+
+Check whether `$FEATURE_DIR/checkpoint.md` already exists. Set `$IS_FIRST_CHECKPOINT` to **true** if the file does NOT exist, **false** if it does.
+
+This must be evaluated **now**, before any branch/worktree setup or checkpoint write — later steps create `checkpoint.md` (and, for a worktree, move the feature directory), so the existence check is only meaningful before they run.
+
+### Step 6: Workflow Setup (First Checkpoint Only)
+
+> **REQUIRED CHECK**: Evaluate `$IS_FIRST_CHECKPOINT` (set in Step 5).
+> - If `$IS_FIRST_CHECKPOINT` is **true** (no `checkpoint.md` existed): **execute this step**.
+> - If `$IS_FIRST_CHECKPOINT` is **false** (a checkpoint already exists): skip to Step 7.
+
+This step offers the user a worktree or branch for the feature. Follow the instructions in [worktree-guide.md](references/worktree-guide.md).
+
+Use `$WORKTREE` as the absolute path to `scripts/worktree-setup.sh` within this skill's directory. Apply the path safety rules from Step 0.
+
+The branch/worktree offer runs **before** the commit (Step 7) so the commit lands on the new branch or worktree.
+
+**If the user chooses Worktree** — the worktree is created before `checkpoint.md` exists, and `worktree-setup.sh execute` *moves* `$PROJECT_ROOT/.dev/$FEATURE_NAME` into the worktree. So you must retarget every subsequent path:
+
+1. Run `worktree-setup.sh execute` per the guide; capture the worktree location from its `worktree:<path>` output as `$WORKTREE_PATH`.
+2. **Retarget**: set `$PROJECT_ROOT ← $WORKTREE_PATH` and `$FEATURE_DIR ← $WORKTREE_PATH/.dev/$FEATURE_NAME`. Every later step — the commit (7), PRD updates (8), git-state capture (9), and checkpoint write (11) — operates on the worktree. Run git against it (`git -C "$WORKTREE_PATH" …`) and run cwd-based scripts from it (`cd "$WORKTREE_PATH" && …`).
+3. **Defer the restart instruction**: do NOT yet tell the user to end the session and `cd` into the worktree. The checkpoint must be written first. That instruction is reported in the Step 12 summary.
+
+**If the user chooses Branch** — `worktree-setup.sh branch` creates and switches to `feature/$FEATURE_NAME` in the current directory. No retargeting needed: the commit (7) lands on it and Step 9 records it.
+
+**If the user chooses Skip or declines** — stay on the current branch and continue to Step 7.
+
+### Step 7: Optional Commit
+
+**Skip this step entirely** if ANY of these are true:
+- This is not a git repository
+- A fresh `git status --porcelain` is empty (no uncommitted changes)
+
+Run `git status --porcelain` fresh here (in the worktree case, `git -C "$WORKTREE_PATH" status --porcelain`) — do NOT reuse any earlier result.
+
+If there are uncommitted changes, generate a commit message from the **Step 3 session analysis as confirmed in Step 4** (completed items + current phase):
+- Format: `<Summary of what was accomplished this session>`
+- One concise sentence, under 72 characters if possible
+- Per repo conventions: no AI attribution, no emojis
+
+**STOP.** Present the following to the user and wait for their response:
+
+> Ready to commit your changes:
+>
+> ```
+> <output of `git status --short`>
+> ```
+>
+> Proposed commit message:
+> ```
+> <generated commit message>
+> ```
+>
+> Commit these changes?
+
+**If the user declines**: leave the working tree as-is and continue to Step 8 — the checkpoint is still saved (it will record the uncommitted state).
+
+**If the user accepts**, run (prefix git with `-C "$WORKTREE_PATH"` in the worktree case):
+
+```bash
+git add -u
+# If there are user-approved untracked files from `git status --short`, add them explicitly:
+# git add -- "<path>"
+git commit -m "<generated commit message>"
+```
+
+Confirm with `git log -1 --oneline` and report the commit hash. Then continue to Step 8.
+
+### Step 8: Update PRD Status Markers (REQUIRED)
 
 For each completed item identified in Step 3, run the CLI:
 
@@ -114,13 +199,13 @@ For each completed item identified in Step 3, run the CLI:
 node "$CLI" status-update --phase N --step M --marker done --dir "$FEATURE_DIR"
 ```
 
-Where `$CLI` is the absolute path to `scripts/dev-workflow.cjs` within this skill's directory. Apply the path safety rules from Step 0 (`$HOME`, copy from output). `$FEATURE_DIR` is `$PROJECT_ROOT/.dev/$FEATURE_NAME`.
+Where `$CLI` is the absolute path to `scripts/dev-workflow.cjs` within this skill's directory. Apply the path safety rules from Step 0 (`$HOME`, copy from output). `$FEATURE_DIR` is `$PROJECT_ROOT/.dev/$FEATURE_NAME` (retargeted to the worktree if Step 6 set one up).
 
 - `--phase N` — the phase number containing the completed step
 - `--step M` — the step number within that phase (omit for phase-level markers)
 - `--marker done` — marks the step as ✅ complete
 
-The CLI reports `{ changed, line, file }` as JSON when `--json` is passed, or a text summary otherwise. Track these results for the Step 9 summary. If `changed` is false, the marker was already ✅.
+The CLI reports `{ changed, line, file }` as JSON when `--json` is passed, or a text summary otherwise. Track these results for the Step 12 summary. If `changed` is false, the marker was already ✅.
 
 **Check the exit code.** A non-zero exit code means the command failed (e.g., phase not found, invalid path). **Never ignore a non-zero exit** — if a `status-update` call fails, stop and report the error before continuing.
 
@@ -128,7 +213,7 @@ If nothing was completed, state: "No PRD updates needed."
 
 **Do NOT manually edit PRD files** — the `status-update` CLI ensures format compatibility with the parser.
 
-### Step 5: Capture Git State
+### Step 9: Capture Git State
 
 Run the [git state script](scripts/git-state.sh):
 
@@ -138,23 +223,17 @@ bash "$GIT_STATE" full
 
 Where `$GIT_STATE` is the absolute path to `scripts/git-state.sh` within this skill's directory. Apply the path safety rules from Step 0 (`$HOME`, copy from output).
 
+This runs **after** the commit (Step 7) and the PRD-marker updates (Step 8), so `branch` and `lastCommit` reflect the final state and the `status:` lines correctly show the fresh `.dev/` edits as uncommitted.
+
+`git-state.sh` reads the current working directory. **In the worktree case**, run it from the worktree so it reports the worktree's state: `cd "$WORKTREE_PATH" && bash "$GIT_STATE" full`.
+
 Parse the output lines:
 - `git:false` → not a git repo; omit `branch`, `lastCommit`, `uncommittedChanges` from the checkpoint JSON.
 - `branch:<name>` → store for checkpoint JSON `branch` field
 - `commit:<oneline>` → store as checkpoint JSON `lastCommit` field
-- `status:<line>` → each is one line of `git status --short`; if no `status:` lines, set `uncommittedChanges` to `false`
+- `status:<line>` → each is one line of `git status --short`; if no `status:` lines, set `uncommittedChanges` to `false` (otherwise `true`)
 
-### Step 6: Confirm Session Context
-
-Present the agent's findings (decisions, blockers, notes) and end with an explicit question:
-
-> "Does this look right? Reply **yes** to continue, or tell me what to add or change."
-
-If a category is empty, omit it.
-
-**STOP. Wait for explicit confirmation before proceeding to Step 7. If the user mentions new bugs or issues during this step, add them to the checkpoint notes — do NOT investigate or fix them.**
-
-### Step 7: Compose Checkpoint Data
+### Step 10: Compose Checkpoint Data
 
 **Rules**:
 - Always include `context`, `currentState`, `nextAction`, `keyFiles`. Omit `decisions`, `blockers`, `notes` if empty (empty arrays, not omitted keys).
@@ -184,13 +263,11 @@ The LLM **composes** the content (decisions, blockers, context — this requires
 
 Reference the [checkpoint-template.md](references/checkpoint-template.md) for the *semantic structure* of each section, but let the CLI handle the formatting.
 
-### Step 8: Save Checkpoint via CLI
-
-Check if `$PROJECT_ROOT/.dev/$FEATURE_NAME/checkpoint.md` already exists. Remember whether the file existed as `$IS_FIRST_CHECKPOINT` (true if the file did NOT exist, false if it did).
+### Step 11: Save Checkpoint via CLI
 
 **Use `--input-file`, not `echo | --stdin`.** Multi-line JSON string values (the `context`, `currentState`, etc. sections contain `\n`) cannot be piped reliably through `echo '...'` — unescaped literal newlines in the shell become real U+000A bytes inside JSON string literals and `JSON.parse` rejects them as "Bad control character". Write the JSON to a file, then pass the path to the CLI.
 
-1. **Write** the Step 7 JSON to `$FEATURE_DIR/.checkpoint-input.json` using the `Write` tool. The file can contain real newlines — `Write` is not a shell and does not mangle the content.
+1. **Write** the Step 10 JSON to `$FEATURE_DIR/.checkpoint-input.json` using the `Write` tool. The file can contain real newlines — `Write` is not a shell and does not mangle the content.
 2. **Run** the CLI against that file:
 
    ```bash
@@ -203,7 +280,7 @@ Check if `$PROJECT_ROOT/.dev/$FEATURE_NAME/checkpoint.md` already exists. Rememb
    rm -f "$FEATURE_DIR/.checkpoint-input.json"
    ```
 
-Where `$CLI` is the absolute path to `scripts/dev-workflow.cjs` within this skill's directory. Apply the path safety rules from Step 0 (`$HOME`, copy from output). `$FEATURE_DIR` is `$PROJECT_ROOT/.dev/$FEATURE_NAME`.
+Where `$CLI` is the absolute path to `scripts/dev-workflow.cjs` within this skill's directory. Apply the path safety rules from Step 0 (`$HOME`, copy from output). `$FEATURE_DIR` is `$PROJECT_ROOT/.dev/$FEATURE_NAME` (the worktree path if Step 6 set one up).
 
 The CLI will:
 1. **Read the existing `checkpoint.md`** (if it exists) and append it to `session-log.md` as a session entry
@@ -214,64 +291,23 @@ The CLI will:
 
 **Do NOT manually write `checkpoint.md` or `session-log.md`** — the CLI ensures format compatibility and handles session-log accumulation automatically.
 
-### Step 9: Summary
+### Step 12: Summary
 
 Report:
 - Which feature was checkpointed
 - **PRD updates made** (list each file and what was changed, or state "No updates needed")
+- Whether a commit was made (and its hash), or that the commit was skipped/declined
 - What the next steps are
 - Confirm the checkpoint location
 
-### Step 10: Workflow Setup (First Checkpoint Only)
+**If a worktree was set up in Step 6**, end the summary with the deferred restart instruction:
 
-> **REQUIRED CHECK**: Evaluate `$IS_FIRST_CHECKPOINT` (set in Step 8).
-> - If `$IS_FIRST_CHECKPOINT` is **true** (this is a NEW checkpoint — no checkpoint.md existed before Step 8): **execute this step**.
-> - If `$IS_FIRST_CHECKPOINT` is **false** (checkpoint.md already existed): skip to Step 11.
-
-This step offers the user a worktree or branch for the feature. Follow the instructions in [worktree-guide.md](references/worktree-guide.md).
-
-Use `$WORKTREE` as the absolute path to `scripts/worktree-setup.sh` within this skill's directory. Apply the path safety rules from Step 0.
-
-### Step 11: Optional Commit
-
-**Skip this step entirely** if ANY of these are true:
-- This is not a git repository
-- `git status --porcelain` output is empty (no uncommitted changes)
-
-Note: Run `git status --porcelain` fresh here — do NOT reuse Step 5's result, because Step 9.5 may have moved files.
-
-If there are uncommitted changes, generate a commit message from the checkpoint context:
-- Format: `<Summary of what was accomplished this session>`
-- Derive the summary from the checkpoint's `<context>` and `<current_state>` sections
-- Keep it to one concise sentence (under 72 characters if possible)
-
-**STOP.** Present the following to the user and wait for their response:
-
-> Ready to commit your changes:
+> Worktree ready at `<$WORKTREE_PATH>` on branch `feature/$FEATURE_NAME`, and this checkpoint was saved inside it.
 >
+> **Next**: End this session, then start a new one in the worktree:
 > ```
-> <output of `git status --short`>
+> cd "<$WORKTREE_PATH>" && claude
 > ```
->
-> Proposed commit message:
-> ```
-> <generated commit message>
-> ```
->
-> Commit these changes?
-
-**If the user declines**: End the skill normally — no further action.
-
-**If the user accepts**, run:
-
-```bash
-git add -u
-# If there are user-approved untracked files from `git status --short`, add them explicitly:
-# git add -- "<path>"
-git commit -m "<generated commit message>"
-```
-
-Confirm with `git log -1 --oneline` and report the commit hash.
 
 ### Wrap-Up Suggestion
 

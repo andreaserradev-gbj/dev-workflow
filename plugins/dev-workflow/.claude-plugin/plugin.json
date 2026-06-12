@@ -7,6 +7,6 @@
   "agents": [
     "./skills/dev-plan/agents/prd-researcher.md",
     "./skills/dev-plan/agents/prd-planner.md",
-    "./skills/dev-judge/agents/phase-reviewer.md"
+    "./skills/dev-review/agents/feature-reporter.md"
   ]
 }

@@ -57,9 +57,6 @@ export interface Feature {
   summary: string | null;
 }
 
-// Verdict block emitted by /dev-quiz and /dev-judge
-export type Verdict = 'pass' | 'revise' | 'escalate';
-
 // Project groups features by parent directory
 export interface Project {
   name: string;
