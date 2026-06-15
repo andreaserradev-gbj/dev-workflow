@@ -12,13 +12,21 @@ Context fills up. You restart. Twenty minutes re-explaining what you were buildi
 
 `/dev-resume`
 
-<img src="docs/demo-resume.svg" alt="dev-resume reconstructs full context from a 2KB checkpoint" width="520"/>
+<img src="docs/demo-resume.svg" alt="dev-resume reconstructs full context from a saved checkpoint" width="520"/>
 
 </div>
 
 ---
 
 **Three commands. That's it.** `/dev-plan` once to create a plan. `/dev-checkpoint` when you stop. `/dev-resume` when you come back. Everything comes back — decisions, progress, blockers, the exact next step. Try it once.
+
+---
+
+## Why I Built This
+
+I kept hitting the same wall. A long session with an AI coding agent starts sharp, then degrades as context fills up, and every restart meant re-explaining what I was building from memory, badly. I tried keeping notes by hand, but they always drifted out of sync with the actual code.
+
+It started small: a plan I could write once, a checkpoint I could save when I stopped. But the real problem was bigger than one feature, so it grew. Session history carries continuity across restarts, and a cross-project wiki indexes every feature I've worked on. Now a fresh session knows more than where one feature left off. It starts with the whole picture, across projects and across tools (Claude Code, Codex, Gemini CLI).
 
 ---
 
@@ -55,7 +63,7 @@ The common workaround? Manually copy plans into files, paste fragments back into
 | **2. Build**      | Implement               | Work until context gets heavy                                        |
 | **3. Checkpoint** | `/dev-checkpoint`       | Saves progress, git state, decisions, next steps                     |
 | **4. Restart**    | Close and reopen Claude | Fresh context window, clean slate                                    |
-| **5. Resume**     | `/dev-resume`           | Loads ~2KB checkpoint, rebuilds context, picks up where you left off |
+| **5. Resume**     | `/dev-resume`           | Loads the checkpoint, rebuilds context, picks up where you left off |
 
 **Repeat steps 2–5** until the feature is complete. Each session starts fresh with high-quality context.
 
@@ -283,7 +291,18 @@ dev-workflow wiki-index --json       # JSON output for scripts
 
 **Plans are living documents.** PRDs have status markers (`⬜` / `✅` / `⏭️`) and phase gates (`⏸️ GATE`). They're meant to be edited mid-flight — add phases, skip steps, rewrite sections when requirements change. Checkpoints capture the decisions behind those changes.
 
-**Context quality over context quantity.** Checkpoints are structured compression — they preserve what matters (state, decisions, next actions) and deliberately discard what doesn't (debugging tangents, tool output, failed attempts). Each resumed session starts lean.
+**Context quality over context quantity.** Checkpoints are structured compression: they preserve what matters (state, decisions, next actions) and deliberately discard what doesn't (debugging tangents, tool output, failed attempts). Each resumed session starts lean.
+
+---
+
+## Architecture Notes
+
+A few decisions that shaped the design:
+
+- **Agent-first CLI.** The skills are backed by a CLI built for machines, not humans: structured `--json` output and deterministic exit codes, so an agent can call it and branch on the result reliably.
+- **Tool-agnostic.** Skills follow the [AgentSkills.io](https://agentskills.io) standard and target abstract destinations resolved at runtime, so the same workflow runs under Claude Code, Codex, or Gemini CLI.
+- **One source of truth, enforced.** A shared TypeScript core (parser, scanner, types) is bundled into each skill; git hooks block any commit where source changed without rebuilding the bundle, or a plugin change without a version bump.
+- **Live dashboard over plain files.** The cross-project dashboard reads `.dev/` PRDs directly and pushes updates over WebSocket, no AI integration required, so it works with any tool that writes the format.
 
 ---
 
