@@ -266,6 +266,20 @@ Checkpoints and resumes are now powered by deterministic CLI commands instead of
 
 <!-- GITHUB-RELEASES-START -->
 
+## v1.35.0 - 2026-06-12
+
+### Added
+
+- `/dev-review` skill: generates an architect-readable PRD-vs-implementation alignment report. It spawns a fresh `feature-reporter` subagent that explores the codebase (rather than trusting PRD checkboxes) and reports in four sections — deviations first, then what was built and how it works, the limits imposed by architectural constraints, and what remains untested. The audience is the architect who designed the feature but has not read the code. It is review-only: it never edits project files, never emits verdict tags, and writes `.dev/<feature>/review.md` only after explicit confirmation. Use it when a feature's implementation is finished (or nearly), before final testing. `/dev-resume` now suggests it at the final phase gate.
+
+### Changed
+
+- `/dev-checkpoint` now asks and executes the branch/worktree and commit decisions **before** updating PRD markers and writing the checkpoint, instead of after. Previously a branch created at the end of the skill landed after the checkpoint was written, so the next `/dev-resume` saw a branch mismatch and reported `drifted`. With commit-first ordering the saved checkpoint records the branch and commit the session actually ends on; the marker edits and checkpoint files written after the commit are honestly recorded as `uncommittedChanges: true` and swept into the next session's commit. The worktree sub-flow retargets all paths into the worktree and defers the "restart in the worktree" instruction to the final summary, so the checkpoint is written before the user is told to leave. Declining the commit no longer ends the skill early — the checkpoint is still saved.
+
+### Removed
+
+- The `dev-judge`, `dev-afk`, and `dev-quiz` skills, along with all their supporting machinery: the `phase-reviewer` agent, verdict parsing in `dev-workflow-core` (`parseVerdict`/`parseFeedback`/the `Verdict` type and fixtures), AFK-runnability classification (`afk-runnable.ts`), and the `--afk` flag plus `afk` JSON field on the `dev-workflow list` command. These were built around ralph-loop-driven unattended automation and have not been used in real projects; Claude Code's native `/loop` supersedes `dev-afk`, and `dev-judge`/`dev-quiz` mainly existed as its quality gates. The `list` command itself remains as a general feature-listing tool.
+
 ## v1.34.0 - 2026-06-03
 
 ### Changed
