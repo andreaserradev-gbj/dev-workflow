@@ -160,7 +160,7 @@ Reconstructs context from a checkpoint:
 
 ### `/dev-review` — PRD-vs-implementation alignment report
 
-Spawns a fresh reporter subagent that explores the codebase and compares what was actually built against the feature's PRD. Produces an architect-readable prose report — deviations first, then what was built and how it works, the limits imposed by the architecture, and what remains untested. Optionally saves to `.dev/<feature>/review.md` on your confirmation.
+Spawns a fresh reporter subagent that explores the codebase and compares what was actually built against the feature's PRD. Produces a concise, scannable report — tables and bullets, not a wall of prose: deviations from the plan, constraints that affect future decisions, and untested areas, each with a verdict chip and a `file:line`. Built for the architect who knows the overall picture and triages in under a minute. Afterward it offers to apply the doc corrections it surfaces back to your PRD and checkpoint — it never edits code and never writes a standalone `review.md`.
 
 Use when a feature's implementation is finished (or nearly), before final testing.
 
