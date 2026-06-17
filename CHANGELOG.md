@@ -4,6 +4,17 @@ All notable changes to this project should be documented in this file.
 
 <!-- LOCAL-RELEASES-START -->
 
+## v1.36.0 - 2026-06-17
+
+### Changed
+
+- `/dev-review` now produces a **concise, scannable** report — a header plus three sections (a deviations table, future-affecting constraints as bullets, and an untested-areas table), each row carrying a verdict chip (✅ / 🔶 / 🔴) and a `file:line` — instead of the previous four-section prose report. It is built for the architect who knows the overall picture and triages in under a minute. The `feature-reporter` agent still explores the codebase deeply (checkboxes are not trusted) and is now explicitly guarded against over-claiming — scope a "unused" claim precisely, verify before characterizing — but the deliverable is tables and bullets, not a wall of prose.
+- After presenting, `/dev-review` offers to apply the documentation corrections it surfaces (the report's "Your call" column) back to the feature's PRD and checkpoint, per item on explicit confirmation. The skill's scope widened from review-only to report-plus-doc-write-backs: it may now `Edit` **only** the feature's own `.dev/<feature>/` PRD and checkpoint markdown, and never code.
+
+### Removed
+
+- The `/dev-review` "save to `.dev/<feature>/review.md`" step. The saved report was read by nothing — not the dashboard, the wiki, or any skill — so it produced a parallel artifact with no downstream consumer. Its durable value (the doc corrections) now flows into the PRD and checkpoint that future sessions actually read.
+
 ## v1.35.0 - 2026-06-12
 
 ### Added

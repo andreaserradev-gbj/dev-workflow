@@ -1,30 +1,30 @@
 ---
 name: dev-review
 description: >-
-  Generate an architect-readable alignment report comparing a feature's PRD
-  against the actual implementation. Spawns a fresh reporter subagent that
-  explores the codebase and reports deviations first, what was built and how
-  it works, architectural-constraint limits, and what is untested.
-  Use when implementation is finished (or nearly), before final testing.
+  Generate a concise, scannable alignment report (tables + bullets) comparing a
+  feature's PRD against the actual implementation. Spawns a fresh reporter
+  subagent that explores the codebase and reports deviations, future-affecting
+  constraints, and untested areas — then offers to apply the doc corrections it
+  surfaces back to the PRD/checkpoint. Use when implementation is finished (or
+  nearly), before final testing.
 argument-hint: "[feature]"
-allowed-tools: Bash(bash:*) Bash(node:*) Bash(git rev-parse:*) Bash(git diff:*) Bash(git log:*) Bash(git status:*) Read Write
+allowed-tools: Bash(bash:*) Bash(node:*) Bash(git rev-parse:*) Bash(git diff:*) Bash(git log:*) Bash(git status:*) Read Edit
 ---
 
 ## Review a Feature's PRD-vs-Implementation Alignment
 
-Compare a feature's PRD against what was actually built, then surface an architect-readable prose report: deviations first, then what was built and how it works, the limits imposed by the architecture, and what remains untested. The audience is the architect who designed the feature but has NOT read the code. The report is produced by a fresh `feature-reporter` subagent so the assessment is grounded in the codebase, not in this session's assumptions.
+Compare a feature's PRD against what was actually built, then surface a **concise, scannable** report — tables and bullets, not a wall of prose: deviations from the plan, constraints that affect future decisions, and untested areas. The audience is the architect who designed the feature, knows the overall picture, and does NOT touch the code — they triage in under a minute. The report is produced by a fresh `feature-reporter` subagent so the assessment is grounded in the codebase, not in this session's assumptions. After presenting, this skill offers to apply the doc corrections the report surfaces back to the PRD and checkpoint.
 
-### REVIEW-ONLY MODE
+### SCOPE: REPORT + DOC WRITE-BACKS ONLY
 
-This skill reads, explores, and reports. It does NOT modify the project.
+This skill reads, explores, reports, and — only on explicit confirmation — applies the report's documentation corrections back to the PRD/checkpoint. It NEVER touches code.
 
-- Do NOT call `Edit` on any file.
 - Do NOT fix bugs, implement steps, or change code — even if the report surfaces gaps.
-- Do NOT update PRD status markers, checkpoints, or session logs.
 - Do NOT commit, push, or otherwise advance the work.
-- **One carve-out**: you MAY `Write` a single file — `.dev/<feature>/review.md` — but only in Step 6, only after the report has been presented, and only on explicit user confirmation.
+- Do NOT write a standalone `review.md` — the report is presented in-session and its corrections flow into the PRD/checkpoint, not into a parallel file.
+- **The only files you may `Edit`** are the feature's own `.dev/<feature>/` PRD and checkpoint markdown — and only in Step 6, only the specific corrections the report's "Your call" column names, and only per-item on explicit user confirmation.
 
-If the report surfaces work to do, point the user at their workflow (re-implement the gap, or `/dev-checkpoint` to capture it) — but do not perform either yourself.
+If the report surfaces *implementation* work (a real gap, an untested path to cover), point the user at their workflow (re-implement, or `/dev-checkpoint` to capture it) — do not perform it yourself. Only documentation corrections are in scope for write-back.
 
 ### Step 0: Discover Project Root
 
@@ -112,22 +112,26 @@ Use the `Task` tool to launch the `feature-reporter` subagent (`subagent_type=de
 - **Branch + uncommitted flag** from `git-state.sh brief`.
 - **Feature directory path** (`$FEATURE_DIR`) so the agent can explore the codebase itself.
 
-Instruct the agent to apply the report structure from its own definition (`agents/feature-reporter.md`) and to ground every claim in a file path. The report is the agent's final message.
+Instruct the agent to apply the concise table/bullet report format from its own definition (`agents/feature-reporter.md`) and to ground every row in a `file:line`. The report is the agent's final message.
 
 ### Step 5: Present the Report
 
-Relay the agent's report to the user **in full**. Do not compress it into bullets, summarize it, or reorder its sections — the prose is the deliverable. If the agent's output is missing one of the four mandatory sections, say so explicitly rather than papering over the gap.
+Relay the agent's report to the user **verbatim**. It is already concise — do NOT re-expand it into prose, re-summarize it, or reorder its sections; the tables and bullets ARE the deliverable. If the report is missing the header, the deviations table, or the untested table, say so explicitly rather than papering over the gap.
 
-### Step 6: Offer to Save
+### Step 6: Offer Doc Write-Backs
 
-After presenting the report, ask:
+The report's **"Your call"** column names the documentation corrections worth folding back into the canonical files that future sessions actually read (the PRD and checkpoint). Do NOT save a standalone `review.md`.
 
-> Save this report to `.dev/$FEATURE_NAME/review.md`?
+Scan the report for "Your call" items that are PRD/checkpoint corrections — a stale instruction, a data-flow line that no longer matches the code, a decision worth recording, a status marker that drifted. If there are none, say so and stop.
 
-Only on an explicit **yes**, `Write` the report verbatim to `$FEATURE_DIR/review.md` with a small header — feature name, date, branch, and the commit it was reviewed at. Saving makes the report visible to the dashboard and the wiki.
+Otherwise, list them back as a short numbered menu, e.g.:
 
-If the user declines, do nothing — no file is created.
+> Found 2 doc corrections. Apply?
+> 1. Master plan L187 — "edit both copies" → it's a symlink, edit one file
+> 2. Master plan data-flow L104 — TOC fetch → URL-parse + same-project guard, no TOC
+
+Apply only the items the user confirms (they may pick a subset). For each confirmed item, `Edit` the specific line in the feature's `.dev/<feature>/` PRD or checkpoint — the narrowest change that makes the doc match reality. Never edit code. Never apply an item the user did not confirm. If the user declines all, do nothing.
 
 ## PRIVACY RULES
 
-If the report (or the evidence it cites) contains absolute paths with usernames, secrets/credentials, or external private-repository references, warn the user before saving and keep the report to relative paths. This skill is REVIEW-ONLY — surface the issue, do not rewrite project files to fix it.
+If the report (or the evidence it cites) contains absolute paths with usernames, secrets/credentials, or external private-repository references, warn the user and keep the report to relative paths. When applying write-backs (Step 6), never introduce such references into the PRD/checkpoint — keep corrections to relative paths and generic descriptions.
