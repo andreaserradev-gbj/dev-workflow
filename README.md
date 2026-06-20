@@ -26,7 +26,7 @@ You stop, you restart. Twenty minutes re-explaining what you were building, what
 
 I kept hitting the same wall. I'd architect a feature with the agent across a long session, then every restart meant re-explaining what I was building from memory, badly. I tried keeping notes by hand, but they always drifted out of sync with the actual code.
 
-It started small: a plan I could write once, a checkpoint I could save when I stopped. But the real problem was bigger than one feature, so it grew. Session history carries continuity across restarts, and a cross-project wiki indexes every feature I've worked on. Now a fresh session knows more than where one feature left off. It starts with the whole picture, across projects and across tools (Claude Code, Codex, Gemini CLI).
+It started small: a plan I could write once, a checkpoint I could save when I stopped. But the real problem was bigger than one feature, so it grew. Session history carries continuity across restarts, and a cross-project wiki indexes every feature I've worked on. Now a fresh session knows more than where one feature left off. It starts with the whole picture, across projects and across tools (Claude Code, Codex, and other AgentSkills.io agents).
 
 ---
 
@@ -92,21 +92,31 @@ Then re-run the install commands above.
 
 </details>
 
-### Codex
+### Codex, pi, OpenCode, and other AgentSkills.io agents
 
-Tell Codex:
-
-> Clone `https://github.com/andreaserradev-gbj/dev-workflow.git` and follow `.codex/INSTALL.md` from the local checkout.
-
-Or see [docs/README.codex.md](docs/README.codex.md) for manual setup.
-
-### Gemini CLI
+These agents discover skills from `~/.agents/skills/`. Install with the AgentSkills.io standard CLI:
 
 ```bash
-gemini skills install https://github.com/andreaserradev-gbj/dev-workflow.git --path plugins/dev-workflow/skills
+npx skills add andreaserradev-gbj/dev-workflow
 ```
 
-Or see [docs/README.gemini.md](docs/README.gemini.md) for alternatives.
+All seven install at once, managed by `npx skills` (`list`, `update`, `remove`).
+
+> **Already using the Claude Code plugin?** The installer detects the agents on your `PATH` and may offer Claude Code as a target. **Decline it** — installing again gives you every skill twice (once from the plugin, once under `~/.claude/skills/`). This command is for the agents that read `~/.agents/skills/`.
+
+<details>
+<summary>No Node? Standard-tools equivalent (curl + tar)</summary>
+
+```bash
+mkdir -p ~/.agents/skills
+curl -fsSL https://github.com/andreaserradev-gbj/dev-workflow/archive/refs/heads/main.tar.gz \
+  | tar -xz -C ~/.agents/skills --strip-components=4 \
+        dev-workflow-main/plugins/dev-workflow/skills
+```
+
+</details>
+
+See [docs/README.codex.md](docs/README.codex.md) for the skill list and Codex-specific notes.
 
 ---
 
@@ -182,7 +192,7 @@ Reviews the conversation for insights worth keeping:
 
 <img src="docs/dashboard-preview.png" alt="Dev Dashboard showing projects with feature progress, status badges, and phase tracking" width="720"/>
 
-A local web server that scans `.dev/` folders across all your projects and shows live feature status in the browser. Real-time updates via WebSocket — edit a PRD and the dashboard reflects changes instantly. Works with any AI coding tool (Claude Code, Codex, Gemini CLI, etc.) — it reads `.dev/` PRDs directly, no AI integration needed.
+A local web server that scans `.dev/` folders across all your projects and shows live feature status in the browser. Real-time updates via WebSocket — edit a PRD and the dashboard reflects changes instantly. Works with any AI coding tool (Claude Code, Codex, etc.) — it reads `.dev/` PRDs directly, no AI integration needed.
 
 ```
 /dev-dashboard
@@ -300,7 +310,7 @@ dev-workflow wiki-index --json       # JSON output for scripts
 A few decisions that shaped the design:
 
 - **Agent-first CLI.** The skills are backed by a CLI built for machines, not humans: structured `--json` output and deterministic exit codes, so an agent can call it and branch on the result reliably.
-- **Tool-agnostic.** Skills follow the [AgentSkills.io](https://agentskills.io) standard and target abstract destinations resolved at runtime, so the same workflow runs under Claude Code, Codex, or Gemini CLI.
+- **Tool-agnostic.** Skills follow the [AgentSkills.io](https://agentskills.io) standard and target abstract destinations resolved at runtime, so the same workflow runs under Claude Code, Codex, and other AgentSkills.io agents.
 - **One source of truth, enforced.** A shared TypeScript core (parser, scanner, types) is bundled into each skill; git hooks block any commit where source changed without rebuilding the bundle, or a plugin change without a version bump.
 - **Live dashboard over plain files.** The cross-project dashboard reads `.dev/` PRDs directly and pushes updates over WebSocket, no AI integration required, so it works with any tool that writes the format.
 

@@ -43,11 +43,8 @@ plugins/dev-workflow/           # Plugin package
 .dev/wrapup-feedback.json        # Wrapup feedback history (auto-compacting)
 .codex/
   INSTALL.md                    # Installation instructions for Codex
-.gemini/
-  INSTALL.md                    # Installation instructions for Gemini CLI
 docs/
   README.codex.md               # Codex usage documentation
-  README.gemini.md              # Gemini CLI usage documentation
 .claude-plugin/
   marketplace.json              # Marketplace metadata
 .githooks/                      # Git hooks (activate with scripts/setup.sh)
@@ -118,7 +115,7 @@ The CLI is agent-first: designed for structured output (`--json`), deterministic
 
 ### Dashboard Actions
 
-The dashboard is AI-tool-agnostic — it works with any tool that reads/writes `.dev/` PRDs (Claude Code, Codex, Gemini CLI, etc.).
+The dashboard is AI-tool-agnostic — it works with any tool that reads/writes `.dev/` PRDs (Claude Code, Codex, etc.).
 
 **Server-side actions** (executed via API with confirmation prompt):
 - **Archive** — moves a completed feature from `.dev/` to `.dev-archive/` (`POST /api/projects/:project/features/:feature/archive`)
