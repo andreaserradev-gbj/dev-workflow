@@ -4,25 +4,27 @@ Use dev-workflow skills with OpenAI Codex via native skill discovery.
 
 ## Install
 
-Codex scans `~/.agents/skills/` at startup. One command installs all seven skills — no clone, no symlink:
+Codex scans `~/.agents/skills/` at startup. Install with the AgentSkills.io standard CLI:
 
 ```bash
-npx degit andreaserradev-gbj/dev-workflow/plugins/dev-workflow/skills ~/.agents/skills/dev-workflow
+npx skills add andreaserradev-gbj/dev-workflow
 ```
+
+All seven skills install at once and are managed by `npx skills` (`list`, `update`, `remove`). Restart Codex to discover them.
+
+> **Already using the Claude Code plugin?** The installer detects the agents on your `PATH` and may offer Claude Code as a target. **Decline it** — the marketplace plugin already provides these skills on Claude Code, so installing again gives you every skill twice (once from the plugin, once under `~/.claude/skills/`). This command is for the agents that read `~/.agents/skills/`: Codex, pi, OpenCode, and others.
 
 <details>
 <summary>No Node? Standard-tools equivalent (curl + tar)</summary>
 
 ```bash
-mkdir -p ~/.agents/skills/dev-workflow
+mkdir -p ~/.agents/skills
 curl -fsSL https://github.com/andreaserradev-gbj/dev-workflow/archive/refs/heads/main.tar.gz \
-  | tar -xz -C ~/.agents/skills/dev-workflow --strip-components=4 \
+  | tar -xz -C ~/.agents/skills --strip-components=4 \
         dev-workflow-main/plugins/dev-workflow/skills
 ```
 
 </details>
-
-Restart Codex to discover the skills. Pin a version by appending a tag: `…/skills#v1.36.0`.
 
 ## Available Skills
 
@@ -44,16 +46,12 @@ Some skills reference Claude Code subagents via the `Task` tool (e.g. `subagent_
 
 The CLI-backed skills (`dev-plan`, `dev-checkpoint`, `dev-resume`, `dev-review`, `dev-wiki`) shell out to a self-contained `node` CLI bundled inside each skill, so Node must be on PATH and Codex must permit the `node` call.
 
-## Update
+## Manage
 
 ```bash
-npx degit --force andreaserradev-gbj/dev-workflow/plugins/dev-workflow/skills ~/.agents/skills/dev-workflow
-```
-
-## Uninstall
-
-```bash
-rm -rf ~/.agents/skills/dev-workflow
+npx skills list      # see installed skills
+npx skills update    # update to the latest version
+npx skills remove    # remove skills
 ```
 
 ## Getting Help

@@ -94,21 +94,23 @@ Then re-run the install commands above.
 
 ### Codex, pi, OpenCode, and other AgentSkills.io agents
 
-These agents discover skills from `~/.agents/skills/`. One command installs all seven — no clone, no symlink:
+These agents discover skills from `~/.agents/skills/`. Install with the AgentSkills.io standard CLI:
 
 ```bash
-npx degit andreaserradev-gbj/dev-workflow/plugins/dev-workflow/skills ~/.agents/skills/dev-workflow
+npx skills add andreaserradev-gbj/dev-workflow
 ```
 
-Restart the agent and the skills are discovered. To update, re-run with `--force`. Pin a version by appending a tag: `…/skills#v1.36.0`.
+All seven install at once, managed by `npx skills` (`list`, `update`, `remove`).
+
+> **Already using the Claude Code plugin?** The installer detects the agents on your `PATH` and may offer Claude Code as a target. **Decline it** — installing again gives you every skill twice (once from the plugin, once under `~/.claude/skills/`). This command is for the agents that read `~/.agents/skills/`.
 
 <details>
 <summary>No Node? Standard-tools equivalent (curl + tar)</summary>
 
 ```bash
-mkdir -p ~/.agents/skills/dev-workflow
+mkdir -p ~/.agents/skills
 curl -fsSL https://github.com/andreaserradev-gbj/dev-workflow/archive/refs/heads/main.tar.gz \
-  | tar -xz -C ~/.agents/skills/dev-workflow --strip-components=4 \
+  | tar -xz -C ~/.agents/skills --strip-components=4 \
         dev-workflow-main/plugins/dev-workflow/skills
 ```
 

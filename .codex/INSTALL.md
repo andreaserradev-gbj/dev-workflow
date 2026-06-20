@@ -1,45 +1,31 @@
 # Installing dev-workflow for Codex
 
-Codex discovers skills from `~/.agents/skills/`. One command installs all seven — no clone, no symlink.
-
-## Install
+Codex discovers skills from `~/.agents/skills/`. Install with the AgentSkills.io standard CLI:
 
 ```bash
-npx degit andreaserradev-gbj/dev-workflow/plugins/dev-workflow/skills ~/.agents/skills/dev-workflow
+npx skills add andreaserradev-gbj/dev-workflow
 ```
 
-Restart Codex (quit and relaunch) to discover the skills. Pin a version instead of latest by appending a tag: `…/skills#v1.36.0`.
+All seven skills install at once and are managed by `npx skills` (`list`, `update`, `remove`). Restart Codex to discover them.
+
+> **Already using the Claude Code plugin?** The installer detects the agents on your `PATH` and may offer Claude Code as a target. **Decline it** — the marketplace plugin already provides these skills on Claude Code, so installing again gives you every skill twice (once from the plugin, once under `~/.claude/skills/`). This command is for the agents that read `~/.agents/skills/`: Codex, pi, OpenCode, and others.
 
 <details>
 <summary>No Node? Standard-tools equivalent (curl + tar)</summary>
 
 ```bash
-mkdir -p ~/.agents/skills/dev-workflow
+mkdir -p ~/.agents/skills
 curl -fsSL https://github.com/andreaserradev-gbj/dev-workflow/archive/refs/heads/main.tar.gz \
-  | tar -xz -C ~/.agents/skills/dev-workflow --strip-components=4 \
+  | tar -xz -C ~/.agents/skills --strip-components=4 \
         dev-workflow-main/plugins/dev-workflow/skills
 ```
 
 </details>
 
-## Verify
+## Manage
 
 ```bash
-ls ~/.agents/skills/dev-workflow
-```
-
-You should see the seven skill directories (`dev-plan`, `dev-checkpoint`, `dev-resume`, `dev-review`, `dev-wiki`, `dev-wrapup`, `dev-dashboard`).
-
-## Update
-
-Re-run the install with `--force`:
-
-```bash
-npx degit --force andreaserradev-gbj/dev-workflow/plugins/dev-workflow/skills ~/.agents/skills/dev-workflow
-```
-
-## Uninstall
-
-```bash
-rm -rf ~/.agents/skills/dev-workflow
+npx skills list      # see installed skills
+npx skills update    # update to the latest version
+npx skills remove    # remove skills
 ```
