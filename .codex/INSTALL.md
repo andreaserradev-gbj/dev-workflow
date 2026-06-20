@@ -1,52 +1,45 @@
 # Installing dev-workflow for Codex
 
-Enable dev-workflow skills in Codex via native skill discovery. Just clone and symlink.
+Codex discovers skills from `~/.agents/skills/`. One command installs all seven — no clone, no symlink.
 
-## Prerequisites
+## Install
 
-- Git
+```bash
+npx degit andreaserradev-gbj/dev-workflow/plugins/dev-workflow/skills ~/.agents/skills/dev-workflow
+```
 
-## Installation
+Restart Codex (quit and relaunch) to discover the skills. Pin a version instead of latest by appending a tag: `…/skills#v1.36.0`.
 
-1. **Clone the dev-workflow repository:**
-   ```bash
-   git clone https://github.com/andreaserradev-gbj/dev-workflow.git ~/.codex/dev-workflow
-   ```
+<details>
+<summary>No Node? Standard-tools equivalent (curl + tar)</summary>
 
-2. **Create the skills symlink:**
-   ```bash
-   mkdir -p ~/.agents/skills
-   ln -s ~/.codex/dev-workflow/plugins/dev-workflow/skills ~/.agents/skills/dev-workflow
-   ```
+```bash
+mkdir -p ~/.agents/skills/dev-workflow
+curl -fsSL https://github.com/andreaserradev-gbj/dev-workflow/archive/refs/heads/main.tar.gz \
+  | tar -xz -C ~/.agents/skills/dev-workflow --strip-components=4 \
+        dev-workflow-main/plugins/dev-workflow/skills
+```
 
-   **Windows (PowerShell):**
-   ```powershell
-   New-Item -ItemType Directory -Force -Path "$env:USERPROFILE\.agents\skills"
-   cmd /c mklink /J "$env:USERPROFILE\.agents\skills\dev-workflow" "$env:USERPROFILE\.codex\dev-workflow\plugins\dev-workflow\skills"
-   ```
-
-3. **Restart Codex** (quit and relaunch the CLI) to discover the skills.
+</details>
 
 ## Verify
 
 ```bash
-ls -la ~/.agents/skills/dev-workflow
+ls ~/.agents/skills/dev-workflow
 ```
 
-You should see a symlink (or junction on Windows) pointing to your dev-workflow skills directory.
+You should see the seven skill directories (`dev-plan`, `dev-checkpoint`, `dev-resume`, `dev-review`, `dev-wiki`, `dev-wrapup`, `dev-dashboard`).
 
-## Updating
+## Update
+
+Re-run the install with `--force`:
 
 ```bash
-cd ~/.codex/dev-workflow && git pull
+npx degit --force andreaserradev-gbj/dev-workflow/plugins/dev-workflow/skills ~/.agents/skills/dev-workflow
 ```
 
-Skills update instantly through the symlink.
-
-## Uninstalling
+## Uninstall
 
 ```bash
-rm ~/.agents/skills/dev-workflow
+rm -rf ~/.agents/skills/dev-workflow
 ```
-
-Optionally delete the clone: `rm -rf ~/.codex/dev-workflow`.
