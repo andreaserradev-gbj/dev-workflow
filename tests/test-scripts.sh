@@ -229,6 +229,26 @@ check_bin_sync() {
 check_bin_sync dev-workflow.cjs dev-checkpoint dev-plan dev-resume dev-review dev-wiki
 
 echo ""
+echo "--- version badge sync ---"
+
+MARKET_VERSION="$(grep -m1 '"version"' "$PROJECT_ROOT/.claude-plugin/marketplace.json" 2>/dev/null | sed -E 's/.*"version"[[:space:]]*:[[:space:]]*"([^"]+)".*/\1/' || true)"
+README_VERSION="$(grep -m1 'img.shields.io/badge/version-' "$PROJECT_ROOT/README.md" 2>/dev/null | sed -E 's#.*badge/version-([^-]+)-green.*#\1#' || true)"
+
+if [ -z "$MARKET_VERSION" ]; then
+  echo "FAIL: could not read version from .claude-plugin/marketplace.json"
+  FAIL=$((FAIL + 1))
+elif [ -z "$README_VERSION" ]; then
+  echo "FAIL: could not read version badge from README.md"
+  FAIL=$((FAIL + 1))
+elif [ "$MARKET_VERSION" != "$README_VERSION" ]; then
+  echo "FAIL: README badge ($README_VERSION) does not match marketplace.json ($MARKET_VERSION) -- bump the badge"
+  FAIL=$((FAIL + 1))
+else
+  echo "PASS: README version badge matches marketplace.json ($MARKET_VERSION)"
+  PASS=$((PASS + 1))
+fi
+
+echo ""
 echo "--- dev-dashboard installer regression tests ---"
 INSTALLER_TESTS="$(cd "$(dirname "$0")" && pwd)/test-dev-dashboard-install.sh"
 if bash "$INSTALLER_TESTS" >/tmp/dev-dashboard-install.log 2>&1; then
