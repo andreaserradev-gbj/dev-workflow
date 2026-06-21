@@ -18,6 +18,7 @@ set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 STOP_SCRIPT="$SCRIPT_DIR/stop.sh"
+READ_PORT_HELPER="$SCRIPT_DIR/read-port.cjs"
 # scripts/ -> skills/dev-dashboard/dashboard/
 DASHBOARD_DIR="$(cd "$SCRIPT_DIR/.." && pwd)/dashboard"
 SERVER_ENTRY="$DASHBOARD_DIR/server/index.cjs"
@@ -60,21 +61,13 @@ read_configured_port() {
     return 0
   fi
 
+  # Delegate config parsing to a committed helper script (no inline `node -e`,
+  # so the launch path has no dynamic-code-execution surface). A missing helper
+  # or any parse failure yields an empty result -> default port.
   local configured_port=""
-  configured_port="$(
-    node -e '
-      const fs = require("fs");
-      const configPath = process.argv[1];
-      try {
-        const raw = fs.readFileSync(configPath, "utf8");
-        const parsed = JSON.parse(raw);
-        const port = parsed.port;
-        if (Number.isInteger(port) && port > 0 && port <= 65535) {
-          process.stdout.write(String(port));
-        }
-      } catch {}
-    ' "$CONFIG_PATH"
-  )"
+  if [ -f "$READ_PORT_HELPER" ]; then
+    configured_port="$(node "$READ_PORT_HELPER" "$CONFIG_PATH" 2>/dev/null || true)"
+  fi
 
   if [ -n "$configured_port" ]; then
     echo "$configured_port"

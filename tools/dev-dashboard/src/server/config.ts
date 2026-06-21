@@ -17,6 +17,7 @@ export const CONFIG_PATH = getConfigPath();
 export const DEFAULT_CONFIG: DashboardConfig = {
   scanDirs: [],
   port: 3141,
+  host: '127.0.0.1',
   notifications: false,
   scanDirsConfigured: false,
   terminal: {},
@@ -26,6 +27,7 @@ export const DEFAULT_PORT = DEFAULT_CONFIG.port;
 export interface CliOverrides {
   scan?: string[];
   port?: number;
+  host?: string;
 }
 
 export class ConfigReadError extends Error {
@@ -45,9 +47,13 @@ export async function loadConfig(
   const storedConfig = await readStoredConfig(configPath);
   const scanDirs = normalizeScanDirs(overrides.scan ?? storedConfig.scanDirs).map(expandHome);
 
+  // Host precedence: CLI flag > DEV_DASHBOARD_HOST env > stored config > default.
+  const envHost = process.env.DEV_DASHBOARD_HOST?.trim();
+
   const config: DashboardConfig = {
     scanDirs,
     port: overrides.port ?? storedConfig.port,
+    host: overrides.host ?? (envHost || storedConfig.host),
     notifications: storedConfig.notifications,
     scanDirsConfigured: overrides.scan ? scanDirs.length > 0 : storedConfig.scanDirsConfigured,
     terminal: storedConfig.terminal,
@@ -210,6 +216,16 @@ export function parseCliArgs(args: string[]): CliOverrides {
         if (!isNaN(port)) overrides.port = port;
         i++;
       }
+    } else if (args[i] === '--host') {
+      i++;
+      if (i < args.length) {
+        overrides.host = args[i].trim();
+        i++;
+      }
+    } else if (args[i] === '--lan') {
+      // Convenience alias for binding all interfaces (LAN-accessible).
+      overrides.host = '0.0.0.0';
+      i++;
     } else {
       i++;
     }
@@ -228,6 +244,10 @@ function normalizeStoredConfig(fileConfig: Partial<DashboardConfig>): DashboardC
   return {
     scanDirs,
     port: fileConfig.port ?? DEFAULT_CONFIG.port,
+    host:
+      typeof fileConfig.host === 'string' && fileConfig.host.trim()
+        ? fileConfig.host.trim()
+        : DEFAULT_CONFIG.host,
     notifications: fileConfig.notifications ?? DEFAULT_CONFIG.notifications,
     scanDirsConfigured,
     terminal: normalizeTerminal(fileConfig.terminal),

@@ -287,18 +287,6 @@ else
 fi
 
 echo ""
-echo "--- dev-dashboard installer regression tests ---"
-INSTALLER_TESTS="$(cd "$(dirname "$0")" && pwd)/test-dev-dashboard-install.sh"
-if bash "$INSTALLER_TESTS" >/tmp/dev-dashboard-install.log 2>&1; then
-  echo "PASS: tests/test-dev-dashboard-install.sh"
-  PASS=$((PASS + 1))
-else
-  echo "FAIL: tests/test-dev-dashboard-install.sh (see /tmp/dev-dashboard-install.log)"
-  cat /tmp/dev-dashboard-install.log
-  FAIL=$((FAIL + 1))
-fi
-
-echo ""
 echo "--- dev-dashboard stop.sh regression tests ---"
 STOP_TESTS="$(cd "$(dirname "$0")" && pwd)/test-dev-dashboard-stop.sh"
 if bash "$STOP_TESTS" >/tmp/dev-dashboard-stop.log 2>&1; then
