@@ -299,5 +299,17 @@ else
 fi
 
 echo ""
+echo "--- dev-dashboard read-port.cjs unit tests ---"
+READ_PORT_TESTS="$(cd "$(dirname "$0")" && pwd)/test-dev-dashboard-read-port.sh"
+if bash "$READ_PORT_TESTS" >/tmp/dev-dashboard-read-port.log 2>&1; then
+  echo "PASS: tests/test-dev-dashboard-read-port.sh"
+  PASS=$((PASS + 1))
+else
+  echo "FAIL: tests/test-dev-dashboard-read-port.sh (see /tmp/dev-dashboard-read-port.log)"
+  cat /tmp/dev-dashboard-read-port.log
+  FAIL=$((FAIL + 1))
+fi
+
+echo ""
 echo "=== Results: $PASS passed, $FAIL failed ==="
 [ "$FAIL" -eq 0 ] || exit 1
