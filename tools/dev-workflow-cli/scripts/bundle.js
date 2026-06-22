@@ -8,9 +8,59 @@
  */
 
 import { build } from 'esbuild';
-import { mkdir, rm } from 'fs/promises';
+import { mkdir, rm, readFile } from 'fs/promises';
 import { resolve, dirname } from 'path';
 import { fileURLToPath } from 'url';
+
+// esbuild plugin: neutralize the dynamic-code-execution primitives that skills.sh's static
+// scanners (Gen REMOTE_CODE_EXECUTION, Socket usesEval) flag in the emitted bundle. Two
+// dependency-shipped primitives exist, both UNREACHABLE in dev-workflow's usage but visible
+// to a scanner reading the artifact text:
+//   1. gray-matter/lib/engines.js — `eval()` in its JavaScript frontmatter engine. We only
+//      ever parse YAML frontmatter (never `js`/`javascript`), so this engine is dead.
+//   2. js-yaml/lib/js-yaml/type/js/function.js — `new Function()` in the `!!js/function` YAML
+//      type. gray-matter parses via `safeLoad` (safe schema EXCLUDES this type), so it is dead
+//      too — but Socket's usesEval alert also covers the Function constructor, so it must go.
+// Stripping both is behavior-preserving for every .dev/ PRD shape (gray-matter's safe YAML
+// path via js-yaml safeLoad/safeDump is untouched). Each replace is GUARDED: if a dependency
+// bump changes the internals so a pattern no longer matches, the build fails loudly rather
+// than silently shipping the primitive again.
+const stripDynamicCodeEval = {
+  name: 'strip-dynamic-code-eval',
+  setup(build) {
+    build.onLoad({ filter: /gray-matter[\\/]lib[\\/]engines\.js$/ }, async (args) => {
+      const original = await readFile(args.path, 'utf8');
+      const patched = original.replace(
+        /return eval\(str\) \|\| \{\};/,
+        'return {}; // gray-matter JS frontmatter engine disabled by dev-workflow build (no eval)',
+      );
+      if (patched === original) {
+        throw new Error(
+          'strip-dynamic-code-eval: expected eval(str) pattern not found in gray-matter engines.js — ' +
+            'internals changed; update this build stub before shipping.',
+        );
+      }
+      return { contents: patched, loader: 'js' };
+    });
+    build.onLoad(
+      { filter: /js-yaml[\\/]lib[\\/]js-yaml[\\/]type[\\/]js[\\/]function\.js$/ },
+      async (args) => {
+        const original = await readFile(args.path, 'utf8');
+        const patched = original.replace(
+          /new Function\(/g,
+          '(function(){throw new Error("js-yaml js/function type disabled by dev-workflow build")})(',
+        );
+        if (patched === original) {
+          throw new Error(
+            'strip-dynamic-code-eval: expected new Function( pattern not found in js-yaml ' +
+              'type/js/function.js — internals changed; update this build stub before shipping.',
+          );
+        }
+        return { contents: patched, loader: 'js' };
+      },
+    );
+  },
+};
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const ROOT = resolve(__dirname, '..');
@@ -40,6 +90,7 @@ async function bundle() {
     outfile: OUT_FILE,
     minify: true,
     sourcemap: false,
+    plugins: [stripDynamicCodeEval],
     external: [
       'fs', 'path', 'os', 'url', 'http', 'https', 'net', 'stream',
       'events', 'util', 'crypto', 'buffer', 'child_process', 'worker_threads',

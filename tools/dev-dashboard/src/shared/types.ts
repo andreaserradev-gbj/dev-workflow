@@ -74,6 +74,9 @@ export interface TerminalConfig {
 export interface DashboardConfig {
   scanDirs: string[];
   port: number;
+  // Network interface the server binds to. Defaults to '127.0.0.1' (loopback —
+  // reachable only from this machine). LAN exposure ('0.0.0.0') is opt-in.
+  host: string;
   notifications: boolean;
   scanDirsConfigured: boolean;
   terminal: TerminalConfig;

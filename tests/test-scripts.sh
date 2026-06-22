@@ -229,6 +229,44 @@ check_bin_sync() {
 check_bin_sync dev-workflow.cjs dev-checkpoint dev-plan dev-resume dev-review dev-wiki
 
 echo ""
+echo "--- bundle smoke test ---"
+# Runs the ACTUAL shipped .cjs end-to-end (not just byte-identity). The vitest suites
+# import TS source and never load the bundle, so this is the only automated layer that
+# catches a bundle-level regression — e.g. if the esbuild dynamic-code stub (the eval /
+# new Function strip in scripts/bundle.js) ever broke gray-matter's YAML frontmatter
+# parse or js-yaml's date coercion. Exercises the real parse path via resume-context.
+SMOKE_DIR="$(mktemp -d)"
+SMOKE_FEATURE="$SMOKE_DIR/.dev/smoke-feature"
+mkdir -p "$SMOKE_FEATURE"
+cat > "$SMOKE_FEATURE/00-master-plan.md" <<'SMOKE_EOF'
+# Smoke Feature
+**Status**: In Progress
+## Phase 1: Smoke
+1. ⬜ step
+SMOKE_EOF
+cat > "$SMOKE_FEATURE/checkpoint.md" <<'SMOKE_EOF'
+---
+branch: smoke/test-branch
+last_commit: abc1234
+uncommitted_changes: false
+checkpointed: 2026-06-21T10:00:00.000Z
+---
+
+<context>Smoke parse check</context>
+<next_action>Verify the bundled .cjs parses YAML frontmatter</next_action>
+SMOKE_EOF
+SMOKE_OUT="$(node "$BIN_DIR/dev-workflow.cjs" resume-context --json --dir "$SMOKE_FEATURE" 2>&1)" && SMOKE_EXIT=0 || SMOKE_EXIT=$?
+if [ "$SMOKE_EXIT" -eq 0 ] && printf '%s' "$SMOKE_OUT" | grep -q 'smoke/test-branch'; then
+  echo "PASS: bundled dev-workflow.cjs parses YAML frontmatter (resume-context)"
+  PASS=$((PASS + 1))
+else
+  echo "FAIL: bundled dev-workflow.cjs smoke (exit $SMOKE_EXIT)"
+  echo "      output: $SMOKE_OUT"
+  FAIL=$((FAIL + 1))
+fi
+rm -rf "$SMOKE_DIR"
+
+echo ""
 echo "--- version badge sync ---"
 
 MARKET_VERSION="$(grep -m1 '"version"' "$PROJECT_ROOT/.claude-plugin/marketplace.json" 2>/dev/null | sed -E 's/.*"version"[[:space:]]*:[[:space:]]*"([^"]+)".*/\1/' || true)"
@@ -249,18 +287,6 @@ else
 fi
 
 echo ""
-echo "--- dev-dashboard installer regression tests ---"
-INSTALLER_TESTS="$(cd "$(dirname "$0")" && pwd)/test-dev-dashboard-install.sh"
-if bash "$INSTALLER_TESTS" >/tmp/dev-dashboard-install.log 2>&1; then
-  echo "PASS: tests/test-dev-dashboard-install.sh"
-  PASS=$((PASS + 1))
-else
-  echo "FAIL: tests/test-dev-dashboard-install.sh (see /tmp/dev-dashboard-install.log)"
-  cat /tmp/dev-dashboard-install.log
-  FAIL=$((FAIL + 1))
-fi
-
-echo ""
 echo "--- dev-dashboard stop.sh regression tests ---"
 STOP_TESTS="$(cd "$(dirname "$0")" && pwd)/test-dev-dashboard-stop.sh"
 if bash "$STOP_TESTS" >/tmp/dev-dashboard-stop.log 2>&1; then
@@ -269,6 +295,18 @@ if bash "$STOP_TESTS" >/tmp/dev-dashboard-stop.log 2>&1; then
 else
   echo "FAIL: tests/test-dev-dashboard-stop.sh (see /tmp/dev-dashboard-stop.log)"
   cat /tmp/dev-dashboard-stop.log
+  FAIL=$((FAIL + 1))
+fi
+
+echo ""
+echo "--- dev-dashboard read-port.cjs unit tests ---"
+READ_PORT_TESTS="$(cd "$(dirname "$0")" && pwd)/test-dev-dashboard-read-port.sh"
+if bash "$READ_PORT_TESTS" >/tmp/dev-dashboard-read-port.log 2>&1; then
+  echo "PASS: tests/test-dev-dashboard-read-port.sh"
+  PASS=$((PASS + 1))
+else
+  echo "FAIL: tests/test-dev-dashboard-read-port.sh (see /tmp/dev-dashboard-read-port.log)"
+  cat /tmp/dev-dashboard-read-port.log
   FAIL=$((FAIL + 1))
 fi
 

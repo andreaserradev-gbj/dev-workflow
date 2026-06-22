@@ -48,6 +48,15 @@ This writes:
 
 Report the output to the user.
 
+#### Filesystem scope (bounded by design)
+
+The wiki writer touches exactly two trees, both fixed and user-owned — no arbitrary, system, or remote filesystem access:
+
+- **Writes** land only under a single fixed directory, `~/.dev-wiki/` (its `index.md`, `log.md`, `README.md`, `.obsidian/`).
+- **Symlinks** under `~/.dev-wiki/projects/` point only at the user's own scanned `.dev/` and `.dev-archive/` PRD directories — the same dirs every other dev-workflow skill already reads.
+
+The dev-dashboard server regenerates the wiki to the **same** fixed `~/.dev-wiki/` on PRD changes (its `wikiDir` default lives in `tools/dev-dashboard/src/server/config.ts`) — one destination, one intent, no second filesystem surface to audit.
+
 ### Step 2: Obsidian Setup (if `--init` or first run)
 
 If the user passed `--init`, or if this is the first time the wiki was generated, provide Obsidian setup instructions:

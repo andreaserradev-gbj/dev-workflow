@@ -35,7 +35,7 @@ plugins/dev-workflow/           # Plugin package
       scripts/discover.sh, validate.sh, dev-workflow.cjs
     dev-dashboard/
       SKILL.md
-      scripts/start.sh, check-install.sh, install.sh
+      scripts/start.sh, stop.sh, read-port.cjs
       dashboard/                    # Bundled server + client (committed build artifact)
         server/index.cjs
         client/

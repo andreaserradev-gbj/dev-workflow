@@ -75,8 +75,18 @@ async function main(): Promise<void> {
     // dist/client/ may not exist in dev mode — Vite handles frontend
   }
 
-  // Start server
-  await app.listen({ port: config.port, host: '0.0.0.0' });
+  // Start server — bind to loopback by default; LAN exposure is opt-in
+  // (--lan / --host / DEV_DASHBOARD_HOST). See config.ts for precedence.
+  await app.listen({ port: config.port, host: config.host });
+
+  const exposedToLan = config.host === '0.0.0.0' || config.host === '::';
+  if (exposedToLan) {
+    console.warn(
+      `dev-dashboard bound to ${config.host}:${config.port} — exposed on ALL network interfaces (LAN-accessible).`,
+    );
+  } else {
+    console.log(`dev-dashboard bound to ${config.host}:${config.port} (localhost only).`);
+  }
 
   // WebSocket broadcaster — attach to the running HTTP server
   const broadcaster = createWsBroadcaster(app.server, state);

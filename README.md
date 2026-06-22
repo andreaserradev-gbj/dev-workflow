@@ -3,7 +3,7 @@
 # dev-workflow
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
-[![Version](https://img.shields.io/badge/version-1.36.0-green.svg)](.claude-plugin/marketplace.json)
+[![Version](https://img.shields.io/badge/version-1.37.0-green.svg)](.claude-plugin/marketplace.json)
 [![AgentSkills.io](https://img.shields.io/badge/standard-AgentSkills.io-purple.svg)](https://agentskills.io)
 
 **AI coding agents start every session from zero. Your architecture shouldn't.**
@@ -198,9 +198,7 @@ A local web server that scans `.dev/` folders across all your projects and shows
 /dev-dashboard
 ```
 
-Starts the server (or reuses an existing instance) and displays the URL. No setup required — the server is bundled with the plugin.
-On first run, `/dev-dashboard` also installs local `dev-dashboard` and `dev-dashboard-stop`
-commands so future terminal launches reuse the same bundled launcher.
+Starts the server (or reuses an existing instance) and displays the URL. No setup required — the server is bundled with the plugin and launches directly through `/dev-dashboard`.
 
 The dashboard also auto-generates a cross-project wiki (see `/dev-wiki` below).
 
@@ -239,22 +237,12 @@ See [tools/dev-dashboard/README.md](tools/dev-dashboard/README.md) for CLI flags
 </details>
 
 <details>
-<summary>Running from the terminal</summary>
+<summary>Network binding</summary>
 
-Run `/dev-dashboard` once to install the local commands, then use:
-
-```bash
-dev-dashboard
-dev-dashboard-stop
-```
-
-The installer writes Unix command shims to `~/.local/bin` by default, or to
-`$DEV_DASHBOARD_BIN_DIR` if you override it. If the install reports that the bin
-directory is not on `PATH`, add that directory to your shell config before using
-the commands directly in a terminal.
-
-This installer-backed path is the primary terminal UX for this release. Manual
-shell snippets are no longer the recommended default.
+The server binds to `127.0.0.1` (localhost only) by default. To expose it on your
+LAN, opt in explicitly with `DEV_DASHBOARD_HOST=0.0.0.0` (or the `--lan` / `--host`
+flags when running the server directly). A LAN bind is logged with a warning at
+startup.
 
 </details>
 

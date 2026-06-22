@@ -4,6 +4,22 @@ All notable changes to this project should be documented in this file.
 
 <!-- LOCAL-RELEASES-START -->
 
+## v1.37.0 - 2026-06-22
+
+### Security
+
+- The bundled `dev-workflow.cjs` CLI now ships with **zero dynamic-code-execution primitives**. A guarded esbuild transform strips `gray-matter`'s `eval()` (its optional JS-frontmatter engine) and `js-yaml`'s `new Function()` (the `!!js/function` type) from every shipped copy at build time — both were dead code under the YAML-only `safeLoad` path the parser actually uses, so PRD parsing is byte-for-byte unchanged. This removes the remote-code-execution surface that drove the `/dev-wiki` security rating and the `usesEval` dependency alerts on the bundle. The transform is guarded — the build fails if a dependency bump relocates either pattern, so a primitive can never silently re-ship — and a bundle smoke test that runs the real `.cjs` (not the TS source, which never loads the shipped artifact) is now part of the test suite.
+- `/dev-review` now treats every PRD, checkpoint, and diff it ingests as **untrusted data, not instructions**. The `feature-reporter` subagent receives that markdown wrapped in XML-like boundary markers (`<prd-content>`, `<checkpoint-content>`, `<diff>`), behind a foregrounded mandatory user-review gate, with its `Edit` capability scoped to the feature's own `.dev/` docs — mirroring the structure that keeps `/dev-checkpoint` from being flagged for the same prompt-injection category. The boundary is enforced in both the skill and the bundled `feature-reporter` agent.
+- `/dev-wiki`'s filesystem writes are now documented as bounded to `~/.dev-wiki`, covering both the CLI generator and the dashboard write site.
+
+### Changed
+
+- The dev-dashboard server now binds to **`127.0.0.1` (loopback) by default** instead of `0.0.0.0`. LAN exposure is opt-in via `--lan`, `--host <addr>`, or `DEV_DASHBOARD_HOST` (precedence: CLI > env > stored > default), and a LAN bind logs a warning at startup. The bind host is intentionally **not** settable through the HTTP API, so a web request can never flip the server to a LAN-exposed address. The dashboard port file is now read by a committed `read-port.cjs` (config path passed as an argv, not string-interpolated) instead of an inline `node -e`, removing the last dynamic-code surface from the launch path.
+
+### Removed
+
+- The dev-dashboard `~/.local/bin` shim-install chain — `install.sh`, `check-install.sh`, and the runtime `chmod`/`node -e` they relied on. The `/dev-dashboard` skill now launches `start.sh`/`stop.sh` directly by absolute path, and skills already invoke the bundled CLI by absolute path, so the shims had no load-bearing consumer. Removing the install capability outright (rather than hardening it) clears the `COMMAND_EXECUTION` driver behind the dev-dashboard rating. Existing user-installed shims keep working but are now unmanaged.
+
 ## v1.36.0 - 2026-06-17
 
 ### Changed

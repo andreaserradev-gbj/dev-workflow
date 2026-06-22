@@ -14,6 +14,59 @@ import { cp, mkdir, rm, readFile } from 'fs/promises';
 import { resolve, dirname } from 'path';
 import { fileURLToPath } from 'url';
 
+// esbuild plugin: neutralize the dynamic-code-execution primitives that skills.sh's static
+// scanners (Gen REMOTE_CODE_EXECUTION, Socket usesEval) would flag in the emitted bundle.
+// The dashboard server re-exports dev-workflow-core's parser/writer, which pull gray-matter
+// (and its js-yaml dependency) in transitively. Two dependency-shipped primitives exist, both
+// UNREACHABLE in dev-workflow's usage but visible to a scanner reading the artifact text:
+//   1. gray-matter/lib/engines.js — `eval()` in its JavaScript frontmatter engine (we parse
+//      YAML only, never `js`/`javascript`).
+//   2. js-yaml/lib/js-yaml/type/js/function.js — `new Function()` in the `!!js/function` type
+//      (gray-matter uses `safeLoad`, whose safe schema excludes this type).
+// Stripping both is behavior-preserving (the safe YAML path is untouched). Each replace is
+// GUARDED so a dependency bump that moves the pattern fails the build loudly instead of
+// silently re-shipping the primitive. Mirror of the stub in dev-workflow-cli/scripts/bundle.js.
+// NOTE: the dashboard server bundle also contains `new Function(` from ajv / fastify
+// (fast-json-stringify, find-my-way) — that is their core schema/serializer codegen, is not
+// removable, and is NOT a rating driver (the server bundle was never in any scanner report;
+// the dev-dashboard MEDs are the install chain + SKILL.md). We intentionally do not touch it.
+const stripDynamicCodeEval = {
+  name: 'strip-dynamic-code-eval',
+  setup(build) {
+    build.onLoad({ filter: /gray-matter[\\/]lib[\\/]engines\.js$/ }, async (args) => {
+      const original = await readFile(args.path, 'utf8');
+      const patched = original.replace(
+        /return eval\(str\) \|\| \{\};/,
+        'return {}; // gray-matter JS frontmatter engine disabled by dev-workflow build (no eval)',
+      );
+      if (patched === original) {
+        throw new Error(
+          'strip-dynamic-code-eval: expected eval(str) pattern not found in gray-matter engines.js — ' +
+            'internals changed; update this build stub before shipping.',
+        );
+      }
+      return { contents: patched, loader: 'js' };
+    });
+    build.onLoad(
+      { filter: /js-yaml[\\/]lib[\\/]js-yaml[\\/]type[\\/]js[\\/]function\.js$/ },
+      async (args) => {
+        const original = await readFile(args.path, 'utf8');
+        const patched = original.replace(
+          /new Function\(/g,
+          '(function(){throw new Error("js-yaml js/function type disabled by dev-workflow build")})(',
+        );
+        if (patched === original) {
+          throw new Error(
+            'strip-dynamic-code-eval: expected new Function( pattern not found in js-yaml ' +
+              'type/js/function.js — internals changed; update this build stub before shipping.',
+          );
+        }
+        return { contents: patched, loader: 'js' };
+      },
+    );
+  },
+};
+
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const ROOT = resolve(__dirname, '..');
 const REPO_ROOT = resolve(ROOT, '../..');
@@ -48,6 +101,7 @@ async function bundle() {
     outfile: resolve(OUT_DIR, 'server/index.cjs'),
     minify: true,
     sourcemap: false,
+    plugins: [stripDynamicCodeEval],
     define: {
       // Substituted into src/server/version.ts at bundle time.
       __VERSION__: JSON.stringify(pluginVersion),

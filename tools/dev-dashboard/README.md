@@ -12,20 +12,7 @@ Live, cross-project dashboard that scans `.dev/` folders across your codebase an
 /dev-dashboard
 ```
 
-Starts the server (or reuses an existing instance), finds an available port, and displays the URL. On first run, it also installs `dev-dashboard` and `dev-dashboard-stop` shell commands so terminal usage reuses the same bundled launcher. The server is bundled with the plugin — no build step or `npm install` needed. Only requires Node.js 24+.
-
-### Via Installed Terminal Commands
-
-After the first `/dev-dashboard` run, use:
-
-```bash
-dev-dashboard
-dev-dashboard-stop
-```
-
-The installer writes Unix command shims to `~/.local/bin` by default, or to
-`$DEV_DASHBOARD_BIN_DIR` if you override it. This installer-backed terminal path
-is Unix-only in this iteration.
+Starts the server (or reuses an existing instance), finds an available port, and displays the URL. The server is bundled with the plugin — no build step or `npm install` needed. Only requires Node.js 24+. It binds to `127.0.0.1` (localhost) by default; opt into LAN exposure with `DEV_DASHBOARD_HOST=0.0.0.0` or the `--lan` / `--host` flags.
 
 ### Manual (for development)
 
