@@ -18,6 +18,10 @@ export function normalizeEmoji(text: string): string {
 
 export interface MasterPlanResult {
   summary: string | null;
+  /** Author-specified frontmatter `tags:` only (authoritative). */
+  tags: string[];
+  /** Deterministic keyword tags derived from the plan body. */
+  keywordTags: string[];
   phases: Phase[];
   progress: Progress;
   lastUpdated: string | null;
@@ -46,13 +50,203 @@ export async function parseMasterPlan(filePath: string): Promise<MasterPlanResul
 
   const percent = total > 0 ? Math.round((done / total) * 100) : 0;
 
-  return { summary, phases, progress: { done, total, percent }, lastUpdated, created };
+  const tags = extractFrontmatterTags(content);
+  const keywordTags = deriveKeywordTags(content);
+
+  return {
+    summary,
+    tags,
+    keywordTags,
+    phases,
+    progress: { done, total, percent },
+    lastUpdated,
+    created,
+  };
 }
 
+/** Union of two tag lists, preserving order with the first list authoritative,
+ *  deduped case-insensitively (first occurrence's casing wins). */
+function mergeTags(primary: string[], secondary: string[]): string[] {
+  const seen = new Set<string>();
+  const out: string[] = [];
+  for (const tag of [...primary, ...secondary]) {
+    const key = tag.toLowerCase();
+    if (seen.has(key)) continue;
+    seen.add(key);
+    out.push(tag);
+  }
+  return out;
+}
+
+/** Read an author-specified `tags:` array from a master plan's YAML
+ *  frontmatter, if present. Mirrors `parseCheckpoint`'s gray-matter usage.
+ *  Master plans usually have no YAML frontmatter (they open with `# Title`),
+ *  in which case gray-matter returns empty data and this yields `[]`.
+ *  Non-array or malformed frontmatter is ignored (also `[]`). Author casing is
+ *  preserved; values are trimmed and empties dropped. */
+function extractFrontmatterTags(content: string): string[] {
+  let data: Record<string, unknown> = {};
+  try {
+    data = matter(content).data;
+  } catch {
+    return [];
+  }
+  if (!Array.isArray(data.tags)) return [];
+  return data.tags
+    .filter((t): t is string => typeof t === 'string')
+    .map((t) => t.trim())
+    .filter((t) => t.length > 0);
+}
+
+/**
+ * Extract a one-line summary for a master plan, trying in order:
+ *   1. `## Executive Summary` section's first line
+ *   2. `## Overview`, `## Summary`, `## Background` (first that exists)
+ *   3. The first prose paragraph (skipping frontmatter, headings, metadata,
+ *      lists, tables, rules, and gate markers)
+ *   4. The H1 title text
+ * Returns `null` only when the document has no prose at all. This kills the
+ * blank summary cards that appeared whenever a plan lacked an Executive Summary.
+ */
 function extractSummary(content: string): string | null {
-  const match = content.match(/## Executive Summary\s*\n\s*\n([^\n]+)/);
-  if (!match) return null;
-  return match[1].trim();
+  for (const heading of ['Executive Summary', 'Overview', 'Summary', 'Background']) {
+    const para = extractHeadingParagraph(content, heading);
+    if (para) return para;
+  }
+  return extractFirstProse(content) ?? extractH1(content);
+}
+
+/** First non-empty content line of a `## <heading>` section, or null. */
+function extractHeadingParagraph(content: string, heading: string): string | null {
+  const regex = new RegExp(`^##\\s+${heading}\\s*\\n(?:[ \\t]*\\n)*([^\\n#].*)`, 'im');
+  const match = content.match(regex);
+  return match ? match[1].trim() : null;
+}
+
+/** Text of the first level-1 heading (`# Title`), or null. */
+function extractH1(content: string): string | null {
+  const match = content.match(/^#\s+(.+)$/m);
+  return match ? match[1].trim() : null;
+}
+
+/** First prose paragraph, skipping frontmatter, headings, metadata key-value
+ *  lines, lists, tables, horizontal rules, blockquotes, and gate markers. */
+function extractFirstProse(content: string): string | null {
+  const lines = content.split('\n');
+  let i = 0;
+
+  // Skip a leading YAML frontmatter fence (--- ... ---), if present.
+  while (i < lines.length && lines[i].trim() === '') i++;
+  if (i < lines.length && lines[i].trim() === '---') {
+    i++;
+    while (i < lines.length && lines[i].trim() !== '---') i++;
+    if (i < lines.length) i++; // consume closing fence
+  }
+
+  for (; i < lines.length; i++) {
+    const t = lines[i].trim();
+    if (t === '') continue;
+    if (t.startsWith('#')) continue; // heading
+    if (/^([-*_])\1{2,}$/.test(t)) continue; // horizontal rule (---, ***, ___)
+    if (/^\*\*[^*]+\*\*\s*:/.test(t)) continue; // **Field**: metadata
+    if (/^[-*+]\s/.test(t)) continue; // bullet list
+    if (/^\d+\.\s/.test(t)) continue; // numbered list
+    if (t.startsWith('|')) continue; // table row
+    if (t.startsWith('>')) continue; // blockquote
+    if (t.startsWith('⏸️')) continue; // gate marker
+    return t;
+  }
+
+  return null;
+}
+
+// ─── Keyword Tag Derivation ────────────────────────────────────────
+
+/** Words that never make useful tags: English function words, a handful of
+ *  imperative verbs that can head a section, the structural boilerplate of
+ *  dev-workflow PRDs, and the canonical workflow filenames. */
+const TAG_STOPWORDS = new Set<string>([
+  // English function words
+  'the', 'a', 'an', 'and', 'or', 'but', 'for', 'to', 'of', 'in', 'on', 'at',
+  'by', 'with', 'from', 'into', 'is', 'are', 'be', 'was', 'were', 'this',
+  'that', 'these', 'those', 'it', 'its', 'as', 'all', 'any', 'via', 'per',
+  'not', 'no', 'we', 'you', 'will', 'can', 'could', 'should', 'would', 'must',
+  'may', 'when', 'then', 'than', 'also', 'if', 'so', 'out', 'up', 'down',
+  'over', 'under', 'about', 'each', 'both', 'first', 'second', 'third', 'next',
+  'new', 'only', 'one', 'two',
+  // imperative verbs that can head a heading
+  'add', 'build', 'write', 'run', 'use', 'using', 'make', 'create', 'update',
+  'implement', 'extend', 'define', 'support', 'edit', 'fix', 'check',
+  // PRD structural boilerplate
+  'phase', 'phases', 'step', 'steps', 'goal', 'goals', 'summary', 'executive',
+  'implementation', 'order', 'verification', 'verify', 'gate', 'status',
+  'created', 'updated', 'plan', 'overview', 'background', 'notes', 'note',
+  'decisions', 'blockers', 'context', 'todo', 'done', 'test', 'tests',
+  'fixture', 'fixtures', 'part', 'reference', 'references', 'file', 'files',
+  // canonical workflow filenames
+  'master-plan', '00-master-plan', 'sub-prd', 'checkpoint', 'session-log',
+  'readme',
+]);
+
+const TAG_LIMIT = 8;
+const PATH_EXT = /\.(ts|tsx|js|cjs|mjs|jsx|md|json|sh|yml|yaml|css|html)$/i;
+
+/** Derive up to {@link TAG_LIMIT} deterministic keyword tags from master-plan
+ *  markdown. Sources: section headings, backtick-quoted file paths (reduced to
+ *  their stem), and capitalized/code-style identifiers (tokens with two or more
+ *  uppercase letters — `JWT`, `OAuth2`, `MasterPlanResult` — which excludes
+ *  sentence-initial verbs like `Add`/`Edit`). Pure: no LLM, no I/O. Candidates
+ *  are lowercased, stopword-filtered, deduped, and ranked by frequency (ties
+ *  broken by first appearance) before the cap is applied. */
+export function deriveKeywordTags(content: string): string[] {
+  const candidates = new Map<string, { count: number; first: number }>();
+
+  const consider = (raw: string, index: number): void => {
+    const tag = raw.toLowerCase().trim().replace(/^[-_.]+|[-_.]+$/g, '');
+    if (tag.length < 2) return;
+    if (/^\d+$/.test(tag)) return; // pure numbers
+    if (TAG_STOPWORDS.has(tag)) return;
+    const hit = candidates.get(tag);
+    if (hit) hit.count++;
+    else candidates.set(tag, { count: 1, first: index });
+  };
+
+  // 1. Section headings (## … ######): split into word tokens, dropping the
+  //    "Phase N:" / "Phase N —" prefix so structural numbering never leaks in.
+  const headingRe = /^#{2,6}\s+(.+)$/gm;
+  let h: RegExpExecArray | null;
+  while ((h = headingRe.exec(content)) !== null) {
+    const text = h[1].replace(/^Phase\s+\d+\s*[:\-—–]\s*/i, '');
+    for (const word of text.match(/[A-Za-z][A-Za-z0-9]+/g) ?? []) {
+      consider(word, h.index);
+    }
+  }
+
+  // 2. Backtick-quoted file paths → stem (basename minus extension). A span is a
+  //    path when it has a code extension or an embedded "/" that is not a
+  //    leading slash (which would mark a slash-command like `/dev-checkpoint`).
+  const codeRe = /`([^`]+)`/g;
+  let c: RegExpExecArray | null;
+  while ((c = codeRe.exec(content)) !== null) {
+    const span = c[1].trim();
+    const looksLikePath = PATH_EXT.test(span) || (span.includes('/') && !span.startsWith('/'));
+    if (!looksLikePath) continue;
+    const base = span.split('/').pop() ?? span;
+    consider(base.replace(PATH_EXT, ''), c.index);
+  }
+
+  // 3. Capitalized / code-style identifiers: tokens with ≥2 uppercase letters.
+  const idRe = /\b[A-Za-z][A-Za-z0-9]+\b/g;
+  let m: RegExpExecArray | null;
+  while ((m = idRe.exec(content)) !== null) {
+    const upper = m[0].match(/[A-Z]/g)?.length ?? 0;
+    if (upper >= 2) consider(m[0], m.index);
+  }
+
+  return [...candidates.entries()]
+    .sort((a, b) => b[1].count - a[1].count || a[1].first - b[1].first)
+    .slice(0, TAG_LIMIT)
+    .map(([tag]) => tag);
 }
 
 function extractFrontmatterField(content: string, field: string): string | null {
@@ -668,6 +862,8 @@ export async function parseFeature(featureDir: string, name: string): Promise<Fe
     nextAction: checkpoint?.nextAction ?? null,
     branch: checkpoint?.branch ?? null,
     summary: masterPlan?.summary ?? null,
+    // Frontmatter tags (authoritative, first) unioned with derived keyword tags.
+    tags: masterPlan ? mergeTags(masterPlan.tags, masterPlan.keywordTags) : [],
   };
 }
 

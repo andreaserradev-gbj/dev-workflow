@@ -37,13 +37,14 @@ export function buildIndexPage(projects: Project[], generated: string): string {
         return compareDatesDesc(a.lastCheckpoint, b.lastCheckpoint);
       });
 
-      lines.push('| Feature | Status | Progress | Summary |');
-      lines.push('|---------|--------|----------|---------|');
+      lines.push('| Feature | Status | Progress | Summary | Tags |');
+      lines.push('|---------|--------|----------|---------|------|');
       for (const f of sortedActive) {
         const link = `[${f.name}](projects/${project.name}/${f.name}/00-master-plan.md)`;
         const progress = f.progress ? `${f.progress.done}/${f.progress.total} (${f.progress.percent}%)` : '—';
         const summary = truncate(f.summary ?? '', 120);
-        lines.push(`| ${link} | ${f.status} | ${progress} | ${summary} |`);
+        const tags = formatTags(f.tags);
+        lines.push(`| ${link} | ${f.status} | ${progress} | ${summary} | ${tags} |`);
       }
       lines.push('');
     }
@@ -55,13 +56,14 @@ export function buildIndexPage(projects: Project[], generated: string): string {
 
       lines.push(`### Archived (${archivedFeatures.length})`);
       lines.push('');
-      lines.push('| Feature | Progress | Summary |');
-      lines.push('|---------|----------|---------|');
+      lines.push('| Feature | Progress | Summary | Tags |');
+      lines.push('|---------|----------|---------|------|');
       for (const f of sortedArchived) {
         const link = `[${f.name}](projects/${project.name}--archive/${f.name}/00-master-plan.md)`;
         const progress = f.progress ? `${f.progress.done}/${f.progress.total} (${f.progress.percent}%)` : '—';
         const summary = truncate(f.summary ?? '', 120);
-        lines.push(`| ${link} | ${progress} | ${summary} |`);
+        const tags = formatTags(f.tags);
+        lines.push(`| ${link} | ${progress} | ${summary} | ${tags} |`);
       }
       lines.push('');
     }
@@ -71,7 +73,7 @@ export function buildIndexPage(projects: Project[], generated: string): string {
 }
 
 export function buildLogPage(projects: Project[], generated: string): string {
-  const allFeatures: { project: string; name: string; status: string; progress: string; summary: string; date: string; dateRaw: string | null }[] = [];
+  const allFeatures: { project: string; name: string; status: string; progress: string; summary: string; tags: string; date: string; dateRaw: string | null }[] = [];
 
   for (const project of projects) {
     for (const f of project.features) {
@@ -84,6 +86,7 @@ export function buildLogPage(projects: Project[], generated: string): string {
         status: f.status,
         progress,
         summary: truncate(f.summary ?? '', 120),
+        tags: f.tags.join(', '),
         date,
         dateRaw,
       });
@@ -112,6 +115,10 @@ export function buildLogPage(projects: Project[], generated: string): string {
     if (entry.summary) {
       lines.push('');
       lines.push(entry.summary);
+    }
+    if (entry.tags) {
+      lines.push('');
+      lines.push(`**Tags**: ${entry.tags}`);
     }
     lines.push('');
   }
@@ -159,6 +166,12 @@ export function buildObsidianAppConfig(): string {
 function truncate(text: string, maxLen: number): string {
   if (text.length <= maxLen) return text;
   return text.slice(0, maxLen - 1) + '…';
+}
+
+/** Render tags as plain comma-separated text for a table cell, or an em dash
+ *  when there are none. Text only — no UI pills. */
+function formatTags(tags: string[]): string {
+  return tags.length > 0 ? tags.join(', ') : '—';
 }
 
 function formatDate(dateStr: string): string {

@@ -47,6 +47,7 @@ const mockFeature: Feature = {
   nextAction: 'Implement refresh token rotation',
   branch: 'feature/auth-system',
   summary: 'Multi-provider authentication with OAuth2 and JWT.',
+  tags: [],
 };
 
 const mockStaleFeature: Feature = {
@@ -58,6 +59,7 @@ const mockStaleFeature: Feature = {
   nextAction: null,
   branch: null,
   summary: 'Event-driven notification system.',
+  tags: [],
 };
 
 const mockArchivedFeature: Feature = {
@@ -69,6 +71,7 @@ const mockArchivedFeature: Feature = {
   nextAction: null,
   branch: null,
   summary: 'Legacy auth system.',
+  tags: [],
 };
 
 beforeAll(async () => {
@@ -102,6 +105,7 @@ beforeAll(async () => {
           nextAction: null,
           branch: 'feature/dashboard-ui',
           summary: 'Dashboard UI components.',
+          tags: [],
         },
       ],
     },

@@ -28,6 +28,7 @@ function makeFeature(overrides: Partial<Feature> & { name: string }): Feature {
     nextAction: null,
     branch: null,
     summary: 'A test feature',
+    tags: [],
     ...overrides,
   };
 }
@@ -112,6 +113,37 @@ describe('buildIndexPage', () => {
     expect(result).not.toContain(longSummary);
     expect(result).toContain('…');
   });
+
+  it('renders a Tags column with comma-separated tags', () => {
+    const projects: Project[] = [
+      makeProject('proj', [makeFeature({ name: 'auth', tags: ['oauth', 'jwt'] })]),
+    ];
+    const result = buildIndexPage(projects, '2026-05-20T00:00:00Z');
+    expect(result).toContain('| Feature | Status | Progress | Summary | Tags |');
+    const row = result.split('\n').find((l) => l.includes('[auth]'));
+    expect(row).toContain('| oauth, jwt |');
+  });
+
+  it('renders an em dash in the Tags column when a feature has no tags', () => {
+    const projects: Project[] = [
+      makeProject('proj', [makeFeature({ name: 'auth', tags: [] })]),
+    ];
+    const result = buildIndexPage(projects, '2026-05-20T00:00:00Z');
+    const row = result.split('\n').find((l) => l.includes('[auth]'));
+    expect(row?.endsWith('| — |')).toBe(true);
+  });
+
+  it('renders a Tags column in the archived table', () => {
+    const projects: Project[] = [
+      makeProject('proj', [
+        makeFeature({ name: 'old', status: 'archived', tags: ['legacy'] }),
+      ]),
+    ];
+    const result = buildIndexPage(projects, '2026-05-20T00:00:00Z');
+    expect(result).toContain('| Feature | Progress | Summary | Tags |');
+    const row = result.split('\n').find((l) => l.includes('[old]'));
+    expect(row).toContain('| legacy |');
+  });
 });
 
 describe('buildLogPage', () => {
@@ -163,6 +195,22 @@ describe('buildLogPage', () => {
     ];
     const result = buildLogPage(projects, '2026-05-20T00:00:00Z');
     expect(result).toContain('## [unknown]');
+  });
+
+  it('renders a **Tags** line when a feature has tags', () => {
+    const projects: Project[] = [
+      makeProject('proj', [makeFeature({ name: 'auth', tags: ['oauth', 'jwt'] })]),
+    ];
+    const result = buildLogPage(projects, '2026-05-20T00:00:00Z');
+    expect(result).toContain('**Tags**: oauth, jwt');
+  });
+
+  it('omits the **Tags** line when a feature has no tags', () => {
+    const projects: Project[] = [
+      makeProject('proj', [makeFeature({ name: 'auth', tags: [] })]),
+    ];
+    const result = buildLogPage(projects, '2026-05-20T00:00:00Z');
+    expect(result).not.toContain('**Tags**');
   });
 });
 

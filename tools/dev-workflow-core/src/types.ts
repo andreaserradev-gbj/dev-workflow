@@ -55,6 +55,9 @@ export interface Feature {
   nextAction: string | null;
   branch: string | null;
   summary: string | null;
+  // Searchable/render tags: frontmatter `tags:` ∪ deterministic keyword tags.
+  // Always present (defaults to []); never null.
+  tags: string[];
 }
 
 // Project groups features by parent directory

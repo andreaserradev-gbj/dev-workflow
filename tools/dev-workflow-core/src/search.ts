@@ -13,6 +13,7 @@ const SEARCHABLE_FIELDS: SearchableField[] = [
   { name: 'nextAction', extract: (f) => f.nextAction },
   { name: 'branch', extract: (f) => f.branch },
   { name: 'currentPhase', extract: (f) => f.currentPhase?.title ?? null },
+  { name: 'tags', extract: (f) => f.tags.join(' ') },
 ];
 
 export function searchFeatures(projects: Project[], options: SearchOptions): SearchHit[] {
