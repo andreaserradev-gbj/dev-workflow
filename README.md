@@ -3,7 +3,7 @@
 # dev-workflow
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
-[![Version](https://img.shields.io/badge/version-1.36.0-green.svg)](.claude-plugin/marketplace.json)
+[![Version](https://img.shields.io/badge/version-1.37.0-green.svg)](.claude-plugin/marketplace.json)
 [![AgentSkills.io](https://img.shields.io/badge/standard-AgentSkills.io-purple.svg)](https://agentskills.io)
 
 **AI coding agents start every session from zero. Your architecture shouldn't.**
