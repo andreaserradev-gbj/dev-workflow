@@ -4,6 +4,13 @@ All notable changes to this project should be documented in this file.
 
 <!-- LOCAL-RELEASES-START -->
 
+## v1.37.1 - 2026-06-22
+
+### Security
+
+- The build transform that removes `gray-matter`'s dead JS-frontmatter engine now strips the **entire `engines.javascript` registration**, not just its `eval()` call. Neutralizing only the call left the surrounding string-building scaffolding (`'(function(){ return ' + str + '}())'`) in the minified bundle, which an LLM-based scanner still reads as a remote-code-execution sink even with zero literal `eval(`. Replacing the whole engine with an inert throwing stub leaves nothing to cite. Behavior is unchanged — that engine is dead under the YAML-only `safeLoad` path the parser uses — and the guard still fails the build if a dependency bump relocates the block. Applies to both the CLI bundle and the dashboard server bundle.
+- `/dev-wiki` now frames the cross-project `.dev/` and `.dev-archive/` markdown it scans as **untrusted data, not instructions** — catalogued, never obeyed. A new "Untrusted Input" section foregrounds that generation is deterministic and CLI-bound, that the skill has no `Edit`/`Write` capability and runs no command found inside a PRD, and that the generated wiki is itself a catalog of untrusted metadata for downstream readers. This mirrors the `/dev-review` untrusted-input scoping shipped in 1.37.0 and targets the prompt-injection category on the skill.
+
 ## v1.37.0 - 2026-06-22
 
 ### Security
@@ -292,6 +299,22 @@ Checkpoints and resumes are now powered by deterministic CLI commands instead of
 <!-- LOCAL-RELEASES-END -->
 
 <!-- GITHUB-RELEASES-START -->
+
+## v1.37.0 - 2026-06-22
+
+### Security
+
+- The bundled `dev-workflow.cjs` CLI now ships with **zero dynamic-code-execution primitives**. A guarded esbuild transform strips `gray-matter`'s `eval()` (its optional JS-frontmatter engine) and `js-yaml`'s `new Function()` (the `!!js/function` type) from every shipped copy at build time — both were dead code under the YAML-only `safeLoad` path the parser actually uses, so PRD parsing is byte-for-byte unchanged. This removes the remote-code-execution surface that drove the `/dev-wiki` security rating and the `usesEval` dependency alerts on the bundle. The transform is guarded — the build fails if a dependency bump relocates either pattern, so a primitive can never silently re-ship — and a bundle smoke test that runs the real `.cjs` (not the TS source, which never loads the shipped artifact) is now part of the test suite.
+- `/dev-review` now treats every PRD, checkpoint, and diff it ingests as **untrusted data, not instructions**. The `feature-reporter` subagent receives that markdown wrapped in XML-like boundary markers (`<prd-content>`, `<checkpoint-content>`, `<diff>`), behind a foregrounded mandatory user-review gate, with its `Edit` capability scoped to the feature's own `.dev/` docs — mirroring the structure that keeps `/dev-checkpoint` from being flagged for the same prompt-injection category. The boundary is enforced in both the skill and the bundled `feature-reporter` agent.
+- `/dev-wiki`'s filesystem writes are now documented as bounded to `~/.dev-wiki`, covering both the CLI generator and the dashboard write site.
+
+### Changed
+
+- The dev-dashboard server now binds to **`127.0.0.1` (loopback) by default** instead of `0.0.0.0`. LAN exposure is opt-in via `--lan`, `--host <addr>`, or `DEV_DASHBOARD_HOST` (precedence: CLI > env > stored > default), and a LAN bind logs a warning at startup. The bind host is intentionally **not** settable through the HTTP API, so a web request can never flip the server to a LAN-exposed address. The dashboard port file is now read by a committed `read-port.cjs` (config path passed as an argv, not string-interpolated) instead of an inline `node -e`, removing the last dynamic-code surface from the launch path.
+
+### Removed
+
+- The dev-dashboard `~/.local/bin` shim-install chain — `install.sh`, `check-install.sh`, and the runtime `chmod`/`node -e` they relied on. The `/dev-dashboard` skill now launches `start.sh`/`stop.sh` directly by absolute path, and skills already invoke the bundled CLI by absolute path, so the shims had no load-bearing consumer. Removing the install capability outright (rather than hardening it) clears the `COMMAND_EXECUTION` driver behind the dev-dashboard rating. Existing user-installed shims keep working but are now unmanaged.
 
 ## v1.36.0 - 2026-06-17
 

@@ -1,0 +1,30 @@
+name: Skills Security Audit
+
+# Weekly re-check of the skills.sh (Vercel) security audits. The scanners run
+# autonomously, hours-to-days after a release, so this is decoupled from the
+# release workflow — the weekly cron is what eventually catches a new scan.
+#
+# Pause it without deleting the workflow by setting the repository variable
+# SKILLS_AUDIT_DISABLED = true (Settings → Secrets and variables → Actions →
+# Variables, or: gh variable set SKILLS_AUDIT_DISABLED --body true).
+
+on:
+  schedule:
+    - cron: "0 6 * * 1" # Mondays 06:00 UTC
+  workflow_dispatch: # manual "run now" (e.g. right after a release)
+
+permissions:
+  contents: read
+
+jobs:
+  audit:
+    if: ${{ vars.SKILLS_AUDIT_DISABLED != 'true' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Run skills.sh audit
+        run: |
+          bash scripts/check-skills-audit.sh --markdown --fail-on HIGH \
+            | tee -a "$GITHUB_STEP_SUMMARY"

@@ -12,12 +12,16 @@ import { mkdir, rm, readFile } from 'fs/promises';
 import { resolve, dirname } from 'path';
 import { fileURLToPath } from 'url';
 
-// esbuild plugin: neutralize the dynamic-code-execution primitives that skills.sh's static
+// esbuild plugin: neutralize the dynamic-code-execution primitives that skills.sh's
 // scanners (Gen REMOTE_CODE_EXECUTION, Socket usesEval) flag in the emitted bundle. Two
 // dependency-shipped primitives exist, both UNREACHABLE in dev-workflow's usage but visible
 // to a scanner reading the artifact text:
-//   1. gray-matter/lib/engines.js — `eval()` in its JavaScript frontmatter engine. We only
-//      ever parse YAML frontmatter (never `js`/`javascript`), so this engine is dead.
+//   1. gray-matter/lib/engines.js — its JavaScript frontmatter engine builds a function string
+//      and `eval()`s it. We parse YAML frontmatter only (never `js`/`javascript`), so the whole
+//      engine is dead. We remove the ENTIRE `engines.javascript` registration, not just the eval
+//      call: Gen's REMOTE_CODE_EXECUTION read is an LLM judgment that cites the string-building
+//      scaffolding around the eval, so neutralizing only the call leaves the sink visible. An
+//      inert throwing stub leaves the scanner nothing to cite.
 //   2. js-yaml/lib/js-yaml/type/js/function.js — `new Function()` in the `!!js/function` YAML
 //      type. gray-matter parses via `safeLoad` (safe schema EXCLUDES this type), so it is dead
 //      too — but Socket's usesEval alert also covers the Function constructor, so it must go.
@@ -30,14 +34,28 @@ const stripDynamicCodeEval = {
   setup(build) {
     build.onLoad({ filter: /gray-matter[\\/]lib[\\/]engines\.js$/ }, async (args) => {
       const original = await readFile(args.path, 'utf8');
+      // Replace the ENTIRE engines.javascript registration, not just its eval() call. Gen's
+      // REMOTE_CODE_EXECUTION read is an LLM judgment that cites the surrounding string-building
+      // scaffolding ('(function(){ return ' + str + '}())'), so neutralizing only the literal
+      // eval leaves the sink visible. The javascript engine is dead in dev-workflow (YAML
+      // frontmatter only), so an inert throwing stub is behavior-preserving and cite-proof.
       const patched = original.replace(
-        /return eval\(str\) \|\| \{\};/,
-        'return {}; // gray-matter JS frontmatter engine disabled by dev-workflow build (no eval)',
+        /engines\.javascript = \{[\s\S]*?stringifying JavaScript is not supported[\s\S]*?\n\};/,
+        [
+          'engines.javascript = {',
+          '  parse: function() {',
+          "    throw new Error('gray-matter JavaScript frontmatter engine disabled by dev-workflow build');",
+          '  },',
+          '  stringify: function() {',
+          "    throw new Error('stringifying JavaScript is not supported');",
+          '  }',
+          '};',
+        ].join('\n'),
       );
       if (patched === original) {
         throw new Error(
-          'strip-dynamic-code-eval: expected eval(str) pattern not found in gray-matter engines.js — ' +
-            'internals changed; update this build stub before shipping.',
+          'strip-dynamic-code-eval: expected engines.javascript = { ... } block not found in ' +
+            'gray-matter engines.js — internals changed; update this build stub before shipping.',
         );
       }
       return { contents: patched, loader: 'js' };

@@ -19,8 +19,11 @@ import { fileURLToPath } from 'url';
 // The dashboard server re-exports dev-workflow-core's parser/writer, which pull gray-matter
 // (and its js-yaml dependency) in transitively. Two dependency-shipped primitives exist, both
 // UNREACHABLE in dev-workflow's usage but visible to a scanner reading the artifact text:
-//   1. gray-matter/lib/engines.js — `eval()` in its JavaScript frontmatter engine (we parse
-//      YAML only, never `js`/`javascript`).
+//   1. gray-matter/lib/engines.js — its JavaScript frontmatter engine builds a function string
+//      and `eval()`s it (we parse YAML only, never `js`/`javascript`). We remove the ENTIRE
+//      `engines.javascript` registration, not just the eval call, because Gen's RCE read is an
+//      LLM judgment that cites the string-building scaffolding around the eval — an inert
+//      throwing stub leaves nothing to cite.
 //   2. js-yaml/lib/js-yaml/type/js/function.js — `new Function()` in the `!!js/function` type
 //      (gray-matter uses `safeLoad`, whose safe schema excludes this type).
 // Stripping both is behavior-preserving (the safe YAML path is untouched). Each replace is
@@ -35,14 +38,28 @@ const stripDynamicCodeEval = {
   setup(build) {
     build.onLoad({ filter: /gray-matter[\\/]lib[\\/]engines\.js$/ }, async (args) => {
       const original = await readFile(args.path, 'utf8');
+      // Replace the ENTIRE engines.javascript registration, not just its eval() call. Gen's
+      // REMOTE_CODE_EXECUTION read is an LLM judgment that cites the surrounding string-building
+      // scaffolding ('(function(){ return ' + str + '}())'), so neutralizing only the literal
+      // eval leaves the sink visible. The javascript engine is dead in dev-workflow (YAML
+      // frontmatter only), so an inert throwing stub is behavior-preserving and cite-proof.
       const patched = original.replace(
-        /return eval\(str\) \|\| \{\};/,
-        'return {}; // gray-matter JS frontmatter engine disabled by dev-workflow build (no eval)',
+        /engines\.javascript = \{[\s\S]*?stringifying JavaScript is not supported[\s\S]*?\n\};/,
+        [
+          'engines.javascript = {',
+          '  parse: function() {',
+          "    throw new Error('gray-matter JavaScript frontmatter engine disabled by dev-workflow build');",
+          '  },',
+          '  stringify: function() {',
+          "    throw new Error('stringifying JavaScript is not supported');",
+          '  }',
+          '};',
+        ].join('\n'),
       );
       if (patched === original) {
         throw new Error(
-          'strip-dynamic-code-eval: expected eval(str) pattern not found in gray-matter engines.js — ' +
-            'internals changed; update this build stub before shipping.',
+          'strip-dynamic-code-eval: expected engines.javascript = { ... } block not found in ' +
+            'gray-matter engines.js — internals changed; update this build stub before shipping.',
         );
       }
       return { contents: patched, loader: 'js' };
