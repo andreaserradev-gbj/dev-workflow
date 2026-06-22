@@ -144,7 +144,7 @@ The branch/worktree offer runs **before** the commit (Step 7) so the commit land
 
 1. Run `worktree-setup.sh execute` per the guide; capture the worktree location from its `worktree:<path>` output as `$WORKTREE_PATH`.
 2. **Retarget**: set `$PROJECT_ROOT ← $WORKTREE_PATH` and `$FEATURE_DIR ← $WORKTREE_PATH/.dev/$FEATURE_NAME`. Every later step — the commit (7), PRD updates (8), git-state capture (9), and checkpoint write (11) — operates on the worktree. Run git against it (`git -C "$WORKTREE_PATH" …`) and run cwd-based scripts from it (`cd "$WORKTREE_PATH" && …`).
-3. **Defer the restart instruction**: do NOT yet tell the user to end the session and `cd` into the worktree. The checkpoint must be written first. That instruction is reported in the Step 12 summary.
+3. **Defer the restart instruction**: do NOT yet tell the user to end the session and `cd` into the worktree. The checkpoint must be written first. That instruction is reported in the Step 13 summary.
 
 **If the user chooses Branch** — `worktree-setup.sh branch` creates and switches to `feature/$FEATURE_NAME` in the current directory. No retargeting needed: the commit (7) lands on it and Step 9 records it.
 
@@ -205,7 +205,7 @@ Where `$CLI` is the absolute path to `scripts/dev-workflow.cjs` within this skil
 - `--step M` — the step number within that phase (omit for phase-level markers)
 - `--marker done` — marks the step as ✅ complete
 
-The CLI reports `{ changed, line, file }` as JSON when `--json` is passed, or a text summary otherwise. Track these results for the Step 12 summary. If `changed` is false, the marker was already ✅.
+The CLI reports `{ changed, line, file }` as JSON when `--json` is passed, or a text summary otherwise. Track these results for the Step 13 summary. If `changed` is false, the marker was already ✅.
 
 **Check the exit code.** A non-zero exit code means the command failed (e.g., phase not found, invalid path). **Never ignore a non-zero exit** — if a `status-update` call fails, stop and report the error before continuing.
 
@@ -268,10 +268,10 @@ Reference the [checkpoint-template.md](references/checkpoint-template.md) for th
 **Use `--input-file`, not `echo | --stdin`.** Multi-line JSON string values (the `context`, `currentState`, etc. sections contain `\n`) cannot be piped reliably through `echo '...'` — unescaped literal newlines in the shell become real U+000A bytes inside JSON string literals and `JSON.parse` rejects them as "Bad control character". Write the JSON to a file, then pass the path to the CLI.
 
 1. **Write** the Step 10 JSON to `$FEATURE_DIR/.checkpoint-input.json` using the `Write` tool. The file can contain real newlines — `Write` is not a shell and does not mangle the content.
-2. **Run** the CLI against that file:
+2. **Run** the CLI against that file (pass `--json` so the consolidation signal can be read reliably in Step 12):
 
    ```bash
-   node "$CLI" checkpoint-write --dir "$FEATURE_DIR" --input-file "$FEATURE_DIR/.checkpoint-input.json"
+   node "$CLI" checkpoint-write --json --dir "$FEATURE_DIR" --input-file "$FEATURE_DIR/.checkpoint-input.json"
    ```
 
 3. **Delete** the input file once the CLI reports success:
@@ -285,18 +285,63 @@ Where `$CLI` is the absolute path to `scripts/dev-workflow.cjs` within this skil
 The CLI will:
 1. **Read the existing `checkpoint.md`** (if it exists) and append it to `session-log.md` as a session entry
 2. **Write the new `checkpoint.md`** with proper YAML frontmatter and XML section formatting
-3. **Return** `{ success, file }` confirming the write
+3. **Return** `{ success, file, sessionCount, consolidationDue }` — `sessionCount` is the number of sessions now in `session-log.md`; `consolidationDue` is `true` when the history has grown enough (≥10 sessions past the last digest) to warrant consolidation. **Capture both for Step 12.**
 
 **Check the exit code.** A non-zero exit code means the command failed (e.g., invalid JSON, missing required fields, directory not found). **Never ignore a non-zero exit** — if `checkpoint-write` fails, stop and report the error. The checkpoint was NOT saved, and `.checkpoint-input.json` is left on disk for inspection (do not delete it on failure).
 
 **Do NOT manually write `checkpoint.md` or `session-log.md`** — the CLI ensures format compatibility and handles session-log accumulation automatically.
 
-### Step 12: Summary
+### Step 12: Consolidate Session History (When Due)
+
+This step keeps `/dev-resume` bounded on long-running features by distilling the older session tail into a compact digest — modeled on `/dev-wrapup`'s feedback compaction. It runs **only** when Step 11 reported `consolidationDue: true`.
+
+**If `consolidationDue` is `false`** (the common case — fewer than 10 sessions, or the last digest is still recent): **skip this step silently.** Do not mention it. Behavior is identical to before.
+
+**If `consolidationDue` is `true`:**
+
+1. **Read** `$FEATURE_DIR/session-log.md` with the `Read` tool. It holds every archived session (`## Session N — <date>` blocks) — the full raw history.
+2. **Compose a two-tier digest** (the LLM step — this requires judgment, mirroring `/dev-wrapup`'s `{ aggregate, recent }` split):
+   - **`aggregate`** — a distilled narrative (a few short paragraphs) of the feature's arc across the older sessions: what was built, the phases completed, major pivots, and persistent constraints. The most recent sessions stay raw in `session-log.md` and are re-surfaced by `/dev-resume` separately, so emphasize the older tail rather than re-narrating the latest work.
+   - **`decisions`** — a **bounded, deduplicated** set of decisions that are *still relevant going forward*. Drop superseded, reversed, or obsolete decisions. This is the curated set `/dev-resume` carries forward in place of every raw `<decisions>` bullet ever recorded.
+3. **Set the numeric fields** from the Step 11 result:
+   - `sessionCount` — the `sessionCount` value returned by `checkpoint-write` (total sessions now in the log). The engine compares against this to decide when the *next* consolidation is due (re-fires every +10 sessions), so it must be the current count, not a smaller number.
+   - `consolidatedThrough` — the highest session number folded into the aggregate. Normally equal to `sessionCount` (consolidate the whole arc); the recent raw sessions re-surface independently at resume.
+4. **Write** the digest JSON to `$FEATURE_DIR/.session-digest-input.json` with the `Write` tool (real newlines are fine — `Write` is not a shell), matching the `SessionDigestWriteInput` schema:
+
+   ```json
+   {
+     "sessionCount": 12,
+     "consolidatedThrough": 12,
+     "aggregate": "## Feature Arc\n\nPhases 1–3 delivered ...\n\nKey pivots: ...",
+     "decisions": ["Still-relevant decision 1", "Still-relevant decision 2"]
+   }
+   ```
+
+5. **Run** the WRITE-only consolidate command:
+
+   ```bash
+   node "$CLI" session-consolidate --dir "$FEATURE_DIR" --input-file "$FEATURE_DIR/.session-digest-input.json"
+   ```
+
+6. **Delete** the input file once the CLI reports success:
+
+   ```bash
+   rm -f "$FEATURE_DIR/.session-digest-input.json"
+   ```
+
+Where `$CLI` is the absolute path to `scripts/dev-workflow.cjs` within this skill's directory. Apply the path safety rules from Step 0 (`$HOME`, copy from output). `$FEATURE_DIR` is the worktree path if Step 6 set one up.
+
+**Check the exit code.** A non-zero exit means the write failed (e.g., invalid JSON, missing `aggregate`/`sessionCount`/`consolidatedThrough`). **Never ignore a non-zero exit** — stop and report; leave `.session-digest-input.json` on disk for inspection (do not delete it on failure).
+
+**The digest is written to its own `session-digest.md` file. `session-log.md` is never edited to hold a digest block** — a `## Session N` heading there would inflate the session counter and be mis-parsed by the session-log parser. The `session-consolidate` CLI enforces this (it only ever writes `session-digest.md`); never hand-write a digest into the log, and never hand-write `session-digest.md` directly — the CLI guarantees format compatibility with the parser.
+
+### Step 13: Summary
 
 Report:
 - Which feature was checkpointed
 - **PRD updates made** (list each file and what was changed, or state "No updates needed")
 - Whether a commit was made (and its hash), or that the commit was skipped/declined
+- Whether session history was consolidated into `session-digest.md` (only when Step 12 ran; omit this line when consolidation was not due)
 - What the next steps are
 - Confirm the checkpoint location
 

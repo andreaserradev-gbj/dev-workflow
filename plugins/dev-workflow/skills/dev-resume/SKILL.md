@@ -75,8 +75,9 @@ Parse the JSON output. It contains all the data previously gathered across multi
 - **`validityDetails`**: `{ checkpointBranch, currentBranch, checkpointUncommitted, currentUncommitted }`
 - **`currentPhasePrd`**: Extracted markdown section for the current phase only (not the full master plan)
 - **`referenceFiles`**: File paths from the master plan's "Reference Files" section
-- **`sessionHistory`**: Last N sessions from `session-log.md` (default 5, use `--sessions=all` for all)
-- **`accumulatedDecisions`**: Union of all `<decisions>` across all sessions, deduplicated
+- **`sessionDigest`**: Distilled digest of the older session tail — `{ sessionCount, consolidatedThrough, generated, aggregate, decisions[] }` — written by `/dev-checkpoint` once a feature crosses the consolidation threshold (≥10 sessions). `null` below the threshold or when no digest has been written yet.
+- **`recentSessionHistory`**: The recent raw session window (last N, default 5; `--sessions=all` for all). Older sessions beyond the window are summarized in `sessionDigest` when present. (Replaces the former `sessionHistory` field.)
+- **`accumulatedDecisions`**: Bounded decision set — when a `sessionDigest` exists, it is the digest's carried-forward decisions ∪ the recent window's decisions (deduplicated); without a digest, the full deduplicated union across all sessions (legacy behavior).
 
 The LLM no longer calls: `git-state.sh`, `checkpoint-read --json`, `feature-show --json`. It no longer compares branches manually. It no longer reads the full master plan (`currentPhasePrd` contains just the relevant section).
 
@@ -100,7 +101,8 @@ Synthesize the resumption summary from the `resume-context` output. **This is th
 **Status**: [feature.currentPhase.title] — [feature.progress.done]/[feature.progress.total] ([feature.progress.percent]%)
 **Last session**: [Derive from checkpoint.context field]
 **Decisions**: [checkpoint.decisions, or "None recorded"]
-**Session history**: [sessionHistory.length sessions tracked, accumulatedDecisions.length total decisions]
+**Session history**: [If sessionDigest present: "sessions 1–{sessionDigest.consolidatedThrough} consolidated into a digest + {recentSessionHistory.length} recent raw"; otherwise "{recentSessionHistory.length} sessions tracked"] — {accumulatedDecisions.length} decisions carried forward
+**Feature arc**: [Only when sessionDigest present — summarize sessionDigest.aggregate so the distilled older-session history isn't lost. Omit this line entirely when sessionDigest is null.]
 **Watch out for**: [checkpoint.blockers, or "Nothing flagged"]
 
 **Current phase PRD**: [currentPhasePrd — summarize or reference; don't re-read the full master plan]
@@ -108,7 +110,7 @@ Synthesize the resumption summary from the `resume-context` output. **This is th
 **Start with**: [First concrete action from checkpoint.nextAction field]
 ```
 
-Incorporate `accumulatedDecisions` when relevant — decisions from earlier sessions may contextualize the current step.
+Incorporate `accumulatedDecisions` when relevant — decisions from earlier sessions may contextualize the current step. When a `sessionDigest` is present, lean on its `aggregate` for the older history rather than the raw `recentSessionHistory` window, which only covers the last few sessions.
 
 **Wait for go-ahead** — do not proceed until the user confirms.
 

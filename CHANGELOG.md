@@ -4,6 +4,17 @@ All notable changes to this project should be documented in this file.
 
 <!-- LOCAL-RELEASES-START -->
 
+## v1.38.0 - 2026-06-22
+
+### Added
+
+- **Wiki enrichment for cross-feature recall.** The index layer that `/dev-plan` consults for prior art no longer renders blank cards or leans on five thin metadata fields alone. `extractSummary` now walks a fallback heading ladder (`## Executive Summary` → `## Overview` → `## Summary` → `## Background` → first prose paragraph → H1) instead of matching `## Executive Summary` only, so PRDs written with any common heading get a real summary. A new deterministic keyword-tag tier in the parser derives tags from headings, backtick-quoted file paths, and capitalized identifiers, and those flow into the `Feature` type, the wiki index/log tables, and the search index. Tags are also read from PRD YAML `tags:` frontmatter when present, so a feature's tags are the union of authored frontmatter and derived keywords. All of this is pure-Node and deterministic — no LLM, no network — so the dashboard's 500ms wiki-regen path is untouched. The optional LLM concept-tag tier (an `--enrich` step that would write capability/domain tags into frontmatter) is intentionally deferred to a future release; it needs no rework to add, since the frontmatter read path ships here.
+- **Session-history consolidation for bounded resume.** On long-running features, `/dev-resume` previously either truncated to the last few sessions (dropping most of the narrative) or loaded the entire session log plus every decision bullet ever recorded. `/dev-checkpoint` now distills the older session tail into a compact `session-digest.md` once a feature crosses ten sessions, modeled on `/dev-wrapup`'s feedback compaction: a two-tier digest of an aggregate narrative plus a bounded, still-relevant decision set. The digest lives in its own file — never as a `## Session N` block in `session-log.md`, which would inflate the session counter — composed by the checkpoint LLM (already in the room) and persisted by a new WRITE-only `session-consolidate` CLI command. `checkpoint-write` now reports a `consolidationDue` signal so the skill knows when to run the step; below the threshold, behavior is identical to before.
+
+### Changed
+
+- **The `resume-context` JSON schema changed (breaking for direct consumers).** `sessionHistory` is renamed to `recentSessionHistory` (the recent raw session window); a new `sessionDigest` field carries the distilled older-session digest, or `null` below the consolidation threshold; and `accumulatedDecisions` is now bounded — when a digest exists it is the digest's carried-forward decisions plus the recent window's decisions, rather than the full union across all sessions. The CLI and the `/dev-checkpoint` / `/dev-resume` skills ship together in this release, so there is no break for end users — the note matters only for anything reading `resume-context --json` directly. Both bundles are rebuilt; the dashboard bundle now carries the deterministic tag code so its wiki regeneration renders the Tags column.
+
 ## v1.37.1 - 2026-06-22
 
 ### Security
