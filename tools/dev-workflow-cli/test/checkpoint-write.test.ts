@@ -410,4 +410,90 @@ src/main.ts
     expect(parsed!.notes).toEqual(['Note one', 'Note two']);
     expect(parsed!.continuationPrompt).toBe('Please continue with Phase 2');
   });
+
+  // ─── Consolidation Threshold Signal ───────────────────────────────
+
+  /** Build a session-log.md with `n` well-formed `## Session N` entries. */
+  function buildSessionLog(n: number): string {
+    let out = '';
+    for (let i = 1; i <= n; i++) {
+      const day = String(i).padStart(2, '0');
+      out += `\n## Session ${i} — 2026-05-${day}T10:00:00.000Z\n\n`;
+      out += `<context>\nSession ${i} work.\n</context>\n\n`;
+      out += `<decisions>\n- Decision from session ${i}\n</decisions>\n\n---\n`;
+    }
+    return out;
+  }
+
+  function writeDigest(dir: string, sessionCount: number): void {
+    const body = [
+      '---',
+      `consolidated_through: ${sessionCount}`,
+      `session_count: ${sessionCount}`,
+      'generated: 2026-05-12T11:00:00.000Z',
+      '---',
+      '',
+      '<aggregate>',
+      'Older tail summary.',
+      '</aggregate>',
+      '',
+    ].join('\n');
+    writeFileSync(join(dir, 'session-digest.md'), body, 'utf-8');
+  }
+
+  /** Seed a dir with a session-log of `logSessions` and an optional digest, then
+   *  write a checkpoint (no existing checkpoint → no append, log count is stable). */
+  async function dueWith(logSessions: number, digestSessionCount: number | null): Promise<{ due: boolean; count: number }> {
+    const dir = createTempFeatureDir();
+    tempDirs.push(dir);
+    writeFileSync(join(dir, 'session-log.md'), buildSessionLog(logSessions), 'utf-8');
+    if (digestSessionCount !== null) writeDigest(dir, digestSessionCount);
+
+    const result = await doCheckpointWrite(dir, {
+      context: 'c',
+      currentState: 's',
+      nextAction: 'n',
+      keyFiles: 'k',
+    });
+    return { due: result.consolidationDue, count: result.sessionCount };
+  }
+
+  it('reports consolidationDue exactly when the session log reaches 10 (no digest)', async () => {
+    const nine = await dueWith(9, null);
+    expect(nine.count).toBe(9);
+    expect(nine.due).toBe(false);
+
+    const ten = await dueWith(10, null);
+    expect(ten.count).toBe(10);
+    expect(ten.due).toBe(true);
+  });
+
+  it('flips consolidationDue at session 10 across an incremental checkpoint loop', async () => {
+    const dir = createTempFeatureDir();
+    tempDirs.push(dir);
+
+    let last: Awaited<ReturnType<typeof doCheckpointWrite>> | undefined;
+    // Each call appends the PREVIOUS checkpoint, so after call i the log holds i-1 sessions.
+    for (let i = 1; i <= 11; i++) {
+      last = await doCheckpointWrite(dir, {
+        context: `session ${i}`,
+        currentState: 'x',
+        nextAction: 'y',
+        keyFiles: 'z',
+        decisions: [`d${i}`],
+      });
+      if (i < 11) expect(last.consolidationDue).toBe(false); // log has <10 sessions
+    }
+    expect(last!.sessionCount).toBe(10);
+    expect(last!.consolidationDue).toBe(true);
+  });
+
+  it('suppresses re-firing until threshold sessions accrue past an existing digest', async () => {
+    // 12-session log, digest already recorded at 12 → 0 new → not due.
+    expect((await dueWith(12, 12)).due).toBe(false);
+    // digest recorded at 3 → 12-3 = 9 new → not due.
+    expect((await dueWith(12, 3)).due).toBe(false);
+    // digest recorded at 2 → 12-2 = 10 new → due.
+    expect((await dueWith(12, 2)).due).toBe(true);
+  });
 });

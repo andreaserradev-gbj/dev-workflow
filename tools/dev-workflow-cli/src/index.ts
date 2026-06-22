@@ -15,6 +15,7 @@ import { progressSummary } from './commands/progress-summary.js';
 import { gateCheck } from './commands/gate-check.js';
 import { checkpointRead } from './commands/checkpoint-read.js';
 import { checkpointWrite } from './commands/checkpoint-write.js';
+import { sessionConsolidate } from './commands/session-consolidate.js';
 import { statusUpdate } from './commands/status-update.js';
 import { resumeContext } from './commands/resume-context.js';
 import { list } from './commands/list.js';
@@ -33,6 +34,7 @@ const commands: Command[] = [
   { name: 'gate-check', description: 'Check if feature is at a phase gate', run: gateCheck },
   { name: 'checkpoint-read', description: 'Read checkpoint data', run: checkpointRead },
   { name: 'checkpoint-write', description: 'Write checkpoint from stdin JSON (+session-log)', run: checkpointWrite },
+  { name: 'session-consolidate', description: 'Write a composed session digest (WRITE-only)', run: sessionConsolidate },
   { name: 'status-update', description: 'Update PRD status marker', run: statusUpdate },
   { name: 'resume-context', description: 'Merged resume context packet', run: resumeContext },
   { name: 'list', description: 'List features and AFK-runnable status', run: list },
@@ -50,8 +52,8 @@ function printUsage(): void {
   console.log('  --json               Output as JSON');
   console.log('  --dir <path>         Feature directory');
   console.log('  --feature <name>     Feature name under .dev/');
-  console.log('  --stdin              Read input from stdin (checkpoint-write)');
-  console.log('  --input-file <path>  Read input JSON from file (checkpoint-write)');
+  console.log('  --stdin              Read input from stdin (checkpoint-write, session-consolidate)');
+  console.log('  --input-file <path>  Read input JSON from file (checkpoint-write, session-consolidate)');
   console.log('  --phase <number>     Phase number (status-update)');
   console.log('  --step <number>      Step number (status-update)');
   console.log('  --marker <done|todo> Marker value (status-update)');

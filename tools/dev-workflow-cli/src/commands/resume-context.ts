@@ -6,8 +6,9 @@ import {
   parseFeature,
   parseCheckpoint,
   parseSessionLog,
+  parseSessionDigest,
 } from 'dev-workflow-core';
-import type { SessionLogEntry } from 'dev-workflow-core';
+import type { SessionLogEntry, SessionDigest } from 'dev-workflow-core';
 import { resolveFeatureDir } from '../resolve.js';
 import { parseFlags } from '../index.js';
 
@@ -38,7 +39,14 @@ interface ResumeContextOutput {
   };
   currentPhasePrd: string | null;
   referenceFiles: string[];
-  sessionHistory: SessionLogEntry[];
+  // Distilled digest of the older session tail (null below the consolidation
+  // threshold or when no digest has been written yet).
+  sessionDigest: SessionDigest | null;
+  // The recent raw session window (last N), NOT the full history. Older sessions
+  // beyond the window are summarized in `sessionDigest` when present.
+  recentSessionHistory: SessionLogEntry[];
+  // Bounded decision set: digest decisions ∪ recent-window decisions when a digest
+  // exists; the full deduplicated union across all sessions otherwise.
   accumulatedDecisions: string[];
 }
 
@@ -174,6 +182,19 @@ function deduplicateDecisions(allSessions: SessionLogEntry[]): string[] {
   return result;
 }
 
+/** Deduplicate a flat string list by content equality, preserving insertion order. */
+function dedupeStrings(items: string[]): string[] {
+  const seen = new Set<string>();
+  const result: string[] = [];
+  for (const item of items) {
+    if (!seen.has(item)) {
+      seen.add(item);
+      result.push(item);
+    }
+  }
+  return result;
+}
+
 /**
  * CLI entry point for resume-context command.
  *
@@ -209,11 +230,12 @@ export async function resumeContext(args: string[]): Promise<number> {
 
   // Parallel: all independent data sources at once
   const masterPlanPath = resolve(featureDir, '00-master-plan.md');
-  const [feature, checkpoint, allSessions, currentBranch, currentUncommitted, masterContent] =
+  const [feature, checkpoint, allSessions, sessionDigest, currentBranch, currentUncommitted, masterContent] =
     await Promise.all([
       parseFeature(featureDir, featureName),
       parseCheckpoint(resolve(featureDir, 'checkpoint.md')),
       parseSessionLog(resolve(featureDir, 'session-log.md')),
+      parseSessionDigest(resolve(featureDir, 'session-digest.md')),
       getCurrentBranch(),
       hasUncommittedChanges(),
       readFile(masterPlanPath, 'utf-8').catch(() => null),
@@ -236,14 +258,20 @@ export async function resumeContext(args: string[]): Promise<number> {
     referenceFiles = parseReferenceFiles(masterContent);
   }
 
-  // 9. Session history (last N sessions)
-  const sessionHistory =
+  // 9. Recent session history (last N sessions). Older sessions beyond this
+  //    window are summarized in sessionDigest when a digest exists.
+  const recentSessionHistory =
     maxSessions === Infinity
       ? allSessions
       : allSessions.slice(-maxSessions);
 
-  // 10. Accumulated decisions (all sessions, deduplicated)
-  const accumulatedDecisions = deduplicateDecisions(allSessions);
+  // 10. Accumulated decisions — BOUNDED. When a digest exists it already carries the
+  //     curated historical decision set, so we add only the recent window's decisions
+  //     on top (keeps resume bounded on long features). Without a digest, fall back to
+  //     the full deduplicated union across all sessions (legacy behavior).
+  const accumulatedDecisions = sessionDigest
+    ? dedupeStrings([...sessionDigest.decisions, ...deduplicateDecisions(recentSessionHistory)])
+    : deduplicateDecisions(allSessions);
 
   const output: ResumeContextOutput = {
     feature: {
@@ -268,7 +296,8 @@ export async function resumeContext(args: string[]): Promise<number> {
     },
     currentPhasePrd,
     referenceFiles,
-    sessionHistory,
+    sessionDigest,
+    recentSessionHistory,
     accumulatedDecisions,
   };
 
@@ -295,6 +324,15 @@ export async function resumeContext(args: string[]): Promise<number> {
       console.log('Next Action:');
       console.log(checkpoint.nextAction);
     }
+    if (sessionDigest) {
+      console.log();
+      console.log(
+        `Session Digest (sessions 1–${sessionDigest.consolidatedThrough} of ${sessionDigest.sessionCount} consolidated):`,
+      );
+      if (sessionDigest.aggregate) {
+        console.log(sessionDigest.aggregate);
+      }
+    }
     if (accumulatedDecisions.length > 0) {
       console.log();
       console.log('Accumulated Decisions:');
@@ -302,10 +340,10 @@ export async function resumeContext(args: string[]): Promise<number> {
         console.log(`  - ${d}`);
       }
     }
-    if (sessionHistory.length > 0) {
+    if (recentSessionHistory.length > 0) {
       console.log();
-      console.log(`Session History (${sessionHistory.length} sessions shown):`);
-      for (const s of sessionHistory) {
+      console.log(`Recent Session History (${recentSessionHistory.length} sessions shown):`);
+      for (const s of recentSessionHistory) {
         console.log(`  Session ${s.session} (${s.date}): ${s.context ?? '(no context)'}`);
       }
     }

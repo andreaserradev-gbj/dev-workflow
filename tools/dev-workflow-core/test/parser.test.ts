@@ -9,6 +9,7 @@ import {
   determineFeatureStatus,
   parseFeature,
   parseSessionLog,
+  parseSessionDigest,
   deriveKeywordTags,
 } from '../src/parser.js';
 import type { Feature } from '../src/types.js';
@@ -927,5 +928,30 @@ describe('parseSessionLog', () => {
   it('handles empty file', async () => {
     const result = await parseSessionLog(resolve(SESSION_LOG_FIXTURE, 'session-log-empty.md'));
     expect(result).toEqual([]);
+  });
+});
+
+// ─── Session Digest Parsing ─────────────────────────────────────────
+
+describe('parseSessionDigest', () => {
+  const DIGEST_FIXTURE = resolve(FIXTURES, 'session-digest');
+
+  it('returns null for a non-existent file', async () => {
+    const result = await parseSessionDigest('/nonexistent/session-digest.md');
+    expect(result).toBeNull();
+  });
+
+  it('parses frontmatter, aggregate, and decisions from the fixture', async () => {
+    const result = await parseSessionDigest(resolve(DIGEST_FIXTURE, 'session-digest.md'));
+
+    expect(result).not.toBeNull();
+    expect(result!.sessionCount).toBe(12);
+    expect(result!.consolidatedThrough).toBe(7);
+    expect(result!.generated).toBe('2026-05-12T11:00:00.000Z');
+    expect(result!.aggregate).toContain('OAuth provider registry');
+    expect(result!.decisions).toEqual([
+      'Curated: OAuth2 for all providers',
+      'Curated: Redis for refresh token storage',
+    ]);
   });
 });

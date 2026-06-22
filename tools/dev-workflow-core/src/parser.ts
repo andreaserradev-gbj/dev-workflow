@@ -1,7 +1,7 @@
 import { readFile, readdir } from 'fs/promises';
 import { resolve, basename } from 'path';
 import matter from 'gray-matter';
-import type { Feature, FeatureStatus, Phase, Progress, SubPrdStep, SessionLogEntry } from './types.js';
+import type { Feature, FeatureStatus, Phase, Progress, SubPrdStep, SessionLogEntry, SessionDigest } from './types.js';
 
 // ─── Emoji Shortcode Normalization ──────────────────────────────────
 
@@ -985,6 +985,47 @@ export async function parseSessionLog(filePath: string): Promise<SessionLogEntry
   }
 
   return entries;
+}
+
+// ─── Session Digest ──────────────────────────────────────────────
+
+/** Parse session-digest.md and return the digest, or null when the file is absent.
+ *
+ *  Single-doc gray-matter read. Frontmatter keys are snake_case
+ *  (consolidated_through, session_count, generated); the body holds an
+ *  `<aggregate>` narrative and an optional `<decisions>` list. Reuses
+ *  extractXmlTag()/extractXmlListItems() — the same machinery as parseCheckpoint.
+ */
+export async function parseSessionDigest(filePath: string): Promise<SessionDigest | null> {
+  let content: string;
+  try {
+    content = await readFile(filePath, 'utf-8');
+  } catch {
+    return null;
+  }
+
+  let frontmatter: Record<string, unknown> = {};
+  try {
+    frontmatter = matter(content).data;
+  } catch {
+    // Malformed YAML — continue with empty frontmatter
+  }
+
+  const sessionCount =
+    typeof frontmatter.session_count === 'number' ? frontmatter.session_count : 0;
+  const consolidatedThrough =
+    typeof frontmatter.consolidated_through === 'number' ? frontmatter.consolidated_through : 0;
+  const generated =
+    typeof frontmatter.generated === 'string'
+      ? frontmatter.generated
+      : frontmatter.generated instanceof Date
+        ? frontmatter.generated.toISOString()
+        : null;
+
+  const aggregate = extractXmlTag(content, 'aggregate');
+  const decisions = extractXmlListItems(content, 'decisions');
+
+  return { sessionCount, consolidatedThrough, generated, aggregate, decisions };
 }
 
 async function isEmptyFeatureDir(dirPath: string): Promise<boolean> {
