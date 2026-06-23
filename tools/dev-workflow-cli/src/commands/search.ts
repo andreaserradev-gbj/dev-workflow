@@ -1,14 +1,11 @@
-import { readFile } from 'fs/promises';
-import { homedir } from 'os';
-import { join, resolve } from 'path';
 import {
   scanProjects,
   searchFeatures,
   type FeatureStatus,
-  type Project,
   type SearchHit,
 } from 'dev-workflow-core';
 import { parseFlags } from '../index.js';
+import { matchesProject, resolveScanDirs } from '../scan-dirs.js';
 
 const VALID_STATUSES: ReadonlySet<FeatureStatus> = new Set([
   'gate',
@@ -79,65 +76,6 @@ export async function search(args: string[]): Promise<number> {
   }
 
   return hits.length > 0 ? 0 : 1;
-}
-
-// ─── Scan-dir resolution (mirrors list.ts) ───────────────────────────
-
-async function resolveScanDirs(scanFlag: string | null): Promise<string[]> {
-  if (scanFlag) return [expandHome(scanFlag)];
-
-  const fromConfig = await readDashboardScanDirs();
-  if (fromConfig.length > 0) return fromConfig;
-
-  return [process.cwd()];
-}
-
-function getDashboardConfigPath(): string {
-  const configHome = process.env.XDG_CONFIG_HOME ?? join(homedir(), '.config');
-  return join(configHome, 'dev-dashboard', 'config.json');
-}
-
-async function readDashboardScanDirs(): Promise<string[]> {
-  let raw: string;
-  try {
-    raw = await readFile(getDashboardConfigPath(), 'utf-8');
-  } catch {
-    return [];
-  }
-
-  let parsed: unknown;
-  try {
-    parsed = JSON.parse(raw);
-  } catch {
-    return [];
-  }
-
-  if (!parsed || typeof parsed !== 'object') return [];
-  const dirs = (parsed as { scanDirs?: unknown }).scanDirs;
-  if (!Array.isArray(dirs)) return [];
-
-  const out: string[] = [];
-  const seen = new Set<string>();
-  for (const dir of dirs) {
-    if (typeof dir !== 'string') continue;
-    const expanded = expandHome(dir.trim());
-    if (!expanded || seen.has(expanded)) continue;
-    seen.add(expanded);
-    out.push(expanded);
-  }
-  return out;
-}
-
-function expandHome(dir: string): string {
-  if (dir === '~') return homedir();
-  if (dir.startsWith('~/')) return resolve(homedir(), dir.slice(2));
-  return resolve(dir);
-}
-
-function matchesProject(p: Project, filter: string): boolean {
-  if (p.name === filter) return true;
-  const expanded = expandHome(filter);
-  return p.path === expanded;
 }
 
 // ─── Text output ─────────────────────────────────────────────────────

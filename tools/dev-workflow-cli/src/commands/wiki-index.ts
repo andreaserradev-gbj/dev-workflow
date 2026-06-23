@@ -1,8 +1,8 @@
-import { readFile } from 'fs/promises';
 import { homedir } from 'os';
-import { join, resolve } from 'path';
+import { join } from 'path';
 import { scanProjects, generateWiki, type Project } from 'dev-workflow-core';
 import { parseFlags } from '../index.js';
+import { expandHome, readDashboardWikiDir, resolveScanDirs } from '../scan-dirs.js';
 
 export async function wikiIndex(args: string[]): Promise<number> {
   const { flags } = parseFlags(args);
@@ -53,16 +53,7 @@ export async function wikiIndex(args: string[]): Promise<number> {
   return 0;
 }
 
-// ─── Scan-dir resolution ──────────────────────────────────────────
-
-async function resolveScanDirs(scanFlag: string | null): Promise<string[]> {
-  if (scanFlag) return [expandHome(scanFlag)];
-
-  const fromConfig = await readDashboardScanDirs();
-  if (fromConfig.length > 0) return fromConfig;
-
-  return [process.cwd()];
-}
+// ─── Wiki-dir resolution ──────────────────────────────────────────
 
 async function resolveWikiDir(outFlag: string | null): Promise<string> {
   if (outFlag) return expandHome(outFlag);
@@ -71,69 +62,6 @@ async function resolveWikiDir(outFlag: string | null): Promise<string> {
   if (fromConfig) return fromConfig;
 
   return join(homedir(), '.dev-wiki');
-}
-
-function getDashboardConfigPath(): string {
-  const configHome = process.env.XDG_CONFIG_HOME ?? join(homedir(), '.config');
-  return join(configHome, 'dev-dashboard', 'config.json');
-}
-
-async function readDashboardScanDirs(): Promise<string[]> {
-  let raw: string;
-  try {
-    raw = await readFile(getDashboardConfigPath(), 'utf-8');
-  } catch {
-    return [];
-  }
-
-  let parsed: unknown;
-  try {
-    parsed = JSON.parse(raw);
-  } catch {
-    return [];
-  }
-
-  if (!parsed || typeof parsed !== 'object') return [];
-  const dirs = (parsed as { scanDirs?: unknown }).scanDirs;
-  if (!Array.isArray(dirs)) return [];
-
-  const out: string[] = [];
-  const seen = new Set<string>();
-  for (const dir of dirs) {
-    if (typeof dir !== 'string') continue;
-    const expanded = expandHome(dir.trim());
-    if (!expanded || seen.has(expanded)) continue;
-    seen.add(expanded);
-    out.push(expanded);
-  }
-  return out;
-}
-
-async function readDashboardWikiDir(): Promise<string | null> {
-  let raw: string;
-  try {
-    raw = await readFile(getDashboardConfigPath(), 'utf-8');
-  } catch {
-    return null;
-  }
-
-  let parsed: unknown;
-  try {
-    parsed = JSON.parse(raw);
-  } catch {
-    return null;
-  }
-
-  if (!parsed || typeof parsed !== 'object') return null;
-  const wikiDir = (parsed as { wikiDir?: unknown }).wikiDir;
-  if (typeof wikiDir !== 'string') return null;
-  return expandHome(wikiDir.trim());
-}
-
-function expandHome(dir: string): string {
-  if (dir === '~') return homedir();
-  if (dir.startsWith('~/')) return resolve(homedir(), dir.slice(2));
-  return resolve(dir);
 }
 
 // ─── Output helpers ───────────────────────────────────────────────
