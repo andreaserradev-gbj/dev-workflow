@@ -1,9 +1,28 @@
 import { resolve } from 'path';
 import { readFile, appendFile } from 'fs/promises';
-import { parseCheckpoint, writeCheckpoint } from 'dev-workflow-core';
+import { parseCheckpoint, parseSessionDigest, writeCheckpoint } from 'dev-workflow-core';
 import type { CheckpointWriteInput } from 'dev-workflow-core';
 import { resolveFeatureDir } from '../resolve.js';
 import { parseFlags } from '../index.js';
+
+/**
+ * Session-count threshold that triggers session-history consolidation.
+ * Below it, resume/checkpoint behavior is unchanged. Consolidation re-fires
+ * once this many sessions accrue past the last digest (mirrors /dev-wrapup's
+ * batched re-compaction so the LLM step doesn't churn on every checkpoint).
+ */
+const CONSOLIDATION_THRESHOLD = 10;
+
+/** Count `## Session N` headings in session-log.md (0 when the file is absent). */
+async function countSessions(sessionLogPath: string): Promise<number> {
+  try {
+    const existing = await readFile(sessionLogPath, 'utf-8');
+    const headings = existing.match(/^## Session\s+\d+/gm);
+    return headings ? headings.length : 0;
+  } catch {
+    return 0;
+  }
+}
 
 /** Read all of stdin as a string. */
 async function readStdin(): Promise<string> {
@@ -85,7 +104,7 @@ async function formatSessionEntry(
 export async function doCheckpointWrite(
   featureDir: string,
   inputData: CheckpointWriteInput,
-): Promise<{ success: boolean; file: string }> {
+): Promise<{ success: boolean; file: string; sessionCount: number; consolidationDue: boolean }> {
   const checkpointPath = resolve(featureDir, 'checkpoint.md');
   const sessionLogPath = resolve(featureDir, 'session-log.md');
 
@@ -99,7 +118,16 @@ export async function doCheckpointWrite(
   // Write the new checkpoint
   await writeCheckpoint(checkpointPath, inputData);
 
-  return { success: true, file: checkpointPath };
+  // Consolidation signal: count archived sessions and compare against any existing
+  // digest. Due when >= CONSOLIDATION_THRESHOLD sessions have accrued since the last
+  // digest (or since the start, when no digest exists). This only REPORTS the signal —
+  // the actual LLM consolidation lives in the /dev-checkpoint skill, never here.
+  const sessionCount = await countSessions(sessionLogPath);
+  const digest = await parseSessionDigest(resolve(featureDir, 'session-digest.md'));
+  const lastConsolidated = digest?.sessionCount ?? 0;
+  const consolidationDue = sessionCount - lastConsolidated >= CONSOLIDATION_THRESHOLD;
+
+  return { success: true, file: checkpointPath, sessionCount, consolidationDue };
 }
 
 /**
@@ -157,6 +185,11 @@ export async function checkpointWrite(args: string[]): Promise<number> {
     console.log(JSON.stringify(result, null, 2));
   } else {
     console.log(`Checkpoint written to ${result.file}`);
+    if (result.consolidationDue) {
+      console.log(
+        `Session consolidation due (${result.sessionCount} sessions) — run the /dev-checkpoint consolidation step.`,
+      );
+    }
   }
 
   return 0;

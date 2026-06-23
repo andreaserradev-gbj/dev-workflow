@@ -3,6 +3,7 @@ import matter from 'gray-matter';
 import { normalizeEmoji } from './parser.js';
 import type {
   CheckpointWriteInput,
+  SessionDigestWriteInput,
   StepTarget,
   StatusMarker,
   StatusUpdateResult,
@@ -78,6 +79,47 @@ export async function writeCheckpoint(
   }
 
   // Combine frontmatter + body via gray-matter
+  const output = matter.stringify(body, frontmatter);
+
+  await writeFile(filePath, output, 'utf-8');
+}
+
+// ─── Session Digest Writer ─────────────────────────────────────────
+
+/**
+ * Write a session-digest.md file that is compatible with parseSessionDigest().
+ *
+ * Produces YAML frontmatter (snake_case keys: consolidated_through,
+ * session_count, generated) + an `<aggregate>` narrative block and an optional
+ * `<decisions>` list. Mirrors writeCheckpoint()'s frontmatter + XML-section
+ * shape so the same gray-matter / extractXmlTag machinery reads it back.
+ *
+ * The digest is COMPOSED by the /dev-checkpoint skill (the LLM) and persisted
+ * here deterministically — the engine never composes a digest or calls an LLM.
+ * The digest lives in its own file, never as a `## Session N` block, so the
+ * session counter in session-log.md is never inflated.
+ */
+export async function writeSessionDigest(
+  filePath: string,
+  data: SessionDigestWriteInput,
+): Promise<void> {
+  const frontmatter: Record<string, unknown> = {
+    consolidated_through: data.consolidatedThrough,
+    session_count: data.sessionCount,
+    generated: data.generated ?? new Date().toISOString(),
+  };
+
+  let body = `<aggregate>\n${data.aggregate}\n</aggregate>`;
+
+  // Optional decisions list — only included when non-empty (mirrors writeCheckpoint).
+  if (data.decisions && data.decisions.length > 0) {
+    body += '\n\n<decisions>\n';
+    for (const d of data.decisions) {
+      body += `- ${d}\n`;
+    }
+    body += '</decisions>';
+  }
+
   const output = matter.stringify(body, frontmatter);
 
   await writeFile(filePath, output, 'utf-8');

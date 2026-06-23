@@ -4,6 +4,22 @@ All notable changes to this project should be documented in this file.
 
 <!-- LOCAL-RELEASES-START -->
 
+## v1.38.0 - 2026-06-22
+
+### Added
+
+- **Wiki enrichment for cross-feature recall.** The index layer that `/dev-plan` consults for prior art no longer renders blank cards or leans on five thin metadata fields alone. `extractSummary` now walks a fallback heading ladder (`## Executive Summary` → `## Overview` → `## Summary` → `## Background` → first prose paragraph → H1) instead of matching `## Executive Summary` only, so PRDs written with any common heading get a real summary. A new deterministic keyword-tag tier in the parser derives tags from headings, backtick-quoted file paths, and capitalized identifiers, and those flow into the `Feature` type, the wiki index/log tables, and the search index. Tags are also read from PRD YAML `tags:` frontmatter when present, so a feature's tags are the union of authored frontmatter and derived keywords. All of this is pure-Node and deterministic — no LLM, no network — so the dashboard's 500ms wiki-regen path is untouched. The optional LLM concept-tag tier (an `--enrich` step that would write capability/domain tags into frontmatter) is intentionally deferred to a future release; it needs no rework to add, since the frontmatter read path ships here.
+- **Session-history consolidation for bounded resume.** On long-running features, `/dev-resume` previously either truncated to the last few sessions (dropping most of the narrative) or loaded the entire session log plus every decision bullet ever recorded. `/dev-checkpoint` now distills the older session tail into a compact `session-digest.md` once a feature crosses ten sessions, modeled on `/dev-wrapup`'s feedback compaction: a two-tier digest of an aggregate narrative plus a bounded, still-relevant decision set. The digest lives in its own file — never as a `## Session N` block in `session-log.md`, which would inflate the session counter — composed by the checkpoint LLM (already in the room) and persisted by a new WRITE-only `session-consolidate` CLI command. `checkpoint-write` now reports a `consolidationDue` signal so the skill knows when to run the step; below the threshold, behavior is identical to before.
+
+### Changed
+
+- **The `resume-context` JSON schema changed (breaking for direct consumers).** `sessionHistory` is renamed to `recentSessionHistory` (the recent raw session window); a new `sessionDigest` field carries the distilled older-session digest, or `null` below the consolidation threshold; and `accumulatedDecisions` is now bounded — when a digest exists it is the digest's carried-forward decisions plus the recent window's decisions, rather than the full union across all sessions. The CLI and the `/dev-checkpoint` / `/dev-resume` skills ship together in this release, so there is no break for end users — the note matters only for anything reading `resume-context --json` directly. Both bundles are rebuilt; the dashboard bundle now carries the deterministic tag code so its wiki regeneration renders the Tags column.
+
+### Fixed
+
+- **Reproducible dashboard bundle.** The bundled dashboard client baked the wall-clock build date into its content, so rebuilding on a different calendar day changed the Vite asset hash and dirtied the committed bundle even when no source had changed. The build date now derives from this CHANGELOG's entry for the current version, so a given version always rebuilds to a byte-identical client bundle.
+- **Green `dev-workflow-core` build.** Dropped a dead variable initializer in the master-plan tag parser (`extractFrontmatterTags`) that tripped eslint's `no-useless-assignment` rule and left `npm run build` failing on the core package.
+
 ## v1.37.1 - 2026-06-22
 
 ### Security
@@ -299,6 +315,13 @@ Checkpoints and resumes are now powered by deterministic CLI commands instead of
 <!-- LOCAL-RELEASES-END -->
 
 <!-- GITHUB-RELEASES-START -->
+
+## v1.37.1 - 2026-06-22
+
+### Security
+
+- The build transform that removes `gray-matter`'s dead JS-frontmatter engine now strips the **entire `engines.javascript` registration**, not just its `eval()` call. Neutralizing only the call left the surrounding string-building scaffolding (`'(function(){ return ' + str + '}())'`) in the minified bundle, which an LLM-based scanner still reads as a remote-code-execution sink even with zero literal `eval(`. Replacing the whole engine with an inert throwing stub leaves nothing to cite. Behavior is unchanged — that engine is dead under the YAML-only `safeLoad` path the parser uses — and the guard still fails the build if a dependency bump relocates the block. Applies to both the CLI bundle and the dashboard server bundle.
+- `/dev-wiki` now frames the cross-project `.dev/` and `.dev-archive/` markdown it scans as **untrusted data, not instructions** — catalogued, never obeyed. A new "Untrusted Input" section foregrounds that generation is deterministic and CLI-bound, that the skill has no `Edit`/`Write` capability and runs no command found inside a PRD, and that the generated wiki is itself a catalog of untrusted metadata for downstream readers. This mirrors the `/dev-review` untrusted-input scoping shipped in 1.37.0 and targets the prompt-injection category on the skill.
 
 ## v1.37.0 - 2026-06-22
 

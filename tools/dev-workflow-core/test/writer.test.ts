@@ -1,15 +1,17 @@
-import { describe, it, expect, beforeEach, afterEach } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { resolve, join } from 'path';
 import { readFile, writeFile, mkdir, rm, readdir } from 'fs/promises';
 import {
   parseCheckpoint,
   parseMasterPlan,
+  parseSessionDigest,
 } from '../src/parser.js';
 import {
   writeCheckpoint,
+  writeSessionDigest,
   updateStatus,
 } from '../src/writer.js';
-import type { CheckpointWriteInput, StepTarget, StatusMarker } from '../src/types.js';
+import type { CheckpointWriteInput, SessionDigestWriteInput, StepTarget, StatusMarker } from '../src/types.js';
 
 const FIXTURES = resolve(__dirname, 'fixtures');
 const TMP_DIR = resolve(__dirname, 'fixtures/_writer_tmp');
@@ -990,5 +992,92 @@ describe('writeCheckpoint regression tests', () => {
 
     // Should have tested at least 6 clean round-trips
     expect(tested).toBeGreaterThanOrEqual(6);
+  });
+});
+
+// ─── Session Digest Writer Tests ────────────────────────────────────
+
+describe('writeSessionDigest round-trip', () => {
+  afterEach(async () => {
+    try { await rm(TMP_DIR, { recursive: true, force: true }); } catch {}
+  });
+
+  it('round-trips a digest through parseSessionDigest', async () => {
+    await mkdir(TMP_DIR, { recursive: true });
+    const tmpPath = join(TMP_DIR, 'session-digest.md');
+
+    const input: SessionDigestWriteInput = {
+      sessionCount: 12,
+      consolidatedThrough: 7,
+      generated: '2026-05-12T11:00:00.000Z',
+      aggregate: 'Sessions 1–7 stood up the provider registry and token storage.',
+      decisions: ['OAuth2 for all providers', 'Redis for refresh tokens'],
+    };
+
+    await writeSessionDigest(tmpPath, input);
+
+    const parsed = await parseSessionDigest(tmpPath);
+    expect(parsed).not.toBeNull();
+    expect(parsed!.sessionCount).toBe(12);
+    expect(parsed!.consolidatedThrough).toBe(7);
+    expect(parsed!.generated).toBe('2026-05-12T11:00:00.000Z');
+    expect(parsed!.aggregate).toBe(input.aggregate);
+    expect(parsed!.decisions).toEqual(['OAuth2 for all providers', 'Redis for refresh tokens']);
+  });
+
+  it('omits the decisions block when empty or undefined', async () => {
+    await mkdir(TMP_DIR, { recursive: true });
+    const tmpPath = join(TMP_DIR, 'no-decisions.md');
+
+    await writeSessionDigest(tmpPath, {
+      sessionCount: 10,
+      consolidatedThrough: 10,
+      generated: '2026-05-10T10:00:00.000Z',
+      aggregate: 'All ten sessions folded in.',
+      decisions: [],
+    });
+
+    const content = await readFile(tmpPath, 'utf-8');
+    expect(content).not.toContain('<decisions>');
+
+    const parsed = await parseSessionDigest(tmpPath);
+    expect(parsed!.decisions).toEqual([]);
+  });
+
+  it('is a SEPARATE file with no `## Session N` heading (counter guard)', async () => {
+    await mkdir(TMP_DIR, { recursive: true });
+    const tmpPath = join(TMP_DIR, 'separate.md');
+
+    await writeSessionDigest(tmpPath, {
+      sessionCount: 11,
+      consolidatedThrough: 6,
+      generated: '2026-05-11T10:00:00.000Z',
+      aggregate: 'Older tail summary.',
+    });
+
+    const content = await readFile(tmpPath, 'utf-8');
+    // The digest must never contain a session heading — that would inflate the
+    // session counter / be mis-parsed by parseSessionLog.
+    expect(content).not.toMatch(/^## Session\s+\d+/m);
+  });
+
+  it('defaults generated to the current time when not provided', async () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date('2026-06-22T09:30:00.000Z'));
+    try {
+      await mkdir(TMP_DIR, { recursive: true });
+      const tmpPath = join(TMP_DIR, 'default-generated.md');
+
+      await writeSessionDigest(tmpPath, {
+        sessionCount: 10,
+        consolidatedThrough: 5,
+        aggregate: 'Default-timestamp digest.',
+      });
+
+      const parsed = await parseSessionDigest(tmpPath);
+      expect(parsed!.generated).toBe('2026-06-22T09:30:00.000Z');
+    } finally {
+      vi.useRealTimers();
+    }
   });
 });

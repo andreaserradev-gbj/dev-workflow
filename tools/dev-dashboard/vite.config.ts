@@ -14,8 +14,20 @@ const marketplace = JSON.parse(
     version?: string;
   }>;
 };
-const buildDate = new Date().toISOString().slice(0, 10);
 const appVersion = marketplace.plugins?.[0]?.version ?? pkg.version ?? '0.0.0';
+
+// Build date is derived from the CHANGELOG entry for the current version, not the
+// wall clock, so the committed client bundle is reproducible: the same version
+// always yields the same date, hence the same Vite content hash. Falls back to
+// the most recent dated entry when the exact version isn't in the log yet (e.g. a
+// dev build before its release note is written).
+const changelog = readFileSync(resolve(__dirname, '../../CHANGELOG.md'), 'utf-8');
+const versionDateRe = new RegExp(
+  `^##\\s+v${appVersion.replace(/\./g, '\\.')}\\s+-\\s+(\\d{4}-\\d{2}-\\d{2})`,
+  'm',
+);
+const anyDateRe = /^##\s+v\d+\.\d+\.\d+\s+-\s+(\d{4}-\d{2}-\d{2})/m;
+const buildDate = (changelog.match(versionDateRe) ?? changelog.match(anyDateRe))?.[1] ?? '';
 
 export default defineConfig({
   plugins: [preact(), tailwindcss()],

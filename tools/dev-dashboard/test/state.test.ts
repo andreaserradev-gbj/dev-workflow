@@ -12,6 +12,7 @@ function feat(name: string, overrides: Partial<Feature> = {}): Feature {
     nextAction: null,
     branch: null,
     summary: null,
+    tags: [],
     ...overrides,
   };
 }

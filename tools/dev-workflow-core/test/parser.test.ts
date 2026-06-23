@@ -9,6 +9,8 @@ import {
   determineFeatureStatus,
   parseFeature,
   parseSessionLog,
+  parseSessionDigest,
+  deriveKeywordTags,
 } from '../src/parser.js';
 import type { Feature } from '../src/types.js';
 
@@ -208,6 +210,148 @@ describe('parseMasterPlan', () => {
     expect(result!.phases[1]).toMatchObject({ number: 2, done: 0, total: 3, status: 'not-started' });
 
     expect(result!.progress).toMatchObject({ done: 4, total: 8, percent: 50 });
+  });
+});
+
+// ─── Summary Fallback Ladder ───────────────────────────────────────
+
+describe('extractSummary fallback ladder', () => {
+  const SF = resolve(FIXTURES, 'summary-fallback');
+
+  it('falls back to ## Overview when no Executive Summary', async () => {
+    const result = await parseMasterPlan(resolve(SF, 'overview/00-master-plan.md'));
+    expect(result!.summary).toBe('A token-bucket rate limiter with per-route configuration.');
+  });
+
+  it('falls back to ## Summary', async () => {
+    const result = await parseMasterPlan(resolve(SF, 'summary/00-master-plan.md'));
+    expect(result!.summary).toBe('Background worker queue with exponential-backoff retries.');
+  });
+
+  it('falls back to ## Background', async () => {
+    const result = await parseMasterPlan(resolve(SF, 'background/00-master-plan.md'));
+    expect(result!.summary).toBe(
+      'Legacy migration from the v1 schema to the partitioned event store.',
+    );
+  });
+
+  it('falls back to first prose paragraph, skipping metadata and headings', async () => {
+    const result = await parseMasterPlan(resolve(SF, 'prose-only/00-master-plan.md'));
+    expect(result!.summary).toBe(
+      'This feature wires up a background worker queue with retry semantics.',
+    );
+  });
+
+  it('falls back to the H1 title when there is no prose', async () => {
+    const result = await parseMasterPlan(resolve(SF, 'h1-only/00-master-plan.md'));
+    expect(result!.summary).toBe('Just A Title Master Plan');
+  });
+
+  it('returns null only when there is no prose at all', async () => {
+    const result = await parseMasterPlan(resolve(SF, 'empty/00-master-plan.md'));
+    expect(result!.summary).toBeNull();
+  });
+
+  it('still prefers ## Executive Summary over later headings', async () => {
+    const result = await parseMasterPlan(resolve(FIXTURES, 'full-feature/00-master-plan.md'));
+    expect(result!.summary).toBe(
+      'Multi-provider authentication with OAuth2 and JWT token management for the API server.',
+    );
+  });
+});
+
+// ─── Frontmatter Tags ──────────────────────────────────────────────
+
+describe('parseMasterPlan tags frontmatter', () => {
+  it('reads a tags: array from YAML frontmatter', async () => {
+    const result = await parseMasterPlan(resolve(FIXTURES, 'tags-frontmatter/00-master-plan.md'));
+    expect(result!.tags).toEqual(['auth', 'oauth', 'jwt']);
+  });
+
+  it('still extracts summary when YAML frontmatter is present', async () => {
+    const result = await parseMasterPlan(resolve(FIXTURES, 'tags-frontmatter/00-master-plan.md'));
+    expect(result!.summary).toBe('Feature with author-specified frontmatter tags.');
+  });
+
+  it('ignores a non-array tags value', async () => {
+    const result = await parseMasterPlan(
+      resolve(FIXTURES, 'tags-frontmatter-invalid/00-master-plan.md'),
+    );
+    expect(result!.tags).toEqual([]);
+  });
+
+  it('returns [] tags when there is no frontmatter', async () => {
+    const result = await parseMasterPlan(resolve(FIXTURES, 'full-feature/00-master-plan.md'));
+    expect(result!.tags).toEqual([]);
+  });
+});
+
+// ─── Keyword Tag Derivation ────────────────────────────────────────
+
+describe('deriveKeywordTags', () => {
+  it('extracts domain words from headings, dropping structural boilerplate', () => {
+    const content = [
+      '# Auth - Master Plan',
+      '',
+      '## Executive Summary',
+      'Some prose.',
+      '',
+      '## Phase 1: Token Rotation',
+      '1. ⬜ do the work',
+    ].join('\n');
+    const tags = deriveKeywordTags(content);
+    expect(tags).toContain('token');
+    expect(tags).toContain('rotation');
+    // boilerplate headings never become tags
+    expect(tags).not.toContain('summary');
+    expect(tags).not.toContain('executive');
+    expect(tags).not.toContain('phase');
+  });
+
+  it('extracts file-path stems and ignores slash-commands and non-path code', () => {
+    const content = [
+      '## Files',
+      'Edit `tools/dev-workflow-core/src/parser.ts` and `search.ts`.',
+      'Run `npm run bundle`. Then `/dev-checkpoint`.',
+    ].join('\n');
+    const tags = deriveKeywordTags(content);
+    expect(tags).toContain('parser');
+    expect(tags).toContain('search');
+    expect(tags).not.toContain('dev-checkpoint'); // leading-slash command, not a path
+    expect(tags).not.toContain('bundle'); // not a path-shaped code span
+  });
+
+  it('extracts code-style identifiers (≥2 uppercase) but not sentence-initial verbs', () => {
+    const content = [
+      '## Notes',
+      'The JWT flow uses OAuth2 and returns a MasterPlanResult.',
+      'Add the handler. Edit the config. Run the build.',
+    ].join('\n');
+    const tags = deriveKeywordTags(content);
+    expect(tags).toContain('jwt');
+    expect(tags).toContain('oauth2');
+    expect(tags).toContain('masterplanresult');
+    // single-leading-capital verbs are excluded by the ≥2-uppercase rule
+    expect(tags).not.toContain('add');
+    expect(tags).not.toContain('edit');
+  });
+
+  it('ranks by frequency across sources, lowercase-dedupes, and caps at 8', () => {
+    const content = [
+      '## Cache Cache Queue Worker Broker Router Schema Buffer Pool Mutex Latch',
+      'See `src/cache.ts`.',
+    ].join('\n');
+    const tags = deriveKeywordTags(content);
+    // 10 distinct heading words → capped to 8
+    expect(tags.length).toBe(8);
+    // cache appears twice in the heading + once as a path stem → ranks first
+    expect(tags[0]).toBe('cache');
+    // lowercase dedup: one 'cache' despite three sources
+    expect(new Set(tags).size).toBe(tags.length);
+  });
+
+  it('returns [] for content with no taggable tokens', () => {
+    expect(deriveKeywordTags('## Summary\n\nthe a an of to.')).toEqual([]);
   });
 });
 
@@ -709,6 +853,24 @@ describe('parseFeature', () => {
     // currentPhase falls back to first pending sub-PRD phase
     expect(result.currentPhase).toMatchObject({ number: 1, title: 'Extras' });
   });
+
+  it('populates tags as frontmatter ∪ keyword tags, deduped', async () => {
+    const result = await parseFeature(resolve(FIXTURES, 'tags-frontmatter'), 'tags-frontmatter');
+    // frontmatter tags come first (authoritative)
+    expect(result.tags.slice(0, 3)).toEqual(['auth', 'oauth', 'jwt']);
+    // derived keyword tag from the "## Phase 1: Core" heading is appended
+    expect(result.tags).toContain('core');
+    // 'jwt' is in both frontmatter and the body but appears once
+    expect(result.tags.filter((t) => t === 'jwt')).toHaveLength(1);
+    expect(new Set(result.tags).size).toBe(result.tags.length);
+  });
+
+  it('populates keyword tags even when there is no frontmatter', async () => {
+    const result = await parseFeature(resolve(FIXTURES, 'full-feature'), 'full-feature');
+    expect(result.tags.length).toBeGreaterThan(0);
+    // from "### Phase 2: Token Management"
+    expect(result.tags).toContain('token');
+  });
 });
 
 // ─── Session Log Parsing ───────────────────────────────────────────
@@ -766,5 +928,30 @@ describe('parseSessionLog', () => {
   it('handles empty file', async () => {
     const result = await parseSessionLog(resolve(SESSION_LOG_FIXTURE, 'session-log-empty.md'));
     expect(result).toEqual([]);
+  });
+});
+
+// ─── Session Digest Parsing ─────────────────────────────────────────
+
+describe('parseSessionDigest', () => {
+  const DIGEST_FIXTURE = resolve(FIXTURES, 'session-digest');
+
+  it('returns null for a non-existent file', async () => {
+    const result = await parseSessionDigest('/nonexistent/session-digest.md');
+    expect(result).toBeNull();
+  });
+
+  it('parses frontmatter, aggregate, and decisions from the fixture', async () => {
+    const result = await parseSessionDigest(resolve(DIGEST_FIXTURE, 'session-digest.md'));
+
+    expect(result).not.toBeNull();
+    expect(result!.sessionCount).toBe(12);
+    expect(result!.consolidatedThrough).toBe(7);
+    expect(result!.generated).toBe('2026-05-12T11:00:00.000Z');
+    expect(result!.aggregate).toContain('OAuth provider registry');
+    expect(result!.decisions).toEqual([
+      'Curated: OAuth2 for all providers',
+      'Curated: Redis for refresh token storage',
+    ]);
   });
 });

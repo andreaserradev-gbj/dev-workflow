@@ -68,7 +68,7 @@ describe('resume-context', () => {
     expect(json.referenceFiles).toBeInstanceOf(Array);
 
     // Session history and accumulated decisions — no session-log in fixture
-    expect(json.sessionHistory).toEqual([]);
+    expect(json.recentSessionHistory).toEqual([]);
     expect(json.accumulatedDecisions).toEqual([]);
   });
 
@@ -133,7 +133,7 @@ describe('resume-context', () => {
     expect(code).toBe(0);
     const json = JSON.parse(output.lines.join('\n'));
     // No session log in this fixture, but the flag should be accepted
-    expect(json.sessionHistory).toEqual([]);
+    expect(json.recentSessionHistory).toEqual([]);
   });
 
   it('returns session history and accumulated decisions from session-log', async () => {
@@ -147,12 +147,12 @@ describe('resume-context', () => {
     const json = JSON.parse(output.lines.join('\n'));
 
     // Session history — default --sessions=5, 3 sessions available
-    expect(json.sessionHistory).toHaveLength(3);
-    expect(json.sessionHistory[0].session).toBe(1);
-    expect(json.sessionHistory[0].date).toBe('2026-02-15T10:00:00.000Z');
-    expect(json.sessionHistory[0].context).toContain('OAuth provider registry');
-    expect(json.sessionHistory[1].session).toBe(2);
-    expect(json.sessionHistory[2].session).toBe(3);
+    expect(json.recentSessionHistory).toHaveLength(3);
+    expect(json.recentSessionHistory[0].session).toBe(1);
+    expect(json.recentSessionHistory[0].date).toBe('2026-02-15T10:00:00.000Z');
+    expect(json.recentSessionHistory[0].context).toContain('OAuth provider registry');
+    expect(json.recentSessionHistory[1].session).toBe(2);
+    expect(json.recentSessionHistory[2].session).toBe(3);
 
     // Accumulated decisions — union of all sessions, deduplicated
     expect(json.accumulatedDecisions).toContain('Use OAuth2 for all providers');
@@ -176,9 +176,9 @@ describe('resume-context', () => {
     const json = JSON.parse(output.lines.join('\n'));
 
     // Should return only last 2 sessions
-    expect(json.sessionHistory).toHaveLength(2);
-    expect(json.sessionHistory[0].session).toBe(2);
-    expect(json.sessionHistory[1].session).toBe(3);
+    expect(json.recentSessionHistory).toHaveLength(2);
+    expect(json.recentSessionHistory[0].session).toBe(2);
+    expect(json.recentSessionHistory[1].session).toBe(3);
     // Accumulated decisions should still be from ALL sessions
     expect(json.accumulatedDecisions).toContain('Use OAuth2 for all providers');
   });
@@ -194,7 +194,7 @@ describe('resume-context', () => {
     expect(code).toBe(0);
     const json = JSON.parse(output.lines.join('\n'));
 
-    expect(json.sessionHistory).toHaveLength(3);
+    expect(json.recentSessionHistory).toHaveLength(3);
   });
 
 
@@ -210,7 +210,7 @@ describe('resume-context', () => {
     const json = JSON.parse(output.lines.join('\n'));
 
     // 0 means "no limit" — should return all 3 sessions
-    expect(json.sessionHistory).toHaveLength(3);
+    expect(json.recentSessionHistory).toHaveLength(3);
   });
 
   it('deduplicates decisions that appear in multiple sessions', async () => {
@@ -305,6 +305,64 @@ describe('resume-context', () => {
     expect(text).toContain('Feature:');
     expect(text).toContain('Status:');
     expect(text).toContain('Validity:');
+  });
+
+  // ─── Session Digest passthrough + bounded decisions ───────────────
+
+  it('passes through the session digest and bounds decisions to digest + recent window', async () => {
+    const code = await resumeContext([
+      '--dir',
+      resolve(FIXTURES, 'session-digest'),
+      '--json',
+    ]);
+
+    expect(code).toBe(0);
+    const json = JSON.parse(output.lines.join('\n'));
+
+    // Digest passthrough
+    expect(json.sessionDigest).not.toBeNull();
+    expect(json.sessionDigest.sessionCount).toBe(12);
+    expect(json.sessionDigest.consolidatedThrough).toBe(7);
+    expect(json.sessionDigest.aggregate).toContain('OAuth provider registry');
+    expect(json.sessionDigest.decisions).toEqual([
+      'Curated: OAuth2 for all providers',
+      'Curated: Redis for refresh token storage',
+    ]);
+
+    // Recent window: default --sessions=5 → sessions 8–12 (raw)
+    expect(json.recentSessionHistory).toHaveLength(5);
+    expect(json.recentSessionHistory[0].session).toBe(8);
+    expect(json.recentSessionHistory[4].session).toBe(12);
+
+    // Bounded decisions = digest decisions ∪ recent-window decisions
+    expect(json.accumulatedDecisions).toContain('Curated: OAuth2 for all providers');
+    expect(json.accumulatedDecisions).toContain('Curated: Redis for refresh token storage');
+    expect(json.accumulatedDecisions).toContain('Decision from session 8');
+    expect(json.accumulatedDecisions).toContain('Decision from session 12');
+
+    // Folded sessions (1–7) are NOT dumped raw — only their curated digest decisions survive.
+    expect(json.accumulatedDecisions).not.toContain('Decision from session 3');
+    expect(json.accumulatedDecisions).not.toContain('Decision from session 7');
+
+    // No duplicates
+    const unique = new Set(json.accumulatedDecisions);
+    expect(unique.size).toBe(json.accumulatedDecisions.length);
+  });
+
+  it('falls back to the full deduplicated union when no digest exists', async () => {
+    // full-with-sessions has a session-log but no session-digest.md
+    const code = await resumeContext([
+      '--dir',
+      resolve(FIXTURES, 'full-with-sessions'),
+      '--json',
+    ]);
+
+    expect(code).toBe(0);
+    const json = JSON.parse(output.lines.join('\n'));
+
+    expect(json.sessionDigest).toBeNull();
+    // Legacy behavior: decisions accumulate across ALL sessions
+    expect(json.accumulatedDecisions).toContain('Use OAuth2 for all providers');
   });
 
 });

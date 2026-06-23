@@ -14,6 +14,7 @@ function makeFeature(overrides: Partial<Feature> = {}): Feature {
     nextAction: null,
     branch: null,
     summary: null,
+    tags: [],
     ...overrides,
   };
 }
@@ -60,6 +61,7 @@ describe('searchFeatures', () => {
           name: 'dark-theme',
           summary: 'Dark theme support for the dashboard UI',
           currentPhase: { number: 1, total: 1, title: 'Theme Implementation' },
+          tags: ['accessibility', 'webhooks'],
         },
       ],
     },
@@ -120,6 +122,13 @@ describe('searchFeatures', () => {
     const hits = searchFeatures(projects, { query: 'refresh rotation' });
     expect(hits).toHaveLength(1);
     expect(hits[0].feature.name).toBe('auth-oauth');
+  });
+
+  it('matches a tag-only term (present in no other field)', () => {
+    const hits = searchFeatures(projects, { query: 'webhooks' });
+    expect(hits).toHaveLength(1);
+    expect(hits[0].feature.name).toBe('dark-theme');
+    expect(hits[0].matches.map((m) => m.field)).toContain('tags');
   });
 
   it('ranks results with more field matches higher', () => {

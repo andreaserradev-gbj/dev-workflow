@@ -21,6 +21,7 @@ const mockFeature: Feature = {
   nextAction: 'Implement refresh token rotation',
   branch: 'feature/auth-system',
   summary: 'Multi-provider authentication with OAuth2 and JWT.',
+  tags: [],
 };
 
 const mockProjects: Project[] = [
@@ -154,6 +155,7 @@ describe('WebSocket server', () => {
       nextAction: 'Start implementation',
       branch: 'feature/new',
       summary: 'A new feature.',
+      tags: [],
     };
 
     broadcaster.broadcast({
