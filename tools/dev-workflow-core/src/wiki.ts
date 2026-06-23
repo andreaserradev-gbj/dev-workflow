@@ -2,7 +2,12 @@ import { mkdir, writeFile, readdir, lstat, readlink, symlink, unlink } from 'fs/
 import { join, resolve } from 'path';
 import { existsSync } from 'fs';
 import type { Project } from './types.js';
-import { buildIndexPage, buildLogPage, buildReadmePage, buildObsidianAppConfig } from './wiki-templates.js';
+import {
+  buildIndexPage,
+  buildLogPage,
+  buildReadmePage,
+  buildObsidianAppConfig,
+} from './wiki-templates.js';
 
 export interface WikiOptions {
   includeReadme?: boolean;

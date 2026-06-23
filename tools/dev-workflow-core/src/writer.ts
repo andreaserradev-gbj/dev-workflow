@@ -18,10 +18,7 @@ import type {
  * Uses gray-matter's stringify for frontmatter generation.
  * Optional sections (decisions, blockers, notes) are omitted when empty.
  */
-export async function writeCheckpoint(
-  filePath: string,
-  data: CheckpointWriteInput,
-): Promise<void> {
+export async function writeCheckpoint(filePath: string, data: CheckpointWriteInput): Promise<void> {
   // Build frontmatter with snake_case keys
   const frontmatter: Record<string, unknown> = {};
   if (data.branch !== undefined) frontmatter.branch = data.branch;
@@ -162,8 +159,7 @@ export async function updateStatus(
   // Build phase sections: each section runs from its heading to the next heading (or EOF)
   for (let i = 0; i < phaseHeadingLines.length; i++) {
     const startLine = phaseHeadingLines[i].line;
-    const endLine =
-      i + 1 < phaseHeadingLines.length ? phaseHeadingLines[i + 1].line : lines.length;
+    const endLine = i + 1 < phaseHeadingLines.length ? phaseHeadingLines[i + 1].line : lines.length;
     phases.push({
       number: phaseHeadingLines[i].number,
       startLine,
@@ -173,13 +169,10 @@ export async function updateStatus(
 
   const phase = phases.find((p) => p.number === target.phase);
   if (!phase) {
-    throw new Error(
-      `Phase ${target.phase} not found in ${filePath}`,
-    );
+    throw new Error(`Phase ${target.phase} not found in ${filePath}`);
   }
 
   let targetLineIdx = -1;
-
 
   if (target.step === undefined) {
     // Phase-level marker: flip marker in the phase heading line
@@ -189,14 +182,11 @@ export async function updateStatus(
     if (line.includes(opposite)) {
       // Replace the opposite marker with the target
       lines[targetLineIdx] = line.replace(opposite, marker);
-
     } else if (line.includes(marker)) {
       // Already has the target marker
-
     } else {
       // No marker found — append one
       lines[targetLineIdx] = line.trimEnd() + ' ' + marker;
-
     }
   } else {
     // Step-level marker: find the specific step within the phase section
@@ -234,7 +224,6 @@ export async function updateStatus(
           const oldMarker = numberedMatch[3] as '✅' | '⬜' | '⏭️';
           if (oldMarker !== marker) {
             lines[i] = lines[i].replace(numberedMatch[3], marker);
-      
           }
           break;
         }
@@ -251,7 +240,6 @@ export async function updateStatus(
           const oldMarker = bulletMatch[2] as '✅' | '⬜' | '⏭️';
           if (oldMarker !== marker) {
             lines[i] = lines[i].replace(bulletMatch[2], marker);
-      
           }
           break;
         }
@@ -268,10 +256,8 @@ export async function updateStatus(
           const current = numberedCheckbox[3];
           if (marker === '✅' && current !== 'x') {
             lines[i] = lines[i].replace('[ ]', '[x]').replace('`[ ]`', '`[x]`');
-      
           } else if (marker === '⬜' && current !== ' ') {
             lines[i] = lines[i].replace('[x]', '[ ]').replace('`[x]`', '`[ ]`');
-      
           }
           break;
         }
@@ -288,10 +274,8 @@ export async function updateStatus(
           const current = bulletCheckbox[2];
           if (marker === '✅' && current !== 'x') {
             lines[i] = lines[i].replace('[ ]', '[x]');
-      
           } else if (marker === '⬜' && current !== ' ') {
             lines[i] = lines[i].replace('[x]', '[ ]');
-      
           }
           break;
         }

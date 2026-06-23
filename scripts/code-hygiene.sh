@@ -29,10 +29,11 @@ repo_root=$(git rev-parse --show-toplevel 2>/dev/null || pwd)
 cd "$repo_root" || exit 1
 
 # --- Configuration ----------------------------------------------------------
-# Baseline captured 2026-06-23: core 1 (prettier unlisted binary) + cli 0 +
-# dashboard 18 (gray-matter, eslint-plugin-prettier, 5 exports, 11 types) = 19.
+# Baseline captured 2026-06-23: core 0 + cli 0 + dashboard 16 (5 exports,
+# 11 types) = 16. (gray-matter dep, eslint-plugin-prettier devDep, and core's
+# prettier-unlisted binary were cleaned up — see git history.)
 # Override with an env var for a quick what-if, e.g. KNIP_BASELINE_ISSUES=0.
-KNIP_BASELINE_ISSUES=${KNIP_BASELINE_ISSUES:-19}
+KNIP_BASELINE_ISSUES=${KNIP_BASELINE_ISSUES:-16}
 KNIP_PKGS="tools/dev-workflow-core tools/dev-workflow-cli tools/dev-dashboard"
 JSCPD_PATHS="tools/dev-workflow-core/src tools/dev-workflow-cli/src tools/dev-dashboard/src"
 # Pinned EXACTLY (not by major range): this gate blocks pushes, so it must be

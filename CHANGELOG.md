@@ -4,6 +4,16 @@ All notable changes to this project should be documented in this file.
 
 <!-- LOCAL-RELEASES-START -->
 
+## v1.38.1 - 2026-06-23
+
+### Added
+
+- **Code-hygiene gate (knip + jscpd) on branch push.** A new `scripts/code-hygiene.sh` runs knip (unused files / dependencies / exports) per package across the three independent `tools/` packages and jscpd (copy-paste duplication) across their `src` trees, wired into `.githooks/pre-push` so regressions surface before a PR. knip runs against a ratcheting baseline (`KNIP_BASELINE_ISSUES`) — existing findings are grandfathered, but any new one fails the push; jscpd holds duplication under the 5% threshold in `.jscpd.json`. Both gates fail open when the tools can't be fetched (offline `npx`) and fail closed only on a real threshold breach. Tool versions are pinned exactly (`knip@6.18.0`, `jscpd@5.0.11`) so the gate stays deterministic.
+
+### Changed
+
+- **Cleaned up the findings the new gate surfaced and ratcheted its knip baseline 19 → 16.** Removed `gray-matter` as a direct `dev-dashboard` dependency — it was never imported there (the dashboard parses frontmatter only through `dev-workflow-core`, which keeps the dep), so the security-hardening build transform is unaffected and the shipped bundle is byte-identical. Dropped the unused `eslint-plugin-prettier` devDependency (the flat config uses `eslint-config-prettier`). Added the previously-unlisted `prettier` devDependency to `dev-workflow-core` and formatted its source under a new package-local `.prettierrc`. All source changes are confined to `tools/` and `scripts/`; the only shipped artifact that changes is the dashboard bundle's About-tab version string.
+
 ## v1.38.0 - 2026-06-22
 
 ### Added
