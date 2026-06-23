@@ -39,27 +39,10 @@ export async function scanProjects(
     for (const devDir of devDirs) {
       // devDir is an absolute path to a .dev/ directory
       const projectDir = dirname(devDir);
-      const projectName = basename(projectDir);
-
-      // Read feature subdirectories inside .dev/
-      let featureDirs: string[];
-      try {
-        const entries = await readdir(devDir, { withFileTypes: true });
-        featureDirs = entries.filter((e) => e.isDirectory()).map((e) => e.name);
-      } catch {
-        continue;
-      }
-
+      const featureDirs = await readSubdirNames(devDir);
       if (featureDirs.length === 0) continue;
 
-      // Parse each feature
-      const existing = projectMap.get(projectDir);
-      const project: Project = existing ?? {
-        name: projectName,
-        path: projectDir,
-        features: [],
-      };
-
+      const project = getOrCreateProject(projectMap, projectDir);
       for (const featureName of featureDirs) {
         const featurePath = resolve(devDir, featureName);
         const feature = await parseFeature(featurePath, featureName);
@@ -87,24 +70,10 @@ export async function scanProjects(
 
     for (const archiveDir of archiveDirs) {
       const projectDir = dirname(archiveDir);
-      const projectName = basename(projectDir);
-
-      let featureDirs: string[];
-      try {
-        const entries = await readdir(archiveDir, { withFileTypes: true });
-        featureDirs = entries.filter((e) => e.isDirectory()).map((e) => e.name);
-      } catch {
-        continue;
-      }
-
+      const featureDirs = await readSubdirNames(archiveDir);
       if (featureDirs.length === 0) continue;
 
-      const existing = projectMap.get(projectDir);
-      const project: Project = existing ?? {
-        name: projectName,
-        path: projectDir,
-        features: [],
-      };
+      const project = getOrCreateProject(projectMap, projectDir);
 
       // Collect active feature names so we can skip collisions
       const activeNames = new Set(project.features.map((f) => f.name));
@@ -124,6 +93,22 @@ export async function scanProjects(
   }
 
   return Array.from(projectMap.values());
+}
+
+/** Names of immediate subdirectories of `dir`; `[]` if the directory is missing or unreadable. */
+async function readSubdirNames(dir: string): Promise<string[]> {
+  try {
+    const entries = await readdir(dir, { withFileTypes: true });
+    return entries.filter((e) => e.isDirectory()).map((e) => e.name);
+  } catch {
+    return [];
+  }
+}
+
+/** Existing project for `projectDir`, or a fresh one keyed off its basename. */
+function getOrCreateProject(projectMap: Map<string, Project>, projectDir: string): Project {
+  const existing = projectMap.get(projectDir);
+  return existing ?? { name: basename(projectDir), path: projectDir, features: [] };
 }
 
 function buildGlobPatterns(maxDepth: number, dirName: string = '.dev'): string[] {

@@ -41,7 +41,9 @@ export function buildIndexPage(projects: Project[], generated: string): string {
       lines.push('|---------|--------|----------|---------|------|');
       for (const f of sortedActive) {
         const link = `[${f.name}](projects/${project.name}/${f.name}/00-master-plan.md)`;
-        const progress = f.progress ? `${f.progress.done}/${f.progress.total} (${f.progress.percent}%)` : '—';
+        const progress = f.progress
+          ? `${f.progress.done}/${f.progress.total} (${f.progress.percent}%)`
+          : '—';
         const summary = truncate(f.summary ?? '', 120);
         const tags = formatTags(f.tags);
         lines.push(`| ${link} | ${f.status} | ${progress} | ${summary} | ${tags} |`);
@@ -60,7 +62,9 @@ export function buildIndexPage(projects: Project[], generated: string): string {
       lines.push('|---------|----------|---------|------|');
       for (const f of sortedArchived) {
         const link = `[${f.name}](projects/${project.name}--archive/${f.name}/00-master-plan.md)`;
-        const progress = f.progress ? `${f.progress.done}/${f.progress.total} (${f.progress.percent}%)` : '—';
+        const progress = f.progress
+          ? `${f.progress.done}/${f.progress.total} (${f.progress.percent}%)`
+          : '—';
         const summary = truncate(f.summary ?? '', 120);
         const tags = formatTags(f.tags);
         lines.push(`| ${link} | ${progress} | ${summary} | ${tags} |`);
@@ -73,7 +77,16 @@ export function buildIndexPage(projects: Project[], generated: string): string {
 }
 
 export function buildLogPage(projects: Project[], generated: string): string {
-  const allFeatures: { project: string; name: string; status: string; progress: string; summary: string; tags: string; date: string; dateRaw: string | null }[] = [];
+  const allFeatures: {
+    project: string;
+    name: string;
+    status: string;
+    progress: string;
+    summary: string;
+    tags: string;
+    date: string;
+    dateRaw: string | null;
+  }[] = [];
 
   for (const project of projects) {
     for (const f of project.features) {
@@ -111,7 +124,9 @@ export function buildLogPage(projects: Project[], generated: string): string {
   }
 
   for (const entry of allFeatures) {
-    lines.push(`## [${entry.date}] ${entry.project} | ${entry.name} | ${entry.status} | ${entry.progress}`);
+    lines.push(
+      `## [${entry.date}] ${entry.project} | ${entry.name} | ${entry.status} | ${entry.progress}`,
+    );
     if (entry.summary) {
       lines.push('');
       lines.push(entry.summary);

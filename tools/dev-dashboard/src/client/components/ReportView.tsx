@@ -1,56 +1,14 @@
 import { useCallback, useEffect, useMemo, useState } from 'preact/hooks';
-import type { FeatureStatus, Project, ReportFeature } from '@shared/types.js';
+import type { Project, ReportFeature } from '@shared/types.js';
 import { useReportData } from '../hooks/useReportData.js';
 import { useClipboard } from '../hooks/useClipboard.js';
 import { computeReportStats, getWorkedDays, sortReportProjects } from '../utils/reportStats.js';
+import { getStatusConfig } from '../utils/statusConfig.js';
 
 interface Props {
   projects: Project[];
   onGoToFeature: (project: string, feature: string) => void;
 }
-
-const STATUS_CONFIG: Record<FeatureStatus, { label: string; badge: string; bar: string }> = {
-  gate: {
-    label: 'Gate',
-    badge: 'bg-amber-500/10 text-amber-400 ring-1 ring-inset ring-amber-500/20',
-    bar: 'bg-amber-500',
-  },
-  active: {
-    label: 'Active',
-    badge: 'bg-sky-500/10 text-sky-400 ring-1 ring-inset ring-sky-500/20',
-    bar: 'bg-sky-500',
-  },
-  complete: {
-    label: 'Complete',
-    badge: 'bg-emerald-500/10 text-emerald-400 ring-1 ring-inset ring-emerald-500/20',
-    bar: 'bg-emerald-500',
-  },
-  stale: {
-    label: 'Stale',
-    badge: 'bg-red-500/10 text-red-400 ring-1 ring-inset ring-red-500/20',
-    bar: 'bg-red-500',
-  },
-  'checkpoint-only': {
-    label: 'Checkpoint',
-    badge: 'bg-violet-500/10 text-violet-400 ring-1 ring-inset ring-violet-500/20',
-    bar: 'bg-violet-500',
-  },
-  'no-prd': {
-    label: 'No PRD',
-    badge: 'bg-slate-500/10 text-slate-400 ring-1 ring-inset ring-slate-500/20',
-    bar: 'bg-slate-600',
-  },
-  empty: {
-    label: 'Empty',
-    badge: 'bg-slate-500/10 text-slate-400 ring-1 ring-inset ring-slate-500/20',
-    bar: 'bg-slate-700',
-  },
-  archived: {
-    label: 'Archived',
-    badge: 'bg-slate-600/10 text-slate-500 ring-1 ring-inset ring-slate-600/20',
-    bar: 'bg-slate-700',
-  },
-};
 
 const REPORT_DATE_RANGE_KEY = 'dev-dashboard-report-date-range';
 const REPORT_VIEW_MODE_KEY = 'dev-dashboard-report-view-mode';
@@ -252,7 +210,7 @@ export function ReportView({ projects, onGoToFeature }: Props) {
       md += `| Feature | Status | Progress | Summary |\n`;
       md += `|---|---|---|---|\n`;
       for (const f of group.features) {
-        const config = STATUS_CONFIG[f.status] ?? STATUS_CONFIG['no-prd'];
+        const config = getStatusConfig(f.status);
         const pct = f.progress ? `${f.progress.percent}%` : '-';
         md += `| ${f.name} | ${config.label} | ${pct} | ${f.summary ?? ''} |\n`;
       }
@@ -520,7 +478,7 @@ function ReportFeatureCard({
   viewMode: ReportViewMode;
   onGoToFeature: (project: string, feature: string) => void;
 }) {
-  const config = STATUS_CONFIG[feature.status] ?? STATUS_CONFIG['no-prd'];
+  const config = getStatusConfig(feature.status);
   const pct = feature.progress?.percent ?? 0;
   const workedDays = getWorkedDays(feature);
   const isCompact = viewMode === 'compact';

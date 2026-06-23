@@ -1,4 +1,5 @@
-import type { Feature, FeatureStatus } from '@shared/types.js';
+import type { Feature } from '@shared/types.js';
+import { getStatusConfig } from '../utils/statusConfig.js';
 
 interface Props {
   feature: Feature;
@@ -6,49 +7,6 @@ interface Props {
   expanded?: boolean;
   onClick?: () => void;
 }
-
-const STATUS_CONFIG: Record<FeatureStatus, { label: string; badge: string; bar: string }> = {
-  gate: {
-    label: 'Gate',
-    badge: 'bg-amber-500/10 text-amber-400 ring-1 ring-inset ring-amber-500/20',
-    bar: 'bg-amber-500',
-  },
-  active: {
-    label: 'Active',
-    badge: 'bg-sky-500/10 text-sky-400 ring-1 ring-inset ring-sky-500/20',
-    bar: 'bg-sky-500',
-  },
-  complete: {
-    label: 'Complete',
-    badge: 'bg-emerald-500/10 text-emerald-400 ring-1 ring-inset ring-emerald-500/20',
-    bar: 'bg-emerald-500',
-  },
-  stale: {
-    label: 'Stale',
-    badge: 'bg-red-500/10 text-red-400 ring-1 ring-inset ring-red-500/20',
-    bar: 'bg-red-500',
-  },
-  'checkpoint-only': {
-    label: 'Checkpoint',
-    badge: 'bg-violet-500/10 text-violet-400 ring-1 ring-inset ring-violet-500/20',
-    bar: 'bg-violet-500',
-  },
-  'no-prd': {
-    label: 'No PRD',
-    badge: 'bg-slate-500/10 text-slate-400 ring-1 ring-inset ring-slate-500/20',
-    bar: 'bg-slate-600',
-  },
-  empty: {
-    label: 'Empty',
-    badge: 'bg-slate-500/10 text-slate-400 ring-1 ring-inset ring-slate-500/20',
-    bar: 'bg-slate-700',
-  },
-  archived: {
-    label: 'Archived',
-    badge: 'bg-slate-600/10 text-slate-500 ring-1 ring-inset ring-slate-600/20',
-    bar: 'bg-slate-700',
-  },
-};
 
 function formatTimeAgo(dateStr: string): string {
   const diff = Date.now() - new Date(dateStr).getTime();
@@ -61,7 +19,7 @@ function formatTimeAgo(dateStr: string): string {
 }
 
 export function FeatureRow({ feature, id, expanded, onClick }: Props) {
-  const config = STATUS_CONFIG[feature.status] ?? STATUS_CONFIG['no-prd'];
+  const config = getStatusConfig(feature.status);
 
   return (
     <div

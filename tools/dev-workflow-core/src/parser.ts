@@ -1,7 +1,15 @@
 import { readFile, readdir } from 'fs/promises';
 import { resolve, basename } from 'path';
 import matter from 'gray-matter';
-import type { Feature, FeatureStatus, Phase, Progress, SubPrdStep, SessionLogEntry, SessionDigest } from './types.js';
+import type {
+  Feature,
+  FeatureStatus,
+  Phase,
+  Progress,
+  SubPrdStep,
+  SessionLogEntry,
+  SessionDigest,
+} from './types.js';
 
 // ─── Emoji Shortcode Normalization ──────────────────────────────────
 
@@ -167,24 +175,130 @@ function extractFirstProse(content: string): string | null {
  *  dev-workflow PRDs, and the canonical workflow filenames. */
 const TAG_STOPWORDS = new Set<string>([
   // English function words
-  'the', 'a', 'an', 'and', 'or', 'but', 'for', 'to', 'of', 'in', 'on', 'at',
-  'by', 'with', 'from', 'into', 'is', 'are', 'be', 'was', 'were', 'this',
-  'that', 'these', 'those', 'it', 'its', 'as', 'all', 'any', 'via', 'per',
-  'not', 'no', 'we', 'you', 'will', 'can', 'could', 'should', 'would', 'must',
-  'may', 'when', 'then', 'than', 'also', 'if', 'so', 'out', 'up', 'down',
-  'over', 'under', 'about', 'each', 'both', 'first', 'second', 'third', 'next',
-  'new', 'only', 'one', 'two',
+  'the',
+  'a',
+  'an',
+  'and',
+  'or',
+  'but',
+  'for',
+  'to',
+  'of',
+  'in',
+  'on',
+  'at',
+  'by',
+  'with',
+  'from',
+  'into',
+  'is',
+  'are',
+  'be',
+  'was',
+  'were',
+  'this',
+  'that',
+  'these',
+  'those',
+  'it',
+  'its',
+  'as',
+  'all',
+  'any',
+  'via',
+  'per',
+  'not',
+  'no',
+  'we',
+  'you',
+  'will',
+  'can',
+  'could',
+  'should',
+  'would',
+  'must',
+  'may',
+  'when',
+  'then',
+  'than',
+  'also',
+  'if',
+  'so',
+  'out',
+  'up',
+  'down',
+  'over',
+  'under',
+  'about',
+  'each',
+  'both',
+  'first',
+  'second',
+  'third',
+  'next',
+  'new',
+  'only',
+  'one',
+  'two',
   // imperative verbs that can head a heading
-  'add', 'build', 'write', 'run', 'use', 'using', 'make', 'create', 'update',
-  'implement', 'extend', 'define', 'support', 'edit', 'fix', 'check',
+  'add',
+  'build',
+  'write',
+  'run',
+  'use',
+  'using',
+  'make',
+  'create',
+  'update',
+  'implement',
+  'extend',
+  'define',
+  'support',
+  'edit',
+  'fix',
+  'check',
   // PRD structural boilerplate
-  'phase', 'phases', 'step', 'steps', 'goal', 'goals', 'summary', 'executive',
-  'implementation', 'order', 'verification', 'verify', 'gate', 'status',
-  'created', 'updated', 'plan', 'overview', 'background', 'notes', 'note',
-  'decisions', 'blockers', 'context', 'todo', 'done', 'test', 'tests',
-  'fixture', 'fixtures', 'part', 'reference', 'references', 'file', 'files',
+  'phase',
+  'phases',
+  'step',
+  'steps',
+  'goal',
+  'goals',
+  'summary',
+  'executive',
+  'implementation',
+  'order',
+  'verification',
+  'verify',
+  'gate',
+  'status',
+  'created',
+  'updated',
+  'plan',
+  'overview',
+  'background',
+  'notes',
+  'note',
+  'decisions',
+  'blockers',
+  'context',
+  'todo',
+  'done',
+  'test',
+  'tests',
+  'fixture',
+  'fixtures',
+  'part',
+  'reference',
+  'references',
+  'file',
+  'files',
   // canonical workflow filenames
-  'master-plan', '00-master-plan', 'sub-prd', 'checkpoint', 'session-log',
+  'master-plan',
+  '00-master-plan',
+  'sub-prd',
+  'checkpoint',
+  'session-log',
   'readme',
 ]);
 
@@ -202,7 +316,10 @@ export function deriveKeywordTags(content: string): string[] {
   const candidates = new Map<string, { count: number; first: number }>();
 
   const consider = (raw: string, index: number): void => {
-    const tag = raw.toLowerCase().trim().replace(/^[-_.]+|[-_.]+$/g, '');
+    const tag = raw
+      .toLowerCase()
+      .trim()
+      .replace(/^[-_.]+|[-_.]+$/g, '');
     if (tag.length < 2) return;
     if (/^\d+$/.test(tag)) return; // pure numbers
     if (TAG_STOPWORDS.has(tag)) return;
@@ -572,7 +689,12 @@ function extractXmlListItems(content: string, tag: string): string[] {
     if (listMatch) {
       // Strip stray close tags from list items (legacy format where
       // e.g. "- text</decisions>" appears on the last item before the closing tag)
-      const item = listMatch[1].replace(/<\/(?:decisions|blockers|notes|context|current_state|next_action|key_files)>$/i, '').trim();
+      const item = listMatch[1]
+        .replace(
+          /<\/(?:decisions|blockers|notes|context|current_state|next_action|key_files)>$/i,
+          '',
+        )
+        .trim();
       items.push(item);
     }
   }
@@ -675,7 +797,7 @@ export async function parseSubPrd(filePath: string): Promise<SubPrdResult | null
   const total = steps.length;
   const status: SubPrdResult['status'] =
     total === 0
-      ? extractSubPrdHeaderStatus(content) ?? 'not-started'
+      ? (extractSubPrdHeaderStatus(content) ?? 'not-started')
       : done === total
         ? 'complete'
         : done > 0
@@ -690,7 +812,17 @@ function extractSubPrdHeaderStatus(content: string): SubPrdResult['status'] | nu
   const match = content.match(/\*\*Status\*\*:\s*(.+)/i);
   if (!match) return null;
   const val = match[1].trim().toLowerCase();
-  const resolved = ['complete', 'completed', 'done', 'shipped', 'merged', 'closed', 'deferred', 'dropped', 'skipped'];
+  const resolved = [
+    'complete',
+    'completed',
+    'done',
+    'shipped',
+    'merged',
+    'closed',
+    'deferred',
+    'dropped',
+    'skipped',
+  ];
   if (resolved.includes(val)) return 'complete';
   if (val.startsWith('in progress') || val.startsWith('in-progress')) return 'in-progress';
   if (val === 'not started' || val === 'not-started' || val === 'pending') return 'not-started';

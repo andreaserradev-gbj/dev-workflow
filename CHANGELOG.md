@@ -4,6 +4,27 @@ All notable changes to this project should be documented in this file.
 
 <!-- LOCAL-RELEASES-START -->
 
+## v1.38.2 - 2026-06-23
+
+### Changed
+
+- **De-duplicated CLI and dashboard internals flagged by the code-hygiene gate (duplication 4.02% → 2.22%, no behavior change).** Three copy-paste clusters were collapsed behind single sources:
+  - The `list`, `search`, and `wiki-index` CLI commands each carried ~150 lines of identical scan-directory resolution (resolve from `--scan` / dashboard config / cwd, read the dashboard config, expand `~`, match a project). That logic now lives in one `scan-dirs.ts` module the three commands import.
+  - The dashboard's `FeatureRow`, `ReportView`, and `SearchPanel` each defined the same `STATUS_CONFIG` map of per-status badge labels and Tailwind classes. It is now a single `getStatusConfig()` helper that also centralizes the shared `?? 'no-prd'` fallback.
+  - `scanProjects`' near-identical `.dev` and `.dev-archive` scan loops now share two small helpers (`readSubdirNames`, `getOrCreateProject`).
+
+  New unit tests cover the extracted CLI scan-dir module and the dashboard status-config helper; the scanner's existing suite already exercises both loops. Both bundles are rebuilt.
+
+## v1.38.1 - 2026-06-23
+
+### Added
+
+- **Code-hygiene gate (knip + jscpd) on branch push.** A new `scripts/code-hygiene.sh` runs knip (unused files / dependencies / exports) per package across the three independent `tools/` packages and jscpd (copy-paste duplication) across their `src` trees, wired into `.githooks/pre-push` so regressions surface before a PR. knip runs against a ratcheting baseline (`KNIP_BASELINE_ISSUES`) — existing findings are grandfathered, but any new one fails the push; jscpd holds duplication under the 5% threshold in `.jscpd.json`. Both gates fail open when the tools can't be fetched (offline `npx`) and fail closed only on a real threshold breach. Tool versions are pinned exactly (`knip@6.18.0`, `jscpd@5.0.11`) so the gate stays deterministic.
+
+### Changed
+
+- **Cleaned up the findings the new gate surfaced and ratcheted its knip baseline 19 → 16.** Removed `gray-matter` as a direct `dev-dashboard` dependency — it was never imported there (the dashboard parses frontmatter only through `dev-workflow-core`, which keeps the dep), so the security-hardening build transform is unaffected and the shipped bundle is byte-identical. Dropped the unused `eslint-plugin-prettier` devDependency (the flat config uses `eslint-config-prettier`). Added the previously-unlisted `prettier` devDependency to `dev-workflow-core` and formatted its source under a new package-local `.prettierrc`. All source changes are confined to `tools/` and `scripts/`; the only shipped artifact that changes is the dashboard bundle's About-tab version string.
+
 ## v1.38.0 - 2026-06-22
 
 ### Added
@@ -315,6 +336,22 @@ Checkpoints and resumes are now powered by deterministic CLI commands instead of
 <!-- LOCAL-RELEASES-END -->
 
 <!-- GITHUB-RELEASES-START -->
+
+## v1.38.0 - 2026-06-23
+
+### Added
+
+- **Wiki enrichment for cross-feature recall.** The index layer that `/dev-plan` consults for prior art no longer renders blank cards or leans on five thin metadata fields alone. `extractSummary` now walks a fallback heading ladder (`## Executive Summary` → `## Overview` → `## Summary` → `## Background` → first prose paragraph → H1) instead of matching `## Executive Summary` only, so PRDs written with any common heading get a real summary. A new deterministic keyword-tag tier in the parser derives tags from headings, backtick-quoted file paths, and capitalized identifiers, and those flow into the `Feature` type, the wiki index/log tables, and the search index. Tags are also read from PRD YAML `tags:` frontmatter when present, so a feature's tags are the union of authored frontmatter and derived keywords. All of this is pure-Node and deterministic — no LLM, no network — so the dashboard's 500ms wiki-regen path is untouched. The optional LLM concept-tag tier (an `--enrich` step that would write capability/domain tags into frontmatter) is intentionally deferred to a future release; it needs no rework to add, since the frontmatter read path ships here.
+- **Session-history consolidation for bounded resume.** On long-running features, `/dev-resume` previously either truncated to the last few sessions (dropping most of the narrative) or loaded the entire session log plus every decision bullet ever recorded. `/dev-checkpoint` now distills the older session tail into a compact `session-digest.md` once a feature crosses ten sessions, modeled on `/dev-wrapup`'s feedback compaction: a two-tier digest of an aggregate narrative plus a bounded, still-relevant decision set. The digest lives in its own file — never as a `## Session N` block in `session-log.md`, which would inflate the session counter — composed by the checkpoint LLM (already in the room) and persisted by a new WRITE-only `session-consolidate` CLI command. `checkpoint-write` now reports a `consolidationDue` signal so the skill knows when to run the step; below the threshold, behavior is identical to before.
+
+### Changed
+
+- **The `resume-context` JSON schema changed (breaking for direct consumers).** `sessionHistory` is renamed to `recentSessionHistory` (the recent raw session window); a new `sessionDigest` field carries the distilled older-session digest, or `null` below the consolidation threshold; and `accumulatedDecisions` is now bounded — when a digest exists it is the digest's carried-forward decisions plus the recent window's decisions, rather than the full union across all sessions. The CLI and the `/dev-checkpoint` / `/dev-resume` skills ship together in this release, so there is no break for end users — the note matters only for anything reading `resume-context --json` directly. Both bundles are rebuilt; the dashboard bundle now carries the deterministic tag code so its wiki regeneration renders the Tags column.
+
+### Fixed
+
+- **Reproducible dashboard bundle.** The bundled dashboard client baked the wall-clock build date into its content, so rebuilding on a different calendar day changed the Vite asset hash and dirtied the committed bundle even when no source had changed. The build date now derives from this CHANGELOG's entry for the current version, so a given version always rebuilds to a byte-identical client bundle.
+- **Green `dev-workflow-core` build.** Dropped a dead variable initializer in the master-plan tag parser (`extractFrontmatterTags`) that tripped eslint's `no-useless-assignment` rule and left `npm run build` failing on the core package.
 
 ## v1.37.1 - 2026-06-22
 
