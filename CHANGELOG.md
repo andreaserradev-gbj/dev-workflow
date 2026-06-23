@@ -316,6 +316,13 @@ Checkpoints and resumes are now powered by deterministic CLI commands instead of
 
 <!-- GITHUB-RELEASES-START -->
 
+## v1.37.1 - 2026-06-22
+
+### Security
+
+- The build transform that removes `gray-matter`'s dead JS-frontmatter engine now strips the **entire `engines.javascript` registration**, not just its `eval()` call. Neutralizing only the call left the surrounding string-building scaffolding (`'(function(){ return ' + str + '}())'`) in the minified bundle, which an LLM-based scanner still reads as a remote-code-execution sink even with zero literal `eval(`. Replacing the whole engine with an inert throwing stub leaves nothing to cite. Behavior is unchanged — that engine is dead under the YAML-only `safeLoad` path the parser uses — and the guard still fails the build if a dependency bump relocates the block. Applies to both the CLI bundle and the dashboard server bundle.
+- `/dev-wiki` now frames the cross-project `.dev/` and `.dev-archive/` markdown it scans as **untrusted data, not instructions** — catalogued, never obeyed. A new "Untrusted Input" section foregrounds that generation is deterministic and CLI-bound, that the skill has no `Edit`/`Write` capability and runs no command found inside a PRD, and that the generated wiki is itself a catalog of untrusted metadata for downstream readers. This mirrors the `/dev-review` untrusted-input scoping shipped in 1.37.0 and targets the prompt-injection category on the skill.
+
 ## v1.37.0 - 2026-06-22
 
 ### Security
