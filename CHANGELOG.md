@@ -15,6 +15,11 @@ All notable changes to this project should be documented in this file.
 
 - **The `resume-context` JSON schema changed (breaking for direct consumers).** `sessionHistory` is renamed to `recentSessionHistory` (the recent raw session window); a new `sessionDigest` field carries the distilled older-session digest, or `null` below the consolidation threshold; and `accumulatedDecisions` is now bounded — when a digest exists it is the digest's carried-forward decisions plus the recent window's decisions, rather than the full union across all sessions. The CLI and the `/dev-checkpoint` / `/dev-resume` skills ship together in this release, so there is no break for end users — the note matters only for anything reading `resume-context --json` directly. Both bundles are rebuilt; the dashboard bundle now carries the deterministic tag code so its wiki regeneration renders the Tags column.
 
+### Fixed
+
+- **Reproducible dashboard bundle.** The bundled dashboard client baked the wall-clock build date into its content, so rebuilding on a different calendar day changed the Vite asset hash and dirtied the committed bundle even when no source had changed. The build date now derives from this CHANGELOG's entry for the current version, so a given version always rebuilds to a byte-identical client bundle.
+- **Green `dev-workflow-core` build.** Dropped a dead variable initializer in the master-plan tag parser (`extractFrontmatterTags`) that tripped eslint's `no-useless-assignment` rule and left `npm run build` failing on the core package.
+
 ## v1.37.1 - 2026-06-22
 
 ### Security

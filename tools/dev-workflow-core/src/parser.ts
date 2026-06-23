@@ -85,7 +85,7 @@ function mergeTags(primary: string[], secondary: string[]): string[] {
  *  Non-array or malformed frontmatter is ignored (also `[]`). Author casing is
  *  preserved; values are trimmed and empties dropped. */
 function extractFrontmatterTags(content: string): string[] {
-  let data: Record<string, unknown> = {};
+  let data: Record<string, unknown>;
   try {
     data = matter(content).data;
   } catch {
