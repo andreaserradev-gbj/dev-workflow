@@ -9,7 +9,8 @@ case "$MODE" in
     # Usage: worktree-setup.sh check <feature> <root> <branch>
     # stdout: "offer" or "skip:<reason>"
     FEATURE="${1:?feature required}"
-    ROOT="${2:?root required}"
+    ROOT="${2:-}"
+    [ -z "$ROOT" ] && ROOT="$(git rev-parse --show-toplevel 2>/dev/null || echo "$PWD")"
     BRANCH="${3:-}"
 
     if ! git rev-parse --git-dir >/dev/null 2>&1; then
@@ -36,7 +37,8 @@ case "$MODE" in
     # Usage: worktree-setup.sh branch <feature> <root>
     # stdout: branch:<name> on success
     FEATURE="${1:?feature required}"
-    ROOT="${2:?root required}"
+    ROOT="${2:-}"
+    [ -z "$ROOT" ] && ROOT="$(git rev-parse --show-toplevel 2>/dev/null || echo "$PWD")"
 
     git -C "$ROOT" checkout -b "feature/$FEATURE"
     echo "branch:feature/$FEATURE"
@@ -46,7 +48,8 @@ case "$MODE" in
     # Usage: worktree-setup.sh execute <feature> <root>
     # stdout: worktree:<path> on success
     FEATURE="${1:?feature required}"
-    ROOT="${2:?root required}"
+    ROOT="${2:-}"
+    [ -z "$ROOT" ] && ROOT="$(git rev-parse --show-toplevel 2>/dev/null || echo "$PWD")"
     BASENAME="$(basename "$ROOT")"
     WORKTREE="$ROOT/../$BASENAME-$FEATURE"
 

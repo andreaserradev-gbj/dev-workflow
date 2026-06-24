@@ -7,7 +7,9 @@ shift || true
 case "$MODE" in
   checkpoint-path)
     # Usage: validate.sh checkpoint-path <path> <root>
-    PATH_ARG="${1:?path required}" ROOT="${2:?root required}"
+    PATH_ARG="${1:?path required}"
+    ROOT="${2:-}"
+    [ -z "$ROOT" ] && ROOT="$(git rev-parse --show-toplevel 2>/dev/null || echo "$PWD")"
     case "$PATH_ARG" in *..*)
       echo "Invalid checkpoint path (traversal)" >&2; exit 1;; esac
     case "$PATH_ARG" in "$ROOT"/.dev/*)
@@ -18,7 +20,9 @@ case "$MODE" in
 
   feature-path)
     # Usage: validate.sh feature-path <path> <root>
-    PATH_ARG="${1:?path required}" ROOT="${2:?root required}"
+    PATH_ARG="${1:?path required}"
+    ROOT="${2:-}"
+    [ -z "$ROOT" ] && ROOT="$(git rev-parse --show-toplevel 2>/dev/null || echo "$PWD")"
     case "$PATH_ARG" in *..*)
       echo "Invalid feature path (traversal)" >&2; exit 1;; esac
     case "$PATH_ARG" in "$ROOT"/.dev/*)

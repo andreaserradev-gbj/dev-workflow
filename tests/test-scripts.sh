@@ -80,6 +80,17 @@ run_test "invalid mode exits 1" \
   1 "Usage: discover.sh {root|checkpoints|features|archived|status-reports} ..." \
   bash "$SCRIPT_DIR/discover.sh" bogus
 
+# Regression: an empty root arg (e.g. an unsubstituted $PROJECT_ROOT from a
+# harness that doesn't expand the pseudo-variable) must fall back to the
+# git toplevel / cwd instead of aborting with "root required".
+TMPDIR_FALLBACK="$(mktemp -d)"
+mkdir -p "$TMPDIR_FALLBACK/.dev/test-feat"
+: > "$TMPDIR_FALLBACK/.dev/test-feat/checkpoint.md"
+run_test "checkpoints with empty root falls back to cwd" \
+  0 "$TMPDIR_FALLBACK/.dev/test-feat/checkpoint.md" \
+  bash -c "cd '$TMPDIR_FALLBACK' && bash '$SCRIPT_DIR/discover.sh' checkpoints ''"
+rm -rf "$TMPDIR_FALLBACK"
+
 echo ""
 echo "--- git-state.sh ---"
 
