@@ -4,6 +4,12 @@ All notable changes to this project should be documented in this file.
 
 <!-- LOCAL-RELEASES-START -->
 
+## v1.38.3 - 2026-06-24
+
+### Fixed
+
+- **Skill discovery scripts no longer abort with `root required` when the harness doesn't expand the `$PROJECT_ROOT` pseudo-variable.** The skills resolve the project root once (`discover.sh root`) and pass it back into later calls as `$PROJECT_ROOT`. Harnesses that substitute the captured value (e.g. Claude Code) work fine, but ones that pass the literal `$PROJECT_ROOT` get an empty string from the shell (it isn't a real env var, and shell state doesn't persist between tool calls), which tripped `${1:?root required}` in `discover.sh` / `validate.sh` / `worktree-setup.sh` and failed `/dev-resume` (and the other skills) at the first discovery step. The root argument now falls back to the same `git rev-parse --show-toplevel || $PWD` detection that `discover.sh root` already uses when it arrives empty, so the scripts self-heal regardless of harness. The explicit path arguments in `validate.sh` stay required. Synced across all skill copies; a regression test covers the empty-root fallback.
+
 ## v1.38.2 - 2026-06-23
 
 ### Changed

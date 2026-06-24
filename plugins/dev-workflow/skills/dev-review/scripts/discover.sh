@@ -15,7 +15,8 @@ case "$MODE" in
   checkpoints)
     # Usage: discover.sh checkpoints <root> [filter]
     # stdout: matching checkpoint.md paths (one per line)
-    ROOT="${1:?root required}"
+    ROOT="${1:-}"
+    [ -z "$ROOT" ] && ROOT="$(git rev-parse --show-toplevel 2>/dev/null || echo "$PWD")"
     FILTER="${2:-}"
     if [ ! -d "$ROOT/.dev" ]; then
       echo "No .dev/ directory" >&2; exit 1
@@ -32,7 +33,8 @@ case "$MODE" in
   features)
     # Usage: discover.sh features <root> [filter]
     # stdout: matching feature dir paths (one per line)
-    ROOT="${1:?root required}"
+    ROOT="${1:-}"
+    [ -z "$ROOT" ] && ROOT="$(git rev-parse --show-toplevel 2>/dev/null || echo "$PWD")"
     FILTER="${2:-}"
     if [ ! -d "$ROOT/.dev" ]; then
       echo "No .dev/ directory" >&2; exit 1
@@ -49,14 +51,16 @@ case "$MODE" in
   archived)
     # Usage: discover.sh archived <root>
     # stdout: archived feature dir paths (one per line, empty if none)
-    ROOT="${1:?root required}"
+    ROOT="${1:-}"
+    [ -z "$ROOT" ] && ROOT="$(git rev-parse --show-toplevel 2>/dev/null || echo "$PWD")"
     find "$ROOT/.dev-archive" -maxdepth 1 -type d ! -name .dev-archive 2>/dev/null | sort || true
     ;;
 
   status-reports)
     # Usage: discover.sh status-reports <root>
     # stdout: existing status-report-*.md file paths (one per line, empty if none)
-    ROOT="${1:?root required}"
+    ROOT="${1:-}"
+    [ -z "$ROOT" ] && ROOT="$(git rev-parse --show-toplevel 2>/dev/null || echo "$PWD")"
     find "$ROOT/.dev" -maxdepth 1 -name "status-report-*.md" -type f 2>/dev/null | sort || true
     ;;
 
