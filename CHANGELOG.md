@@ -343,6 +343,17 @@ Checkpoints and resumes are now powered by deterministic CLI commands instead of
 
 <!-- GITHUB-RELEASES-START -->
 
+## v1.38.2 - 2026-06-23
+
+### Changed
+
+- **De-duplicated CLI and dashboard internals flagged by the code-hygiene gate (duplication 4.02% → 2.22%, no behavior change).** Three copy-paste clusters were collapsed behind single sources:
+  - The `list`, `search`, and `wiki-index` CLI commands each carried ~150 lines of identical scan-directory resolution (resolve from `--scan` / dashboard config / cwd, read the dashboard config, expand `~`, match a project). That logic now lives in one `scan-dirs.ts` module the three commands import.
+  - The dashboard's `FeatureRow`, `ReportView`, and `SearchPanel` each defined the same `STATUS_CONFIG` map of per-status badge labels and Tailwind classes. It is now a single `getStatusConfig()` helper that also centralizes the shared `?? 'no-prd'` fallback.
+  - `scanProjects`' near-identical `.dev` and `.dev-archive` scan loops now share two small helpers (`readSubdirNames`, `getOrCreateProject`).
+
+  New unit tests cover the extracted CLI scan-dir module and the dashboard status-config helper; the scanner's existing suite already exercises both loops. Both bundles are rebuilt.
+
 ## v1.38.0 - 2026-06-23
 
 ### Added
