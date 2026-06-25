@@ -135,8 +135,12 @@ Runs automatically via the pre-commit hook.
 
 ### Git Hooks (`.githooks/`)
 
-- **pre-commit** — runs `tests/test-scripts.sh` (including cross-skill sync checks for shared scripts and CLI copies), blocks commit if dashboard or CLI source changed without rebuilding the respective bundle
-- **pre-push** — syncs the GitHub releases section of `CHANGELOG.md`, blocks push if that sync changes the file, blocks push if `plugins/` changed without a version bump in `marketplace.json`, and blocks version bumps that do not have a matching local changelog entry
+- **pre-commit** — runs `tests/test-scripts.sh` (including cross-skill sync checks for shared scripts and CLI copies); when dashboard source is staged, also runs `eslint` + `prettier --check` on it; blocks commit if dashboard or CLI source changed without rebuilding the respective bundle
+- **pre-push** — syncs the GitHub releases section of `CHANGELOG.md`, blocks push if that sync changes the file, blocks push if `plugins/` changed without a version bump in `marketplace.json`, and blocks version bumps that do not have a matching local changelog entry. Also runs the **code-hygiene gate** on any branch push carrying commits (see Code Hygiene below)
+
+### Code Hygiene
+
+`scripts/code-hygiene.sh` runs **knip** (unused files/deps/exports, per `tools/` package — no root workspace) and **jscpd** (copy-paste duplication) as a ratchet gate. It runs in pre-push on any branch push with commits, and fails-open when `npx` can't fetch the tools — only a real threshold breach blocks. Run it anytime: `sh scripts/code-hygiene.sh`. Tune thresholds in `scripts/code-hygiene.sh` (`KNIP_BASELINE_ISSUES`) and `.jscpd.json`.
 
 ### Version Bumps
 
