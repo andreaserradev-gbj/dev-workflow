@@ -149,6 +149,46 @@ export interface SearchMatch {
   snippet: string;
 }
 
+// ─── Live dashboard/TUI config shapes ────────────────────────────
+// Node-free config-shape types shared by the dashboard server, the live config
+// I/O in `./live`, and (future) the terminal UI. Declared here in the node-free
+// `./types` barrel so the browser client and type-only consumers never resolve
+// the node-only `./live` runtime (which pulls in chokidar).
+
+// User's terminal-launch setting per platform.
+//   - string  → preset id (server's terminal-presets registry resolves it).
+//   - object  → literal { cmd, args }; args may contain '{{cwd}}' which the
+//     server substitutes with the feature dir before execFile.
+// The discrete-args invariant is preserved end-to-end — `args` stays an
+// array, never a single shell string.
+export type TerminalSetting = string | { cmd: string; args: string[] };
+
+export interface TerminalConfig {
+  darwin?: TerminalSetting;
+  linux?: TerminalSetting;
+  win32?: TerminalSetting;
+}
+
+// Dashboard config (~/.config/dev-dashboard/config.json)
+export interface DashboardConfig {
+  scanDirs: string[];
+  port: number;
+  // Network interface the server binds to. Defaults to '127.0.0.1' (loopback —
+  // reachable only from this machine). LAN exposure ('0.0.0.0') is opt-in.
+  host: string;
+  notifications: boolean;
+  scanDirsConfigured: boolean;
+  terminal: TerminalConfig;
+  wikiDir?: string;
+}
+
+// CLI/env overrides layered on top of the persisted config at load time.
+export interface CliOverrides {
+  scan?: string[];
+  port?: number;
+  host?: string;
+}
+
 // Status sort order — gate first (needs user action), complete last
 export const STATUS_ORDER: Record<FeatureStatus, number> = {
   gate: 0,

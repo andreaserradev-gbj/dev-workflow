@@ -2,7 +2,7 @@ import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { mkdtemp, writeFile, rm } from 'fs/promises';
 import { join } from 'path';
 import { tmpdir } from 'os';
-import { watchConfig, type ConfigWatcher } from '../src/server/config.js';
+import { watchConfig, type ConfigWatcher } from '../src/config.js';
 
 describe('watchConfig', () => {
   let tmpDir: string;

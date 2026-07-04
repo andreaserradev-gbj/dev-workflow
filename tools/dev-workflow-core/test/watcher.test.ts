@@ -2,7 +2,7 @@ import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { mkdtemp, mkdir, writeFile, rm, unlink } from 'fs/promises';
 import { join } from 'path';
 import { tmpdir } from 'os';
-import { createWatcher, type Watcher, type WatcherCallbacks } from '../src/server/watcher.js';
+import { createWatcher, type Watcher, type WatcherCallbacks } from '../src/watcher.js';
 
 const MASTER_PLAN = `# test - Master Plan
 
