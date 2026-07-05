@@ -278,6 +278,27 @@ fi
 rm -rf "$SMOKE_DIR"
 
 echo ""
+echo "--- TUI bundle smoke test ---"
+# The TUI is a foreground Ink app — it can't be run to completion headlessly (it
+# blocks on a TTY waiting for `q`). `node --check` validates that the shipped ESM
+# artifact PARSES (ESM + top-level await + the createRequire banner), catching a
+# bundle-level regression (e.g. a broken esbuild strip/stub plugin) without a TTY.
+# The TUI is NOT part of check_sync/check_bin_sync: its cli.mjs is an ESM entry,
+# not a dev-workflow.cjs copy, and its launcher (launch.sh) is skill-specific.
+TUI_BUNDLE="$PROJECT_ROOT/plugins/dev-workflow/skills/dev-dashboard-tui/tui/cli.mjs"
+if [ ! -f "$TUI_BUNDLE" ]; then
+  echo "FAIL: TUI bundle missing at $TUI_BUNDLE (run: cd tools/dev-dashboard-tui && npm run bundle)"
+  FAIL=$((FAIL + 1))
+elif node --check "$TUI_BUNDLE" 2>/tmp/tui-bundle-check.log; then
+  echo "PASS: shipped TUI cli.mjs parses (node --check)"
+  PASS=$((PASS + 1))
+else
+  echo "FAIL: shipped TUI cli.mjs failed node --check"
+  cat /tmp/tui-bundle-check.log
+  FAIL=$((FAIL + 1))
+fi
+
+echo ""
 echo "--- version badge sync ---"
 
 MARKET_VERSION="$(grep -m1 '"version"' "$PROJECT_ROOT/.claude-plugin/marketplace.json" 2>/dev/null | sed -E 's/.*"version"[[:space:]]*:[[:space:]]*"([^"]+)".*/\1/' || true)"

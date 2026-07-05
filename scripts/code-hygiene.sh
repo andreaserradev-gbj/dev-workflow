@@ -29,13 +29,18 @@ repo_root=$(git rev-parse --show-toplevel 2>/dev/null || pwd)
 cd "$repo_root" || exit 1
 
 # --- Configuration ----------------------------------------------------------
-# Baseline captured 2026-06-23: core 0 + cli 0 + dashboard 16 (5 exports,
-# 11 types) = 16. (gray-matter dep, eslint-plugin-prettier devDep, and core's
-# prettier-unlisted binary were cleaned up — see git history.)
+# Baseline re-measured 2026-07-05: core 0 + cli 0 + dashboard 13 + tui 1 = 14.
+#   - Was 16 (captured 2026-06-23); the dashboard dropped to 13 as Phase-4 dedup
+#     work (buildFeatureDetail hoist) removed unused exports/types.
+#   - dev-dashboard-tui adds 1: the StorePhase type is exported for API symmetry with
+#     Store/FilterKey but only used in-module. It's grandfathered rather than
+#     de-exported because de-exporting a *type* changes no emitted JS, so the bundle
+#     stays byte-identical and the pre-commit bundle-freshness gate can't tell that
+#     type-only edit from a stale bundle — it would false-block. Net floor: 14.
 # Override with an env var for a quick what-if, e.g. KNIP_BASELINE_ISSUES=0.
-KNIP_BASELINE_ISSUES=${KNIP_BASELINE_ISSUES:-16}
-KNIP_PKGS="tools/dev-workflow-core tools/dev-workflow-cli tools/dev-dashboard"
-JSCPD_PATHS="tools/dev-workflow-core/src tools/dev-workflow-cli/src tools/dev-dashboard/src"
+KNIP_BASELINE_ISSUES=${KNIP_BASELINE_ISSUES:-14}
+KNIP_PKGS="tools/dev-workflow-core tools/dev-workflow-cli tools/dev-dashboard tools/dev-dashboard-tui"
+JSCPD_PATHS="tools/dev-workflow-core/src tools/dev-workflow-cli/src tools/dev-dashboard/src tools/dev-dashboard-tui/src"
 # Pinned EXACTLY (not by major range): this gate blocks pushes, so it must be
 # deterministic. The baselines/thresholds below were calibrated against these
 # versions. Bump a pin -> re-measure the baseline before committing.

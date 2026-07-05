@@ -4,6 +4,15 @@ All notable changes to this project should be documented in this file.
 
 <!-- LOCAL-RELEASES-START -->
 
+## v1.39.0 - 2026-07-05
+
+### Added
+
+- **`/dev-dashboard-tui` — a terminal-native dev dashboard.** The same cross-project `.dev/` feature portfolio as the web `/dev-dashboard` — a recency-sorted project rail, per-feature status and progress, filter pills, and a detail pane — rendered natively in the terminal for SSH/tmux/no-browser workflows. It is read-only (v1), live-refreshes as PRDs change (a shared `dev-workflow-core` watcher drives a full rescan on every `.dev/` edit), and, like the web dashboard, is AI-tool-agnostic: it reads `.dev/` PRDs directly, so it works with any tool that writes them (Claude Code, Codex, etc.). Keybindings: `j`/`k`/`↑`/`↓` move the selection, `h`/`l`/`←`/`→` move focus across panes, `Tab` or `1`–`6` switch the filter, `Space` toggles session history, `q` quits.
+- **User-launched foreground model.** A TUI is a foreground, interactive process that must own a real terminal, and the agent's `Bash` tool can only offer a detached pipe — so unlike `/dev-dashboard` (which backgrounds an HTTP server and reports a URL), the `/dev-dashboard-tui` skill hands the user the exact `launch.sh` command to run in their own terminal. `launch.sh` resolves the bundled entry relative to itself and `exec node`s it in the foreground — no port, no background process, nothing to stop.
+- **Shared runtime hoisted into `dev-workflow-core`.** The dashboard's `state`/`config`/`watcher` runtime, `scanProjects`/`sortProjects`, `resolveScanDirs`, and `buildFeatureDetail` now live in `dev-workflow-core` (the chokidar-bearing pieces behind a dedicated `./live` subpath so they can never leak into the chokidar-free CLI or browser bundles), shared by the dashboard and the TUI rather than duplicated. The TUI ships as a self-contained **ESM** bundle (`tui/cli.mjs`) — Ink 7 + yoga-layout emit top-level awaits that a CJS bundle can't represent, and a user-launched TUI has no CJS constraint.
+- **Compliance gates extended to the new package.** The pre-commit hook gained a TUI bundle-freshness check (plus `eslint`/`prettier` on staged TUI source) parallel to the existing Dashboard/CLI checks; `tests/test-scripts.sh` gained a `node --check` smoke test on the shipped `cli.mjs`; and the code-hygiene gate now covers `tools/dev-dashboard-tui` (knip baseline re-measured to 14 — the dashboard's own count dropped 16 → 13 from earlier dedup work, and the TUI adds one grandfathered export).
+
 ## v1.38.3 - 2026-06-24
 
 ### Fixed
