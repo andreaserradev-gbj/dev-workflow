@@ -1,8 +1,11 @@
-// Shared scan-directory and dashboard-config resolution for the list, search,
-// and wiki-index commands. All three discover which project roots to scan the
-// same way — an explicit --scan flag wins, else the dashboard's stored
-// config.json `scanDirs`, else the current working directory — and read the
+// Shared scan-directory and dashboard-config resolution. The CLI's list, search,
+// and wiki-index commands and the dev-dashboard-tui all discover which project
+// roots to scan the same way — an explicit --scan flag wins, else the dashboard's
+// stored config.json `scanDirs`, else the current working directory — and read the
 // same dashboard config file. Keep this the single source of that logic.
+//
+// Node-only (fs/os/path), but deliberately chokidar-free so it can live on the
+// main barrel: the CLI consumes it and must never resolve the `./live` runtime.
 
 import { readFile } from 'fs/promises';
 import { homedir } from 'os';

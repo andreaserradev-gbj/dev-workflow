@@ -2,11 +2,12 @@ import { join } from 'path';
 import {
   scanProjects,
   STATUS_ORDER,
+  matchesProject,
+  resolveScanDirs,
   type Feature,
   type FeatureStatus,
 } from 'dev-workflow-core';
 import { parseFlags } from '../index.js';
-import { matchesProject, resolveScanDirs } from '../scan-dirs.js';
 
 const VALID_STATUSES: ReadonlySet<FeatureStatus> = new Set([
   'gate',

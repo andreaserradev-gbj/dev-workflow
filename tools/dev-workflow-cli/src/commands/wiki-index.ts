@@ -1,8 +1,14 @@
 import { homedir } from 'os';
 import { join } from 'path';
-import { scanProjects, generateWiki, type Project } from 'dev-workflow-core';
+import {
+  scanProjects,
+  generateWiki,
+  expandHome,
+  readDashboardWikiDir,
+  resolveScanDirs,
+  type Project,
+} from 'dev-workflow-core';
 import { parseFlags } from '../index.js';
-import { expandHome, readDashboardWikiDir, resolveScanDirs } from '../scan-dirs.js';
 
 export async function wikiIndex(args: string[]): Promise<number> {
   const { flags } = parseFlags(args);
