@@ -40,3 +40,29 @@ if [ -n "$CLI_SRC_CHANGED" ] && [ -z "$CLI_BUNDLE_CHANGED" ]; then
   echo "Run 'cd tools/dev-workflow-cli && npm run bundle' and stage the output."
   exit 1
 fi
+
+# Lint & format check TUI source if any TUI files are staged (src-only, mirroring
+# the dashboard block — the TUI package's format:check is src-only by design).
+TUI_TS_CHANGED=$(git diff --cached --name-only -- tools/dev-dashboard-tui/src/ | head -1)
+if [ -n "$TUI_TS_CHANGED" ]; then
+  echo "Running TUI lint & format check..."
+  if ! (cd tools/dev-dashboard-tui && npx eslint src/ && npx prettier --check src/); then
+    echo ""
+    echo "ERROR: TUI lint/format issues. Run 'cd tools/dev-dashboard-tui && npm run lint:fix && npm run format' to fix."
+    exit 1
+  fi
+fi
+
+# Check if TUI source changed without rebuilding the ESM bundle (cli.mjs). Scoped
+# to the TUI's own src/package.json like the dashboard block; a core edit that
+# ripples into the TUI bundle is caught by the CLI block above forcing a rebundle
+# pass, at which point the TUI is rebundled too.
+TUI_SRC_CHANGED=$(git diff --cached --name-only -- tools/dev-dashboard-tui/src/ tools/dev-dashboard-tui/package.json | head -1)
+TUI_BUNDLE_CHANGED=$(git diff --cached --name-only -- plugins/dev-workflow/skills/dev-dashboard-tui/tui/ | head -1)
+
+if [ -n "$TUI_SRC_CHANGED" ] && [ -z "$TUI_BUNDLE_CHANGED" ]; then
+  echo ""
+  echo "ERROR: TUI source files changed but bundle was not updated."
+  echo "Run 'cd tools/dev-dashboard-tui && npm run bundle' and stage the output."
+  exit 1
+fi

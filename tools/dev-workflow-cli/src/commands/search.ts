@@ -1,11 +1,12 @@
 import {
   scanProjects,
   searchFeatures,
+  matchesProject,
+  resolveScanDirs,
   type FeatureStatus,
   type SearchHit,
 } from 'dev-workflow-core';
 import { parseFlags } from '../index.js';
-import { matchesProject, resolveScanDirs } from '../scan-dirs.js';
 
 const VALID_STATUSES: ReadonlySet<FeatureStatus> = new Set([
   'gate',

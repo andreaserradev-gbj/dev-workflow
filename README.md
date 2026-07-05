@@ -3,7 +3,7 @@
 # dev-workflow
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
-[![Version](https://img.shields.io/badge/version-1.38.3-green.svg)](.claude-plugin/marketplace.json)
+[![Version](https://img.shields.io/badge/version-1.39.0-green.svg)](.claude-plugin/marketplace.json)
 [![AgentSkills.io](https://img.shields.io/badge/standard-AgentSkills.io-purple.svg)](https://agentskills.io)
 
 **AI coding agents start every session from zero. Your architecture shouldn't.**
@@ -100,7 +100,7 @@ These agents discover skills from `~/.agents/skills/`. Install with the AgentSki
 npx skills add andreaserradev-gbj/dev-workflow
 ```
 
-All seven install at once, managed by `npx skills` (`list`, `update`, `remove`).
+All eight install at once, managed by `npx skills` (`list`, `update`, `remove`).
 
 > **Already using the Claude Code plugin?** The installer detects the agents on your `PATH` and may offer Claude Code as a target. **Decline it** — installing again gives you every skill twice (once from the plugin, once under `~/.claude/skills/`). This command is for the agents that read `~/.agents/skills/`.
 
@@ -245,6 +245,26 @@ flags when running the server directly). A LAN bind is logged with a warning at
 startup.
 
 </details>
+
+### `/dev-dashboard-tui` — Terminal dashboard
+
+The same cross-project `.dev/` portfolio as `/dev-dashboard`, rendered natively in your terminal — for SSH, tmux, and no-browser workflows. Built with [Ink](https://github.com/vadimdemedes/ink); read-only and live-refreshing. Like the web dashboard, it works with any AI coding tool that reads `.dev/` PRDs.
+
+```
+/dev-dashboard-tui
+```
+
+A TUI is a **foreground, interactive** process, so — unlike the web dashboard — the agent can't launch it for you (Claude Code's Bash tool has no interactive terminal to hand over). The skill prints the exact command to paste into your own terminal:
+
+```bash
+bash "<plugin>/skills/dev-dashboard-tui/scripts/launch.sh"
+```
+
+Pass `--scan <dir>` to point it at specific directories instead of the stored dashboard config.
+
+**Keybindings:** `j`/`k` or `↑`/`↓` move the selection · `h`/`l` or `←`/`→` move focus across panes · `Tab` or `1`–`6` switch the status filter · `Space` toggles session history · `q` quits.
+
+**Dashboard vs TUI:** the web dashboard backgrounds a server and opens in a browser with live WebSocket updates and archive/restore/open actions; the TUI is a read-only, single foreground process that live-refreshes in place — reach for it when a browser isn't available or you already live in the terminal.
 
 ### `/dev-wiki` — Cross-project wiki
 

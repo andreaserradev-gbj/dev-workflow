@@ -10,7 +10,7 @@ Codex scans `~/.agents/skills/` at startup. Install with the AgentSkills.io stan
 npx skills add andreaserradev-gbj/dev-workflow
 ```
 
-All seven skills install at once and are managed by `npx skills` (`list`, `update`, `remove`). Restart Codex to discover them.
+All eight skills install at once and are managed by `npx skills` (`list`, `update`, `remove`). Restart Codex to discover them.
 
 > **Already using the Claude Code plugin?** The installer detects the agents on your `PATH` and may offer Claude Code as a target. **Decline it** — the marketplace plugin already provides these skills on Claude Code, so installing again gives you every skill twice (once from the plugin, once under `~/.claude/skills/`). This command is for the agents that read `~/.agents/skills/`: Codex, pi, OpenCode, and others.
 
@@ -36,6 +36,7 @@ curl -fsSL https://github.com/andreaserradev-gbj/dev-workflow/archive/refs/heads
 | `dev-review` | Generate an architect-readable PRD-vs-implementation alignment report |
 | `dev-wrapup` | Review the conversation for learnings worth keeping |
 | `dev-dashboard` | Start the bundled dashboard server and show its URL |
+| `dev-dashboard-tui` | Print the command to launch the terminal-native dashboard (Ink TUI) |
 | `dev-wiki` | Generate a cross-project markdown wiki from `.dev/` PRDs |
 
 Codex activates a skill when you mention it by name ("use dev-plan"), when the task matches its description, or when you invoke it explicitly.

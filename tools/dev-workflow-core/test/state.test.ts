@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
-import { sortProjects } from '../src/server/state.js';
-import type { Feature, Project } from '../src/shared/types.js';
+import { sortProjects } from '../src/state.js';
+import type { Feature, Project } from '../src/types.js';
 
 function feat(name: string, overrides: Partial<Feature> = {}): Feature {
   return {

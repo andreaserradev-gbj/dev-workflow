@@ -2,7 +2,7 @@ import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { mkdtemp, writeFile, rm } from 'fs/promises';
 import { join } from 'path';
 import { tmpdir } from 'os';
-import { DEFAULT_CONFIG, loadConfig, parseCliArgs } from '../src/server/config.js';
+import { DEFAULT_CONFIG, loadConfig, parseCliArgs } from '../src/config.js';
 
 describe('host / bind configuration', () => {
   let tmpDir: string;

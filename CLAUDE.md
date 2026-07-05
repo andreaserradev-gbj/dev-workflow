@@ -39,6 +39,10 @@ plugins/dev-workflow/           # Plugin package
       dashboard/                    # Bundled server + client (committed build artifact)
         server/index.cjs
         client/
+    dev-dashboard-tui/
+      SKILL.md
+      scripts/launch.sh             # Foreground `exec node` launcher (user-run)
+      tui/cli.mjs                   # Bundled Ink TUI (committed build artifact, ESM)
 # Generated in user's project (not in plugin repo)
 .dev/wrapup-feedback.json        # Wrapup feedback history (auto-compacting)
 .codex/
@@ -50,12 +54,16 @@ docs/
 .githooks/                      # Git hooks (activate with scripts/setup.sh)
   pre-commit                    # Runs tests before commit
   pre-push                      # Enforces version bumps
-tools/dev-dashboard/            # Cross-project live dashboard
+tools/dev-dashboard/            # Cross-project live dashboard (web)
   bin/dev-dashboard              # Shell entry point
   src/server/                    # Fastify backend (scanner, parser, watcher, API, WS)
   src/client/                    # Preact frontend (portfolio view, detail panels)
   src/shared/                    # Shared TypeScript types
   test/                          # Vitest tests + fixtures
+tools/dev-dashboard-tui/         # Cross-project dashboard, terminal-native (Ink TUI)
+  src/                           # Ink components, hooks (useStore/useNavigation), theme
+  scripts/bundle.js              # esbuild-bundles the TUI to the skill's tui/cli.mjs (ESM)
+  test/                          # Vitest + ink-testing-library
 tools/dev-workflow-core/         # Shared workflow core (parser, scanner, types)
   src/                           # TypeScript source
   test/                          # Vitest tests + fixtures
@@ -113,6 +121,16 @@ The pre-commit hook blocks commits where CLI source changed without updating the
 
 The CLI is agent-first: designed for structured output (`--json`), deterministic exit codes, and consumption by skill scripts — not as a user-facing terminal tool. Command names are intentionally promotable to a public CLI later without redesign, but no stability guarantees are made at this stage.
 
+### TUI Bundle
+
+After modifying `tools/dev-dashboard-tui/`, rebuild the bundle that ships with the plugin:
+
+```bash
+cd tools/dev-dashboard-tui && npm run bundle
+```
+
+This esbuild-bundles the Ink TUI into `plugins/dev-workflow/skills/dev-dashboard-tui/tui/cli.mjs`. Output is **ESM (`.mjs`), not CJS**: Ink 7 + yoga-layout emit top-level awaits the CJS format can't represent, and the TUI is user-launched (`node cli.mjs`), so the CJS constraint that binds the agent CLI doesn't apply here. The bundle is a committed build artifact — commit it alongside source changes. The pre-commit hook blocks commits that change TUI source without updating the bundle. Because the TUI pulls `dev-workflow-core`, a core edit also warrants a TUI rebundle (the CLI-bundle gate already forces a rebundle pass on core changes).
+
 ### Dashboard Actions
 
 The dashboard is AI-tool-agnostic — it works with any tool that reads/writes `.dev/` PRDs (Claude Code, Codex, etc.).
@@ -135,7 +153,7 @@ Runs automatically via the pre-commit hook.
 
 ### Git Hooks (`.githooks/`)
 
-- **pre-commit** — runs `tests/test-scripts.sh` (including cross-skill sync checks for shared scripts and CLI copies); when dashboard source is staged, also runs `eslint` + `prettier --check` on it; blocks commit if dashboard or CLI source changed without rebuilding the respective bundle
+- **pre-commit** — runs `tests/test-scripts.sh` (including cross-skill sync checks for shared scripts and CLI copies, plus a `node --check` smoke test on the shipped TUI bundle); when dashboard or TUI source is staged, also runs `eslint` + `prettier --check` on it; blocks commit if dashboard, CLI, or TUI source changed without rebuilding the respective bundle
 - **pre-push** — syncs the GitHub releases section of `CHANGELOG.md`, blocks push if that sync changes the file, blocks push if `plugins/` changed without a version bump in `marketplace.json`, and blocks version bumps that do not have a matching local changelog entry. Also runs the **code-hygiene gate** on any branch push carrying commits (see Code Hygiene below)
 
 ### Code Hygiene

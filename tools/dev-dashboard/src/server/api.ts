@@ -1,4 +1,4 @@
-import { access, mkdir, readdir, readFile, rename } from 'fs/promises';
+import { access, mkdir, readFile, rename } from 'fs/promises';
 import { dirname, join, resolve } from 'path';
 import { execFile as execFileCb } from 'node:child_process';
 import { homedir } from 'os';
@@ -8,7 +8,6 @@ import type {
   DashboardConfig,
   DashboardConfigResponse,
   DashboardSearchHit,
-  FeatureDetail,
   Project,
   ReportFeature,
   ReportResponse,
@@ -24,8 +23,7 @@ import {
   readStoredConfig,
   updateConfig,
 } from './config.js';
-import { parseCheckpoint, parseMasterPlan, parseSessionLog, parseSubPrd } from './parser.js';
-import { searchFeatures } from 'dev-workflow-core';
+import { buildFeatureDetail, searchFeatures } from 'dev-workflow-core';
 import { resolveTerminalCommand } from './terminal-presets.js';
 import { VERSION } from './version.js';
 
@@ -155,42 +153,7 @@ export function registerApiRoutes(app: FastifyInstance, state: DashboardState): 
 
     const devSubdir = feature.status === 'archived' ? '.dev-archive' : '.dev';
     const featureDir = resolve(project.path, devSubdir, featureName);
-    const masterPlan = await parseMasterPlan(resolve(featureDir, '00-master-plan.md'));
-    const checkpoint = await parseCheckpoint(resolve(featureDir, 'checkpoint.md'));
-    // parseSessionLog returns [] for missing or empty files (fault-tolerant);
-    // collapse that to null so the client can render "no history" cleanly.
-    const sessionLog = await parseSessionLog(resolve(featureDir, 'session-log.md'));
-
-    // Parse sub-PRDs (files matching NN-sub-prd-*.md)
-    const subPrds: FeatureDetail['subPrds'] = [];
-    try {
-      const entries = await readdir(featureDir);
-      const subPrdFiles = entries.filter((e) => /^\d+-sub-prd-.*\.md$/.test(e)).sort();
-      for (const file of subPrdFiles) {
-        const result = await parseSubPrd(resolve(featureDir, file));
-        if (result) subPrds.push(result);
-      }
-    } catch {
-      // Feature dir not readable — subPrds stays empty
-    }
-
-    const detail: FeatureDetail = {
-      ...feature,
-      project: projectName,
-      checkpoint: checkpoint
-        ? {
-            nextAction: checkpoint.nextAction,
-            decisions: checkpoint.decisions,
-            blockers: checkpoint.blockers,
-            notes: checkpoint.notes,
-          }
-        : null,
-      phases: masterPlan?.phases ?? [],
-      subPrds,
-      sessionLog: sessionLog.length > 0 ? sessionLog : null,
-    };
-
-    return detail;
+    return buildFeatureDetail(featureDir, feature, projectName);
   });
 
   app.get<{

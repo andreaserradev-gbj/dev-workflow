@@ -6,3 +6,5 @@ export * from './writer.js';
 export * from './wiki.js';
 export * from './wiki-templates.js';
 export * from './search.js';
+export * from './scan-dirs.js';
+export * from './feature-detail.js';

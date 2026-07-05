@@ -9,33 +9,24 @@ export type {
   Feature,
   Project,
   SessionLogEntry,
+  FeatureDetail,
+  TerminalSetting,
+  TerminalConfig,
+  DashboardConfig,
 } from 'dev-workflow-core/types';
 export { STATUS_ORDER } from 'dev-workflow-core/types';
 
 // ─── Dashboard-only types (API/UI concerns) ──────────────────────
 
-import type { Feature, Phase, Project, SessionLogEntry, SubPrd } from 'dev-workflow-core/types';
+import type { DashboardConfig, Feature, Project } from 'dev-workflow-core/types';
 
 // GET /api/projects response
 export interface ProjectsResponse {
   projects: Project[];
 }
 
-// Expanded feature detail (GET /api/projects/:project/features/:feature)
-export interface FeatureDetail extends Feature {
-  project: string;
-  checkpoint: {
-    nextAction: string | null;
-    decisions: string[];
-    blockers: string[];
-    notes: string[];
-  } | null;
-  phases: Phase[];
-  subPrds: SubPrd[];
-  // Parsed session-log.md entries in file order (Session 1 = oldest, last = newest).
-  // null when session-log.md is absent or empty; populated array otherwise.
-  sessionLog: SessionLogEntry[] | null;
-}
+// FeatureDetail (GET /api/projects/:project/features/:feature) is re-exported
+// above from core — its assembly (buildFeatureDetail) is shared with the TUI.
 
 // Feature annotated with project name (for cross-project report view)
 export interface ReportFeature extends Feature {
@@ -56,32 +47,8 @@ export interface HealthResponse {
   features: number;
 }
 
-// User's terminal-launch setting per platform.
-//   - string  → preset id (server's terminal-presets registry resolves it).
-//   - object  → literal { cmd, args }; args may contain '{{cwd}}' which the
-//     server substitutes with the feature dir before execFile.
-// The discrete-args invariant is preserved end-to-end — `args` stays an
-// array, never a single shell string.
-export type TerminalSetting = string | { cmd: string; args: string[] };
-
-export interface TerminalConfig {
-  darwin?: TerminalSetting;
-  linux?: TerminalSetting;
-  win32?: TerminalSetting;
-}
-
-// Dashboard config (~/.config/dev-dashboard/config.json)
-export interface DashboardConfig {
-  scanDirs: string[];
-  port: number;
-  // Network interface the server binds to. Defaults to '127.0.0.1' (loopback —
-  // reachable only from this machine). LAN exposure ('0.0.0.0') is opt-in.
-  host: string;
-  notifications: boolean;
-  scanDirsConfigured: boolean;
-  terminal: TerminalConfig;
-  wikiDir?: string;
-}
+// TerminalSetting, TerminalConfig, and DashboardConfig are re-exported above from
+// the node-free `dev-workflow-core/types` barrel (the core is their single owner).
 
 // GET /api/config response wrapper. Carries the persisted DashboardConfig
 // alongside platform/version/configPath so the client About tab and the
