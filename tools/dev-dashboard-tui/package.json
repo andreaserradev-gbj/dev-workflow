@@ -1,0 +1,35 @@
+{
+  "name": "dev-dashboard-tui",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "bundle": "node scripts/bundle.js",
+    "lint": "eslint src/",
+    "lint:fix": "eslint src/ --fix",
+    "format": "prettier --write src/",
+    "format:check": "prettier --check src/"
+  },
+  "dependencies": {
+    "dev-workflow-core": "file:../dev-workflow-core",
+    "ink": "^7.1.0",
+    "react": "^19.2.0"
+  },
+  "engines": {
+    "node": ">=24"
+  },
+  "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "@types/node": "^22.0.0",
+    "@types/react": "^19.2.0",
+    "esbuild": "^0.27.4",
+    "eslint": "^10.2.0",
+    "ink-testing-library": "^4.0.0",
+    "prettier": "^3.8.1",
+    "typescript": "^5.6.0",
+    "typescript-eslint": "^8.58.1",
+    "vitest": "^3.0.0"
+  }
+}
