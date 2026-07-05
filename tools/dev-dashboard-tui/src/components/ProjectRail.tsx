@@ -3,21 +3,24 @@ import type { Project } from 'dev-workflow-core/types';
 
 interface Props {
   projects: Project[];
-  /** Index of the highlighted project (rail nav lands in Phase 6). */
+  /** Index of the highlighted project. */
   selectedIndex: number;
   width?: number;
+  /** Cyan border when this pane holds keyboard focus. */
+  focused?: boolean;
 }
 
 /** Left pane: recency-sorted project rail with per-project feature counts. */
-export function ProjectRail({ projects, selectedIndex, width = 28 }: Props) {
+export function ProjectRail({ projects, selectedIndex, width = 28, focused = false }: Props) {
   return (
     <Box
       flexDirection="column"
       width={width}
       flexShrink={0}
       borderStyle="round"
-      borderColor="gray"
+      borderColor={focused ? 'cyan' : 'gray'}
       paddingX={1}
+      overflowY="hidden"
     >
       <Text bold>Projects</Text>
       {projects.length === 0 ? (
@@ -34,7 +37,11 @@ export function ProjectRail({ projects, selectedIndex, width = 28 }: Props) {
 function ProjectRow({ project, selected }: { project: Project; selected: boolean }) {
   return (
     <Box>
-      <Text color={selected ? 'cyan' : undefined}>{selected ? '› ' : '  '}</Text>
+      {/* Fixed marker column (see FeatureRow) — keeps the '›' from losing its
+          trailing space when a long project name shrinks the row. */}
+      <Box width={2} flexShrink={0}>
+        <Text color={selected ? 'cyan' : undefined}>{selected ? '›' : ''}</Text>
+      </Box>
       <Box flexGrow={1} marginRight={1}>
         <Text bold={selected} wrap="truncate-end">
           {project.name}

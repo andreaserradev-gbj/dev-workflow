@@ -1,10 +1,17 @@
 import { render } from 'ink-testing-library';
 import { describe, expect, it } from 'vitest';
-import type { Feature, FeatureStatus, Progress, Project } from 'dev-workflow-core/types';
+import type {
+  Feature,
+  FeatureDetail,
+  FeatureStatus,
+  Progress,
+  Project,
+} from 'dev-workflow-core/types';
 import { ProgressBar } from '../src/components/ProgressBar.js';
 import { FilterPills } from '../src/components/FilterPills.js';
 import { ProjectRail } from '../src/components/ProjectRail.js';
 import { FeatureList } from '../src/components/FeatureList.js';
+import { DetailPane } from '../src/components/DetailPane.js';
 import type { FilterKey } from '../src/hooks/useStore.js';
 
 function feature(name: string, status: FeatureStatus, progress: Progress | null = null): Feature {
@@ -93,5 +100,111 @@ describe('FeatureList', () => {
     expect(frame).toContain('Gate');
     expect(frame).toContain('Active');
     expect(frame).toContain('8/23');
+    // The selection marker keeps a gap before the status label (regression:
+    // a bare trailing-space marker gets trimmed under Yoga width pressure).
+    expect(frame).toMatch(/›\s+Gate/);
+  });
+});
+
+function detail(overrides: Partial<FeatureDetail> = {}): FeatureDetail {
+  return {
+    ...feature('demo', 'gate', { done: 8, total: 23, percent: 35 }),
+    currentPhase: { number: 2, total: 2, title: 'Detail pane' },
+    branch: 'feature/demo',
+    project: 'my-project',
+    checkpoint: {
+      nextAction: '## Next Steps\n\nWire the detail pane into the app.',
+      decisions: ['Ink over blessed'],
+      blockers: ['Manual TTY verification pending'],
+      notes: [],
+    },
+    phases: [
+      { number: 1, title: 'Core hoist', done: 4, total: 4, status: 'complete' },
+      { number: 2, title: 'Detail pane', done: 2, total: 4, status: 'in-progress' },
+    ],
+    subPrds: [{ id: '02', title: 'TUI package', done: 5, total: 7, status: 'in-progress', steps: [] }],
+    sessionLog: [
+      { session: 1, date: '2026-07-04', context: '## Context\n\nPlanning only.', decisions: [], blockers: [], notes: [] },
+      { session: 2, date: '2026-07-05', context: '## Context\n\nBuilt portfolio.', decisions: [], blockers: [], notes: [] },
+    ],
+    ...overrides,
+  };
+}
+
+describe('DetailPane', () => {
+  it('renders the header, status line, next action, decisions, and blockers', () => {
+    const frame =
+      render(<DetailPane detail={detail()} loading={false} error={null} />).lastFrame() ?? '';
+    expect(frame).toContain('demo'); // feature name header
+    expect(frame).toContain('Gate'); // status label
+    expect(frame).toContain('8/23'); // progress
+    expect(frame).toContain('feature/demo'); // branch
+    expect(frame).toContain('Next Action');
+    expect(frame).toContain('Wire the detail pane'); // nextAction body, leading ## heading stripped
+    expect(frame).not.toContain('Next Steps'); // the ## heading is stripped
+    expect(frame).toContain('Decisions');
+    expect(frame).toContain('Ink over blessed');
+    expect(frame).toContain('Blockers');
+    expect(frame).toContain('Manual TTY verification pending');
+  });
+
+  it('renders phases with status icons and sub-PRDs', () => {
+    const frame =
+      render(<DetailPane detail={detail()} loading={false} error={null} />).lastFrame() ?? '';
+    expect(frame).toContain('Phases');
+    expect(frame).toContain('Core hoist');
+    expect(frame).toContain('✅'); // complete phase icon
+    expect(frame).toContain('🔶'); // in-progress phase icon
+    expect(frame).toContain('Sub-PRDs');
+    expect(frame).toContain('TUI package');
+  });
+
+  it('collapses session history to a count by default', () => {
+    const frame =
+      render(<DetailPane detail={detail()} loading={false} error={null} />).lastFrame() ?? '';
+    expect(frame).toContain('Session History (2)');
+    expect(frame).toContain('▶'); // collapsed marker
+    expect(frame).not.toContain('Session 1');
+  });
+
+  it('lists newest-first session entries when expanded, flagging the latest', () => {
+    const frame =
+      render(
+        <DetailPane detail={detail()} loading={false} error={null} sessionExpanded />,
+      ).lastFrame() ?? '';
+    expect(frame).toContain('Session 1');
+    expect(frame).toContain('Session 2');
+    expect(frame).toContain('LATEST');
+    // Newest first: Session 2 precedes Session 1 in the frame.
+    expect(frame.indexOf('Session 2')).toBeLessThan(frame.indexOf('Session 1'));
+  });
+
+  it('shows a scroll indicator when sessions overflow the window', () => {
+    const many: FeatureDetail['sessionLog'] = Array.from({ length: 8 }, (_, i) => ({
+      session: i + 1,
+      date: '2026-07-05',
+      context: null,
+      decisions: [],
+      blockers: [],
+      notes: [],
+    }));
+    const frame =
+      render(
+        <DetailPane detail={detail({ sessionLog: many })} loading={false} error={null} sessionExpanded />,
+      ).lastFrame() ?? '';
+    // 8 sessions, window of 4 → "older" indicator present below the fold.
+    expect(frame).toContain('older');
+  });
+
+  it('renders loading and empty states', () => {
+    expect(
+      render(<DetailPane detail={null} loading error={null} />).lastFrame(),
+    ).toContain('Loading');
+    expect(
+      render(<DetailPane detail={null} loading={false} error={null} />).lastFrame(),
+    ).toContain('Select a feature');
+    expect(
+      render(<DetailPane detail={null} loading={false} error="boom" />).lastFrame(),
+    ).toContain('boom');
   });
 });

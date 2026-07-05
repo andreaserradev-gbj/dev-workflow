@@ -9,6 +9,7 @@ export type {
   Feature,
   Project,
   SessionLogEntry,
+  FeatureDetail,
   TerminalSetting,
   TerminalConfig,
   DashboardConfig,
@@ -17,35 +18,15 @@ export { STATUS_ORDER } from 'dev-workflow-core/types';
 
 // ─── Dashboard-only types (API/UI concerns) ──────────────────────
 
-import type {
-  DashboardConfig,
-  Feature,
-  Phase,
-  Project,
-  SessionLogEntry,
-  SubPrd,
-} from 'dev-workflow-core/types';
+import type { DashboardConfig, Feature, Project } from 'dev-workflow-core/types';
 
 // GET /api/projects response
 export interface ProjectsResponse {
   projects: Project[];
 }
 
-// Expanded feature detail (GET /api/projects/:project/features/:feature)
-export interface FeatureDetail extends Feature {
-  project: string;
-  checkpoint: {
-    nextAction: string | null;
-    decisions: string[];
-    blockers: string[];
-    notes: string[];
-  } | null;
-  phases: Phase[];
-  subPrds: SubPrd[];
-  // Parsed session-log.md entries in file order (Session 1 = oldest, last = newest).
-  // null when session-log.md is absent or empty; populated array otherwise.
-  sessionLog: SessionLogEntry[] | null;
-}
+// FeatureDetail (GET /api/projects/:project/features/:feature) is re-exported
+// above from core — its assembly (buildFeatureDetail) is shared with the TUI.
 
 // Feature annotated with project name (for cross-project report view)
 export interface ReportFeature extends Feature {

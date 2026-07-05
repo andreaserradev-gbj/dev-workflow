@@ -118,6 +118,25 @@ export interface SessionLogEntry {
   notes: string[];
 }
 
+// Expanded feature detail — a Feature plus its parsed checkpoint fields,
+// master-plan phases, sub-PRDs, and session log. Assembled by buildFeatureDetail()
+// and shared by the dashboard API (GET /api/projects/:project/features/:feature)
+// and the TUI detail pane, so the assembly lives in exactly one place.
+export interface FeatureDetail extends Feature {
+  project: string;
+  checkpoint: {
+    nextAction: string | null;
+    decisions: string[];
+    blockers: string[];
+    notes: string[];
+  } | null;
+  phases: Phase[];
+  subPrds: SubPrd[];
+  // Parsed session-log.md entries in file order (Session 1 = oldest, last = newest).
+  // null when session-log.md is absent or empty; populated array otherwise.
+  sessionLog: SessionLogEntry[] | null;
+}
+
 // Session digest parsed from session-digest.md — a distilled narrative of the
 // older session tail plus a bounded decision set, kept in a SEPARATE file from
 // session-log.md so the `## Session N` counter is never inflated.
