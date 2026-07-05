@@ -38,36 +38,48 @@ STALE_DAYS="${STALE_DAYS:-7}"
 RETIRED_PROVIDERS="${RETIRED_PROVIDERS-Runlayer}"
 
 # Default = the skills shipped by this plugin (see plugins/dev-workflow/skills/).
-DEFAULT_SKILLS=(dev-plan dev-checkpoint dev-resume dev-review dev-wiki dev-wrapup dev-dashboard)
+DEFAULT_SKILLS=(dev-plan dev-checkpoint dev-resume dev-review dev-wiki dev-wrapup dev-dashboard dev-dashboard-tui)
 
 MODE="text"
 FAIL_ON=""
 SKILLS=()
 while [ "$#" -gt 0 ]; do
-  case "$1" in
+    case "$1" in
     --json) MODE="json" ;;
-    --markdown|--md) MODE="markdown" ;;
+    --markdown | --md) MODE="markdown" ;;
     --fail-on)
-      shift
-      [ "$#" -gt 0 ] || { echo "error: --fail-on needs a level (HIGH|MEDIUM|LOW)" >&2; exit 2; }
-      FAIL_ON="$1"
-      ;;
+        shift
+        [ "$#" -gt 0 ] || {
+            echo "error: --fail-on needs a level (HIGH|MEDIUM|LOW)" >&2
+            exit 2
+        }
+        FAIL_ON="$1"
+        ;;
     --fail-on=*) FAIL_ON="${1#*=}" ;;
-    -h|--help)
-      sed -n '2,/^set -eu/p' "$0" | sed 's/^# \{0,1\}//; /^set -eu/d'
-      exit 0
-      ;;
-    -*) echo "unknown flag: $1" >&2; exit 2 ;;
+    -h | --help)
+        sed -n '2,/^set -eu/p' "$0" | sed 's/^# \{0,1\}//; /^set -eu/d'
+        exit 0
+        ;;
+    -*)
+        echo "unknown flag: $1" >&2
+        exit 2
+        ;;
     *) SKILLS+=("$1") ;;
-  esac
-  shift
+    esac
+    shift
 done
 if [ "${#SKILLS[@]}" -eq 0 ]; then
-  SKILLS=("${DEFAULT_SKILLS[@]}")
+    SKILLS=("${DEFAULT_SKILLS[@]}")
 fi
 
-command -v curl >/dev/null 2>&1 || { echo "error: curl not found" >&2; exit 2; }
-command -v python3 >/dev/null 2>&1 || { echo "error: python3 not found" >&2; exit 2; }
+command -v curl >/dev/null 2>&1 || {
+    echo "error: curl not found" >&2
+    exit 2
+}
+command -v python3 >/dev/null 2>&1 || {
+    echo "error: python3 not found" >&2
+    exit 2
+}
 
 # Fetch every skill's audit into a temp dir (index-keyed so odd skill names are
 # never used as filenames). A missing file = the fetch failed for that skill.
@@ -76,17 +88,17 @@ trap 'rm -rf "$tmpdir"' EXIT
 
 idx=0
 for skill in "${SKILLS[@]}"; do
-  url="${API}/${OWNER}/${REPO}/${skill}"
-  curl -fsS "$url" -o "$tmpdir/${idx}.json" 2>/dev/null || rm -f "$tmpdir/${idx}.json"
-  idx=$((idx + 1))
+    url="${API}/${OWNER}/${REPO}/${skill}"
+    curl -fsS "$url" -o "$tmpdir/${idx}.json" 2>/dev/null || rm -f "$tmpdir/${idx}.json"
+    idx=$((idx + 1))
 done
 
 # One python pass aggregates across all skills so the rollup, the retired-
 # provider exclusion, and the --fail-on exit code are computed globally.
 MODE="$MODE" FAIL_ON="$FAIL_ON" AUDIT_TMPDIR="$tmpdir" \
-OWNER="$OWNER" REPO="$REPO" STALE_DAYS="$STALE_DAYS" \
-RETIRED_PROVIDERS="$RETIRED_PROVIDERS" \
-python3 - "${SKILLS[@]}" <<'PY' || exit 1
+    OWNER="$OWNER" REPO="$REPO" STALE_DAYS="$STALE_DAYS" \
+    RETIRED_PROVIDERS="$RETIRED_PROVIDERS" \
+    python3 - "${SKILLS[@]}" <<'PY' || exit 1
 import json, os, re, sys, textwrap
 from collections import OrderedDict
 from datetime import datetime, timezone
