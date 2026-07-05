@@ -13,11 +13,14 @@ export interface FeatureDetailState {
  * Build the expanded FeatureDetail for the selected feature. Mirrors the web
  * dashboard's useFeatureDetail hook, but skips the HTTP round-trip: the TUI
  * shares the process with the parsers, so it calls buildFeatureDetail() (the
- * hoisted core function) directly. Re-runs whenever the selection changes.
+ * hoisted core function) directly. Re-runs whenever the selection changes, or
+ * when `revision` bumps — a live rescan whose edit left the feature's identity
+ * (project / name / status) unchanged, so the open pane still needs a rebuild.
  */
 export function useFeatureDetail(
   project: Project | null,
   feature: Feature | null,
+  revision = 0,
 ): FeatureDetailState {
   const [detail, setDetail] = useState<FeatureDetail | null>(null);
   const [loading, setLoading] = useState(false);
@@ -61,7 +64,7 @@ export function useFeatureDetail(
     return () => {
       cancelled = true;
     };
-  }, [projectPath, projectName, featureName, featureStatus]);
+  }, [projectPath, projectName, featureName, featureStatus, revision]);
 
   return { detail, loading, error };
 }

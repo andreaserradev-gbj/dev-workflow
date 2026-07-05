@@ -29,7 +29,11 @@ interface Props {
  */
 export function App({ scanDirs }: Props) {
   const store = useStore(scanDirs);
-  const featureDetail = useFeatureDetail(store.selectedProject, store.selectedFeature);
+  const featureDetail = useFeatureDetail(
+    store.selectedProject,
+    store.selectedFeature,
+    store.revision,
+  );
   // The detail pane measures its own scroll range and reports it back so the nav
   // hook can bound j/k; seeded at 0 (no scroll until content overflows).
   const [detailScrollMax, setDetailScrollMax] = useState(0);

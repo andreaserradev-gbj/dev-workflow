@@ -1,7 +1,12 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { scanProjects } from 'dev-workflow-core';
-import { sortProjects } from 'dev-workflow-core/live';
+import { createWatcher, sortProjects, type Watcher } from 'dev-workflow-core/live';
 import type { Feature, FeatureStatus, Project } from 'dev-workflow-core/types';
+
+// Periodic full-rescan cadence — a safety net for fs events chokidar can
+// silently drop (notably across macOS sleep/wake on a long-running process).
+// Mirrors the dashboard server's 5-minute interval.
+const FULL_RESCAN_INTERVAL_MS = 5 * 60 * 1000;
 
 // The filter pills the portfolio exposes: the catch-all plus the four statuses
 // worth isolating and the archived view. A curated subset of FeatureStatus —
@@ -29,8 +34,15 @@ export interface Store {
   setSelectedFeatureIndex: (index: number) => void;
   selectedProject: Project | null;
   selectedFeature: Feature | null;
-  /** Re-run the one-shot scan (manual refresh; the live watcher arrives in Phase 7). */
+  /** Force a rescan (manual refresh; the live watcher and periodic net also drive this). */
   reload: () => void;
+  /**
+   * Monotonic scan counter — bumps on every rescan (manual, watcher event, or
+   * the periodic safety net). Thread it into useFeatureDetail so the open detail
+   * pane rebuilds when the selected feature's files change on disk without its
+   * identity (project / name / status) changing.
+   */
+  revision: number;
 }
 
 /**
@@ -96,26 +108,72 @@ export function useStore(scanDirs: string[]): Store {
 
   useEffect(() => {
     let cancelled = false;
-    setPhase('loading');
-    setError(null);
 
     scanProjects(scanDirs)
       .then((raw) => {
         if (cancelled) return;
         setProjects(sortProjects(raw));
+        setError(null);
         setPhase('ready');
       })
       .catch((err: unknown) => {
         if (cancelled) return;
         setError(err instanceof Error ? err.message : String(err));
-        setPhase('error');
+        // Keep the last good render on a background rescan failure; only fall to
+        // the error screen when the very first scan has nothing to show yet.
+        setPhase((p) => (p === 'loading' ? 'error' : p));
       });
 
     return () => {
       cancelled = true;
     };
-    // scanKey stands in for the scanDirs array (stable primitive); nonce forces a manual reload.
+    // scanKey stands in for the scanDirs array (stable primitive); nonce forces a
+    // rescan (manual reload, watcher event, or the periodic net). Rescans keep the
+    // current phase — no 'loading' flash — so live updates swap in place.
   }, [scanKey, nonce]);
+
+  // Live refresh: watch the scanned .dev/ trees and rescan on any change. Every
+  // watcher event (added / updated / removed) collapses to a full rescan — the
+  // same one-shot path as the initial load and manual reload — so there is a
+  // single data path and no bespoke in-memory feature splicing. createWatcher
+  // already debounces bursts (200ms), so a rescan-per-event is cheap.
+  //
+  // A periodic full rescan backs up the watcher for fs events chokidar can
+  // silently drop. Teardown on unmount (Ink quit) closes the watcher and clears
+  // the interval so no fs handles leak (EMFILE) and the process exits cleanly.
+  useEffect(() => {
+    const bump = () => setNonce((n) => n + 1);
+    let watcher: Watcher | null = null;
+    let stopped = false;
+
+    createWatcher(scanDirs, {
+      onFeatureUpdated: bump,
+      onFeatureAdded: bump,
+      onFeatureRemoved: bump,
+    })
+      .then((w) => {
+        // Unmounted before the watcher finished starting — close it now rather
+        // than leaking the fs handles.
+        if (stopped) {
+          void w.close();
+          return;
+        }
+        watcher = w;
+      })
+      .catch(() => {
+        // Watcher failed to start (e.g. EMFILE): live refresh is disabled, but
+        // the initial scan already rendered and manual reload still works.
+      });
+
+    const rescanTimer = setInterval(bump, FULL_RESCAN_INTERVAL_MS);
+
+    return () => {
+      stopped = true;
+      clearInterval(rescanTimer);
+      if (watcher) void watcher.close();
+    };
+    // Rebuild the watcher only when the set of scanned dirs actually changes.
+  }, [scanKey]);
 
   const filteredProjects = useMemo(() => filterProjects(projects, filter), [projects, filter]);
 
@@ -142,5 +200,6 @@ export function useStore(scanDirs: string[]): Store {
     selectedProject,
     selectedFeature,
     reload,
+    revision: nonce,
   };
 }
