@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { Box, Text } from 'ink';
 import { filterCounts, useStore } from './hooks/useStore.js';
 import { useFeatureDetail } from './hooks/useFeatureDetail.js';
@@ -29,7 +30,10 @@ interface Props {
 export function App({ scanDirs }: Props) {
   const store = useStore(scanDirs);
   const featureDetail = useFeatureDetail(store.selectedProject, store.selectedFeature);
-  const nav = useNavigation(store, featureDetail);
+  // The detail pane measures its own scroll range and reports it back so the nav
+  // hook can bound j/k; seeded at 0 (no scroll until content overflows).
+  const [detailScrollMax, setDetailScrollMax] = useState(0);
+  const nav = useNavigation(store, detailScrollMax);
   const { rows } = useTerminalSize();
 
   if (store.phase === 'loading') {
@@ -91,7 +95,8 @@ export function App({ scanDirs }: Props) {
           error={featureDetail.error}
           focused={nav.focus === 'detail'}
           sessionExpanded={nav.sessionExpanded}
-          sessionScroll={nav.sessionScroll}
+          scroll={nav.detailScroll}
+          onScrollMax={setDetailScrollMax}
         />
       </Box>
       <Box flexShrink={0}>

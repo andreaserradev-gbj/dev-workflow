@@ -88,7 +88,7 @@ describe('ProjectRail', () => {
 });
 
 describe('FeatureList', () => {
-  it('renders the title, feature names, status labels, and progress', () => {
+  it('renders the title, feature names, status dots, and progress', () => {
     const features = [
       feature('a1', 'gate', { done: 8, total: 23, percent: 35 }),
       feature('a2', 'active', null),
@@ -97,12 +97,15 @@ describe('FeatureList', () => {
       render(<FeatureList title="alpha" features={features} selectedIndex={0} />).lastFrame() ?? '';
     expect(frame).toContain('alpha');
     expect(frame).toContain('a1');
-    expect(frame).toContain('Gate');
-    expect(frame).toContain('Active');
+    expect(frame).toContain('a2');
+    // Status is a colored dot (●), not the spelled-out word — the label is gone.
+    expect(frame).toContain('●');
+    expect(frame).not.toContain('Gate');
+    expect(frame).not.toContain('Active');
     expect(frame).toContain('8/23');
-    // The selection marker keeps a gap before the status label (regression:
+    // The selection marker keeps a gap before the status dot (regression:
     // a bare trailing-space marker gets trimmed under Yoga width pressure).
-    expect(frame).toMatch(/›\s+Gate/);
+    expect(frame).toMatch(/›\s+●/);
   });
 });
 
@@ -179,7 +182,7 @@ describe('DetailPane', () => {
     expect(frame.indexOf('Session 2')).toBeLessThan(frame.indexOf('Session 1'));
   });
 
-  it('shows a scroll indicator when sessions overflow the window', () => {
+  it('renders every session when expanded (no per-section window)', () => {
     const many: FeatureDetail['sessionLog'] = Array.from({ length: 8 }, (_, i) => ({
       session: i + 1,
       date: '2026-07-05',
@@ -192,8 +195,10 @@ describe('DetailPane', () => {
       render(
         <DetailPane detail={detail({ sessionLog: many })} loading={false} error={null} sessionExpanded />,
       ).lastFrame() ?? '';
-    // 8 sessions, window of 4 → "older" indicator present below the fold.
-    expect(frame).toContain('older');
+    // No windowing anymore — the whole pane scrolls, so all 8 sessions render
+    // (the oldest and newest both present, not paged out by a 4-row window).
+    expect(frame).toContain('Session 1');
+    expect(frame).toContain('Session 8');
   });
 
   it('renders loading and empty states', () => {

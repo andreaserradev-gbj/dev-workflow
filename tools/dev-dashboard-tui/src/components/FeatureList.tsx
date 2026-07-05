@@ -52,8 +52,12 @@ function FeatureRow({ feature, selected }: { feature: Feature; selected: boolean
       <Box width={2} flexShrink={0}>
         <Text color={selected ? 'cyan' : undefined}>{selected ? '›' : ''}</Text>
       </Box>
-      <Box width={10} flexShrink={0}>
-        <Text color={theme.color}>{theme.label}</Text>
+      {/* Status as a 1-col colored dot rather than the full word: the hue already
+          encodes the status (and the filter pill / rail give the context), so the
+          former 10-col label is freed for the feature name — the row's key data.
+          The status word still spells out in the detail pane. */}
+      <Box width={2} flexShrink={0}>
+        <Text color={theme.color}>●</Text>
       </Box>
       <Box flexGrow={1} marginRight={1}>
         <Text bold={selected} wrap="truncate-end">
@@ -64,15 +68,15 @@ function FeatureRow({ feature, selected }: { feature: Feature; selected: boolean
           thus every row's bar — lands on the same column regardless of digits. */}
       {feature.progress ? (
         <Box flexShrink={0}>
-          <ProgressBar percent={feature.progress.percent} color={theme.color} width={10} />
-          <Box width={8} justifyContent="flex-end">
+          <ProgressBar percent={feature.progress.percent} color={theme.color} width={6} />
+          <Box width={6} justifyContent="flex-end">
             <Text dimColor>
               {feature.progress.done}/{feature.progress.total}
             </Text>
           </Box>
         </Box>
       ) : (
-        <Box width={8} flexShrink={0} justifyContent="flex-end">
+        <Box width={6} flexShrink={0} justifyContent="flex-end">
           <Text dimColor>—</Text>
         </Box>
       )}

@@ -1,8 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useApp, useInput } from 'ink';
 import { FILTER_KEYS, type FilterKey, type Store } from './useStore.js';
-import type { FeatureDetailState } from './useFeatureDetail.js';
-import { MAX_VISIBLE_SESSIONS } from '../components/DetailPane.js';
 
 export type Pane = 'rail' | 'list' | 'detail';
 
@@ -13,7 +11,8 @@ export const PANES: readonly Pane[] = ['rail', 'list', 'detail'];
 export interface NavState {
   focus: Pane;
   sessionExpanded: boolean;
-  sessionScroll: number;
+  /** Whole-pane vertical scroll offset for the detail pane (rows). */
+  detailScroll: number;
 }
 
 function clamp(value: number, lo: number, hi: number): number {
@@ -39,20 +38,23 @@ export function cycleFilter(current: FilterKey, dir: 1 | -1): FilterKey {
  * scroll in the detail. Tab / Shift+Tab cycle the filter (arrows already own pane
  * focus); 1–6 jump straight to a filter; q / Ctrl+C quit.
  *
- * Owns the transient view state (focus + session expand/scroll) and drives the
- * store's selection setters; the store stays the sole data owner.
+ * Owns the transient view state (focus + session expand + detail scroll) and
+ * drives the store's selection setters; the store stays the sole data owner.
+ *
+ * `detailScrollMax` is measured by the detail pane (content height vs. viewport)
+ * and threaded back in so j/k can't scroll past the end.
  */
-export function useNavigation(store: Store, detail: FeatureDetailState): NavState {
+export function useNavigation(store: Store, detailScrollMax = 0): NavState {
   const { exit } = useApp();
   const [focus, setFocus] = useState<Pane>('rail');
   const [sessionExpanded, setSessionExpanded] = useState(false);
-  const [sessionScroll, setSessionScroll] = useState(0);
+  const [detailScroll, setDetailScroll] = useState(0);
 
-  // Reset the session scroll whenever the selected feature changes, so a fresh
+  // Reset the detail scroll whenever the selected feature changes, so a fresh
   // detail never opens mid-scroll. Keyed on project+feature (names repeat).
   const featureKey = `${store.selectedProject?.name ?? ''}/${store.selectedFeature?.name ?? ''}`;
   useEffect(() => {
-    setSessionScroll(0);
+    setDetailScroll(0);
   }, [featureKey]);
 
   useInput((input, key) => {
@@ -113,12 +115,12 @@ export function useNavigation(store: Store, detail: FeatureDetailState): NavStat
     } else if (focus === 'list') {
       const count = store.selectedProject?.features.length ?? 0;
       store.setSelectedFeatureIndex(clamp(store.selectedFeatureIndex + delta, 0, count - 1));
-    } else if (sessionExpanded) {
-      const total = detail.detail?.sessionLog?.length ?? 0;
-      const maxOffset = Math.max(0, total - MAX_VISIBLE_SESSIONS);
-      setSessionScroll((s) => clamp(s + delta, 0, maxOffset));
+    } else {
+      // Detail pane focused: j/k scroll the whole pane, bounded by the range the
+      // pane measured (0 when everything already fits).
+      setDetailScroll((s) => clamp(s + delta, 0, detailScrollMax));
     }
   });
 
-  return { focus, sessionExpanded, sessionScroll };
+  return { focus, sessionExpanded, detailScroll };
 }
