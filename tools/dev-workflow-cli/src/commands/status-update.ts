@@ -1,6 +1,6 @@
 import { resolve } from 'path';
-import { readdir, readFile, access } from 'fs/promises';
-import { isSubPrdFile, updateStatus as coreUpdateStatus } from 'dev-workflow-core';
+import { readdir } from 'fs/promises';
+import { isSubPrdFile, parseMasterPlan, updateStatus as coreUpdateStatus } from 'dev-workflow-core';
 import type { StepTarget, StatusMarker, StatusUpdateResult } from 'dev-workflow-core';
 import { resolveFeatureDir } from '../resolve.js';
 import { parseFlags } from '../index.js';
@@ -98,33 +98,26 @@ export async function statusUpdate(args: string[]): Promise<number> {
 }
 
 /**
- * Resolve which PRD file contains the target phase.
+ * Resolve which PRD file holds the steps for a phase.
  *
- * Scans `00-master-plan.md` first (primary), then numbered `NN-<slug>.md`
- * sub-PRD files (canonical `NN-sub-prd-*.md` or bare form) by filename prefix.
+ * The master plan owns the phase only when its `### Phase N` section carries
+ * inline steps. A stub header that delegates to a sub-PRD (the master +
+ * numbered-sub-PRD shape — a collapsed range, or a Goal+GATE pointer with no
+ * steps) must NOT shadow the `NN-<slug>.md` sub-PRD file that actually holds the
+ * steps, so those phases resolve to the sub-PRD file (which `updateStatus` then
+ * edits via its Implementation Progress table). Falls back to the master plan
+ * for phases it does own, or a clear "not found" error otherwise.
  */
 async function resolveTargetPrd(featureDir: string, phaseNum: number): Promise<string | null> {
   const masterPlanPath = resolve(featureDir, '00-master-plan.md');
+  const masterPlan = await parseMasterPlan(masterPlanPath);
 
-  // Check master plan first — it contains `### Phase N:` headers
-  try {
-    const content = await readFile(masterPlanPath, 'utf-8');
-    const phaseRegex = /#{2,3}\s*Phase\s+(\d+)/i;
-    let found = false;
-    let match: RegExpExecArray | null;
-    const regex = new RegExp(phaseRegex.source, 'gi');
-    while ((match = regex.exec(content)) !== null) {
-      if (parseInt(match[1], 10) === phaseNum) {
-        found = true;
-        break;
-      }
-    }
-    if (found) return masterPlanPath;
-  } catch {
-    // Master plan doesn't exist — fall through to sub-PRDs
+  // Master plan owns the phase iff its `### Phase N` section has inline steps.
+  if (masterPlan?.phases.some((p) => p.number === phaseNum && p.total > 0)) {
+    return masterPlanPath;
   }
 
-  // Fall back to sub-PRDs: filename prefix NN maps to phase NN
+  // Otherwise prefer the sub-PRD file whose NN prefix matches the phase.
   try {
     const entries = await readdir(featureDir);
     const subPrdFiles = entries.filter(isSubPrdFile).sort();
@@ -138,12 +131,7 @@ async function resolveTargetPrd(featureDir: string, phaseNum: number): Promise<s
     // Directory read failed
   }
 
-  // Final fallback: if master plan exists but no Phase N header, still try it
-  // (updateStatus will throw a clear error if phase not found)
-  try {
-    await access(masterPlanPath);
-    return masterPlanPath;
-  } catch {
-    return null;
-  }
+  // Final fallback: the master plan (a stub Phase N heading for a phase-level
+  // marker, or a clear "not found" error from updateStatus).
+  return masterPlan ? masterPlanPath : null;
 }

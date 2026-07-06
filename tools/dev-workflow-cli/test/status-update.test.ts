@@ -65,6 +65,36 @@ const SUB_PRD_1 = `# Sub-PRD: Setup Phase
 | **2** | Add deps | ⬜ |
 `;
 
+/** A master plan whose Phase 1 has inline steps but Phase 2 is a stub that
+ *  delegates its steps to a sub-PRD (Goal + GATE, no numbered steps). */
+const MASTER_PLAN_STUB = `# Feature: Stub Feature
+
+## Implementation Order
+
+### Phase 1: Setup
+
+1. ⬜ Create scaffold
+
+⏸️ **GATE**: Phase 1 complete.
+
+### Phase 2: Core → [02](./02-sub-prd-core.md)
+**Goal**: Delegated to the sub-PRD.
+
+⏸️ **GATE**.
+`;
+
+const SUB_PRD_2 = `# Sub-PRD: Core
+
+**Status**: Not Started
+
+## Implementation Progress
+
+| Step | Description | Status |
+|------|-------------|--------|
+| **1** | Implement core | ⬜ Not Started |
+| **2** | Add tests | ⬜ Not Started |
+`;
+
 function createTempFeatureDir(masterPlan?: string, subPrds?: Record<string, string>): string {
   const dir = mkdtempSync(join(tmpdir(), 'su-test-'));
   mkdirSync(join(dir), { recursive: true });
@@ -176,16 +206,70 @@ describe('status-update', () => {
     expect(updated).toContain('1. ⬜ Create scaffold');
   });
 
-  it('falls back to sub-PRD when master plan has no Phase headers', async () => {
+  it('updates a sub-PRD table row when the master plan has no Phase headers', async () => {
     const dir = createTempFeatureDir(MASTER_PLAN_SUBPRD, { '01-sub-prd-setup.md': SUB_PRD_1 });
     tempDirs.push(dir);
 
-    // The core updateStatus won't find Phase headers in sub-PRDs either —
-    // expect it to fail with a clear error
-    const code = await statusUpdate(['--dir', dir, '--phase', '1', '--step', '1', '--marker', 'done']);
+    const code = await statusUpdate(['--dir', dir, '--phase', '1', '--step', '1', '--marker', 'done', '--json']);
 
-    expect(code).toBe(1);
-    expect(output.errorLines.join('\n')).toContain('Phase 1 not found');
+    expect(code).toBe(0);
+    const json = JSON.parse(output.lines.join('\n'));
+    expect(json.changed).toBe(true);
+    expect(json.file).toContain('01-sub-prd-setup.md');
+
+    const updated = readFileSync(join(dir, '01-sub-prd-setup.md'), 'utf-8');
+    expect(updated).toContain('| **1** | Create scaffold | ✅ Done |');
+    // The other row and the master plan are untouched.
+    expect(updated).toContain('| **2** | Add deps | ⬜ |');
+  });
+
+  it('routes a delegated stub-header phase to its sub-PRD file, not the master plan', async () => {
+    const dir = createTempFeatureDir(MASTER_PLAN_STUB, { '02-sub-prd-core.md': SUB_PRD_2 });
+    tempDirs.push(dir);
+
+    const code = await statusUpdate(['--dir', dir, '--phase', '2', '--step', '1', '--marker', 'done', '--json']);
+
+    expect(code).toBe(0);
+    const json = JSON.parse(output.lines.join('\n'));
+    expect(json.file).toContain('02-sub-prd-core.md');
+
+    const sub = readFileSync(join(dir, '02-sub-prd-core.md'), 'utf-8');
+    expect(sub).toContain('| **1** | Implement core | ✅ Done |');
+    // The master plan's stub Phase 2 heading is left alone.
+    const master = readFileSync(join(dir, '00-master-plan.md'), 'utf-8');
+    expect(master).toContain('### Phase 2: Core → [02](./02-sub-prd-core.md)');
+  });
+
+  it('keeps a master-plan phase with inline steps authoritative over a same-numbered sub-PRD', async () => {
+    const dir = createTempFeatureDir(MASTER_PLAN_STUB, { '01-sub-prd-setup.md': SUB_PRD_1 });
+    tempDirs.push(dir);
+
+    const code = await statusUpdate(['--dir', dir, '--phase', '1', '--step', '1', '--marker', 'done', '--json']);
+
+    expect(code).toBe(0);
+    const json = JSON.parse(output.lines.join('\n'));
+    expect(json.file).toContain('00-master-plan.md');
+
+    const master = readFileSync(join(dir, '00-master-plan.md'), 'utf-8');
+    expect(master).toContain('1. ✅ Create scaffold');
+    // The sub-PRD with the same NN prefix is not touched.
+    const sub = readFileSync(join(dir, '01-sub-prd-setup.md'), 'utf-8');
+    expect(sub).toContain('| **1** | Create scaffold | ⬜ |');
+  });
+
+  it('sets a sub-PRD Status field for a phase-level marker', async () => {
+    const dir = createTempFeatureDir(MASTER_PLAN_SUBPRD, { '01-sub-prd-setup.md': SUB_PRD_1 });
+    tempDirs.push(dir);
+
+    const code = await statusUpdate(['--dir', dir, '--phase', '1', '--marker', 'done', '--json']);
+
+    expect(code).toBe(0);
+    const json = JSON.parse(output.lines.join('\n'));
+    expect(json.changed).toBe(true);
+    expect(json.file).toContain('01-sub-prd-setup.md');
+
+    const updated = readFileSync(join(dir, '01-sub-prd-setup.md'), 'utf-8');
+    expect(updated).toContain('**Status**: Complete');
   });
 
   it('returns exit code 1 when --phase is missing', async () => {
