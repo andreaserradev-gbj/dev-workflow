@@ -4,6 +4,13 @@ All notable changes to this project should be documented in this file.
 
 <!-- LOCAL-RELEASES-START -->
 
+## v1.39.1 - 2026-07-06
+
+### Fixed
+
+- **The dashboard, TUI, and CLI now surface the full phase list for master-plan + numbered-sub-PRD features.** A plan whose Implementation Order collapses several phases into a range header (e.g. `### Phases 1–8:`) or delegates per-phase steps to numbered sub-PRDs was rendered with an incomplete, oddly-numbered phase list and an undercounted progress bar. Two narrow assumptions caused it: the phase parser matched singular `### Phase N:` headers only (so ranges vanished), and sub-PRD detection required the `NN-sub-prd-*.md` naming (so the common bare `NN-<slug>.md` form was invisible). `dev-workflow-core` now recognizes any numbered `NN-<slug>.md` sibling as a sub-PRD (a shared `isSubPrdFile`), and when the sub-PRDs enumerate more phases than the master plan parsed, they become the authoritative phase list, progress source, and gate/current-phase basis — so the summary card and detail pane agree and progress counts every sub-PRD's steps. The agent CLI (`progress-summary`, `status-update`) shares the same detection. All three bundles are rebuilt; a new `master-range-subprds` fixture plus unit tests cover the ranged shape.
+- **The TUI detail pane keeps a gap between two-digit phase numbers and their titles.** Phase numbers rendered in a fixed two-column box, so numbers ≥ 10 filled it exactly and butted against the title (`10Remaining Safe Configs`). The number box now carries its own right margin, so every row separates cleanly while titles stay column-aligned. Regression test added.
+
 ## v1.39.0 - 2026-07-05
 
 ### Added

@@ -11,6 +11,8 @@ import {
   parseSessionLog,
   parseSessionDigest,
   deriveKeywordTags,
+  isSubPrdFile,
+  subPrdToPhase,
 } from '../src/parser.js';
 import type { Feature } from '../src/types.js';
 
@@ -596,6 +598,47 @@ describe('parseSubPrdsAsPhases', () => {
     const phases = await parseSubPrdsAsPhases(resolve(FIXTURES, 'gate-feature'));
     expect(phases).toHaveLength(0);
   });
+
+  it('recognizes bare NN-<slug>.md sub-PRDs (no sub-prd- infix)', async () => {
+    const phases = await parseSubPrdsAsPhases(resolve(FIXTURES, 'master-range-subprds'));
+
+    // 01-alpha … 04-delta — all four, despite the bare naming.
+    expect(phases.map((p) => p.number)).toEqual([1, 2, 3, 4]);
+    expect(phases[0]).toMatchObject({ number: 1, title: 'Alpha', done: 2, total: 2, status: 'complete' });
+    expect(phases[1]).toMatchObject({ number: 2, title: 'Beta', done: 0, total: 2, status: 'not-started' });
+  });
+});
+
+// ─── Sub-PRD File Detection ────────────────────────────────────────
+
+describe('isSubPrdFile', () => {
+  it('matches both the canonical and bare sub-PRD namings', () => {
+    expect(isSubPrdFile('01-sub-prd-tokens.md')).toBe(true);
+    expect(isSubPrdFile('01-repo-scaffold-bootstrap.md')).toBe(true);
+    expect(isSubPrdFile('16-future-dedup.md')).toBe(true);
+  });
+
+  it('excludes the master plan and non-sub-PRD siblings', () => {
+    expect(isSubPrdFile('00-master-plan.md')).toBe(false);
+    expect(isSubPrdFile('checkpoint.md')).toBe(false);
+    expect(isSubPrdFile('session-log.md')).toBe(false);
+    expect(isSubPrdFile('session-digest.md')).toBe(false);
+    expect(isSubPrdFile('notes.txt')).toBe(false);
+  });
+});
+
+describe('subPrdToPhase', () => {
+  it('projects a parsed sub-PRD onto a Phase, number from the NN- prefix', () => {
+    const phase = subPrdToPhase({
+      id: '07-lazygit',
+      title: 'lazygit',
+      done: 1,
+      total: 2,
+      status: 'in-progress',
+      steps: [],
+    });
+    expect(phase).toEqual({ number: 7, title: 'lazygit', done: 1, total: 2, status: 'in-progress' });
+  });
 });
 
 // ─── Status Determination ──────────────────────────────────────────
@@ -837,6 +880,35 @@ describe('parseFeature', () => {
 
     expect(result.name).toBe('subprd-gate-no-table');
     expect(result.status).toBe('gate');
+  });
+
+  it('treats bare-named sub-PRDs as the phase list when the plan collapses phases into a range', async () => {
+    // The master plan's Implementation Order has `### Phase 0:`, a `### Phases
+    // 1–2:` range header the singular-Phase regex skips, and `### Phase 3:` — so
+    // parseMasterPlan alone sees only 2 phases…
+    const plan = await parseMasterPlan(resolve(FIXTURES, 'master-range-subprds/00-master-plan.md'));
+    expect(plan!.phases).toHaveLength(2);
+
+    // …but the four NN-<slug>.md sub-PRDs enumerate more, so they become the
+    // authoritative phase list, progress source, and gate basis.
+    const result = await parseFeature(resolve(FIXTURES, 'master-range-subprds'), 'master-range-subprds');
+
+    // Aggregate of the sub-PRD step tables: 2 (alpha) + 0 + 0 + 0 of 2+2+1+1.
+    expect(result.progress).toMatchObject({ done: 2, total: 6 });
+    // Alpha complete, the rest not-started, none in-progress → gate.
+    expect(result.status).toBe('gate');
+    // Current phase is the first pending sub-PRD, numbered/sized from the sub-PRDs.
+    expect(result.currentPhase).toMatchObject({ number: 2, total: 4, title: 'Beta' });
+  });
+
+  it('surfaces the full sub-PRD phase list in the detail view for the ranged shape', async () => {
+    const dir = resolve(FIXTURES, 'master-range-subprds');
+    const feature = await parseFeature(dir, 'master-range-subprds');
+    const { buildFeatureDetail } = await import('../src/feature-detail.js');
+    const detail = await buildFeatureDetail(dir, feature, 'proj');
+
+    expect(detail.phases.map((p) => p.title)).toEqual(['Alpha', 'Beta', 'Gamma', 'Delta']);
+    expect(detail.subPrds).toHaveLength(4);
   });
 
   it('combines master-plan + sub-PRD progress when master plan is complete and sub-PRD has pending steps', async () => {

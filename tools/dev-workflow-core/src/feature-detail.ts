@@ -1,7 +1,14 @@
 import { readdir } from 'fs/promises';
 import { resolve } from 'path';
 import type { Feature, FeatureDetail, SubPrd } from './types.js';
-import { parseCheckpoint, parseMasterPlan, parseSessionLog, parseSubPrd } from './parser.js';
+import {
+  isSubPrdFile,
+  parseCheckpoint,
+  parseMasterPlan,
+  parseSessionLog,
+  parseSubPrd,
+  subPrdToPhase,
+} from './parser.js';
 
 /**
  * Assemble the expanded detail view for a single feature: its checkpoint fields,
@@ -28,11 +35,13 @@ export async function buildFeatureDetail(
   // collapse that to null so consumers can render "no history" cleanly.
   const sessionLog = await parseSessionLog(resolve(featureDir, 'session-log.md'));
 
-  // Sub-PRDs: files matching NN-sub-prd-*.md, in filename order.
+  // Sub-PRDs: numbered NN-<slug>.md siblings of the master plan, in filename
+  // order. Matches both the canonical NN-sub-prd-*.md naming and the bare
+  // NN-<slug>.md form (see isSubPrdFile).
   const subPrds: SubPrd[] = [];
   try {
     const entries = await readdir(featureDir);
-    const subPrdFiles = entries.filter((e) => /^\d+-sub-prd-.*\.md$/.test(e)).sort();
+    const subPrdFiles = entries.filter(isSubPrdFile).sort();
     for (const file of subPrdFiles) {
       const result = await parseSubPrd(resolve(featureDir, file));
       if (result) subPrds.push(result);
@@ -40,6 +49,14 @@ export async function buildFeatureDetail(
   } catch {
     // Feature dir not readable — subPrds stays empty
   }
+
+  // Phase list: the master plan's Implementation Order headers, unless the
+  // sub-PRDs enumerate more phases (the master + numbered-sub-PRD shape, where
+  // the plan collapses/omits per-phase headers) — then the sub-PRDs are the
+  // phases. Mirrors parseFeature so the summary card and detail pane agree.
+  const planPhases = masterPlan?.phases ?? [];
+  const subPrdPhases = subPrds.map(subPrdToPhase);
+  const phases = subPrdPhases.length > planPhases.length ? subPrdPhases : planPhases;
 
   return {
     ...feature,
@@ -52,7 +69,7 @@ export async function buildFeatureDetail(
           notes: checkpoint.notes,
         }
       : null,
-    phases: masterPlan?.phases ?? [],
+    phases,
     subPrds,
     sessionLog: sessionLog.length > 0 ? sessionLog : null,
   };

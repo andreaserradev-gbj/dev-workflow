@@ -895,7 +895,21 @@ export async function parseFeature(featureDir: string, name: string): Promise<Fe
   const masterPlan = await parseMasterPlan(resolve(featureDir, '00-master-plan.md'));
   const checkpoint = await parseCheckpoint(resolve(featureDir, 'checkpoint.md'));
 
+  // Phase list resolution. The master plan's `### Phase N:` headers are the
+  // default, but when the sibling sub-PRD files enumerate MORE phases than the
+  // plan parsed, the plan is using the master + numbered-sub-PRD shape — its
+  // Implementation Order collapses ranges (e.g. `### Phases 1–8:`) or omits
+  // per-phase headers, delegating the real steps to the sub-PRDs. In that case
+  // the sub-PRDs are the authoritative phase list, progress source, and
+  // gate/current-phase basis, so summary and detail agree with each other.
+  const planPhases = masterPlan?.phases ?? [];
+  const subPrdPhases = masterPlan ? await parseSubPrdsAsPhases(featureDir) : [];
+  const subPrdsAuthoritative = subPrdPhases.length > planPhases.length;
+  const effectivePhases = subPrdsAuthoritative ? subPrdPhases : planPhases;
+
   // Progress resolution:
+  //   0. Sub-PRDs authoritative → aggregate their step tables (or, when they
+  //      carry status but no tables, keep the master plan's own progress).
   //   1. Master plan with inline steps still pending → master plan progress (sub-PRDs
   //      typically document master-plan work in detail; combining would double-count).
   //   2. Master plan with inline steps all complete + sub-PRD with pending steps →
@@ -904,7 +918,15 @@ export async function parseFeature(featureDir: string, name: string): Promise<Fe
   //   3. Master plan with 0 inline steps → fall back to sub-PRD aggregation, then
   //      to phase-level ✅ markers.
   let progress: Progress | null = masterPlan?.progress ?? null;
-  if (masterPlan && masterPlan.progress.total === 0) {
+  if (masterPlan && subPrdsAuthoritative) {
+    const done = subPrdPhases.reduce((sum, p) => sum + p.done, 0);
+    const total = subPrdPhases.reduce((sum, p) => sum + p.total, 0);
+    if (total > 0) {
+      progress = { done, total, percent: Math.round((done / total) * 100) };
+    }
+    // total === 0 (sub-PRDs carry status but no step tables): leave the master
+    // plan's own progress; phase status still flows through effectivePhases.
+  } else if (masterPlan && masterPlan.progress.total === 0) {
     const subPrdProgress = await aggregateSubPrdProgress(featureDir);
     if (subPrdProgress && subPrdProgress.total > 0) {
       progress = subPrdProgress;
@@ -930,17 +952,12 @@ export async function parseFeature(featureDir: string, name: string): Promise<Fe
 
   const allComplete = progress !== null && progress.total > 0 && progress.done === progress.total;
 
-  // At gate: completed phase(s) followed by not-started phase(s), no in-progress phase
-  // Fall back to sub-PRD statuses when master plan has no Phase headers
-  let gatePhases = masterPlan?.phases ?? [];
-  if (gatePhases.length === 0 && masterPlan) {
-    gatePhases = await parseSubPrdsAsPhases(featureDir);
-  }
+  // At gate: completed phase(s) followed by not-started phase(s), no in-progress phase.
   const atGate =
     !allComplete &&
-    gatePhases.some((p) => p.status === 'complete') &&
-    gatePhases.some((p) => p.status === 'not-started') &&
-    !gatePhases.some((p) => p.status === 'in-progress');
+    effectivePhases.some((p) => p.status === 'complete') &&
+    effectivePhases.some((p) => p.status === 'not-started') &&
+    !effectivePhases.some((p) => p.status === 'in-progress');
 
   const status = determineFeatureStatus({
     hasMasterPlan: masterPlan !== null,
@@ -953,23 +970,23 @@ export async function parseFeature(featureDir: string, name: string): Promise<Fe
     progressDone: progress?.done,
   });
 
-  // Find current phase (first in-progress, or first not-started). When all
-  // master plan phases are complete but a sub-PRD still has pending phases,
-  // surface the first pending sub-PRD phase so AFK and the dashboard can pick
-  // up extension work.
+  // Find current phase (first in-progress, or first not-started) over the
+  // effective phase list. When all master plan phases are complete but a sub-PRD
+  // still has pending phases (extension work landing after the feature shipped,
+  // where the sub-PRDs are NOT the authoritative list), fall back to the first
+  // pending sub-PRD phase so AFK and the dashboard pick it up.
   let currentPhase: Feature['currentPhase'] = null;
   if (masterPlan) {
-    const inProgress = masterPlan.phases.find((p) => p.status === 'in-progress');
-    const notStarted = masterPlan.phases.find((p) => p.status === 'not-started');
+    const inProgress = effectivePhases.find((p) => p.status === 'in-progress');
+    const notStarted = effectivePhases.find((p) => p.status === 'not-started');
     const active = inProgress || notStarted;
     if (active) {
       currentPhase = {
         number: active.number,
-        total: masterPlan.phases.length,
+        total: effectivePhases.length,
         title: active.title,
       };
     } else if (!allComplete) {
-      const subPrdPhases = await parseSubPrdsAsPhases(featureDir);
       const subActive =
         subPrdPhases.find((p) => p.status === 'in-progress') ??
         subPrdPhases.find((p) => p.status === 'not-started');
@@ -999,11 +1016,36 @@ export async function parseFeature(featureDir: string, name: string): Promise<Fe
   };
 }
 
+/** Match a sub-PRD file: a numbered `NN-<slug>.md` sibling of the master plan.
+ *  Recognizes both the canonical `NN-sub-prd-<slug>.md` naming and the bare
+ *  `NN-<slug>.md` form some plans use (e.g. `01-repo-scaffold-bootstrap.md`).
+ *  Excludes `00-master-plan.md` — and any `0`-numbered file — since sub-PRDs are
+ *  numbered from 01, so the plan itself never counts as one. */
+export function isSubPrdFile(name: string): boolean {
+  const match = /^(\d+)-.+\.md$/i.exec(name);
+  return match !== null && parseInt(match[1], 10) > 0;
+}
+
+/** Project a parsed sub-PRD onto a Phase entry (number from its `NN-` filename
+ *  prefix, title + progress + status carried through). Lets the sub-PRD list
+ *  stand in as the phase list for the master + numbered-sub-PRD shape, where the
+ *  master plan's Implementation Order collapses or omits per-phase headers. */
+export function subPrdToPhase(sub: SubPrdResult): Phase {
+  const numMatch = sub.id.match(/^(\d+)/);
+  return {
+    number: numMatch ? parseInt(numMatch[1], 10) : 0,
+    title: sub.title,
+    done: sub.done,
+    total: sub.total,
+    status: sub.status,
+  };
+}
+
 /** Aggregate step counts from sub-PRD files when master plan has no inline steps. */
 async function aggregateSubPrdProgress(featureDir: string): Promise<Progress | null> {
   try {
     const entries = await readdir(featureDir);
-    const subPrdFiles = entries.filter((e) => /^\d+-sub-prd-.*\.md$/.test(e)).sort();
+    const subPrdFiles = entries.filter(isSubPrdFile).sort();
     if (subPrdFiles.length === 0) return null;
 
     let done = 0;
@@ -1027,23 +1069,13 @@ async function aggregateSubPrdProgress(featureDir: string): Promise<Progress | n
 export async function parseSubPrdsAsPhases(featureDir: string): Promise<Phase[]> {
   try {
     const entries = await readdir(featureDir);
-    const subPrdFiles = entries.filter((e) => /^\d+-sub-prd-.*\.md$/.test(e)).sort();
+    const subPrdFiles = entries.filter(isSubPrdFile).sort();
     if (subPrdFiles.length === 0) return [];
 
     const phases: Phase[] = [];
     for (const file of subPrdFiles) {
       const result = await parseSubPrd(resolve(featureDir, file));
-      if (result) {
-        const numMatch = file.match(/^(\d+)/);
-        const number = numMatch ? parseInt(numMatch[1], 10) : phases.length + 1;
-        phases.push({
-          number,
-          title: result.title,
-          done: result.done,
-          total: result.total,
-          status: result.status,
-        });
-      }
+      if (result) phases.push(subPrdToPhase(result));
     }
 
     return phases;

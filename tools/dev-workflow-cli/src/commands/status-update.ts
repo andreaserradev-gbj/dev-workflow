@@ -1,6 +1,6 @@
 import { resolve } from 'path';
 import { readdir, readFile, access } from 'fs/promises';
-import { updateStatus as coreUpdateStatus } from 'dev-workflow-core';
+import { isSubPrdFile, updateStatus as coreUpdateStatus } from 'dev-workflow-core';
 import type { StepTarget, StatusMarker, StatusUpdateResult } from 'dev-workflow-core';
 import { resolveFeatureDir } from '../resolve.js';
 import { parseFlags } from '../index.js';
@@ -100,8 +100,8 @@ export async function statusUpdate(args: string[]): Promise<number> {
 /**
  * Resolve which PRD file contains the target phase.
  *
- * Scans `00-master-plan.md` first (primary), then `NN-sub-prd-*.md` files
- * by filename prefix matching.
+ * Scans `00-master-plan.md` first (primary), then numbered `NN-<slug>.md`
+ * sub-PRD files (canonical `NN-sub-prd-*.md` or bare form) by filename prefix.
  */
 async function resolveTargetPrd(featureDir: string, phaseNum: number): Promise<string | null> {
   const masterPlanPath = resolve(featureDir, '00-master-plan.md');
@@ -127,7 +127,7 @@ async function resolveTargetPrd(featureDir: string, phaseNum: number): Promise<s
   // Fall back to sub-PRDs: filename prefix NN maps to phase NN
   try {
     const entries = await readdir(featureDir);
-    const subPrdFiles = entries.filter((e) => /^\d+-sub-prd-.*\.md$/.test(e)).sort();
+    const subPrdFiles = entries.filter(isSubPrdFile).sort();
     for (const file of subPrdFiles) {
       const numMatch = file.match(/^(\d+)/);
       if (numMatch && parseInt(numMatch[1], 10) === phaseNum) {

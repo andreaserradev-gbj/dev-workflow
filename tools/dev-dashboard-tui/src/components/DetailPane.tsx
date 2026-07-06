@@ -156,7 +156,7 @@ function DetailBody({
           {detail.phases.map((phase) => (
             <Box key={phase.number}>
               <Text>{getPhaseIcon(phase.status)} </Text>
-              <Box width={2} flexShrink={0}>
+              <Box width={2} flexShrink={0} marginRight={1}>
                 <Text dimColor>{phase.number}</Text>
               </Box>
               <Box flexGrow={1} marginRight={1}>
