@@ -248,6 +248,8 @@ startup.
 
 ### `/dev-dashboard-tui` — Terminal dashboard
 
+<img src="docs/dev-tui-demo.gif" alt="dev-dashboard-tui: a terminal-native cross-project .dev/ portfolio with a project rail, feature list, detail pane, and status filters" width="720"/>
+
 The same cross-project `.dev/` portfolio as `/dev-dashboard`, rendered natively in your terminal — for SSH, tmux, and no-browser workflows. Built with [Ink](https://github.com/vadimdemedes/ink); read-only and live-refreshing. Like the web dashboard, it works with any AI coding tool that reads `.dev/` PRDs.
 
 ```
