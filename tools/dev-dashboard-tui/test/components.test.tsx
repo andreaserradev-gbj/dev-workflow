@@ -162,6 +162,26 @@ describe('DetailPane', () => {
     expect(frame).toContain('TUI package');
   });
 
+  it('keeps a gap between two-digit phase numbers and their titles', () => {
+    const frame =
+      render(
+        <DetailPane
+          detail={detail({
+            phases: [
+              { number: 9, title: 'Niner', done: 0, total: 3, status: 'not-started' },
+              { number: 10, title: 'Tenner', done: 0, total: 2, status: 'not-started' },
+            ],
+          })}
+          loading={false}
+          error={null}
+        />,
+      ).lastFrame() ?? '';
+    // Regression: the width-2 number box left 2-digit numbers butting against
+    // the title (e.g. "10Tenner"). The number box now carries its own margin.
+    expect(frame).toContain('10 Tenner');
+    expect(frame).not.toContain('10Tenner');
+  });
+
   it('collapses session history to a count by default', () => {
     const frame =
       render(<DetailPane detail={detail()} loading={false} error={null} />).lastFrame() ?? '';

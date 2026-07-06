@@ -673,6 +673,79 @@ describe('updateStatus marker updates', () => {
   });
 });
 
+describe('updateStatus on sub-PRD files (Implementation Progress table)', () => {
+  let tmpDir: string;
+
+  beforeEach(async () => {
+    tmpDir = resolve(TMP_DIR, `status-subprd-${Date.now()}`);
+    await mkdir(tmpDir, { recursive: true });
+  });
+
+  afterEach(async () => {
+    try {
+      await rm(TMP_DIR, { recursive: true, force: true });
+    } catch {}
+  });
+
+  const SUB_PRD = [
+    '# Sub-PRD: Core',
+    '',
+    '**Status**: In Progress',
+    '',
+    '## Implementation Progress',
+    '',
+    '| Step | Description | Status |',
+    '|------|-------------|--------|',
+    '| **1** | Implement core | ⬜ Not Started |',
+    '| **2** | Add tests | ⬜ Not Started |',
+    '',
+  ].join('\n');
+
+  it('flips a table step marker and rewrites the status cell', async () => {
+    const filePath = join(tmpDir, '02-core.md');
+    await writeFile(filePath, SUB_PRD, 'utf-8');
+
+    const result = await updateStatus(filePath, { phase: 2, step: 1 }, '✅');
+
+    expect(result.changed).toBe(true);
+    const updated = await readFile(filePath, 'utf-8');
+    expect(updated).toContain('| **1** | Implement core | ✅ Done |');
+    expect(updated).toContain('| **2** | Add tests | ⬜ Not Started |'); // untouched
+  });
+
+  it('reports changed=false when the row already has the target marker', async () => {
+    const filePath = join(tmpDir, '02-core.md');
+    await writeFile(filePath, SUB_PRD, 'utf-8');
+
+    const result = await updateStatus(filePath, { phase: 2, step: 1 }, '⬜');
+
+    expect(result.changed).toBe(false);
+    const updated = await readFile(filePath, 'utf-8');
+    // Wording is preserved (only the glyph would flip, and it already matches).
+    expect(updated).toContain('| **1** | Implement core | ⬜ Not Started |');
+  });
+
+  it('sets the **Status** field for a phase-level marker', async () => {
+    const filePath = join(tmpDir, '02-core.md');
+    await writeFile(filePath, SUB_PRD, 'utf-8');
+
+    const result = await updateStatus(filePath, { phase: 2 }, '✅');
+
+    expect(result.changed).toBe(true);
+    const updated = await readFile(filePath, 'utf-8');
+    expect(updated).toContain('**Status**: Complete');
+  });
+
+  it('throws for a step the table does not contain', async () => {
+    const filePath = join(tmpDir, '02-core.md');
+    await writeFile(filePath, SUB_PRD, 'utf-8');
+
+    await expect(updateStatus(filePath, { phase: 2, step: 9 }, '✅')).rejects.toThrow(
+      'Phase 2 not found',
+    );
+  });
+});
+
 // ─── Regression Tests from Real-World Checkpoints ──────────────────
 //
 // These tests cover edge cases found in real-world checkpoint data.

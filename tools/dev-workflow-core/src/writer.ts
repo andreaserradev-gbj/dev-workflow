@@ -168,13 +168,20 @@ export async function updateStatus(
   }
 
   const phase = phases.find((p) => p.number === target.phase);
-  if (!phase) {
-    throw new Error(`Phase ${target.phase} not found in ${filePath}`);
-  }
 
   let targetLineIdx = -1;
 
-  if (target.step === undefined) {
+  if (!phase) {
+    // No `### Phase N` heading matched. Sub-PRD files carry their steps in a
+    // `## Implementation Progress` table (the file itself is the phase), so fall
+    // back to updating that table by step — or the `**Status**` field for a
+    // phase-level marker. Guarded inside updateSubPrdFallback so a master plan
+    // (no such table) reports the phase as missing rather than mutating status.
+    targetLineIdx = updateSubPrdFallback(lines, target, marker);
+    if (targetLineIdx === -1) {
+      throw new Error(`Phase ${target.phase} not found in ${filePath}`);
+    }
+  } else if (target.step === undefined) {
     // Phase-level marker: flip marker in the phase heading line
     targetLineIdx = phase.startLine;
     const line = lines[targetLineIdx];
@@ -303,4 +310,79 @@ export async function updateStatus(
     line: targetLineIdx + 1, // 1-indexed
     file: filePath,
   };
+}
+
+/**
+ * Update a sub-PRD file (one whose steps live in a `## Implementation Progress`
+ * table rather than under a `### Phase N` heading). Returns the mutated line
+ * index, or -1 when the file is not a sub-PRD or the target can't be located.
+ *
+ * The `## Implementation Progress` guard is what keeps a master plan — which has
+ * no such table — from having its overall `**Status**` field rewritten when a
+ * phase-level marker targets a phase it doesn't contain.
+ */
+function updateSubPrdFallback(
+  lines: string[],
+  target: StepTarget,
+  marker: StatusMarker,
+): number {
+  if (!lines.some((l) => /^##\s+Implementation Progress/i.test(l))) return -1;
+  return target.step === undefined
+    ? updateSubPrdStatusField(lines, marker)
+    : updateSubPrdTableStep(lines, target.step, marker);
+}
+
+/**
+ * Flip the status marker of an Implementation Progress table row whose first cell
+ * is the given step number, e.g. `| **2** | Add deps | ⬜ Not Started |`. The
+ * whole status cell is rewritten to a canonical `✅ Done` / `⬜ Not Started`, but
+ * only when the current glyph actually differs (so a row already at the target
+ * marker keeps its wording and reports no change). Returns the row index or -1.
+ */
+function updateSubPrdTableStep(lines: string[], step: number, marker: StatusMarker): number {
+  const label = marker === '✅' ? 'Done' : 'Not Started';
+  let inTable = false;
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i];
+    if (/^##\s+Implementation Progress/i.test(line)) {
+      inTable = true;
+      continue;
+    }
+    if (!inTable) continue;
+    const trimmed = line.trim();
+    if (trimmed.startsWith('#') || trimmed === '---') {
+      inTable = false;
+      continue;
+    }
+    if (!trimmed.startsWith('|')) continue;
+
+    const cells = line.split('|'); // ['', ' id ', ' desc ', ' status ', '']
+    if (cells.length < 5) continue;
+    if (cells[1].replace(/\*/g, '').trim() !== String(step)) continue;
+
+    const currentGlyph = cells[3].match(/(✅|⬜|⏭️|⛔|⏹️)/)?.[1];
+    if (!currentGlyph) continue; // header/separator row, not a step
+    if (currentGlyph === marker) return i; // already the target — keep wording
+    cells[3] = ` ${marker} ${label} `;
+    lines[i] = cells.join('|');
+    return i;
+  }
+  return -1;
+}
+
+/**
+ * Set a sub-PRD's `**Status**:` field to match a phase-level marker
+ * (✅ → `Complete`, ⬜ → `Not Started`), the prose form `parseSubPrd` reads back.
+ * Returns the line index or -1 when there is no Status field.
+ */
+function updateSubPrdStatusField(lines: string[], marker: StatusMarker): number {
+  const value = marker === '✅' ? 'Complete' : 'Not Started';
+  for (let i = 0; i < lines.length; i++) {
+    const m = lines[i].match(/^(\*\*Status\*\*:\s*).+$/i);
+    if (m) {
+      lines[i] = `${m[1]}${value}`;
+      return i;
+    }
+  }
+  return -1;
 }

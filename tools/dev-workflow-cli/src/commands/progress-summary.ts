@@ -1,5 +1,5 @@
 import { resolve } from 'path';
-import { parseMasterPlan, parseSubPrd } from 'dev-workflow-core';
+import { isSubPrdFile, parseMasterPlan, parseSubPrd, subPrdToPhase } from 'dev-workflow-core';
 import { resolveFeatureDir } from '../resolve.js';
 import { parseFlags } from '../index.js';
 import { readdir } from 'fs/promises';
@@ -36,9 +36,10 @@ export async function progressSummary(args: string[]): Promise<number> {
   } catch {
     entries = [];
   }
-  const subPrdFiles = entries.filter((e) => /^\d+-sub-prd-.*\.md$/.test(e)).sort();
+  const subPrdFiles = entries.filter(isSubPrdFile).sort();
 
   const subPrds: ProgressOutput['subPrds'] = [];
+  const subPrdPhases: ProgressOutput['phases'] = [];
   for (const file of subPrdFiles) {
     const result = await parseSubPrd(resolve(featureDir, file));
     if (result) {
@@ -49,26 +50,38 @@ export async function progressSummary(args: string[]): Promise<number> {
         total: result.total,
         status: result.status,
       });
+      subPrdPhases.push(subPrdToPhase(result));
     }
   }
 
-  // If master plan has no inline steps, aggregate from sub-PRDs, then phase counts
+  // Phase list: master plan headers, unless the sub-PRDs enumerate more phases
+  // (master + numbered-sub-PRD shape) — then they are the authoritative list,
+  // progress source, and phase output. Mirrors core's parseFeature.
+  const subPrdsAuthoritative = subPrdPhases.length > masterPlan.phases.length;
+  const effectivePhases = subPrdsAuthoritative ? subPrdPhases : masterPlan.phases;
+
   let overall = masterPlan.progress;
-  if (overall.total === 0 && subPrds.length > 0) {
+  if (subPrdsAuthoritative) {
+    const done = subPrdPhases.reduce((sum, p) => sum + p.done, 0);
+    const total = subPrdPhases.reduce((sum, p) => sum + p.total, 0);
+    if (total > 0) overall = { done, total, percent: Math.round((done / total) * 100) };
+  } else if (overall.total === 0 && subPrds.length > 0) {
+    // Master plan has no inline steps → aggregate from sub-PRDs.
     const done = subPrds.reduce((sum, s) => sum + s.done, 0);
     const total = subPrds.reduce((sum, s) => sum + s.total, 0);
-    overall = { done, total, percent: total > 0 ? Math.round((done / total) * 100) : 0 };
+    if (total > 0) overall = { done, total, percent: Math.round((done / total) * 100) };
   }
-  if (overall.total === 0 && masterPlan.phases.length > 0) {
-    const done = masterPlan.phases.filter((p) => p.status === 'complete').length;
-    const total = masterPlan.phases.length;
+  if (overall.total === 0 && effectivePhases.length > 0) {
+    // Still nothing countable → fall back to phase-completion counts.
+    const done = effectivePhases.filter((p) => p.status === 'complete').length;
+    const total = effectivePhases.length;
     overall = { done, total, percent: Math.round((done / total) * 100) };
   }
 
   const output: ProgressOutput = {
     feature: featureName,
     overall,
-    phases: masterPlan.phases.map((p) => ({
+    phases: effectivePhases.map((p) => ({
       number: p.number,
       title: p.title,
       done: p.done,
