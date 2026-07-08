@@ -7,9 +7,9 @@
 // Node-only (fs/os/path), but deliberately chokidar-free so it can live on the
 // main barrel: the CLI consumes it and must never resolve the `./live` runtime.
 
-import { readFile } from 'fs/promises';
+import { readFile, writeFile, mkdir } from 'fs/promises';
 import { homedir } from 'os';
-import { join, resolve } from 'path';
+import { join, resolve, dirname } from 'path';
 
 /** Expand a leading `~` / `~/` and resolve to an absolute path. */
 export function expandHome(dir: string): string {
@@ -68,6 +68,54 @@ async function readDashboardScanDirs(): Promise<string[]> {
     out.push(expanded);
   }
   return out;
+}
+
+/**
+ * Register a project root into the dashboard config's `scanDirs` so a later scan
+ * resolves the full configured set regardless of where the command was invoked.
+ *
+ * Mirrors `readDashboardScanDirs` on the read side and `config.ts` on the write
+ * side: a missing config is treated as empty (created below); a hand-edited but
+ * invalid-JSON config is left untouched (warn + return, never clobbered); every
+ * other key is preserved; and it is idempotent via `expandHome` so `~/x` and its
+ * absolute form count as the same root. Deliberately chokidar-free — the CLI
+ * calls this and must never resolve `config.ts` / `dev-workflow-core/live`.
+ */
+export async function ensureScanDir(root: string): Promise<void> {
+  const expanded = expandHome(root);
+  const configPath = getDashboardConfigPath();
+
+  let parsed: Record<string, unknown> = {};
+  try {
+    const raw = await readFile(configPath, 'utf-8');
+    try {
+      const json = JSON.parse(raw);
+      if (json && typeof json === 'object') parsed = json as Record<string, unknown>;
+    } catch {
+      console.warn(
+        `Warning: dashboard config at ${configPath} is invalid JSON; not registering scan dir.`,
+      );
+      return;
+    }
+  } catch {
+    // No config yet — start from an empty object and create the file below.
+  }
+
+  const existing = Array.isArray(parsed.scanDirs)
+    ? (parsed.scanDirs as unknown[]).filter((d): d is string => typeof d === 'string')
+    : [];
+
+  // Idempotent: skip when this root is already registered (~ vs absolute equal).
+  if (existing.some((d) => expandHome(d.trim()) === expanded)) return;
+
+  const updated = {
+    ...parsed,
+    scanDirs: [...existing, expanded],
+    scanDirsConfigured: true,
+  };
+
+  await mkdir(dirname(configPath), { recursive: true });
+  await writeFile(configPath, JSON.stringify(updated, null, 2) + '\n', 'utf-8');
 }
 
 /** `wikiDir` from the dashboard's config.json, expanded; `null` if absent/invalid. */

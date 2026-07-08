@@ -293,13 +293,47 @@ describe('generateWiki', () => {
     expect(existsSync(join(outDir, 'projects', 'stale-project-a'))).toBe(true);
     expect(existsSync(join(outDir, 'projects', 'stale-project-b'))).toBe(true);
 
-    // Second run: only project A
+    // Project B's directory is genuinely deleted, then a run without it. The
+    // non-destructive union only prunes a symlink once its target is gone.
+    await rm(projectB, { recursive: true, force: true });
     await generateWiki([makeProject('stale-project-a', [], projectA)], outDir);
     expect(existsSync(join(outDir, 'projects', 'stale-project-a'))).toBe(true);
 
-    // stale-project-b symlink should be removed
+    // stale-project-b symlink should be removed (its target no longer exists)
     const entries = await readdir(join(outDir, 'projects'));
     expect(entries).not.toContain('stale-project-b');
+  });
+
+  it('narrow scan preserves other projects (union)', async () => {
+    const projectA = join(tempDir, 'union-project-a');
+    const projectB = join(tempDir, 'union-project-b');
+    await mkdir(join(projectA, '.dev', 'feat-a'), { recursive: true });
+    await mkdir(join(projectB, '.dev', 'feat-b'), { recursive: true });
+
+    const outDir = join(tempDir, 'wiki-union');
+
+    // First run: both projects present.
+    await generateWiki(
+      [makeProject('union-project-a', [], projectA), makeProject('union-project-b', [], projectB)],
+      outDir,
+    );
+    expect(existsSync(join(outDir, 'projects', 'union-project-a'))).toBe(true);
+    expect(existsSync(join(outDir, 'projects', 'union-project-b'))).toBe(true);
+
+    // Second run scans only project A — but B still exists on disk, so the
+    // union must re-scan it from its surviving symlink and keep it.
+    await generateWiki([makeProject('union-project-a', [], projectA)], outDir);
+
+    // B's symlink must survive — its directory was never deleted.
+    expect(existsSync(join(outDir, 'projects', 'union-project-b'))).toBe(true);
+    const entries = await readdir(join(outDir, 'projects'));
+    expect(entries).toContain('union-project-b');
+
+    // ...and B must still be present in the regenerated pages.
+    const index = await readFile(join(outDir, 'index.md'), 'utf-8');
+    const log = await readFile(join(outDir, 'log.md'), 'utf-8');
+    expect(index).toContain('union-project-b');
+    expect(log).toContain('union-project-b');
   });
 
   it('is idempotent — same input produces same output', async () => {

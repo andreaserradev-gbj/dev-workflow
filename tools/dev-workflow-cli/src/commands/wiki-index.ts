@@ -6,6 +6,7 @@ import {
   expandHome,
   readDashboardWikiDir,
   resolveScanDirs,
+  ensureScanDir,
   type Project,
 } from 'dev-workflow-core';
 import { parseFlags } from '../index.js';
@@ -16,9 +17,20 @@ export async function wikiIndex(args: string[]): Promise<number> {
   const json = flags.json === true;
   const generate = flags.generate === true;
   const scanOverride = typeof flags.scan === 'string' ? flags.scan : null;
+  const ensureRoot = typeof flags.ensure === 'string' ? flags.ensure : null;
   const outOverride = typeof flags.out === 'string' ? flags.out : null;
 
-  const scanDirs = await resolveScanDirs(scanOverride);
+  // `--ensure <root>` registers the repo into the dashboard config, then scans
+  // the FULL configured set — so the invocation location no longer narrows the
+  // scan. It wins over `--scan`, which stays the explicit "scan only this"
+  // escape hatch for deliberate scoped overrides.
+  let scanDirs: string[];
+  if (ensureRoot) {
+    await ensureScanDir(ensureRoot);
+    scanDirs = await resolveScanDirs(null);
+  } else {
+    scanDirs = await resolveScanDirs(scanOverride);
+  }
   const wikiDir = await resolveWikiDir(outOverride);
   const projects = await scanProjects(scanDirs);
 
