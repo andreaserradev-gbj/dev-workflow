@@ -3,7 +3,7 @@
 # dev-workflow
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
-[![Version](https://img.shields.io/badge/version-1.39.1-green.svg)](.claude-plugin/marketplace.json)
+[![Version](https://img.shields.io/badge/version-1.39.2-green.svg)](.claude-plugin/marketplace.json)
 [![AgentSkills.io](https://img.shields.io/badge/standard-AgentSkills.io-purple.svg)](https://agentskills.io)
 
 **AI coding agents start every session from zero. Your architecture shouldn't.**
@@ -278,6 +278,8 @@ Mechanically, it generates a set of markdown files at `~/.dev-wiki/` (configurab
 /dev-wiki
 ```
 
+**Config-first scope.** Running `/dev-wiki` registers the current repo into the shared dashboard config (`~/.config/dev-dashboard/config.json`) and then regenerates from the **full** configured set — so it doesn't matter which repo you run it from; the wiki always spans every project you've registered, not just the one you're standing in. **Non-destructive by design:** a scoped run never erases other projects — an entry disappears only when its `.dev/` directory is actually gone from disk, so a wrong or narrow invocation costs you a stale row at worst, never the whole cross-project index.
+
 **What it produces:**
 
 | File | Contents |
@@ -296,10 +298,13 @@ Mechanically, it generates a set of markdown files at `~/.dev-wiki/` (configurab
 The CLI equivalent is also available:
 
 ```bash
-dev-workflow wiki-index              # scan and show summary
-dev-workflow wiki-index --generate   # generate wiki files
-dev-workflow wiki-index --json       # JSON output for scripts
+dev-workflow wiki-index                        # scan and show summary
+dev-workflow wiki-index --generate             # generate wiki files
+dev-workflow wiki-index --json                 # JSON output for scripts
+dev-workflow wiki-index --generate --ensure .  # register this repo, then scan the full configured set
 ```
+
+`--ensure <root>` registers `<root>` into the config and scans the full set (what `/dev-wiki` uses); `--scan <dir>` is the power-user escape hatch that scans only `<dir>`.
 
 ---
 
