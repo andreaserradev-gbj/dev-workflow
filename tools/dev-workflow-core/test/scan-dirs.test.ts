@@ -1,11 +1,12 @@
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
-import { mkdtempSync, mkdirSync, writeFileSync, rmSync } from 'fs';
+import { mkdtempSync, mkdirSync, writeFileSync, readFileSync, rmSync } from 'fs';
 import { homedir, tmpdir } from 'os';
 import { join, resolve } from 'path';
 import {
   expandHome,
   resolveScanDirs,
   readDashboardWikiDir,
+  ensureScanDir,
   matchesProject,
 } from '../src/scan-dirs.js';
 
@@ -143,6 +144,56 @@ describe('scan-dirs', () => {
     it('returns null when wikiDir is absent or not a string', async () => {
       writeDashboardConfig(xdgDir, JSON.stringify({ scanDirs: ['/x'], wikiDir: 123 }));
       await expect(readDashboardWikiDir()).resolves.toBeNull();
+    });
+  });
+
+  describe('ensureScanDir', () => {
+    const configPathOf = (xdg: string) => join(xdg, 'dev-dashboard', 'config.json');
+
+    it('creates the config when none exists yet', async () => {
+      const root = mkdtempSync(join(tmpdir(), 'ensure-new-'));
+      try {
+        await ensureScanDir(root);
+        const parsed = JSON.parse(readFileSync(configPathOf(xdgDir), 'utf-8'));
+        expect(parsed.scanDirs).toEqual([resolve(root)]);
+        expect(parsed.scanDirsConfigured).toBe(true);
+      } finally {
+        rmSync(root, { recursive: true, force: true });
+      }
+    });
+
+    it('appends while preserving other keys (wikiDir, port)', async () => {
+      writeDashboardConfig(
+        xdgDir,
+        JSON.stringify({ scanDirs: ['/existing/root'], wikiDir: '~/my-wiki', port: 4317 }),
+      );
+      await ensureScanDir('/new/root');
+      const parsed = JSON.parse(readFileSync(configPathOf(xdgDir), 'utf-8'));
+      expect(parsed.scanDirs).toEqual(['/existing/root', resolve('/new/root')]);
+      expect(parsed.wikiDir).toBe('~/my-wiki');
+      expect(parsed.port).toBe(4317);
+      expect(parsed.scanDirsConfigured).toBe(true);
+    });
+
+    it('is idempotent, treating ~ and absolute paths as the same root', async () => {
+      writeDashboardConfig(xdgDir, JSON.stringify({ scanDirs: ['~/repos/app'] }));
+      await ensureScanDir(join(homedir(), 'repos', 'app'));
+      const parsed = JSON.parse(readFileSync(configPathOf(xdgDir), 'utf-8'));
+      // The existing ~ entry is preserved verbatim; no duplicate appended.
+      expect(parsed.scanDirs).toEqual(['~/repos/app']);
+    });
+
+    it('leaves an invalid-JSON config untouched and warns', async () => {
+      writeDashboardConfig(xdgDir, '{not valid json');
+      await ensureScanDir('/some/root');
+      expect(readFileSync(configPathOf(xdgDir), 'utf-8')).toBe('{not valid json');
+      expect(warn.warnLines.join('\n')).toContain('invalid JSON');
+    });
+
+    it('stores the expanded absolute path for a ~ root', async () => {
+      await ensureScanDir('~/work/project');
+      const parsed = JSON.parse(readFileSync(configPathOf(xdgDir), 'utf-8'));
+      expect(parsed.scanDirs).toEqual([resolve(homedir(), 'work/project')]);
     });
   });
 

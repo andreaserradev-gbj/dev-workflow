@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeAll, afterAll, beforeEach, afterEach } from 'vitest';
 import { mkdtempSync, mkdirSync, writeFileSync, rmSync, existsSync, lstatSync, readdirSync, readFileSync } from 'fs';
 import { tmpdir } from 'os';
-import { join } from 'path';
+import { join, resolve } from 'path';
 import { wikiIndex } from '../src/commands/wiki-index.js';
 
 function captureOutput() {
@@ -145,5 +145,104 @@ describe('wiki-index', () => {
     expect(text).toContain('project-b');
     expect(text).toContain('Dev Wiki Index');
     expect(text).toContain('--generate');
+  });
+
+  // These cases touch the dashboard config (ensureScanDir writes it,
+  // resolveScanDirs reads it), so each runs against a throwaway XDG_CONFIG_HOME
+  // and never reads or writes the real ~/.config/dev-dashboard/config.json.
+  describe('non-destructive writer + --ensure scope', () => {
+    let origXdg: string | undefined;
+    let xdgDir: string;
+
+    beforeEach(() => {
+      origXdg = process.env.XDG_CONFIG_HOME;
+      xdgDir = mkdtempSync(join(tmpdir(), 'wiki-index-xdg-'));
+      process.env.XDG_CONFIG_HOME = xdgDir;
+    });
+    afterEach(() => {
+      if (origXdg === undefined) delete process.env.XDG_CONFIG_HOME;
+      else process.env.XDG_CONFIG_HOME = origXdg;
+      rmSync(xdgDir, { recursive: true, force: true });
+    });
+
+    function writeDashboardConfig(content: string): void {
+      const cfgDir = join(xdgDir, 'dev-dashboard');
+      mkdirSync(cfgDir, { recursive: true });
+      writeFileSync(join(cfgDir, 'config.json'), content);
+    }
+    function readConfig(): { scanDirs?: string[]; scanDirsConfigured?: boolean } {
+      return JSON.parse(readFileSync(join(xdgDir, 'dev-dashboard', 'config.json'), 'utf-8'));
+    }
+
+    it('a narrow --scan run preserves other projects (writer safety)', async () => {
+      const outDir = join(tempOut, 'writer-safety');
+
+      // Seed the wiki from the full scan — both projects present.
+      await wikiIndex(['--generate', '--scan', tempScan, '--out', outDir]);
+      expect(readdirSync(join(outDir, 'projects'))).toContain('project-b');
+
+      // A narrow re-run scoped to project-a must NOT erase project-b, whose
+      // directory still exists on disk.
+      const code = await wikiIndex([
+        '--generate', '--scan', join(tempScan, 'project-a'), '--out', outDir,
+      ]);
+      expect(code).toBe(0);
+
+      expect(readdirSync(join(outDir, 'projects'))).toContain('project-b');
+      expect(readFileSync(join(outDir, 'index.md'), 'utf-8')).toContain('project-b');
+      expect(readFileSync(join(outDir, 'log.md'), 'utf-8')).toContain('project-b');
+    });
+
+    it('--ensure scans the full configured set and registers the repo', async () => {
+      writeDashboardConfig(JSON.stringify({ scanDirs: [tempScan] }));
+      const outDir = join(tempOut, 'ensure-scope');
+
+      const code = await wikiIndex([
+        '--generate', '--ensure', join(tempScan, 'project-a'), '--out', outDir,
+      ]);
+      expect(code).toBe(0);
+
+      // Full config set was scanned even though --ensure named only project-a.
+      const index = readFileSync(join(outDir, 'index.md'), 'utf-8');
+      expect(index).toContain('project-a');
+      expect(index).toContain('project-b');
+
+      // ...and the named repo is now registered in the config.
+      const cfg = readConfig();
+      expect(cfg.scanDirs).toContain(resolve(join(tempScan, 'project-a')));
+      expect(cfg.scanDirsConfigured).toBe(true);
+    });
+
+    it('--ensure bootstraps an empty config and scans the registered repo', async () => {
+      const outDir = join(tempOut, 'ensure-bootstrap');
+
+      const code = await wikiIndex([
+        '--generate', '--ensure', join(tempScan, 'project-a'), '--out', outDir,
+      ]);
+      expect(code).toBe(0);
+
+      expect(readFileSync(join(outDir, 'index.md'), 'utf-8')).toContain('project-a');
+      expect(readConfig().scanDirs).toEqual([resolve(join(tempScan, 'project-a'))]);
+    });
+
+    it('--ensure wins over --scan when both are given', async () => {
+      writeDashboardConfig(JSON.stringify({ scanDirs: [tempScan] }));
+      const emptyDir = mkdtempSync(join(tmpdir(), 'wiki-ensure-empty-'));
+      const outDir = join(tempOut, 'ensure-wins');
+      try {
+        const code = await wikiIndex([
+          '--generate', '--ensure', join(tempScan, 'project-a'),
+          '--scan', emptyDir, '--out', outDir,
+        ]);
+        expect(code).toBe(0);
+
+        // The full config set was scanned, not the empty --scan directory.
+        const index = readFileSync(join(outDir, 'index.md'), 'utf-8');
+        expect(index).toContain('project-a');
+        expect(index).toContain('project-b');
+      } finally {
+        rmSync(emptyDir, { recursive: true, force: true });
+      }
+    });
   });
 });

@@ -4,6 +4,12 @@ All notable changes to this project should be documented in this file.
 
 <!-- LOCAL-RELEASES-START -->
 
+## v1.39.2 - 2026-07-08
+
+### Fixed
+
+- **Running `/dev-wiki` from inside a single repo no longer wipes the cross-project wiki.** The skill scanned only the current git root (`wiki-index --generate --scan "$PROJECT_ROOT"`), and `generateWiki()` treated whatever project set it received as the complete truth — deleting every `projects/` symlink not in that set and overwriting `index.md`/`log.md` — so a wiki spanning many projects collapsed to just the one repo you happened to run from, recoverable only by re-running from the configured root or having the dashboard server running. The fix is defense in depth. The writer is now **non-destructive**: it unions the projects it scans with the ones already represented under `~/.dev-wiki/projects/` (re-scanned from their surviving symlinks) and prunes an entry only when its `.dev/` / `.dev-archive/` directory is genuinely gone from disk, so a narrow run can never erase another project. And scope is now **config-first**: a new `--ensure <root>` flag — which `/dev-wiki` now uses — registers the current repo into the shared dashboard config (`~/.config/dev-dashboard/config.json`) and then scans the full configured `scanDirs` set regardless of where the command runs; `--scan` stays as the power-user "scan only this" escape hatch and `--ensure` wins when both are given. Either mechanism alone closes the hole; together they make the loss impossible even when the config is absent or wrong. The new `ensureScanDir` writer is chokidar-free (it never pulls the dashboard's config runtime into the CLI), idempotent, and leaves a hand-edited invalid-JSON config untouched. Covered by new core + CLI tests — union preservation, the writer-safety repro, and `--ensure` scope/bootstrap/precedence; all three bundles rebuilt.
+
 ## v1.39.1 - 2026-07-06
 
 ### Fixed
