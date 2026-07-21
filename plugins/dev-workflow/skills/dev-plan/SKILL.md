@@ -148,6 +148,7 @@ Use `subagent_type=dev-workflow:prd-planner`.
 3. **Create files** under `$PROJECT_ROOT/.dev/$FEATURE_NAME/`:
    - Always create `00-master-plan.md` — use the Master Plan template in [prd-templates.md](references/prd-templates.md)
    - For complex features, create `01-sub-prd-[name].md` etc. — use the Sub-PRD template in [prd-templates.md](references/prd-templates.md)
+     - **Track each phase's steps in ONE place, never both.** Either the master plan's Implementation Order carries the numbered ⬜ steps (and the sub-PRD is a step-less narrative), OR the master plan collapses phases into step-less range headers and the sub-PRD `## Implementation Progress` table carries the steps. Listing the same steps in both makes the sub-PRD counters a dead duplicate — `status-update` only writes one file, so the other freezes and the dashboard shows a misleading `0/N`.
    - Incorporate research findings (Phase 2) and implementation plan (agent output) into the PRD
 4. **Verify PRD structure** — Run the CLI to confirm the PRD is parseable:
 

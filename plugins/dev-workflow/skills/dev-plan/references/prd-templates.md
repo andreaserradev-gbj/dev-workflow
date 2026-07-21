@@ -108,6 +108,15 @@ _(Repeat for additional phases. Each needs: Goal, numbered ⬜ steps, Verificati
 
 ## Template: Sub-PRD (`01-sub-prd-[name].md`)
 
+> **Single source of step tracking.** A phase's numbered steps live in exactly
+> one file. If the master plan's Implementation Order enumerates a phase's steps,
+> the matching sub-PRD is narrative only — drop its `## Implementation Progress`
+> table (or leave it status-free prose). Use the sub-PRD table as the tracked
+> checklist ONLY when the master plan collapses those phases into step-less range
+> headers (e.g. `### Phases 1–2: …`). Duplicating steps in both places leaves the
+> sub-PRD counters stale — `status-update` writes one file, and the dashboard
+> then shows a misleading `0/N` for the sub-PRD.
+
 ```markdown
 # Sub-PRD: [Title]
 

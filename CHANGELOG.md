@@ -4,6 +4,13 @@ All notable changes to this project should be documented in this file.
 
 <!-- LOCAL-RELEASES-START -->
 
+## v1.39.3 - 2026-07-21
+
+### Fixed
+
+- **The dashboard and TUI no longer show a misleading `0/N` for sub-PRDs in the "redundant-hybrid" master-plan shape.** When a feature's `00-master-plan.md` fully enumerates its phases *with* inline steps AND its numbered sub-PRDs *also* keep their own `## Implementation Progress` tables, the same work is tracked in two places. `status-update` only writes the master plan (it owns the phases), so the sub-PRD tables never advance — yet the detail pane still rendered their frozen counters, e.g. a Foundation sub-PRD covering completed Phases 0–1 showing `0/10`. `buildFeatureDetail` now detects this shape — the master plan owns the phases (sub-PRDs don't outnumber them) and carries its own inline-step progress — and marks those sub-PRD counts non-authoritative (`countsAuthoritative: false`), so the web dashboard and TUI hide the dead `done/total` and fall back to the sub-PRD's own `**Status**` header. The ranged shape (sub-PRDs authoritative) and the stub-master shape (step-less master) are untouched — their sub-PRD tables remain the live source. New `master-hybrid-redundant` fixture plus `buildFeatureDetail` tests; all three bundles rebuilt.
+- **`/dev-plan` now steers authors away from creating the redundant-hybrid shape in the first place.** The skill and the PRD templates gained a "single source of step tracking" rule: a phase's numbered steps live in exactly one file — either the master plan's Implementation Order (sub-PRD is narrative only) or, when the master collapses phases into step-less range headers, the sub-PRD's Implementation Progress table — never both.
+
 ## v1.39.2 - 2026-07-08
 
 ### Fixed

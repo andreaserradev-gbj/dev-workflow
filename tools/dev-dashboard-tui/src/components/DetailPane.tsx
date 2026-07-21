@@ -180,7 +180,7 @@ function DetailBody({
               <Box flexGrow={1} marginRight={1}>
                 <Text wrap="truncate-end">{sub.title}</Text>
               </Box>
-              {sub.total > 0 ? (
+              {sub.total > 0 && sub.countsAuthoritative !== false ? (
                 <Text dimColor>
                   {sub.done}/{sub.total}
                 </Text>

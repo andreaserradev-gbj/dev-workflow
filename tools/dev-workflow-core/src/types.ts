@@ -41,6 +41,17 @@ export interface SubPrd {
   total: number;
   status: 'complete' | 'in-progress' | 'not-started';
   steps: SubPrdStep[];
+  /**
+   * Whether this sub-PRD's `done`/`total` step counts are a live progress
+   * source. Absent (or `true`) for the normal case. Set to `false` for the
+   * redundant-hybrid shape — a feature whose master plan owns the phases and
+   * carries its own inline-step progress while the sub-PRDs *also* keep their
+   * own Implementation Progress tables. No writer advances those tables
+   * (status-update targets the master plan), so their counters are dead;
+   * renderers hide the count and fall back to `status` (from the sub-PRD's
+   * `**Status**` header). See buildFeatureDetail.
+   */
+  countsAuthoritative?: boolean;
 }
 
 // Feature summary (used in portfolio list view)
