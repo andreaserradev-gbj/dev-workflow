@@ -443,7 +443,7 @@ export function FeaturePanel({ project, projectPath, featureName, feature }: Pro
                 return (
                   <div key={sub.id} class="flex items-center gap-2 text-xs">
                     <span class="text-slate-300 flex-1 truncate">{sub.title}</span>
-                    {sub.total > 0 && (
+                    {sub.total > 0 && sub.countsAuthoritative !== false && (
                       <span class="text-slate-500 font-mono flex-shrink-0">
                         {sub.done}/{sub.total}
                       </span>

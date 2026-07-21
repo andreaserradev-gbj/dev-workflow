@@ -751,6 +751,14 @@ export interface SubPrdResult {
   total: number;
   status: 'complete' | 'in-progress' | 'not-started';
   steps: SubPrdStep[];
+  /**
+   * Status parsed from the sub-PRD's `**Status**` header field, independent of
+   * the step table (null when absent/unrecognized). `status` above is
+   * table-derived when the sub-PRD has a step table; consumers that need the
+   * human-maintained header value (e.g. when the table counts are a dead
+   * duplicate of master-plan progress) read this instead.
+   */
+  headerStatus: 'complete' | 'in-progress' | 'not-started' | null;
 }
 
 export async function parseSubPrd(filePath: string): Promise<SubPrdResult | null> {
@@ -795,16 +803,17 @@ export async function parseSubPrd(filePath: string): Promise<SubPrdResult | null
 
   const done = steps.filter((s) => s.status === 'done').length;
   const total = steps.length;
+  const headerStatus = extractSubPrdHeaderStatus(content);
   const status: SubPrdResult['status'] =
     total === 0
-      ? (extractSubPrdHeaderStatus(content) ?? 'not-started')
+      ? (headerStatus ?? 'not-started')
       : done === total
         ? 'complete'
         : done > 0
           ? 'in-progress'
           : 'not-started';
 
-  return { id, title, done, total, status, steps };
+  return { id, title, done, total, status, steps, headerStatus };
 }
 
 /** Extract status from the **Status** frontmatter field in a sub-PRD (e.g., "**Status**: Complete"). */
