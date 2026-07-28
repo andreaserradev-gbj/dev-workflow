@@ -4,6 +4,12 @@ All notable changes to this project should be documented in this file.
 
 <!-- LOCAL-RELEASES-START -->
 
+## v1.39.4 - 2026-07-28
+
+### Changed
+
+- **The `prd-researcher` model pin moved from `/dev-plan`'s skill body into the agent's own frontmatter.** The Phase 2 research fan-out spawns 2–3 agents to grep the codebase for patterns and `file:line` references — work that wants a cheap model, not the session's. That choice was written as prose at the call site (`Use subagent_type=… and model=sonnet`), which bound it to that one line: anything else spawning `prd-researcher` silently got a different model, and a Claude-Code-only directive sat in the `SKILL.md` that Codex and other AgentSkills.io consumers read. `model: sonnet` now lives in `prd-researcher.md`'s frontmatter, so it holds regardless of caller and stays in the Claude-Code-only file. No behavior change on Claude Code — the research agents still run on Sonnet. `prd-planner` and `feature-reporter` remain deliberately unpinned: frontmatter `model` is a hard pin rather than a floor, and those two do the judgment work (phase decomposition, verify-every-claim review), so the session model should flow through to them.
+
 ## v1.39.3 - 2026-07-21
 
 ### Fixed

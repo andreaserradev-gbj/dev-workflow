@@ -3,6 +3,7 @@ name: prd-researcher
 color: cyan
 description: Research codebase to populate PRD's Research Findings section
 tools: Read, Glob, Grep, LS, WebFetch, WebSearch
+model: sonnet
 ---
 
 ## Mission
