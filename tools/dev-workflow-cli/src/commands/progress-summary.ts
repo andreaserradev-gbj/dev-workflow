@@ -1,5 +1,11 @@
 import { resolve } from 'path';
-import { isSubPrdFile, parseMasterPlan, parseSubPrd, subPrdToPhase } from 'dev-workflow-core';
+import {
+  capWarnings,
+  isSubPrdFile,
+  parseMasterPlan,
+  parseSubPrd,
+  subPrdToPhase,
+} from 'dev-workflow-core';
 import { resolveFeatureDir } from '../resolve.js';
 import { parseFlags } from '../index.js';
 import { readdir } from 'fs/promises';
@@ -9,6 +15,9 @@ interface ProgressOutput {
   overall: { done: number; total: number; percent: number };
   phases: Array<{ number: number; title: string; done: number; total: number; status: string }>;
   subPrds: Array<{ id: string; title: string; done: number; total: number; status: string }>;
+  /** Unrecognized-marker warnings from the master plan and every sub-PRD. Key
+   *  omitted when empty so healthy features' payloads keep their shape. */
+  warnings?: string[];
 }
 
 export async function progressSummary(args: string[]): Promise<number> {
@@ -40,6 +49,7 @@ export async function progressSummary(args: string[]): Promise<number> {
 
   const subPrds: ProgressOutput['subPrds'] = [];
   const subPrdPhases: ProgressOutput['phases'] = [];
+  const subPrdWarnings: string[] = [];
   for (const file of subPrdFiles) {
     const result = await parseSubPrd(resolve(featureDir, file));
     if (result) {
@@ -51,8 +61,13 @@ export async function progressSummary(args: string[]): Promise<number> {
         status: result.status,
       });
       subPrdPhases.push(subPrdToPhase(result));
+      if (result.warnings) subPrdWarnings.push(...result.warnings);
     }
   }
+
+  // Same ordering and cap as core's parseFeature: master plan first, then
+  // sub-PRDs in filename order.
+  const warnings = capWarnings([...(masterPlan.warnings ?? []), ...subPrdWarnings]);
 
   // Phase list: master plan headers, unless the sub-PRDs enumerate more phases
   // (master + numbered-sub-PRD shape) — then they are the authoritative list,
@@ -89,6 +104,7 @@ export async function progressSummary(args: string[]): Promise<number> {
       status: p.status,
     })),
     subPrds,
+    ...(warnings.length > 0 ? { warnings } : {}),
   };
 
   if (json) {
@@ -110,6 +126,15 @@ export async function progressSummary(args: string[]): Promise<number> {
       for (const s of output.subPrds) {
         const mark = s.status === 'complete' ? '[done]' : s.status === 'in-progress' ? '[active]' : '[pending]';
         console.log(`  ${s.id}: ${s.title} ${mark} (${s.done}/${s.total})`);
+      }
+    }
+    // stderr, not stdout: the counts above are routinely piped into other
+    // tools, and a warning line in that stream would corrupt the parse.
+    if (warnings.length > 0) {
+      console.error();
+      console.error('Warnings:');
+      for (const w of warnings) {
+        console.error(`  ${w}`);
       }
     }
   }

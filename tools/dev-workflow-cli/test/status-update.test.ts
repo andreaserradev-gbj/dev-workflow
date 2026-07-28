@@ -310,6 +310,104 @@ describe('status-update', () => {
     expect(output.errorLines.join('\n')).toContain('Phase 99 not found');
   });
 
+  // The CLI surface of the write-path fix. `status-update.ts` prints
+  // `err.message` verbatim, so these pin the wording an agent actually reads —
+  // the whole point of the fix was that it used to read `Phase N not found`,
+  // which names the wrong layer entirely.
+  describe('unwritable status markers', () => {
+    it('refuses an unknown glyph in a sub-PRD table row, naming the glyph and the file', async () => {
+      const subPrd = `# Sub-PRD: Setup Phase
+
+**Status**: In Progress
+
+## Implementation Progress
+
+| Step | Description | Status |
+|------|-------------|--------|
+| **1** | Create scaffold | ⬜ |
+| **2** | Add deps | ⚠️ Written, unverifiable |
+`;
+      const dir = createTempFeatureDir(MASTER_PLAN_SUBPRD, { '01-sub-prd-setup.md': subPrd });
+      tempDirs.push(dir);
+      const before = readFileSync(join(dir, '01-sub-prd-setup.md'), 'utf-8');
+
+      const code = await statusUpdate(['--dir', dir, '--phase', '1', '--step', '2', '--marker', 'done']);
+
+      expect(code).toBe(1);
+      const err = output.errorLines.join('\n');
+      expect(err).toContain('step 2 in');
+      expect(err).toContain('01-sub-prd-setup.md');
+      expect(err).toContain('has unrecognized status marker "⚠️"');
+      expect(err).toContain('(expected ⬜ ✅ ⏭️ ⛔ ⏹️)');
+      expect(err).toContain('fix the row, then re-run');
+      // Never the old, misleading message.
+      expect(err).not.toContain('not found');
+      // The refused row is left byte-identical.
+      expect(readFileSync(join(dir, '01-sub-prd-setup.md'), 'utf-8')).toBe(before);
+    });
+
+    it('refuses an unknown glyph in an inline numbered step', async () => {
+      const plan = `# Feature: Test
+
+### Phase 1: Setup
+
+1. ⬜ Create scaffold
+2. ⚠️ Written, unverifiable
+`;
+      const dir = createTempFeatureDir(plan);
+      tempDirs.push(dir);
+      const before = readFileSync(join(dir, '00-master-plan.md'), 'utf-8');
+
+      const code = await statusUpdate(['--dir', dir, '--phase', '1', '--step', '2', '--marker', 'done']);
+
+      expect(code).toBe(1);
+      const err = output.errorLines.join('\n');
+      expect(err).toContain('has unrecognized status marker "⚠️"');
+      expect(err).not.toContain('not found');
+      expect(readFileSync(join(dir, '00-master-plan.md'), 'utf-8')).toBe(before);
+    });
+
+    it('still writes a sibling row whose marker is recognized', async () => {
+      const subPrd = `# Sub-PRD: Setup Phase
+
+**Status**: In Progress
+
+## Implementation Progress
+
+| Step | Description | Status |
+|------|-------------|--------|
+| **1** | Create scaffold | ⬜ |
+| **2** | Add deps | ⚠️ Written, unverifiable |
+`;
+      const dir = createTempFeatureDir(MASTER_PLAN_SUBPRD, { '01-sub-prd-setup.md': subPrd });
+      tempDirs.push(dir);
+
+      const code = await statusUpdate(['--dir', dir, '--phase', '1', '--step', '1', '--marker', 'done', '--json']);
+
+      expect(code).toBe(0);
+      const updated = readFileSync(join(dir, '01-sub-prd-setup.md'), 'utf-8');
+      expect(updated).toContain('| **1** | Create scaffold | ✅ Done |');
+      // The unwritable row is untouched by its sibling's write.
+      expect(updated).toContain('| **2** | Add deps | ⚠️ Written, unverifiable |');
+    });
+
+    it('writes a previously-unwritable ⛔ inline step (the latent writer bug)', async () => {
+      const plan = `# Feature: Test
+
+### Phase 1: Setup
+
+1. ⛔ Blocked on upstream
+`;
+      const dir = createTempFeatureDir(plan);
+      tempDirs.push(dir);
+
+      const code = await statusUpdate(['--dir', dir, '--phase', '1', '--step', '1', '--marker', 'done', '--json']);
+
+      expect(code).toBe(0);
+      expect(readFileSync(join(dir, '00-master-plan.md'), 'utf-8')).toContain('1. ✅ Blocked on upstream');
+    });
+  });
+
   it('handles emoji shortcodes in the source file', async () => {
     const shortcodePlan = `# Feature: Test
 
