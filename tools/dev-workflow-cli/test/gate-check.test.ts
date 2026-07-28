@@ -1,5 +1,7 @@
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
-import { resolve } from 'path';
+import { join, resolve } from 'path';
+import { mkdtempSync, rmSync, writeFileSync } from 'fs';
+import { tmpdir } from 'os';
 import { gateCheck } from '../src/commands/gate-check.js';
 
 const FIXTURES = resolve(__dirname, '../../dev-workflow-core/test/fixtures');
@@ -115,5 +117,121 @@ describe('gate-check', () => {
     expect(json.atGate).toBe(true);
     expect(json.completedPhase).toMatchObject({ number: 1, title: 'Networking Cleanup' });
     expect(json.nextPhase).toMatchObject({ number: 2, title: 'Storage Cleanup' });
+  });
+
+  // Regression: an unrecognized glyph used to drop out of BOTH numerator and
+  // denominator, so a phase whose only outstanding step carried one reported
+  // itself complete — and gate-check waved the agent through to the next phase.
+  // These shapes are purpose-built rather than fixture-based: the unknown glyph
+  // has to be the *sole* thing standing between the feature and "complete", or
+  // the assertion would pass for the wrong reason.
+  describe('unknown glyphs never read as complete', () => {
+    let tempDirs: string[];
+
+    beforeEach(() => {
+      tempDirs = [];
+    });
+
+    afterEach(() => {
+      for (const dir of tempDirs) {
+        try {
+          rmSync(dir, { recursive: true, force: true });
+        } catch {
+          // ignore
+        }
+      }
+    });
+
+    function tempFeature(files: Record<string, string>): string {
+      const dir = mkdtempSync(join(tmpdir(), 'gc-test-'));
+      for (const [name, content] of Object.entries(files)) {
+        writeFileSync(join(dir, name), content, 'utf-8');
+      }
+      tempDirs.push(dir);
+      return dir;
+    }
+
+    it('does not report allComplete when the last outstanding inline step is unknown', async () => {
+      const dir = tempFeature({
+        '00-master-plan.md': `# Feature: Almost Done
+
+## Implementation Order
+
+### Phase 1: Only Phase
+
+1. ✅ Really done
+2. ⚠️ Written, unverifiable
+
+⏸️ **GATE**: Phase complete.
+`,
+      });
+
+      const code = await gateCheck(['--dir', dir, '--json']);
+
+      expect(code).toBe(0);
+      const json = JSON.parse(output.lines.join('\n'));
+      expect(json.allComplete).toBe(false);
+      expect(json.atGate).toBe(false);
+    });
+
+    it('does not report atGate when the phase behind the gate has an unknown step', async () => {
+      const dir = tempFeature({
+        '00-master-plan.md': `# Feature: Not At A Gate
+
+## Implementation Order
+
+### Phase 1: First
+
+1. ✅ Really done
+2. ⚠️ Written, unverifiable
+
+⏸️ **GATE**: Phase complete.
+
+### Phase 2: Second
+
+1. ⬜ Not started
+
+⏸️ **GATE**: Phase complete.
+`,
+      });
+
+      const code = await gateCheck(['--dir', dir, '--json']);
+
+      expect(code).toBe(0);
+      const json = JSON.parse(output.lines.join('\n'));
+      expect(json.atGate).toBe(false);
+      expect(json.allComplete).toBe(false);
+      expect(json.completedPhase).toBeNull();
+      expect(json.nextPhase).toBeNull();
+    });
+
+    it('does not report allComplete when the unknown step lives in a sub-PRD table', async () => {
+      const dir = tempFeature({
+        '00-master-plan.md': `# Feature: SubPRD Almost Done
+
+## Implementation Order
+
+See sub-PRDs for details.
+`,
+        '01-sub-prd-setup.md': `# Sub-PRD: Setup
+
+**Status**: In Progress
+
+## Implementation Progress
+
+| Step | Description | Status |
+|------|-------------|--------|
+| **1** | Really done | ✅ Done |
+| **2** | Written, unverifiable | ⚠️ Unverifiable |
+`,
+      });
+
+      const code = await gateCheck(['--dir', dir, '--json']);
+
+      expect(code).toBe(0);
+      const json = JSON.parse(output.lines.join('\n'));
+      expect(json.allComplete).toBe(false);
+      expect(json.atGate).toBe(false);
+    });
   });
 });

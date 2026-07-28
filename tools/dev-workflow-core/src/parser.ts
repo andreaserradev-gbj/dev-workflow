@@ -10,6 +10,13 @@ import type {
   SessionLogEntry,
   SessionDigest,
 } from './types.js';
+import {
+  EXPECTED_GLYPHS_TEXT,
+  classifyStepGlyph,
+  firstGlyphInCell,
+  matchBulletStepLine,
+  matchNumberedStepLine,
+} from './glyphs.js';
 
 // ─── Emoji Shortcode Normalization ──────────────────────────────────
 
@@ -34,6 +41,8 @@ export interface MasterPlanResult {
   progress: Progress;
   lastUpdated: string | null;
   created: string | null;
+  /** Unrecognized step markers found while counting. Omitted when empty. */
+  warnings?: string[];
 }
 
 export async function parseMasterPlan(filePath: string): Promise<MasterPlanResult | null> {
@@ -47,7 +56,7 @@ export async function parseMasterPlan(filePath: string): Promise<MasterPlanResul
   const summary = extractSummary(content);
   const lastUpdated = extractFrontmatterField(content, 'Last Updated');
   const created = extractFrontmatterField(content, 'Created');
-  const phases = extractPhases(content);
+  const { phases, warnings } = extractPhases(content, basename(filePath));
 
   let done = 0;
   let total = 0;
@@ -69,6 +78,8 @@ export async function parseMasterPlan(filePath: string): Promise<MasterPlanResul
     progress: { done, total, percent },
     lastUpdated,
     created,
+    // Omitted entirely when empty so healthy features' payloads keep their shape.
+    ...(warnings.length > 0 ? { warnings } : {}),
   };
 }
 
@@ -372,9 +383,13 @@ function extractFrontmatterField(content: string, field: string): string | null 
   return match ? match[1].trim() : null;
 }
 
-function extractPhases(rawContent: string): Phase[] {
+function extractPhases(
+  rawContent: string,
+  fileLabel: string,
+): { phases: Phase[]; warnings: string[] } {
   const content = normalizeEmoji(rawContent);
   const phases: Phase[] = [];
+  const warnings: string[] = [];
 
   // Split by phase headers: ### Phase N: Title  or  ## Phase N — Title
   const phaseRegex = /###?\s*Phase\s+(\d+)[:\s—–-]+\s*(.+)/g;
@@ -405,7 +420,12 @@ function extractPhases(rawContent: string): Phase[] {
       title = title.replace(/\s*⬜\s*/, '').trim();
     }
 
-    const { done, total } = countSteps(section);
+    const {
+      done,
+      total,
+      warnings: sectionWarnings,
+    } = countSteps(section, { file: fileLabel, phase: headers[i].number });
+    warnings.push(...sectionWarnings);
     let status: Phase['status'];
     if (total > 0) {
       // Use step counts when available
@@ -431,12 +451,47 @@ function extractPhases(rawContent: string): Phase[] {
     });
   }
 
-  return phases;
+  return { phases, warnings };
 }
 
-function countSteps(section: string): { done: number; total: number } {
+/** Where a warning came from, so the message can name the exact row. */
+interface StepCountContext {
+  /** File label, e.g. `00-master-plan.md`. */
+  file: string;
+  /** Phase number the section belongs to. */
+  phase: number;
+}
+
+/**
+ * One shape for every unrecognized-marker warning, built from
+ * {@link EXPECTED_GLYPHS_TEXT} so the message can never advertise a glyph set
+ * the classifier does not actually accept.
+ *
+ * `cell` is the raw table cell, supplied only by the table path — it separates
+ * "the cell is blank" from "the cell holds prose", which are the same `''`
+ * marker but very different authoring mistakes. Inline steps never need it:
+ * their predicate requires an emoji in the marker slot, so the marker is always
+ * non-empty by the time a warning is built.
+ */
+export function unrecognizedMarkerWarning(location: string, marker: string, cell?: string): string {
+  let what: string;
+  if (marker !== '') {
+    what = `unrecognized status marker ${JSON.stringify(marker)}`;
+  } else if (cell !== undefined && cell.trim() !== '') {
+    what = `no status marker in ${JSON.stringify(cell.trim())}`;
+  } else {
+    what = 'empty status cell';
+  }
+  return `${location}: ${what} (expected ${EXPECTED_GLYPHS_TEXT}) — counted as not done`;
+}
+
+function countSteps(
+  section: string,
+  ctx: StepCountContext,
+): { done: number; total: number; warnings: string[] } {
   let done = 0;
   let total = 0;
+  const warnings: string[] = [];
   let inVerification = false;
 
   const lines = section.split('\n');
@@ -460,11 +515,24 @@ function countSteps(section: string): { done: number; total: number } {
     // Skip headings, table rows, and other non-step lines
     if (trimmed.startsWith('#') || trimmed.startsWith('|')) continue;
 
-    // Numbered steps: "1. ✅ ..." or "1. ⬜ ..." (⏭️ Skipped / ⛔ Dropped / ⏹️ Deferred all count as resolved)
-    const numberedMatch = trimmed.match(/^\d+\.\s*(✅|⬜|⏭️|⛔|⏹️)/);
-    if (numberedMatch) {
+    // Numbered steps: "1. ✅ ..." or "1. ⬜ ..." (⏭️ Skipped / ⛔ Dropped / ⏹️ Deferred
+    // all count as resolved). A step whose marker is an emoji we do not know is
+    // still a step: it counts toward `total`, never toward `done`, and warns.
+    // Dropping it from both — the old behaviour — is the defect being fixed.
+    const numbered = matchNumberedStepLine(trimmed);
+    if (numbered) {
       total++;
-      if (numberedMatch[1] !== '⬜') done++;
+      const cls = classifyStepGlyph(numbered.marker);
+      if (cls === 'resolved') {
+        done++;
+      } else if (cls === 'unknown') {
+        warnings.push(
+          unrecognizedMarkerWarning(
+            `\`${ctx.file}\` Phase ${ctx.phase} step ${numbered.number}`,
+            numbered.marker,
+          ),
+        );
+      }
       continue;
     }
 
@@ -476,11 +544,23 @@ function countSteps(section: string): { done: number; total: number } {
       continue;
     }
 
-    // Bullet steps: "- ✅ ..." or "- ⬜ ..." (⏭️ Skipped / ⛔ Dropped / ⏹️ Deferred all count as resolved)
-    const bulletMatch = trimmed.match(/^-\s+(✅|⬜|⏭️|⛔|⏹️)/);
-    if (bulletMatch) {
+    // Bullet steps: "- ✅ ..." or "- ⬜ ..." — same unknown-marker rule as above.
+    // Bullets have no written ordinal, so the warning names their position, which
+    // is also how writer.ts targets them.
+    const bullet = matchBulletStepLine(trimmed);
+    if (bullet) {
       total++;
-      if (bulletMatch[1] !== '⬜') done++;
+      const cls = classifyStepGlyph(bullet.marker);
+      if (cls === 'resolved') {
+        done++;
+      } else if (cls === 'unknown') {
+        warnings.push(
+          unrecognizedMarkerWarning(
+            `\`${ctx.file}\` Phase ${ctx.phase} step ${total}`,
+            bullet.marker,
+          ),
+        );
+      }
       continue;
     }
 
@@ -493,7 +573,7 @@ function countSteps(section: string): { done: number; total: number } {
     }
   }
 
-  return { done, total };
+  return { done, total, warnings };
 }
 
 /** Check for a **Status** field indicating phase completion (e.g., "- **Status**: `[x]` done"). */
@@ -549,6 +629,14 @@ function extractInlineStatusMarker(section: string): Phase['status'] | null {
     if (/^See\s+\[/i.test(t)) continue;
 
     // Match: leading emoji + (optional bold) status word.
+    //
+    // Deliberately NOT routed through `glyphs.ts`. That module owns step
+    // recognition — "is this line a step, and what is its status glyph". This
+    // matcher answers a different question: "does this phase delegate to a
+    // sub-PRD, and what does its prose status line say". Its glyph set is
+    // legitimately different — it includes `❌` (DROPPED at the phase level),
+    // which is not a step marker — and it requires a status *word*, so the
+    // permissive emoji-token rule used for steps would be wrong here.
     const m = t.match(
       /^(✅|⬜|❌|⏭️|⏹️)\s*\**\s*(DONE|SHIPPED|MERGED|CLOSED|COMPLETE|COMPLETED|DROPPED|SKIPPED|DEFERRED|NOT[\s-]?STARTED|TODO|IN[\s-]?PROGRESS)\b/i,
     );
@@ -759,6 +847,8 @@ export interface SubPrdResult {
    * duplicate of master-plan progress) read this instead.
    */
   headerStatus: 'complete' | 'in-progress' | 'not-started' | null;
+  /** Unrecognized step markers found in the progress table. Omitted when empty. */
+  warnings?: string[];
 }
 
 export async function parseSubPrd(filePath: string): Promise<SubPrdResult | null> {
@@ -781,23 +871,42 @@ export async function parseSubPrd(filePath: string): Promise<SubPrdResult | null
     /## Implementation Progress[\s\S]*?\|[\s\S]*?\|[\s\S]*?\|([\s\S]*?)(?=\n---|\n##|$)/;
   const tableMatch = content.match(tableRegex);
 
+  const warnings: string[] = [];
+
   if (tableMatch) {
     const tableBody = tableMatch[1];
-    // Step rows. The identifier may be bold or plain (`1` or `**1**`) and need
-    // not be purely numeric — track-lettered/dotted IDs like `3A`, `3A.1`, `3G`
-    // are all valid step labels; we only require it to start with a digit so the
-    // `| Step |` header and `|---|` separator rows never match. The status cell's
-    // first glyph is the marker; `⏭️` (Skipped), `⛔` (Dropped), and `⏹️` (Deferred)
-    // all count as resolved, like `✅`. Only `⬜` is pending.
-    const rowRegex = /\|\s*\*{0,2}(\d[\w.]*)\*{0,2}\s*\|([^|]*)\|\s*(✅|⬜|⏭️|⛔|⏹️)[^|]*\|/g;
+    // Step rows, matched STRUCTURALLY — the row's shape is what proves it is a
+    // step, never its status glyph. The identifier may be bold or plain (`1` or
+    // `**1**`) and need not be purely numeric — track-lettered/dotted IDs like
+    // `3A`, `3A.1`, `3G` are all valid step labels; we only require it to start
+    // with a digit so the `| Step |` header and `|---|` separator rows never
+    // match. Anchored per line so a 4-column row cannot slide the match sideways
+    // and pick up the wrong cells.
+    //
+    // The status cell is classified separately below. Whitelisting glyphs here —
+    // the old behaviour — made a row with any other glyph vanish from BOTH the
+    // numerator and the denominator, silently under-reporting `total`.
+    const rowRegex = /^[ \t]*\|\s*\*{0,2}(\d[\w.]*)\*{0,2}\s*\|([^|]*)\|([^|]*)\|/gm;
     let rowMatch: RegExpExecArray | null;
     while ((rowMatch = rowRegex.exec(tableBody)) !== null) {
-      const marker = rowMatch[3];
-      steps.push({
+      const marker = firstGlyphInCell(rowMatch[3]);
+      const cls = classifyStepGlyph(marker);
+      const step: SubPrdStep = {
         number: rowMatch[1],
         description: rowMatch[2].trim(),
-        status: marker === '⬜' ? 'pending' : 'done',
-      });
+        status: cls === 'resolved' ? 'done' : 'pending',
+      };
+      if (cls === 'unknown') {
+        step.unrecognizedMarker = marker;
+        warnings.push(
+          unrecognizedMarkerWarning(
+            `\`${basename(filePath)}\` step ${step.number}`,
+            marker,
+            rowMatch[3],
+          ),
+        );
+      }
+      steps.push(step);
     }
   }
 
@@ -813,7 +922,16 @@ export async function parseSubPrd(filePath: string): Promise<SubPrdResult | null
           ? 'in-progress'
           : 'not-started';
 
-  return { id, title, done, total, status, steps, headerStatus };
+  return {
+    id,
+    title,
+    done,
+    total,
+    status,
+    steps,
+    headerStatus,
+    ...(warnings.length > 0 ? { warnings } : {}),
+  };
 }
 
 /** Extract status from the **Status** frontmatter field in a sub-PRD (e.g., "**Status**: Complete"). */
@@ -1009,6 +1127,13 @@ export async function parseFeature(featureDir: string, name: string): Promise<Fe
     }
   }
 
+  // Master-plan and sub-PRD warnings ride together: "this feature's numbers are
+  // lying to you" belongs on the portfolio card, not buried in a detail pane.
+  const warnings = capWarnings([
+    ...(masterPlan?.warnings ?? []),
+    ...(await collectSubPrdWarnings(featureDir)),
+  ]);
+
   return {
     name,
     status,
@@ -1022,6 +1147,8 @@ export async function parseFeature(featureDir: string, name: string): Promise<Fe
     summary: masterPlan?.summary ?? null,
     // Frontmatter tags (authoritative, first) unioned with derived keyword tags.
     tags: masterPlan ? mergeTags(masterPlan.tags, masterPlan.keywordTags) : [],
+    // Key omitted when empty so healthy features' payloads keep their shape.
+    ...(warnings.length > 0 ? { warnings } : {}),
   };
 }
 
@@ -1048,6 +1175,38 @@ export function subPrdToPhase(sub: SubPrdResult): Phase {
     total: sub.total,
     status: sub.status,
   };
+}
+
+/**
+ * Ceiling on how many warnings ride along on a Feature. A PRD authored with a
+ * wholly different glyph convention would otherwise attach one warning per
+ * step to a payload that is rebuilt for every feature on every dashboard
+ * websocket tick.
+ */
+const MAX_WARNINGS = 20;
+
+/** Cap a warning list, replacing the overflow with a count. */
+export function capWarnings(warnings: string[], max: number = MAX_WARNINGS): string[] {
+  if (warnings.length <= max) return warnings;
+  return [...warnings.slice(0, max), `…and ${warnings.length - max} more`];
+}
+
+/** Collect unrecognized-marker warnings across a feature's sub-PRDs. */
+async function collectSubPrdWarnings(featureDir: string): Promise<string[]> {
+  try {
+    const entries = await readdir(featureDir);
+    const subPrdFiles = entries.filter(isSubPrdFile).sort();
+    if (subPrdFiles.length === 0) return [];
+
+    const warnings: string[] = [];
+    for (const file of subPrdFiles) {
+      const result = await parseSubPrd(resolve(featureDir, file));
+      if (result?.warnings) warnings.push(...result.warnings);
+    }
+    return warnings;
+  } catch {
+    return [];
+  }
 }
 
 /** Aggregate step counts from sub-PRD files when master plan has no inline steps. */

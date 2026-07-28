@@ -72,6 +72,52 @@ describe('progress-summary', () => {
     expect(text).toContain('[pending]');
   });
 
+  it('emits sub-PRD unrecognized-marker warnings in JSON', async () => {
+    const code = await progressSummary([
+      '--dir',
+      resolve(FIXTURES, 'subprd-unknown-glyph'),
+      '--json',
+    ]);
+
+    expect(code).toBe(0);
+    const json = JSON.parse(output.lines.join('\n'));
+    // The row the old parser dropped is now in the denominator.
+    expect(json.overall).toMatchObject({ done: 1, total: 2, percent: 50 });
+    expect(json.warnings).toHaveLength(1);
+    expect(json.warnings[0]).toContain('⚠️');
+    expect(json.warnings[0]).toContain('01-sub-prd-foundation.md');
+  });
+
+  it('emits master-plan unrecognized-marker warnings in JSON', async () => {
+    const code = await progressSummary(['--dir', resolve(FIXTURES, 'master-unknown-glyph'), '--json']);
+
+    expect(code).toBe(0);
+    const json = JSON.parse(output.lines.join('\n'));
+    expect(json.warnings.length).toBeGreaterThan(0);
+    expect(json.warnings.join('\n')).toContain('00-master-plan.md');
+  });
+
+  it('omits the warnings key entirely for a clean feature', async () => {
+    const code = await progressSummary(['--dir', resolve(FIXTURES, 'full-feature'), '--json']);
+
+    expect(code).toBe(0);
+    const json = JSON.parse(output.lines.join('\n'));
+    expect(json).not.toHaveProperty('warnings');
+  });
+
+  it('prints warnings to stderr in human mode, leaving stdout parseable', async () => {
+    const code = await progressSummary(['--dir', resolve(FIXTURES, 'subprd-unknown-glyph')]);
+
+    expect(code).toBe(0);
+    expect(output.lines.join('\n')).toContain('Overall: 1/2 (50%)');
+    // stdout must stay free of warning text — it gets piped.
+    expect(output.lines.join('\n')).not.toContain('Warnings:');
+    expect(output.lines.join('\n')).not.toContain('⚠️');
+    const err = output.errorLines.join('\n');
+    expect(err).toContain('Warnings:');
+    expect(err).toContain('⚠️');
+  });
+
   it('returns exit code 1 for missing master plan', async () => {
     const code = await progressSummary(['--dir', resolve(FIXTURES, 'checkpoint-only')]);
 

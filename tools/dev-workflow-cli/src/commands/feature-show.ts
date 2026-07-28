@@ -35,6 +35,17 @@ export async function featureShow(args: string[]): Promise<number> {
     if (feature.summary) {
       console.log(`Summary: ${feature.summary}`);
     }
+    // stderr, not stdout: the fields above are routinely piped into other
+    // tools, and a warning line in that stream would corrupt the parse.
+    // The --json branch needs nothing — it prints the core Feature, which
+    // already carries `warnings`.
+    if (feature.warnings && feature.warnings.length > 0) {
+      console.error();
+      console.error('Warnings:');
+      for (const w of feature.warnings) {
+        console.error(`  ${w}`);
+      }
+    }
   }
 
   return 0;

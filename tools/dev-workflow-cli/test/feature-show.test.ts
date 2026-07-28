@@ -90,6 +90,38 @@ describe('feature-show', () => {
     expect(json.status).toBe('empty');
   });
 
+  it('prints warnings to stderr in text mode, leaving stdout parseable', async () => {
+    const code = await featureShow(['--dir', resolve(FIXTURES, 'subprd-unknown-glyph')]);
+
+    expect(code).toBe(0);
+    expect(output.lines.join('\n')).toContain('Feature: subprd-unknown-glyph');
+    expect(output.lines.join('\n')).not.toContain('Warnings:');
+    expect(output.lines.join('\n')).not.toContain('⚠️');
+    const err = output.errorLines.join('\n');
+    expect(err).toContain('Warnings:');
+    expect(err).toContain('⚠️');
+    expect(err).toContain('01-sub-prd-foundation.md');
+  });
+
+  it('carries warnings through --json without a separate code path', async () => {
+    const code = await featureShow(['--dir', resolve(FIXTURES, 'subprd-unknown-glyph'), '--json']);
+
+    expect(code).toBe(0);
+    const json = JSON.parse(output.lines.join('\n'));
+    expect(json.warnings).toHaveLength(1);
+    expect(json.warnings[0]).toContain('⚠️');
+    // Warnings never duplicate onto stderr in JSON mode — stdout is the payload.
+    expect(output.errorLines.join('\n')).toBe('');
+  });
+
+  it('omits the warnings key entirely for a clean feature', async () => {
+    const code = await featureShow(['--dir', resolve(FIXTURES, 'full-feature'), '--json']);
+
+    expect(code).toBe(0);
+    const json = JSON.parse(output.lines.join('\n'));
+    expect(json).not.toHaveProperty('warnings');
+  });
+
   it('returns exit code 1 when no dir or feature specified', async () => {
     const code = await featureShow([]);
 

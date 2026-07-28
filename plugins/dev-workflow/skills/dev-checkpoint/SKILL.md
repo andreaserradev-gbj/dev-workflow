@@ -209,6 +209,16 @@ The CLI reports `{ changed, line, file }` as JSON when `--json` is passed, or a 
 
 **Check the exit code.** A non-zero exit code means the command failed (e.g., phase not found, invalid path). **Never ignore a non-zero exit** — if a `status-update` call fails, stop and report the error before continuing.
 
+**Unrecognized status marker → exit 1, nothing written.** A step whose marker is not one of `⬜ ✅ ⏭️ ⛔ ⏹️` is found but deliberately not written:
+
+```
+step 2 in <file> has unrecognized status marker "⚠️" (expected ⬜ ✅ ⏭️ ⛔ ⏹️) — fix the row, then re-run
+```
+
+This is a refusal, not a lookup failure — do not read it as "phase not found" and do not retry with different `--phase`/`--step` values. The writer replaces the whole status cell, so flipping an unknown marker would also destroy whatever note travels with it (`⚠️ Written, unverifiable` → `✅ Done`). The marker must also **lead** the cell: `Done ✅` reads as unrecognized, same as `⚠️`.
+
+Resolution: tell the user which row is affected and let them decide. The fix is a one-line manual edit to a `⬜`, after which the command succeeds. Do not edit the row yourself to work around the refusal — the annotation is deliberate and its meaning is the user's to resolve.
+
 If nothing was completed, state: "No PRD updates needed."
 
 **Do NOT manually edit PRD files** — the `status-update` CLI ensures format compatibility with the parser.

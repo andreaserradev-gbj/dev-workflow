@@ -198,8 +198,14 @@ When skills target cross-tool destinations (e.g., project docs, scoped rules), r
 ## Key Conventions
 
 ### Status Markers
-- `⬜` - Pending
-- `✅` - Completed
+- `⬜` - Pending (the only unresolved marker)
+- `✅` `⏭️` `⛔` `⏹️` - Resolved: done, skipped, dropped, deferred. All count toward `done`
+
+Step detection is **structural**, not glyph-gated: a numbered or bulleted line is
+a step when an emoji token leads its marker slot; a table row is a step when its
+shape says so. A marker outside the set above still counts toward `total`, never
+toward `done`, and raises a parse warning — it does not vanish. `status-update`
+refuses to overwrite one (exit 1) rather than destroying the annotation.
 
 ### Phase Gates
 ```

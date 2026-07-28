@@ -13,6 +13,7 @@ import {
   deriveKeywordTags,
   isSubPrdFile,
   subPrdToPhase,
+  capWarnings,
 } from '../src/parser.js';
 import type { Feature } from '../src/types.js';
 
@@ -1025,5 +1026,139 @@ describe('parseSessionDigest', () => {
       'Curated: OAuth2 for all providers',
       'Curated: Redis for refresh token storage',
     ]);
+  });
+});
+// ─── Unrecognized Status Markers ───────────────────────────────────
+//
+// The whitelist defect: a step whose status glyph was outside the known set
+// vanished from BOTH the numerator and the denominator, so a feature could
+// report 100% complete with steps unaccounted for and nothing warned.
+
+describe('unrecognized status markers — sub-PRD tables', () => {
+  it('counts an unknown-glyph row instead of dropping it (bugs.md repro)', async () => {
+    const result = await parseSubPrd(
+      resolve(FIXTURES, 'subprd-unknown-glyph/01-sub-prd-foundation.md'),
+    );
+
+    expect(result).not.toBeNull();
+    // The payload from .dev/bugs.md case C: two steps, one incomplete. The old
+    // parser reported 1/1 at 100% complete.
+    expect(result!.done).toBe(1);
+    expect(result!.total).toBe(2);
+    expect(result!.status).toBe('in-progress');
+
+    // The unknown row reads as pending and carries the offending glyph.
+    expect(result!.steps[1]).toMatchObject({
+      number: '2',
+      status: 'pending',
+      unrecognizedMarker: '⚠️',
+    });
+    // Recognized rows stay clean — no key added to their payload.
+    expect(result!.steps[0].unrecognizedMarker).toBeUndefined();
+
+    expect(result!.warnings).toHaveLength(1);
+    expect(result!.warnings![0]).toContain('01-sub-prd-foundation.md');
+    expect(result!.warnings![0]).toContain('step 2');
+    expect(result!.warnings![0]).toContain('⚠️');
+    expect(result!.warnings![0]).toContain('counted as not done');
+  });
+
+  it('counts an empty status cell toward total but never toward done', async () => {
+    const result = await parseSubPrd(
+      resolve(FIXTURES, 'subprd-empty-status-cell/01-sub-prd-gaps.md'),
+    );
+
+    expect(result).not.toBeNull();
+    expect(result!.done).toBe(1);
+    expect(result!.total).toBe(3);
+
+    expect(result!.steps[1]).toMatchObject({
+      number: '2',
+      status: 'pending',
+      unrecognizedMarker: '',
+    });
+    expect(result!.steps[2]).toMatchObject({
+      number: '3',
+      status: 'pending',
+      unrecognizedMarker: '',
+    });
+
+    // A blank cell and a prose cell are the same empty marker but different
+    // authoring mistakes, so the messages distinguish them.
+    expect(result!.warnings).toHaveLength(2);
+    expect(result!.warnings![0]).toContain('empty status cell');
+    expect(result!.warnings![1]).toContain('no status marker in "Done, probably"');
+  });
+
+  it('omits the warnings key entirely for a clean sub-PRD', async () => {
+    const result = await parseSubPrd(resolve(FIXTURES, 'subprd-mixed-steps/01-sub-prd-mixed.md'));
+
+    expect(result).not.toBeNull();
+    expect(result!.warnings).toBeUndefined();
+    expect('warnings' in result!).toBe(false);
+  });
+});
+
+describe('unrecognized status markers — master-plan inline steps', () => {
+  it('counts an unknown-glyph step without sweeping in prose decoys', async () => {
+    const result = await parseMasterPlan(
+      resolve(FIXTURES, 'master-unknown-glyph/00-master-plan.md'),
+    );
+
+    expect(result).not.toBeNull();
+
+    // THE denominator-inflation guard. Phase 1 holds exactly three steps
+    // (✅, ⬜, ⚠️). The section also holds numbered prose, a trailing-emoji
+    // line, plain bullets and a link bullet — a predicate that accepted any
+    // leading token rather than specifically an emoji would count those too and
+    // silently corrupt `total` in every PRD in every project.
+    expect(result!.phases[0]).toMatchObject({
+      number: 1,
+      done: 1,
+      total: 3,
+      status: 'in-progress',
+    });
+    expect(result!.phases[1]).toMatchObject({ number: 2, done: 0, total: 1 });
+    expect(result!.progress).toMatchObject({ done: 1, total: 4, percent: 25 });
+
+    expect(result!.warnings).toHaveLength(1);
+    expect(result!.warnings![0]).toContain('00-master-plan.md');
+    expect(result!.warnings![0]).toContain('Phase 1 step 3');
+    expect(result!.warnings![0]).toContain('⚠️');
+  });
+
+  it('omits the warnings key entirely for a clean master plan', async () => {
+    const result = await parseMasterPlan(resolve(FIXTURES, 'full-feature/00-master-plan.md'));
+
+    expect(result).not.toBeNull();
+    expect(result!.warnings).toBeUndefined();
+  });
+});
+
+describe('warning aggregation onto Feature', () => {
+  it('surfaces sub-PRD warnings on the feature summary', async () => {
+    const dir = resolve(FIXTURES, 'subprd-unknown-glyph');
+    const feature = await parseFeature(dir, 'subprd-unknown-glyph');
+
+    // "This feature's numbers are lying to you" belongs on the portfolio card,
+    // not buried in a detail pane.
+    expect(feature.warnings).toHaveLength(1);
+    expect(feature.warnings![0]).toContain('step 2');
+  });
+
+  it('omits the warnings key entirely for a clean feature', async () => {
+    const dir = resolve(FIXTURES, 'full-feature');
+    const feature = await parseFeature(dir, 'full-feature');
+
+    expect(feature.warnings).toBeUndefined();
+  });
+
+  it('caps the warning list and reports the overflow count', () => {
+    const many = Array.from({ length: 25 }, (_, i) => `warning ${i + 1}`);
+
+    expect(capWarnings(many)).toHaveLength(21);
+    expect(capWarnings(many)[20]).toBe('…and 5 more');
+    // At or below the cap the list passes through untouched.
+    expect(capWarnings(many.slice(0, 20))).toHaveLength(20);
   });
 });

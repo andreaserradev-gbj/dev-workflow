@@ -746,6 +746,209 @@ describe('updateStatus on sub-PRD files (Implementation Progress table)', () => 
   });
 });
 
+// ─── Unwritable status markers ─────────────────────────────────────
+//
+// The write path's half of the glyph-whitelist defect. Two distinct failures:
+//
+//   1. A row whose status glyph is unknown was SKIPPED, so a row the writer had
+//      already matched by step number was reported as `Phase N not found` —
+//      naming the wrong layer entirely. It must refuse, and say why.
+//   2. `⛔` / `⏹️` steps were countable by the parser but invisible to the
+//      writer's own three-glyph regex. For bullet steps, targeted by position,
+//      that made the writer's Nth bullet a different line from the parser's Nth
+//      bullet — silent corruption of the wrong row.
+
+describe('updateStatus refuses unwritable status markers', () => {
+  let tmpDir: string;
+
+  beforeEach(async () => {
+    tmpDir = resolve(TMP_DIR, `status-unwritable-${Date.now()}`);
+    await mkdir(tmpDir, { recursive: true });
+  });
+
+  afterEach(async () => {
+    try {
+      await rm(TMP_DIR, { recursive: true, force: true });
+    } catch {}
+  });
+
+  const TABLE_PRD = [
+    '# Sub-PRD: Core',
+    '',
+    '**Status**: In Progress',
+    '',
+    '## Implementation Progress',
+    '',
+    '| Step | Description | Status |',
+    '|------|-------------|--------|',
+    '| **1** | Implement core | ⬜ Not Started |',
+    '| **2** | Add tests | ⚠️ Written, unverifiable |',
+    '| **3** | Blank marker |  |',
+    '| **4** | Prose marker | Done, probably |',
+    '',
+  ].join('\n');
+
+  /** Run updateStatus and hand back the rejection, so the message can be asserted on. */
+  async function rejectionFrom(
+    filePath: string,
+    target: StepTarget,
+    marker: StatusMarker,
+  ): Promise<Error> {
+    const err = await updateStatus(filePath, target, marker).catch((e: unknown) => e);
+    expect(err).toBeInstanceOf(Error);
+    return err as Error;
+  }
+
+  it('names the step, not a missing phase, for an unrecognized table marker', async () => {
+    const filePath = join(tmpDir, '02-core.md');
+    await writeFile(filePath, TABLE_PRD, 'utf-8');
+
+    const err = await rejectionFrom(filePath, { phase: 2, step: 2 }, '✅');
+
+    expect(err.message).toMatch(/step 2 in .*02-core\.md/);
+    expect(err.message).toContain('unrecognized status marker "⚠️"');
+    expect(err.message).toContain('expected ⬜ ✅ ⏭️ ⛔ ⏹️');
+    expect(err.message).toContain('fix the row, then re-run');
+    // The whole point: the old code blamed the phase for a row it had found.
+    expect(err.message).not.toMatch(/not found/);
+  });
+
+  it('leaves the file byte-identical when it refuses', async () => {
+    const filePath = join(tmpDir, '02-core.md');
+    await writeFile(filePath, TABLE_PRD, 'utf-8');
+
+    await rejectionFrom(filePath, { phase: 2, step: 2 }, '✅');
+
+    expect(await readFile(filePath, 'utf-8')).toBe(TABLE_PRD);
+  });
+
+  it('still updates a sibling row with a known marker', async () => {
+    const filePath = join(tmpDir, '02-core.md');
+    await writeFile(filePath, TABLE_PRD, 'utf-8');
+
+    const result = await updateStatus(filePath, { phase: 2, step: 1 }, '✅');
+
+    expect(result.changed).toBe(true);
+    const updated = await readFile(filePath, 'utf-8');
+    expect(updated).toContain('| **1** | Implement core | ✅ Done |');
+    // The ⚠️ row's note text survives untouched — destroying it is why the
+    // writer refuses rather than flipping.
+    expect(updated).toContain('| **2** | Add tests | ⚠️ Written, unverifiable |');
+  });
+
+  it('distinguishes a blank status cell from an unrecognized glyph', async () => {
+    const filePath = join(tmpDir, '02-core.md');
+    await writeFile(filePath, TABLE_PRD, 'utf-8');
+
+    const err = await rejectionFrom(filePath, { phase: 2, step: 3 }, '✅');
+
+    expect(err.message).toContain('has an empty status cell');
+    expect(err.message).not.toContain('marker ""');
+  });
+
+  it('distinguishes a prose-filled status cell from a blank one', async () => {
+    const filePath = join(tmpDir, '02-core.md');
+    await writeFile(filePath, TABLE_PRD, 'utf-8');
+
+    const err = await rejectionFrom(filePath, { phase: 2, step: 4 }, '✅');
+
+    expect(err.message).toContain('no status marker in "Done, probably"');
+  });
+
+  it('refuses an unrecognized marker on an inline numbered step', async () => {
+    const filePath = join(tmpDir, '00-master-plan.md');
+    await writeFile(filePath, await readFixture('master-unknown-glyph', '00-master-plan.md'), 'utf-8');
+    const before = await readFile(filePath, 'utf-8');
+
+    const err = await rejectionFrom(filePath, { phase: 1, step: 3 }, '✅');
+
+    expect(err.message).toContain('unrecognized status marker "⚠️"');
+    expect(err.message).not.toMatch(/not found/);
+    expect(await readFile(filePath, 'utf-8')).toBe(before);
+  });
+});
+
+describe('updateStatus reaches ⛔ / ⏹️ steps (latent write-path bug)', () => {
+  let tmpDir: string;
+
+  beforeEach(async () => {
+    tmpDir = resolve(TMP_DIR, `status-blocked-${Date.now()}`);
+    await mkdir(tmpDir, { recursive: true });
+  });
+
+  afterEach(async () => {
+    try {
+      await rm(TMP_DIR, { recursive: true, force: true });
+    } catch {}
+  });
+
+  /** Copy the frozen fixture into the temp dir, since updateStatus writes in place. */
+  async function stageFixture(): Promise<string> {
+    const filePath = join(tmpDir, '00-master-plan.md');
+    await writeFile(
+      filePath,
+      await readFixture('master-blocked-deferred-steps', '00-master-plan.md'),
+      'utf-8',
+    );
+    return filePath;
+  }
+
+  it('counts every step form, so writer and parser agree on the ordinals', async () => {
+    const parsed = await parseMasterPlan(await stageFixture());
+
+    // The numbers the positional bullet targeting below depends on.
+    expect(parsed!.phases.find((p) => p.number === 1)).toMatchObject({ done: 3, total: 4 });
+    expect(parsed!.phases.find((p) => p.number === 2)).toMatchObject({ done: 3, total: 4 });
+  });
+
+  it('flips a numbered ⛔ step to ✅', async () => {
+    const filePath = await stageFixture();
+
+    const result = await updateStatus(filePath, { phase: 1, step: 2 }, '✅');
+
+    expect(result.changed).toBe(true);
+    const updated = await readFile(filePath, 'utf-8');
+    expect(updated).toContain('2. ✅ Dropped');
+    expect(updated).toContain('3. ⏹️ Deferred'); // sibling untouched
+  });
+
+  it('flips a numbered ⏹️ step to ✅', async () => {
+    const filePath = await stageFixture();
+
+    const result = await updateStatus(filePath, { phase: 1, step: 3 }, '✅');
+
+    expect(result.changed).toBe(true);
+    const updated = await readFile(filePath, 'utf-8');
+    expect(updated).toContain('3. ✅ Deferred');
+    expect(updated).toContain('2. ⛔ Dropped'); // sibling untouched
+  });
+
+  it('targets the parser\'s Nth bullet, not a whitelist-filtered Nth', async () => {
+    const filePath = await stageFixture();
+
+    // Bullet 2 is ⛔. The old writer skipped it, so `step: 2` landed on the
+    // FOURTH bullet and rewrote it — silently, with no error to notice.
+    const result = await updateStatus(filePath, { phase: 2, step: 2 }, '✅');
+
+    expect(result.changed).toBe(true);
+    const updated = await readFile(filePath, 'utf-8');
+    expect(updated).toContain('- ✅ Second bullet, dropped');
+    expect(updated).toContain('- ⬜ Fourth bullet, pending'); // NOT the line that moved
+  });
+
+  it('reaches the last bullet, which the old writer could not count up to', async () => {
+    const filePath = await stageFixture();
+
+    const result = await updateStatus(filePath, { phase: 2, step: 4 }, '✅');
+
+    expect(result.changed).toBe(true);
+    const updated = await readFile(filePath, 'utf-8');
+    expect(updated).toContain('- ✅ Fourth bullet, pending');
+    expect(updated).toContain('- ⛔ Second bullet, dropped');
+    expect(updated).toContain('- ⏹️ Third bullet, deferred');
+  });
+});
+
 // ─── Regression Tests from Real-World Checkpoints ──────────────────
 //
 // These tests cover edge cases found in real-world checkpoint data.

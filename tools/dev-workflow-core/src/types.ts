@@ -30,7 +30,23 @@ export interface SubPrdStep {
   /** Step identifier as written in the table — e.g. `"1"`, `"3A"`, `"3A.1"`. */
   number: string;
   description: string;
+  /**
+   * Deliberately stays a two-value union. A step whose status cell carries an
+   * unrecognized glyph reads as `pending` — it is not done, and that is the
+   * only question this field answers. Adding an `'unknown'` member would break
+   * exhaustive switches in the dashboard and TUI renderers for no user-visible
+   * gain; `unrecognizedMarker` carries the extra detail instead.
+   */
   status: 'done' | 'pending';
+  /**
+   * The status cell's glyph when it was not one of the known markers — `''`
+   * when the cell was empty or opened with prose. Absent for recognized
+   * markers, so existing JSON payloads are unchanged.
+   *
+   * Present means: this step still counts toward `total`, but its status could
+   * not be read, so it was counted as not done.
+   */
+  unrecognizedMarker?: string;
 }
 
 // Sub-PRD summary
@@ -69,6 +85,20 @@ export interface Feature {
   // Searchable/render tags: frontmatter `tags:` ∪ deterministic keyword tags.
   // Always present (defaults to []); never null.
   tags: string[];
+  /**
+   * Parse-time problems that make this feature's numbers untrustworthy —
+   * chiefly steps whose status marker could not be recognized.
+   *
+   * Structured rather than logged, deliberately: core is imported by the Ink
+   * TUI, which renders to stdout while a file watcher re-parses in the
+   * background, so a stray `console.warn` splatters the render surface. A
+   * dashboard server log is no better — an invisible failure is precisely the
+   * mode being fixed here.
+   *
+   * The key is omitted entirely when there is nothing to report, so payloads
+   * for healthy features keep their existing shape.
+   */
+  warnings?: string[];
 }
 
 // Project groups features by parent directory
