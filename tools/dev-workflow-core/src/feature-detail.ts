@@ -3,6 +3,7 @@ import { resolve } from 'path';
 import type { Feature, FeatureDetail, SubPrd } from './types.js';
 import type { SubPrdResult } from './parser.js';
 import {
+  capWarnings,
   isSubPrdFile,
   parseCheckpoint,
   parseMasterPlan,
@@ -83,6 +84,16 @@ export async function buildFeatureDetail(
     };
   });
 
+  // Recomputed from this function's own parse rather than trusted from
+  // `feature`: buildFeatureDetail re-parses independently, and a detail pane
+  // that disagreed with its own phase data about whether the numbers are
+  // trustworthy would be worse than no warning at all. Same inputs and same
+  // order as parseFeature, so the two agree by construction.
+  const warnings = capWarnings([
+    ...(masterPlan?.warnings ?? []),
+    ...subPrdResults.flatMap((r) => r.warnings ?? []),
+  ]);
+
   return {
     ...feature,
     project: projectName,
@@ -97,5 +108,6 @@ export async function buildFeatureDetail(
     phases,
     subPrds,
     sessionLog: sessionLog.length > 0 ? sessionLog : null,
+    ...(warnings.length > 0 ? { warnings } : {}),
   };
 }

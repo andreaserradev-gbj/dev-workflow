@@ -75,6 +75,35 @@ describe('buildFeatureDetail', () => {
     expect(core?.status).toBe('not-started');
   });
 
+  it('engages redundant-hybrid suppression when every sub-PRD row has an unknown glyph', async () => {
+    // Second-order effect of the whitelist defect. With all three rows carrying
+    // `🚧`, the sub-PRD's `total` parsed as 0, so the `r.total > 0` guard on the
+    // countsAuthoritative suppression never fired and the dead counter rendered
+    // as a live one. Counting the rows fixes the suppression as a side effect.
+    const dir = resolve(FIXTURES, 'master-hybrid-unknown-glyph');
+    const feature = await parseFeature(dir, 'master-hybrid-unknown-glyph');
+    const detail = await buildFeatureDetail(dir, feature, 'proj');
+
+    const foundation = detail.subPrds.find((s) => s.id === '01-sub-prd-foundation');
+    expect(foundation?.total).toBe(3);
+    expect(foundation?.done).toBe(0);
+    expect(foundation?.countsAuthoritative).toBe(false);
+    // Suppressed → status comes from the `**Status**` header, not the table.
+    expect(foundation?.status).toBe('complete');
+
+    // Every row warned, and the detail pane carries them like the summary does.
+    expect(detail.warnings).toHaveLength(3);
+    expect(detail.warnings![0]).toContain('🚧');
+  });
+
+  it('omits the warnings key entirely for a clean feature detail', async () => {
+    const dir = resolve(FIXTURES, 'full-feature');
+    const feature = await parseFeature(dir, 'full-feature');
+    const detail = await buildFeatureDetail(dir, feature, 'proj');
+
+    expect(detail.warnings).toBeUndefined();
+  });
+
   it('leaves sub-PRD counts authoritative in the ranged shape', async () => {
     // Sub-PRDs outnumber the parsed master phases → they ARE the progress source,
     // so their counts must stay live (no countsAuthoritative flag).

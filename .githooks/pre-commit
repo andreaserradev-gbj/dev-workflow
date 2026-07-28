@@ -19,8 +19,11 @@ if [ -n "$DASHBOARD_TS_CHANGED" ]; then
   fi
 fi
 
-# Check if dashboard source changed without rebuilding the bundle
-DASHBOARD_SRC_CHANGED=$(git diff --cached --name-only -- tools/dev-dashboard/src/ tools/dev-dashboard/package.json | head -1)
+# Check if dashboard source changed without rebuilding the bundle. Includes
+# dev-workflow-core/src/ because the dashboard depends on core (file: dependency,
+# tools/dev-dashboard/package.json) and inlines it at bundle time — a core-only
+# edit changes the shipped dashboard artifact without touching dashboard source.
+DASHBOARD_SRC_CHANGED=$(git diff --cached --name-only -- tools/dev-dashboard/src/ tools/dev-dashboard/package.json tools/dev-workflow-core/src/ | head -1)
 BUNDLE_CHANGED=$(git diff --cached --name-only -- plugins/dev-workflow/skills/dev-dashboard/dashboard/ | head -1)
 
 if [ -n "$DASHBOARD_SRC_CHANGED" ] && [ -z "$BUNDLE_CHANGED" ]; then
