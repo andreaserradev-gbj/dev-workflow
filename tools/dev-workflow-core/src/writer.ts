@@ -1,5 +1,12 @@
 import { readFile, writeFile } from 'fs/promises';
 import matter from 'gray-matter';
+import {
+  EXPECTED_GLYPHS_TEXT,
+  classifyStepGlyph,
+  firstGlyphInCell,
+  matchBulletStepLine,
+  matchNumberedStepLine,
+} from './glyphs.js';
 import { normalizeEmoji } from './parser.js';
 import type {
   CheckpointWriteInput,
@@ -125,6 +132,44 @@ export async function writeSessionDigest(
 // ─── Status Marker Updater ─────────────────────────────────────────
 
 /**
+ * The write path's answer to an unusable status marker: refuse, and name the
+ * real cause.
+ *
+ * The read path *counts* such a step — see {@link classifyStepGlyph} — but the
+ * writer cannot follow suit, because it rewrites the whole marker slot:
+ * flipping `⚠️ Written, unverifiable` to `✅ Done` would destroy the row's note
+ * text, not merely its glyph. Refusing is the only non-destructive answer.
+ *
+ * The message names the *step*, because that is what was found. The old code
+ * skipped such a row and let the caller report `Phase N not found` for a row it
+ * had already matched by step number — pointing at the wrong layer entirely.
+ *
+ * `cell` is supplied by the table path only: a blank status cell and one
+ * reading `Done, probably` are the same empty marker but different authoring
+ * mistakes, and `unrecognized status marker ""` reads as a bug in the tool.
+ * Inline steps never need it — their predicate requires an emoji in the marker
+ * slot, so the marker is non-empty by the time we get here.
+ */
+function unwritableMarkerError(
+  step: number,
+  filePath: string,
+  marker: string,
+  cell?: string,
+): Error {
+  let what: string;
+  if (marker !== '') {
+    what = `has unrecognized status marker ${JSON.stringify(marker)}`;
+  } else if (cell !== undefined && cell.trim() !== '') {
+    what = `has no status marker in ${JSON.stringify(cell.trim())}`;
+  } else {
+    what = 'has an empty status cell';
+  }
+  return new Error(
+    `step ${step} in ${filePath} ${what} (expected ${EXPECTED_GLYPHS_TEXT}) — fix the row, then re-run`,
+  );
+}
+
+/**
  * Surgically update a status marker (⬜ ↔ ✅) in a PRD file.
  *
  * Uses normalizeEmoji() pre-pass so emoji shortcodes are handled.
@@ -177,7 +222,7 @@ export async function updateStatus(
     // back to updating that table by step — or the `**Status**` field for a
     // phase-level marker. Guarded inside updateSubPrdFallback so a master plan
     // (no such table) reports the phase as missing rather than mutating status.
-    targetLineIdx = updateSubPrdFallback(lines, target, marker);
+    targetLineIdx = updateSubPrdFallback(lines, target, marker, filePath);
     if (targetLineIdx === -1) {
       throw new Error(`Phase ${target.phase} not found in ${filePath}`);
     }
@@ -221,16 +266,20 @@ export async function updateStatus(
       // Skip GATE lines
       if (trimmed.includes('⏸️') && trimmed.includes('GATE')) continue;
 
-      // Numbered steps: "3. ✅ ..." or "3. ⬜ ..."
-      const numberedMatch = trimmed.match(/^(\s*)(\d+)\.\s*(✅|⬜|⏭️)/);
-      if (numberedMatch) {
-        const stepNum = parseInt(numberedMatch[2], 10);
-        if (stepNum === target.step) {
+      // Numbered steps: "3. ✅ ..." or "3. ⬜ ...", recognised by the SAME
+      // predicate the parser counts with. The old local regex knew only three
+      // glyphs, so a `⛔`/`⏹️` step the parser happily counted was unwritable
+      // here — and reported as a missing phase.
+      const numbered = matchNumberedStepLine(trimmed);
+      if (numbered) {
+        if (numbered.number === target.step) {
+          if (classifyStepGlyph(numbered.marker) === 'unknown') {
+            throw unwritableMarkerError(target.step, filePath, numbered.marker);
+          }
           targetLineIdx = i;
           // Replace the marker in the line
-          const oldMarker = numberedMatch[3] as '✅' | '⬜' | '⏭️';
-          if (oldMarker !== marker) {
-            lines[i] = lines[i].replace(numberedMatch[3], marker);
+          if (numbered.marker !== marker) {
+            lines[i] = lines[i].replace(numbered.marker, marker);
           }
           break;
         }
@@ -238,15 +287,20 @@ export async function updateStatus(
         continue;
       }
 
-      // Bullet steps: "- ✅ ..." or "- ⬜ ..."
-      const bulletMatch = trimmed.match(/^(\s*-\s*)(✅|⬜|⏭️)/);
-      if (bulletMatch) {
+      // Bullet steps: "- ✅ ..." or "- ⬜ ...". These are targeted POSITIONALLY —
+      // the Nth bullet in the section — which is exactly why the predicate must
+      // be the parser's: the Nth bullet here has to be the Nth bullet there, or
+      // the writer silently rewrites the wrong line. See glyphs.ts.
+      const bullet = matchBulletStepLine(trimmed);
+      if (bullet) {
         stepCount++;
         if (stepCount === target.step) {
+          if (classifyStepGlyph(bullet.marker) === 'unknown') {
+            throw unwritableMarkerError(target.step, filePath, bullet.marker);
+          }
           targetLineIdx = i;
-          const oldMarker = bulletMatch[2] as '✅' | '⬜' | '⏭️';
-          if (oldMarker !== marker) {
-            lines[i] = lines[i].replace(bulletMatch[2], marker);
+          if (bullet.marker !== marker) {
+            lines[i] = lines[i].replace(bullet.marker, marker);
           }
           break;
         }
@@ -320,16 +374,22 @@ export async function updateStatus(
  * The `## Implementation Progress` guard is what keeps a master plan — which has
  * no such table — from having its overall `**Status**` field rewritten when a
  * phase-level marker targets a phase it doesn't contain.
+ *
+ * Deliberately does not catch: an unwritable-marker error from the table path
+ * means the row was FOUND and is unusable, which is the opposite of the `-1`
+ * this returns for genuine absence. Swallowing it would restore the misleading
+ * `Phase N not found` the refusal exists to replace.
  */
 function updateSubPrdFallback(
   lines: string[],
   target: StepTarget,
   marker: StatusMarker,
+  filePath: string,
 ): number {
   if (!lines.some((l) => /^##\s+Implementation Progress/i.test(l))) return -1;
   return target.step === undefined
     ? updateSubPrdStatusField(lines, marker)
-    : updateSubPrdTableStep(lines, target.step, marker);
+    : updateSubPrdTableStep(lines, target.step, marker, filePath);
 }
 
 /**
@@ -337,9 +397,16 @@ function updateSubPrdFallback(
  * is the given step number, e.g. `| **2** | Add deps | ⬜ Not Started |`. The
  * whole status cell is rewritten to a canonical `✅ Done` / `⬜ Not Started`, but
  * only when the current glyph actually differs (so a row already at the target
- * marker keeps its wording and reports no change). Returns the row index or -1.
+ * marker keeps its wording and reports no change). Returns the row index, or -1
+ * when the table genuinely has no row for this step. Throws when it has one the
+ * writer must not rewrite.
  */
-function updateSubPrdTableStep(lines: string[], step: number, marker: StatusMarker): number {
+function updateSubPrdTableStep(
+  lines: string[],
+  step: number,
+  marker: StatusMarker,
+  filePath: string,
+): number {
   const label = marker === '✅' ? 'Done' : 'Not Started';
   let inTable = false;
   for (let i = 0; i < lines.length; i++) {
@@ -357,11 +424,19 @@ function updateSubPrdTableStep(lines: string[], step: number, marker: StatusMark
     if (!trimmed.startsWith('|')) continue;
 
     const cells = line.split('|'); // ['', ' id ', ' desc ', ' status ', '']
+    // Skip a row only for STRUCTURAL reasons — wrong column count, or an ID cell
+    // that is not this step. The `| Step |` header and the `|---|` separator both
+    // fail the ID test, so neither needs a glyph check to weed it out. Past this
+    // point the row IS the targeted step, and an unusable marker on it is an
+    // error to report rather than a row to skip past: skipping is precisely what
+    // produced `Phase N not found` for a row already located by step number.
     if (cells.length < 5) continue;
     if (cells[1].replace(/\*/g, '').trim() !== String(step)) continue;
 
-    const currentGlyph = cells[3].match(/(✅|⬜|⏭️|⛔|⏹️)/)?.[1];
-    if (!currentGlyph) continue; // header/separator row, not a step
+    const currentGlyph = firstGlyphInCell(cells[3]);
+    if (classifyStepGlyph(currentGlyph) === 'unknown') {
+      throw unwritableMarkerError(step, filePath, currentGlyph, cells[3]);
+    }
     if (currentGlyph === marker) return i; // already the target — keep wording
     cells[3] = ` ${marker} ${label} `;
     lines[i] = cells.join('|');
