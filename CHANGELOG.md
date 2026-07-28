@@ -4,6 +4,12 @@ All notable changes to this project should be documented in this file.
 
 <!-- LOCAL-RELEASES-START -->
 
+## v1.39.4 - 2026-07-28
+
+### Changed
+
+- **The `prd-researcher` model pin moved from `/dev-plan`'s skill body into the agent's own frontmatter.** The Phase 2 research fan-out spawns 2–3 agents to grep the codebase for patterns and `file:line` references — work that wants a cheap model, not the session's. That choice was written as prose at the call site (`Use subagent_type=… and model=sonnet`), which bound it to that one line: anything else spawning `prd-researcher` silently got a different model, and a Claude-Code-only directive sat in the `SKILL.md` that Codex and other AgentSkills.io consumers read. `model: sonnet` now lives in `prd-researcher.md`'s frontmatter, so it holds regardless of caller and stays in the Claude-Code-only file. No behavior change on Claude Code — the research agents still run on Sonnet. `prd-planner` and `feature-reporter` remain deliberately unpinned: frontmatter `model` is a hard pin rather than a floor, and those two do the judgment work (phase decomposition, verify-every-claim review), so the session model should flow through to them.
+
 ## v1.39.3 - 2026-07-21
 
 ### Fixed
@@ -372,6 +378,13 @@ Checkpoints and resumes are now powered by deterministic CLI commands instead of
 <!-- LOCAL-RELEASES-END -->
 
 <!-- GITHUB-RELEASES-START -->
+
+## v1.39.3 - 2026-07-21
+
+### Fixed
+
+- **The dashboard and TUI no longer show a misleading `0/N` for sub-PRDs in the "redundant-hybrid" master-plan shape.** When a feature's `00-master-plan.md` fully enumerates its phases *with* inline steps AND its numbered sub-PRDs *also* keep their own `## Implementation Progress` tables, the same work is tracked in two places. `status-update` only writes the master plan (it owns the phases), so the sub-PRD tables never advance — yet the detail pane still rendered their frozen counters, e.g. a Foundation sub-PRD covering completed Phases 0–1 showing `0/10`. `buildFeatureDetail` now detects this shape — the master plan owns the phases (sub-PRDs don't outnumber them) and carries its own inline-step progress — and marks those sub-PRD counts non-authoritative (`countsAuthoritative: false`), so the web dashboard and TUI hide the dead `done/total` and fall back to the sub-PRD's own `**Status**` header. The ranged shape (sub-PRDs authoritative) and the stub-master shape (step-less master) are untouched — their sub-PRD tables remain the live source. New `master-hybrid-redundant` fixture plus `buildFeatureDetail` tests; all three bundles rebuilt.
+- **`/dev-plan` now steers authors away from creating the redundant-hybrid shape in the first place.** The skill and the PRD templates gained a "single source of step tracking" rule: a phase's numbered steps live in exactly one file — either the master plan's Implementation Order (sub-PRD is narrative only) or, when the master collapses phases into step-less range headers, the sub-PRD's Implementation Progress table — never both.
 
 ## v1.39.2 - 2026-07-08
 
