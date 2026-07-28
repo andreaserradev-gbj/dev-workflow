@@ -17,11 +17,24 @@ All notable changes to this project should be documented in this file.
 
 ### Changed
 
-- **The pre-commit dashboard-bundle gate now covers `tools/dev-workflow-core/src/`.** The dashboard takes core as a `file:` dependency and inlines it at bundle time, so a core-only edit changed the shipped dashboard artifact without touching dashboard source — and slipped past the gate. (The bundle committed at v1.39.4 was stale for exactly this reason.) The gate was observed failing on a core-only stage before being trusted.
+- **The pre-commit dashboard-bundle gate now covers `tools/dev-workflow-core/src/`.** The dashboard takes core as a `file:` dependency and inlines it at bundle time, so a core-only edit changed the shipped dashboard artifact without touching dashboard source — and slipped past the gate. No published bundle is known to have shipped stale: the one historical core-only commit was a dead-code deletion, and a later rebundle swept it up before release. But nothing *forced* the two to move together, which is the property a gate is supposed to provide. The gate was observed failing on a core-only stage before being trusted.
 
 ### Note on existing PRDs
 
-Correcting the denominator moves real numbers. A feature that previously read `complete` because a step was invisible will now correctly read `in-progress`, which un-hides it from the dashboard's `complete`-last sort and removes its Archive action. This is the bug surfacing, not a regression — the step was always outstanding. Measured against every feature in this repo (24 in `.dev/` and `.dev-archive/`), no count changed, so PRDs authored with the documented markers are unaffected.
+Correcting the denominator moves real numbers. A feature that previously read `complete` because a step was invisible will now correctly read `in-progress`, which un-hides it from the dashboard's `complete`-last sort and removes its Archive action. This is the bug surfacing, not a regression — the step was always outstanding.
+
+**Anything archived on the strength of a 100% reading is worth re-checking.** The failure mode was silent and symmetric: a feature could reach `complete` with real work outstanding, and archiving it on that reading would have filed it away as finished. Restoring it from `.dev-archive/` costs nothing if the reading was right.
+
+To find affected features, look for the new `warnings` key — it is present only when a marker could not be read:
+
+```bash
+for d in .dev/*/ .dev-archive/*/; do
+  dev-workflow progress-summary --json --dir "$d" 2>/dev/null \
+    | jq -r 'select(.warnings) | "\(.feature): \(.warnings|length) warning(s)"'
+done
+```
+
+Measured against every feature in this repo (24 in `.dev/` and `.dev-archive/`), no count changed, so PRDs authored with the documented markers are unaffected.
 
 ## v1.39.4 - 2026-07-28
 

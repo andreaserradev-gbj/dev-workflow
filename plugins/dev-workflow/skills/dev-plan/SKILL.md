@@ -32,7 +32,7 @@ Store the output as `$PROJECT_ROOT`. If the command fails, inform the user and s
 The sole deliverable is PRD files written to `$PROJECT_ROOT/.dev/$FEATURE_NAME/`.
 Produce documentation, not code. Every session must end with files on disk.
 
-This is part of a 3-skill system (`/dev-plan` → `/dev-checkpoint` → `/dev-resume`). The other skills parse PRD files using status markers (`⬜`/`✅`), phase gates, file changes summary, and sub-PRD links.
+This is part of a 3-skill system (`/dev-plan` → `/dev-checkpoint` → `/dev-resume`). The other skills parse PRD files using status markers (`⬜` pending; `✅`/`⏭️`/`⛔`/`⏹️` resolved), phase gates, file changes summary, and sub-PRD links. Write steps with `⬜` — any other emoji marker parses as an unrecognized status: the step still counts toward the total, but it reads as not done and `status-update` will refuse to write over it.
 
 ## AGENTS
 

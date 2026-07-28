@@ -80,6 +80,8 @@ _(Only for complex features. Remove this section for simple features.)_
 
 _(Repeat for additional phases. Each needs: Goal, numbered ⬜ steps, Verification checklist, and ⏸️ GATE.)_
 
+_Status markers: `⬜` pending; `✅` `⏭️` `⛔` `⏹️` resolved (done, skipped, dropped, deferred — all count toward `done`). Start every step at `⬜`. Any other emoji in the marker slot parses as an unrecognized status: the step still counts toward the total but reads as not done, and `status-update` refuses to overwrite it._
+
 ---
 
 ## File Changes Summary
@@ -133,6 +135,8 @@ _(Repeat for additional phases. Each needs: Goal, numbered ⬜ steps, Verificati
 |------|-------------|--------|
 | **1** | [Description] | ⬜ Not Started |
 | **2** | [Description] | ⬜ Not Started |
+
+_Keep these three leading columns in this order — the parser reads the step ID from the first and the status from the third. The marker must **lead** the status cell (`⬜ Not Started`, not `Not Started ⬜`); a trailing glyph reads as an unrecognized status._
 
 ---
 

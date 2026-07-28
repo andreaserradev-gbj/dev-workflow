@@ -312,7 +312,7 @@ dev-workflow wiki-index --generate --ensure .  # register this repo, then scan t
 
 **Composable, not prescribed.** Each skill is independent. Use `/dev-plan` without `/dev-checkpoint`. Use `/dev-resume` alongside `/code-review`, Jira, Slack, or any other tool. Start a session without any plan at all. The skills work together but never force a sequence.
 
-**Plans are living documents.** PRDs have status markers (`⬜` / `✅` / `⏭️`) and phase gates (`⏸️ GATE`). They're meant to be edited mid-flight — add phases, skip steps, rewrite sections when requirements change. Checkpoints capture the decisions behind those changes.
+**Plans are living documents.** PRDs have status markers (`⬜` pending; `✅` / `⏭️` / `⛔` / `⏹️` resolved) and phase gates (`⏸️ GATE`). They're meant to be edited mid-flight — add phases, skip steps, rewrite sections when requirements change. Checkpoints capture the decisions behind those changes. Because a step is recognized by its structure rather than its glyph, annotating one with a marker of your own counts it as outstanding and warns — it never drops out of the count.
 
 **Context quality over context quantity.** Checkpoints are structured compression: they preserve what matters (state, decisions, next actions) and deliberately discard what doesn't (debugging tangents, tool output, failed attempts). Each resumed session starts lean.
 
