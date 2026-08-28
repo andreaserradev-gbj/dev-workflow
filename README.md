@@ -30,6 +30,25 @@ It started small: a plan I could write once, a checkpoint I could save when I st
 
 ---
 
+## Loops, Graphs, and the Part Nobody Ships
+
+You've seen the debate: is an agent "a model in a loop" (Anthropic) or a declared graph of agents (LangGraph)? Both answers live inside one session. The loop dies when you close the window; the graph has no memory across restarts.
+
+dev-workflow is the piece both camps skip: **a human-driven outer graph that spans sessions**. Agent loops run inside each phase. PRD gates are the edges. Checkpoints are the durable state. You — not the model — decide when the graph advances.
+
+| Graph concept | Where it lives here |
+|---------------|---------------------|
+| Nodes | PRD phases and steps |
+| Edges | Phase gates (`⏸️ GATE: Continue or /dev-checkpoint`) |
+| Node state | Status markers `⬜ ✅ ⏭️ ⛔ ⏹️` |
+| State across iterations | Checkpoint (`<current_state>`, `<decisions>`, `<next_action>`) |
+| Invalid transitions | **Impossible, not discouraged** — `status-update` refuses to overwrite an unknown marker (exit 1) |
+| Cycle closure | Manual — `/dev-checkpoint` → restart → `/dev-resume` |
+
+**vs. agent frameworks** (LangGraph, CrewAI, ...): they orchestrate the agent *within* a session. dev-workflow orchestrates *you across* sessions. They solve agent coordination; this solves engineer continuity.
+
+---
+
 ## How I Work
 
 I architect the feature. The agent implements it and brainstorms with me. I review every line it writes, including the boilerplate that slips through. When something ships and works, that is on me. When it breaks, also me. The agent is an implementer and a sparring partner, never the decision-maker.
