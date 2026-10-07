@@ -417,6 +417,38 @@ Checkpoints and resumes are now powered by deterministic CLI commands instead of
 
 <!-- GITHUB-RELEASES-START -->
 
+## v1.40.0 - 2026-07-28
+
+### Fixed
+
+- **A step whose status glyph isn't one of the known markers no longer vanishes from progress counts.** `dev-workflow-core` decided whether a PRD line or sub-PRD table row was a step by whitelisting the glyph in its status slot (`⬜ ✅ ⏭️ ⛔ ⏹️`). Any other glyph — `⚠️`, `🚧`, an empty cell, a cell holding prose — made the row invisible rather than unknown, dropping it from *both* the numerator and the denominator: a 10-step sub-PRD carrying one `⚠️` reported `9/9` and a status of `complete`, silently, with the phase reading as finished. Step recognition is now structural and separate from status classification, in a single module (`glyphs.ts`) that the parser and writer both route through. A numbered or bulleted line is a step when an **emoji token** occupies the marker slot; a table row is a step when its *shape* says so — a step ID cell plus the column layout — whatever the status cell holds. An unrecognized marker counts toward `total`, never toward `done`, and raises a warning naming the file, the step, and the glyph. The same defect existed in the master-plan inline form, which the original report didn't cover; both forms are fixed. New `glyphs.test.ts` plus `subprd-unknown-glyph`, `subprd-empty-status-cell`, `master-unknown-glyph` and `master-hybrid-unknown-glyph` fixtures; all three bundles rebuilt.
+- **Sub-PRD counters in the redundant-hybrid shape are suppressed even when every row carries an unknown glyph.** A second-order effect of the same defect: with all rows invisible a sub-PRD's `total` parsed as `0`, so the `countsAuthoritative: false` suppression added in v1.39.3 — guarded on `total > 0` — never engaged, and the dead counter rendered as a live one. Counting the rows fixes the suppression as a side effect.
+
+### Added
+
+- **Parse warnings travel with the data, on both `Feature` and `FeatureDetail`.** A new optional `warnings?: string[]` reports the rows whose status could not be read, so "this feature's numbers are lying to you" lands on the portfolio card rather than being buried in a detail pane. `SubPrdStep` gains an optional `unrecognizedMarker` carrying the offending glyph. Both keys are omitted entirely when there is nothing to report, so payloads for healthy features keep their existing shape, and the list is capped at 20 entries with an `…and N more` tail. Structured rather than logged, deliberately: core is imported by the Ink TUI, which renders to stdout while a file watcher re-parses in the background, and a dashboard server log is precisely the invisible-failure mode being fixed.
+
+### Changed
+
+- **The pre-commit dashboard-bundle gate now covers `tools/dev-workflow-core/src/`.** The dashboard takes core as a `file:` dependency and inlines it at bundle time, so a core-only edit changed the shipped dashboard artifact without touching dashboard source — and slipped past the gate. No published bundle is known to have shipped stale: the one historical core-only commit was a dead-code deletion, and a later rebundle swept it up before release. But nothing *forced* the two to move together, which is the property a gate is supposed to provide. The gate was observed failing on a core-only stage before being trusted.
+
+### Note on existing PRDs
+
+Correcting the denominator moves real numbers. A feature that previously read `complete` because a step was invisible will now correctly read `in-progress`, which un-hides it from the dashboard's `complete`-last sort and removes its Archive action. This is the bug surfacing, not a regression — the step was always outstanding.
+
+**Anything archived on the strength of a 100% reading is worth re-checking.** The failure mode was silent and symmetric: a feature could reach `complete` with real work outstanding, and archiving it on that reading would have filed it away as finished. Restoring it from `.dev-archive/` costs nothing if the reading was right.
+
+To find affected features, look for the new `warnings` key — it is present only when a marker could not be read:
+
+```bash
+for d in .dev/*/ .dev-archive/*/; do
+  dev-workflow progress-summary --json --dir "$d" 2>/dev/null \
+    | jq -r 'select(.warnings) | "\(.feature): \(.warnings|length) warning(s)"'
+done
+```
+
+Measured against every feature in this repo (24 in `.dev/` and `.dev-archive/`), no count changed, so PRDs authored with the documented markers are unaffected.
+
 ## v1.39.4 - 2026-07-28
 
 ### Changed
