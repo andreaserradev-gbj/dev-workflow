@@ -43,6 +43,7 @@ describe('gate-check', () => {
     expect(json.completedPhase).toMatchObject({ number: 1, title: 'Email Channel' });
     expect(json.nextPhase).toMatchObject({ number: 2, title: 'Push Notifications' });
     expect(json.allComplete).toBe(false);
+    expect(json.gateContract).toContain('recap');
   });
 
   it('reports not at gate for in-progress feature (exit 0)', async () => {
@@ -53,6 +54,7 @@ describe('gate-check', () => {
     expect(json.atGate).toBe(false);
     expect(json.completedPhase).toBeNull();
     expect(json.nextPhase).toBeNull();
+    expect(json.gateContract).toBeUndefined();
   });
 
   it('reports all complete for shortcode-emoji feature (exit 0)', async () => {
@@ -73,6 +75,7 @@ describe('gate-check', () => {
     expect(text).toContain('Email Channel');
     expect(text).toContain('Phase 2');
     expect(text).toContain('Push Notifications');
+    expect(text).toContain('recap');
   });
 
   it('shows not at gate text for in-progress feature', async () => {
