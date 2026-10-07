@@ -4,6 +4,12 @@ All notable changes to this project should be documented in this file.
 
 <!-- LOCAL-RELEASES-START -->
 
+## v1.41.0 - 2026-10-07
+
+### Added
+
+- **`gate-check` carries the gate contract in its output.** Skills consume gate state mechanically, but the expected stop behavior — recap first (impact, choices, evidence, gaps), then the continue-or-checkpoint question, external actions left to the user — previously lived only in the conversation, so an autonomous phase run could reach the gate without delivering the owner-facing recap. The contract now travels with the state: a `gateContract` field in the `--json` payload and a line in text output, present only when `atGate` is true, so payloads for every other state keep their existing shape.
+
 ## v1.40.0 - 2026-07-28
 
 ### Fixed

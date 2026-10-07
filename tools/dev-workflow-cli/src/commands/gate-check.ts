@@ -9,7 +9,13 @@ interface GateOutput {
   completedPhase: { number: number; title: string } | null;
   nextPhase: { number: number; title: string } | null;
   allComplete: boolean;
+  gateContract?: string;
 }
+
+// Skills read gate state and act on it; the contract rides along so the
+// expected stop behavior is stated at the moment of stopping, not recalled.
+const GATE_CONTRACT =
+  'GATE: deliver the recap first — impact, key choices, evidence (file:line + test names), gaps — then ask: continue to the next phase or /dev-checkpoint. External actions (push, PR, merge) stay with the user.';
 
 export async function gateCheck(args: string[]): Promise<number> {
   const { flags } = parseFlags(args);
@@ -56,6 +62,9 @@ export async function gateCheck(args: string[]): Promise<number> {
   }
 
   const output: GateOutput = { feature: featureName, atGate, completedPhase, nextPhase, allComplete };
+  if (atGate) {
+    output.gateContract = GATE_CONTRACT;
+  }
 
   if (json) {
     console.log(JSON.stringify(output, null, 2));
@@ -66,6 +75,7 @@ export async function gateCheck(args: string[]): Promise<number> {
     } else if (atGate) {
       console.log(`AT GATE: Phase ${completedPhase!.number} (${completedPhase!.title}) complete.`);
       console.log(`Next: Phase ${nextPhase!.number} (${nextPhase!.title})`);
+      console.log(GATE_CONTRACT);
     } else {
       console.log('Not at a gate.');
       const active = phases.find((p) => p.status === 'in-progress');
