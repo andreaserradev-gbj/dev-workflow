@@ -4,6 +4,12 @@ All notable changes to this project should be documented in this file.
 
 <!-- LOCAL-RELEASES-START -->
 
+## v1.42.0 - 2026-10-14
+
+### Added
+
+- **`/dev-orchestrator` — run one PRD phase by delegation in Herdr.** A coordinator agent skill for work inside a Herdr pane: it resumes the feature checkpoint, transcribes the current phase's PRD steps into worker briefs (step text, verification commands, required report shape — inlined, so worktree workers don't need the gitignored PRD), launches one worker at a time (`herdr agent start --kind omp` in a split pane), and gates each step's marker tick on the named verification evidence in the worker's report. Missing or ambiguous evidence leaves the marker ⬜ and pages the user; permission prompts are triaged in-task only when plainly non-destructive, with pushes, PRs, destructive ops, and trust screens always paged. At the phase gate it delivers a recap (impact, choices with forks, evidence, gaps) and asks before continuing. Outside Herdr (`HERDR_ENV` unset) the skill is inert and degrades to plain `/dev-resume` behavior, so it ships safely to environments without Herdr. Sequential Tier 0: no plugin manifest, parallel workers, or ticker wakeups (deferred).
+
 ## v1.41.0 - 2026-10-07
 
 ### Added
