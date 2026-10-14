@@ -11159,7 +11159,7 @@ async function progressSummary(args) {
 
 // src/commands/gate-check.ts
 var import_path8 = require("path");
-var GATE_CONTRACT = "GATE: deliver the recap first \u2014 impact, key choices (each with its fork), evidence (file:line + test names), gaps \u2014 then write the checkpoint via checkpoint-write (decision trail included), then auto-continue to the next phase without asking. External actions (push, PR, merge) stay with the user.";
+var GATE_CONTRACT = "GATE: deliver the recap first \u2014 impact, key choices (each with its fork), evidence (file:line + test names), gaps \u2014 then write the checkpoint via checkpoint-write (decision trail included), then continue to the next phase: auto-continue in whole-feature runs, ask-and-wait in step-level runs. External actions (push, PR, merge) stay with the user.";
 async function gateCheck(args) {
   const { flags } = parseFlags(args);
   const json = flags.json === true;
@@ -11194,7 +11194,16 @@ async function gateCheck(args) {
       nextPhase = { number: next.number, title: next.title };
     }
   }
-  const output = { feature: featureName, atGate, completedPhase, nextPhase, allComplete };
+  const output = {
+    feature: featureName,
+    atGate,
+    completedPhase,
+    nextPhase,
+    allComplete
+  };
+  if (masterPlan.warnings && masterPlan.warnings.length > 0) {
+    output.warnings = masterPlan.warnings;
+  }
   if (atGate) {
     output.gateContract = GATE_CONTRACT;
   }
@@ -11202,6 +11211,9 @@ async function gateCheck(args) {
     console.log(JSON.stringify(output, null, 2));
   } else {
     console.log(`Feature: ${featureName}`);
+    if (output.warnings) {
+      output.warnings.forEach((w) => console.log(`WARNING: ${w}`));
+    }
     if (allComplete) {
       console.log("All phases complete.");
     } else if (atGate) {

@@ -7,7 +7,8 @@ description: >-
   evidence, auto-checkpoint and auto-continue at every gate, and page
   the human only for anomalies (a verification failing without a fix,
   an architectural preference call, an external or irreversible action,
-  missing key files, a drifted branch).
+  missing key or PRD files, a drifted branch, or another loop-blocking
+  state it cannot resolve).
   Use when a checkpointed feature should run hands-off without per-step
   supervision.
 argument-hint: <feature name>
@@ -109,7 +110,7 @@ After the phase's last step is ticked:
 node "$CLI" gate-check --json --dir "$FEATURE_DIR"
 ```
 
-Check the `atGate` field. If the gate is not reached — an unticked step, a parse warning — resolve under the lane rules or page before continuing. Do not recap past an unmet gate.
+Check the `atGate` field and the optional `warnings` field (present only when the PRD has rows whose status marker could not be read). If the gate is not reached — an unticked step, or a parse warning surfaced in `warnings` — resolve under the lane rules or page before continuing. Do not recap past an unmet gate.
 
 If it is reached:
 
@@ -118,21 +119,9 @@ If it is reached:
    - **Choices** — key decisions, each with its fork; queued items called out for revisit.
    - **Evidence** — file:line and test names, taken from the verification commands you ran.
    - **Gaps** — unverified claims, skipped steps, open questions.
-2. **Write the checkpoint** via `checkpoint-write`, composing `CheckpointWriteInput` JSON with at least `context`, `currentState`, `nextAction`, `keyFiles` (required), plus `decisions`, `blockers`, `notes`. The CLI never calls git — supply `branch`, `lastCommit`, and `uncommittedChanges` yourself:
+2. **Write the checkpoint** via `checkpoint-write`, composing `CheckpointWriteInput` JSON with at least `context`, `currentState`, `nextAction`, `keyFiles` (required), plus `decisions`, `blockers`, `notes`. The CLI never calls git — supply `branch`, `lastCommit`, and `uncommittedChanges` yourself (`git rev-parse --abbrev-ref HEAD`, `git rev-parse --short HEAD`, `git status --porcelain` non-empty → `true`).
 
-   ```bash
-   git rev-parse --abbrev-ref HEAD    # branch
-   git rev-parse --short HEAD         # lastCommit
-   git status --porcelain | wc -l     # >0 → uncommittedChanges: true
-   ```
-
-   **Use `--input-file`, not `echo | --stdin`.** Multi-line JSON string values (`context`, `currentState`, … contain real newlines) cannot be piped reliably through `echo` — unescaped newlines inside JSON string literals make `JSON.parse` reject the input. Reuse the dev-checkpoint convention:
-
-   1. **Write** the JSON to `$FEATURE_DIR/.checkpoint-input.json` with the `Write` tool (real newlines are fine — `Write` is not a shell).
-   2. **Run** `node "$CLI" checkpoint-write --json --dir "$FEATURE_DIR" --input-file "$FEATURE_DIR/.checkpoint-input.json"`.
-   3. **Delete** the input file once the CLI reports success (`rm -f`). On failure, leave it for inspection, stop, and report — the checkpoint was NOT saved.
-
-   **Do NOT manually write `checkpoint.md` or `session-log.md`** — the CLI ensures format compatibility and handles session-log accumulation.
+   Reuse the dev-checkpoint skill's `--input-file` recipe exactly: **Write** the JSON to `$FEATURE_DIR/.checkpoint-input.json` (the `Write` tool handles real newlines; `echo | --stdin` cannot), **run** `node "$CLI" checkpoint-write --json --dir "$FEATURE_DIR" --input-file "$FEATURE_DIR/.checkpoint-input.json"`, **delete** the input file on success (`rm -f`), leave it and STOP on failure — the checkpoint was NOT saved. **Do NOT manually write `checkpoint.md` or `session-log.md`** — the CLI ensures format compatibility and handles session-log accumulation.
 
 3. **Auto-continue** to the next phase without asking. Announce the next phase (title, step count, gate at its end) and re-enter the phase loop at Step 2. One run covers every phase.
 
@@ -140,20 +129,18 @@ At the **last gate** (`allComplete` in gate-check output): deliver the final sum
 
 ### Paging Contract
 
-Page the user — pause-and-wait — in every one of these cases:
+Pause-and-wait for every run-loop anomaly:
 
 - A verification failing with no fix after one attempt (the same repair failing twice = stop). The page shows: attempted paths, the fork, verified current state, exact next action.
 - An architectural preference call: a choice touching a cross-module interface, or contradicting the PRD's stated approach.
-- External or irreversible actions: push, PR, merge, publish, destructive operations, branch switch.
-- Missing key files; missing PRD files.
-- A drifted branch (checkpoint valid on `Y`, working tree on `X` — not fixable by you).
-- Discovery/validation refusing, an untickable step, or a gate-refusing state you cannot resolve.
+- Missing key or PRD files; a drifted branch (checkpoint valid on `Y`, working tree on `X` — not fixable by you).
+- Discovery/validation refusing, an untickable step, or a gate-refusing state you cannot resolve — including any parse warning surfaced by `gate-check` you cannot clear.
 
-While paged, do not start other phases' work. Resume when the user answers.
+Everything in the Safety Summary below is a permanent page-in-every-case list; this section only adds the loop's transient triggers. While paged, do not start other phases' work. Resume when the user answers.
 
 ### Mid-Run Skips
 
-A step can be skipped, dropped, or deferred only by editing the PRD marker by hand — `status-update` writes ✅/⬜ only and refuses to overwrite any glyph it does not recognize. The resolved glyphs are `✅` done, `⏭️` skipped, `⛔` dropped, `⏹️` deferred; all count toward phase completion. Apply the hand edit to `00-master-plan.md` (or the named sub-PRD) with the `Edit` tool on the user's explicit request — never on the run's own initiative.
+A step can be skipped, dropped, or deferred only by editing the PRD marker by hand — `status-update` writes ✅/⬜ only and refuses to overwrite any glyph it does not recognize. The resolved glyphs are `✅` done, `⏭️` skipped, `⛔` dropped, `⏹️` deferred; all count toward phase completion. Apply the hand edit to `00-master-plan.md` (or the named sub-PRD) with the `Edit` tool on the user's explicit request — never on the run's own initiative. After the edit, the user's "continue" re-enters the phase loop: re-derive position from the PRD (the first remaining ⬜ is next; the edited glyph counts as done). A skipped step always appears in the recap's Gaps.
 
 ### Crash Recovery
 

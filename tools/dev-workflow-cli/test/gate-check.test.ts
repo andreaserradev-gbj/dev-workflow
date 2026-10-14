@@ -175,6 +175,9 @@ describe('gate-check', () => {
       const json = JSON.parse(output.lines.join('\n'));
       expect(json.allComplete).toBe(false);
       expect(json.atGate).toBe(false);
+      expect(json.warnings).toEqual(
+        expect.arrayContaining([expect.stringContaining('unrecognized')]),
+      );
     });
 
     it('does not report atGate when the phase behind the gate has an unknown step', async () => {
