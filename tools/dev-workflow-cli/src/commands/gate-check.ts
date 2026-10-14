@@ -9,13 +9,17 @@ interface GateOutput {
   completedPhase: { number: number; title: string } | null;
   nextPhase: { number: number; title: string } | null;
   allComplete: boolean;
+  warnings?: string[]; // parse-only rows; omitted entirely when nothing to report
   gateContract?: string;
 }
 
 // Skills read gate state and act on it; the contract rides along so the
-// expected stop behavior is stated at the moment of stopping, not recalled.
+// expected gate sequence is stated at the moment of stopping, not recalled.
+// The string stays shared and consumer-agnostic: whole-feature runs
+// (dev-orchestrator) auto-continue after the checkpoint; step-level runs
+// (dev-resume) stop and ask. The calling skill's contract picks which.
 const GATE_CONTRACT =
-  'GATE: deliver the recap first — impact, key choices, evidence (file:line + test names), gaps — then ask: continue to the next phase or /dev-checkpoint. External actions (push, PR, merge) stay with the user.';
+  'GATE: deliver the recap first — impact, key choices (each with its fork), evidence (file:line + test names), gaps — then write the checkpoint via checkpoint-write (decision trail included), then continue to the next phase: auto-continue in whole-feature runs, ask-and-wait in step-level runs. External actions (push, PR, merge) stay with the user.';
 
 export async function gateCheck(args: string[]): Promise<number> {
   const { flags } = parseFlags(args);
@@ -61,7 +65,16 @@ export async function gateCheck(args: string[]): Promise<number> {
     }
   }
 
-  const output: GateOutput = { feature: featureName, atGate, completedPhase, nextPhase, allComplete };
+  const output: GateOutput = {
+    feature: featureName,
+    atGate,
+    completedPhase,
+    nextPhase,
+    allComplete,
+  };
+  if (masterPlan.warnings && masterPlan.warnings.length > 0) {
+    output.warnings = masterPlan.warnings;
+  }
   if (atGate) {
     output.gateContract = GATE_CONTRACT;
   }
@@ -70,6 +83,9 @@ export async function gateCheck(args: string[]): Promise<number> {
     console.log(JSON.stringify(output, null, 2));
   } else {
     console.log(`Feature: ${featureName}`);
+    if (output.warnings) {
+      output.warnings.forEach((w) => console.log(`WARNING: ${w}`));
+    }
     if (allComplete) {
       console.log('All phases complete.');
     } else if (atGate) {

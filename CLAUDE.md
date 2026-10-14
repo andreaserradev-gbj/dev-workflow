@@ -43,6 +43,9 @@ plugins/dev-workflow/           # Plugin package
       SKILL.md
       scripts/launch.sh             # Foreground `exec node` launcher (user-run)
       tui/cli.mjs                   # Bundled Ink TUI (committed build artifact, ESM)
+    dev-orchestrator/
+      SKILL.md
+      scripts/discover.sh, validate.sh, dev-workflow.cjs
 # Generated in user's project (not in plugin repo)
 .dev/wrapup-feedback.json        # Wrapup feedback history (auto-compacting)
 .codex/

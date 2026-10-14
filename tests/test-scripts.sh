@@ -239,6 +239,27 @@ check_bin_sync() {
 
 check_bin_sync dev-workflow.cjs dev-checkpoint dev-orchestrator dev-plan dev-resume dev-review dev-wiki
 
+# no-herdr guard: the orchestrator skill runs in-session; no worker/pane protocol
+# may reappear in the skill's hand-written files. Derived bundle copies are
+# regenerated from tools/dev-workflow-cli/src, so the guard targets SKILL.md and
+# scripts/*.sh only — a herdr word shipped in a future generated bundle must not
+# fire on incidental content.
+echo ""
+echo "--- no-herdr guard ---"
+ORCH_DIR="$SKILLS_DIR/dev-orchestrator"
+GUARD_HITS="$(grep -ril herdr "$ORCH_DIR/SKILL.md" "$ORCH_DIR"/scripts/*.sh 2>/dev/null || true)"
+if [ ! -f "$ORCH_DIR/SKILL.md" ]; then
+  echo "FAIL: dev-orchestrator SKILL.md missing — guard has no subject"
+  FAIL=$((FAIL + 1))
+elif [ -n "$GUARD_HITS" ]; then
+  echo "FAIL: dev-orchestrator skill contains herdr references:"
+  grep -rin herdr "$ORCH_DIR/SKILL.md" "$ORCH_DIR"/scripts/*.sh | head -10
+  FAIL=$((FAIL + 1))
+else
+  echo "PASS: dev-orchestrator skill herdr-free"
+  PASS=$((PASS + 1))
+fi
+
 echo ""
 echo "--- bundle smoke test ---"
 # Runs the ACTUAL shipped .cjs end-to-end (not just byte-identity). The vitest suites

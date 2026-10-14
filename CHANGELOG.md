@@ -4,6 +4,12 @@ All notable changes to this project should be documented in this file.
 
 <!-- LOCAL-RELEASES-START -->
 
+## v1.43.0 - 2026-10-14
+
+### Changed
+
+- **`/dev-orchestrator` rewritten: Herdr per-step delegation → whole-feature in-session runner.** One agent session now executes every phase of a checkpointed feature end-to-end instead of spawning a fresh Herdr worker per PRD step. The per-step design paid pane + session startup per spawn and each worker was amnesiac by construction; Herdr imposed none of it (one `agent start` is a persistent session), so the protocol, not the tool, was the defect. The Herdr protocol is deleted entirely — `HERDR_ENV` gating, the degraded dev-resume duplicate, the worker/pane loop, and permission triage are gone; git history and the archived PRD keep it. The session now re-derives position from `resume-context` plus a direct `checkpoint.md` read, executes steps under embedded lane rules (fix reversible / pick-and-log local preference / page on the rest), ticks each marker only on the verification it ran itself, and at every gate delivers a recap (impact, choices with forks, evidence file:line + test names, gaps), writes a checkpoint with the decision trail via `checkpoint-write`, and auto-continues to the next phase without asking. Paging contract: verification failing with no fix after one attempt (the same repair failing twice = stop), architectural preference calls, external/irreversible actions, missing key files, drifted branch. The skill's name, scripts, and CLI surface are unchanged; `allowed-tools` gains `Edit`/`Write`. `gate-check`'s shipped `GATE_CONTRACT` string stays shared and consumer-agnostic: recap → checkpoint-write → continue, auto-continue for whole-feature runs and ask-and-wait for step-level runs (`dev-resume`), and `gate-check` now surfaces PRD parse warnings — an optional `warnings` field in the `--json` payload plus `WARNING:` lines in text output, present only when rows carry unreadable status markers. A new no-herdr guard in `tests/test-scripts.sh` (targeting the skill's hand-written files — `SKILL.md` + `scripts/*.sh`, not the derived bundle copies; FAILs when `SKILL.md` is missing) pins herdr-independence, observed failing before first trusted pass; README, Codex docs, and CLAUDE.md describe the new behavior; suite at 50 passed / 0 failed.
+
 ## v1.42.1 - 2026-10-14
 
 ### Fixed
@@ -434,6 +440,18 @@ Checkpoints and resumes are now powered by deterministic CLI commands instead of
 <!-- LOCAL-RELEASES-END -->
 
 <!-- GITHUB-RELEASES-START -->
+
+## v1.42.1 - 2026-10-14
+
+### Fixed
+
+- **Dashboard: sanitize all rendered markdown (Socket `gptAnomaly`).** `tools/dev-dashboard` rendered PRD-adjacent text (checkpoint `nextAction`, decisions, blockers) to `dangerouslySetInnerHTML` through `marked` with no sanitizer, so raw HTML, event handlers, and `javascript:`/`data:` URLs from `.dev/` content executed in the dashboard page. `markdown.ts` now runs DOMPurify (defaults + `http(s)`/`mailto`/relative URI allowlist) on both `render` and `renderInline`; link text survives, schemes are stripped inert. Covered by new XSS-vector tests in `test/markdown.test.ts` (jsdom).
+
+### Changed
+
+- **CLI bundle ships unminified.** `bin/dev-workflow.cjs` and per-skill copies are esbuild-bundled with `minify: false` (184KB → 416KB): the skills.sh Gen Agent Trust Hub scanner flagged the minified artifact as OBFUSCATION (MEDIUM on dev-plan/dev-resume). Behavior unchanged; all 133 CLI tests and the 49-script suite pass.
+- **Stale skills.sh findings no longer trip the audit gate.** `scripts/check-skills-audit.sh` `--fail-on` now excludes findings older than `STALE_DAYS` (7) from the triggered-alert computation — a stale risk level describes an artifact no longer in the repo; fresh scans follow every release. Stale rows remain visible with their `[STALE]` marker.
+- **Added `SECURITY.md`** documenting the trust model: `.dev/` markdown is untrusted data, dashboard rendering is sanitized, process launches are `execFile` arg-arrays, and which scanner categories are inherent to the product shape.
 
 ## v1.42.0 - 2026-10-14
 
