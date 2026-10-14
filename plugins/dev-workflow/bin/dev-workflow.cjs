@@ -11159,7 +11159,7 @@ async function progressSummary(args) {
 
 // src/commands/gate-check.ts
 var import_path8 = require("path");
-var GATE_CONTRACT = "GATE: deliver the recap first \u2014 impact, key choices, evidence (file:line + test names), gaps \u2014 then ask: continue to the next phase or /dev-checkpoint. External actions (push, PR, merge) stay with the user.";
+var GATE_CONTRACT = "GATE: deliver the recap first \u2014 impact, key choices (each with its fork), evidence (file:line + test names), gaps \u2014 then write the checkpoint via checkpoint-write (decision trail included), then auto-continue to the next phase without asking. External actions (push, PR, merge) stay with the user.";
 async function gateCheck(args) {
   const { flags } = parseFlags(args);
   const json = flags.json === true;

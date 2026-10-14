@@ -15,7 +15,7 @@ interface GateOutput {
 // Skills read gate state and act on it; the contract rides along so the
 // expected stop behavior is stated at the moment of stopping, not recalled.
 const GATE_CONTRACT =
-  'GATE: deliver the recap first — impact, key choices, evidence (file:line + test names), gaps — then ask: continue to the next phase or /dev-checkpoint. External actions (push, PR, merge) stay with the user.';
+  'GATE: deliver the recap first — impact, key choices (each with its fork), evidence (file:line + test names), gaps — then write the checkpoint via checkpoint-write (decision trail included), then auto-continue to the next phase without asking. External actions (push, PR, merge) stay with the user.';
 
 export async function gateCheck(args: string[]): Promise<number> {
   const { flags } = parseFlags(args);

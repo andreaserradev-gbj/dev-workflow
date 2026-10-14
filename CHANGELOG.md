@@ -4,6 +4,12 @@ All notable changes to this project should be documented in this file.
 
 <!-- LOCAL-RELEASES-START -->
 
+## v1.43.0 - 2026-10-14
+
+### Changed
+
+- **`/dev-orchestrator` rewritten: Herdr per-step delegation → whole-feature in-session runner.** One agent session now executes every phase of a checkpointed feature end-to-end instead of spawning a fresh Herdr worker per PRD step. The per-step design paid pane + session startup per spawn and each worker was amnesiac by construction; Herdr imposed none of it (one `agent start` is a persistent session), so the protocol, not the tool, was the defect. The Herdr protocol is deleted entirely — `HERDR_ENV` gating, the degraded dev-resume duplicate, the worker/pane loop, and permission triage are gone; git history and the archived PRD keep it. The session now re-derives position from `resume-context` plus a direct `checkpoint.md` read, executes steps under embedded lane rules (fix reversible / pick-and-log local preference / page on the rest), ticks each marker only on the verification it ran itself, and at every gate delivers a recap (impact, choices with forks, evidence file:line + test names, gaps), writes a checkpoint with the decision trail via `checkpoint-write`, and auto-continues to the next phase without asking. Paging contract: verification failing with no fix after one attempt (the same repair failing twice = stop), architectural preference calls, external/irreversible actions, missing key files, drifted branch. The skill's name, scripts, and CLI surface are unchanged; `allowed-tools` gains `Edit`/`Write`. `gate-check`'s shipped `GATE_CONTRACT` string says auto-continue instead of ask-at-gate. A new no-herdr guard in `tests/test-scripts.sh` pins herdr-independence (observed failing against the archived pre-rewrite wording before first trusted PASS); README, Codex docs, and CLAUDE.md describe the new behavior; suite at 50 passed / 0 failed.
+
 ## v1.42.1 - 2026-10-14
 
 ### Fixed

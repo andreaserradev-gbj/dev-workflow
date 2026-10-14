@@ -239,6 +239,21 @@ check_bin_sync() {
 
 check_bin_sync dev-workflow.cjs dev-checkpoint dev-orchestrator dev-plan dev-resume dev-review dev-wiki
 
+# no-herdr guard: the orchestrator skill runs in-session; no worker/pane protocol
+# may reappear in the skill directory. (Guard observed failing against the archived
+# pre-rewrite wording in .dev-archive/dev-orchestrator/ before first trusted PASS.)
+echo ""
+echo "--- no-herdr guard ---"
+ORCH_DIR="$SKILLS_DIR/dev-orchestrator"
+if grep -ril herdr "$ORCH_DIR" | grep -q .; then
+  echo "FAIL: dev-orchestrator skill dir contains herdr references:"
+  grep -rin herdr "$ORCH_DIR" | head -10
+  FAIL=$((FAIL + 1))
+else
+  echo "PASS: dev-orchestrator skill dir herdr-free"
+  PASS=$((PASS + 1))
+fi
+
 echo ""
 echo "--- bundle smoke test ---"
 # Runs the ACTUAL shipped .cjs end-to-end (not just byte-identity). The vitest suites

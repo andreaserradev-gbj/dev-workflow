@@ -3,7 +3,7 @@
 # dev-workflow
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
-[![Version](https://img.shields.io/badge/version-1.42.1-green.svg)](.claude-plugin/marketplace.json)
+[![Version](https://img.shields.io/badge/version-1.43.0-green.svg)](.claude-plugin/marketplace.json)
 [![AgentSkills.io](https://img.shields.io/badge/standard-AgentSkills.io-purple.svg)](https://agentskills.io)
 
 **AI coding agents start every session from zero. Your architecture shouldn't.**
@@ -183,11 +183,11 @@ Reconstructs context from a checkpoint:
 /dev-resume oauth-login
 ```
 
-### `/dev-orchestrator` — Run one phase by delegation
+### `/dev-orchestrator` — Hands-off whole-feature run
 
-Runs a feature's current PRD phase end-to-end by delegating its steps to worker agents in [Herdr](https://herdr.dev) panes. A coordinator skill: it transcribes PRD steps into worker briefs, launches one worker at a time (`herdr agent start --kind omp`), gates each step's completion on the verification evidence the worker reports, ticks PRD markers, and stops at the phase gate with a recap. The coordinator never implements.
+Runs a checkpointed feature end-to-end in a single in-session loop: the session itself re-derives position from the checkpoint, executes every phase's numbered steps, and gates each tick on the verification it ran — no worker agents, no per-step spawns. At every phase gate it delivers a recap (impact, choices, evidence, gaps), writes a checkpoint with the decision trail, and continues automatically. It pages you only for anomalies: a verification failing without a fix, an architectural preference call, an external or irreversible action, missing key files, or a drifted branch.
 
-**Requires Herdr** (version 0.9.1+) with a signed-in `omp` agent — outside Herdr (`HERDR_ENV` unset) the skill is inert and degrades to plain `/dev-resume` behavior, so it works even in environments that don't have Herdr installed.
+Use when a checkpointed feature should run without per-step supervision.
 
 ```
 /dev-orchestrator
