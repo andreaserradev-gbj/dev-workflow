@@ -1,3 +1,5 @@
+// @vitest-environment jsdom
+
 import { describe, it, expect } from 'vitest';
 import { render, renderInline } from '../src/client/lib/markdown.js';
 
@@ -44,5 +46,61 @@ describe('renderInline (no <p> wrap)', () => {
 
   it('returns an empty string for empty input', () => {
     expect(renderInline('')).toBe('');
+  });
+});
+
+describe('sanitization (XSS vectors)', () => {
+  it('strips javascript: hrefs in block markdown', () => {
+    const html = render('[click](javascript:alert(1))');
+    expect(html).not.toContain('javascript:');
+  });
+
+  it('strips javascript: hrefs in inline markdown', () => {
+    const html = renderInline('[click](javascript:alert(1))');
+    expect(html).not.toContain('javascript:');
+    expect(html).toContain('click');
+  });
+
+  it('strips data: URLs in inline markdown', () => {
+    const html = renderInline('[click](data:text/html,<script>alert(1)</script>)');
+    expect(html).not.toContain('data:');
+    expect(html).not.toContain('<script');
+  });
+
+  it('strips <script> elements', () => {
+    expect(render('<script>alert(1)</script>')).not.toContain('script');
+    expect(renderInline('<script>alert(1)</script>')).not.toContain('script');
+  });
+
+  it('strips event handlers from raw HTML', () => {
+    const html = render('<img src=x onerror=alert(1)>');
+    expect(html).not.toContain('onerror');
+    expect(html).toContain('<img');
+  });
+
+  it('restricts exotic URI schemes via the allowed-uri regexp', () => {
+    const html = render('[a](vbscript:msgbox)');
+    expect(html).not.toContain('vbscript:');
+  });
+
+  it('keeps http(s), mailto, and relative links', () => {
+    const html = render('[a](https://ok.com) [b](mailto:x@y.z) [c](/rel)');
+    expect(html).toContain('https://ok.com');
+    expect(html).toContain('mailto:x@y.z');
+    expect(html).toContain('/rel');
+  });
+
+  it('keeps bare-path-relative URLs (review gap: scheme-less filenames)', () => {
+    const html = render('[p](page.html) [d](docs/x.md) [u](../up)');
+    expect(html).toContain('href="page.html"');
+    expect(html).toContain('href="docs/x.md"');
+    expect(html).toContain('href="../up"');
+  });
+
+  it('preserves legitimate formatting end to end', () => {
+    const html = render('## H\n1. **bold** item\n2. `code`');
+    expect(html).toContain('<h2');
+    expect(html).toContain('<strong');
+    expect(html).toContain('<code');
   });
 });

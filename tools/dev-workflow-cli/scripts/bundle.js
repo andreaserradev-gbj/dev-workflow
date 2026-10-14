@@ -107,7 +107,7 @@ async function bundle() {
     target: 'node24',
     format: 'cjs',
     outfile: OUT_FILE,
-    minify: true,
+    minify: false, // readable bundle: skills.sh scanners flag minified artifacts as OBFUSCATION (MEDIUM on dev-plan/dev-resume)
     sourcemap: false,
     plugins: [stripDynamicCodeEval],
     external: [

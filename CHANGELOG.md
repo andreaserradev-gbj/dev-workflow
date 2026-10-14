@@ -4,6 +4,18 @@ All notable changes to this project should be documented in this file.
 
 <!-- LOCAL-RELEASES-START -->
 
+## v1.42.1 - 2026-10-14
+
+### Fixed
+
+- **Dashboard: sanitize all rendered markdown (Socket `gptAnomaly`).** `tools/dev-dashboard` rendered PRD-adjacent text (checkpoint `nextAction`, decisions, blockers) to `dangerouslySetInnerHTML` through `marked` with no sanitizer, so raw HTML, event handlers, and `javascript:`/`data:` URLs from `.dev/` content executed in the dashboard page. `markdown.ts` now runs DOMPurify (defaults + `http(s)`/`mailto`/relative URI allowlist) on both `render` and `renderInline`; link text survives, schemes are stripped inert. Covered by new XSS-vector tests in `test/markdown.test.ts` (jsdom).
+
+### Changed
+
+- **CLI bundle ships unminified.** `bin/dev-workflow.cjs` and per-skill copies are esbuild-bundled with `minify: false` (184KB → 416KB): the skills.sh Gen Agent Trust Hub scanner flagged the minified artifact as OBFUSCATION (MEDIUM on dev-plan/dev-resume). Behavior unchanged; all 133 CLI tests and the 49-script suite pass.
+- **Stale skills.sh findings no longer trip the audit gate.** `scripts/check-skills-audit.sh` `--fail-on` now excludes findings older than `STALE_DAYS` (7) from the triggered-alert computation — a stale risk level describes an artifact no longer in the repo; fresh scans follow every release. Stale rows remain visible with their `[STALE]` marker.
+- **Added `SECURITY.md`** documenting the trust model: `.dev/` markdown is untrusted data, dashboard rendering is sanitized, process launches are `execFile` arg-arrays, and which scanner categories are inherent to the product shape.
+
 ## v1.42.0 - 2026-10-14
 
 ### Added
@@ -422,6 +434,12 @@ Checkpoints and resumes are now powered by deterministic CLI commands instead of
 <!-- LOCAL-RELEASES-END -->
 
 <!-- GITHUB-RELEASES-START -->
+
+## v1.42.0 - 2026-10-14
+
+### Added
+
+- **`/dev-orchestrator` — run one PRD phase by delegation in Herdr.** A coordinator agent skill for work inside a Herdr pane: it resumes the feature checkpoint, transcribes the current phase's PRD steps into worker briefs (step text, verification commands, required report shape — inlined, so worktree workers don't need the gitignored PRD), launches one worker at a time (`herdr agent start --kind omp` in a split pane), and gates each step's marker tick on the named verification evidence in the worker's report. Missing or ambiguous evidence leaves the marker ⬜ and pages the user; permission prompts are triaged in-task only when plainly non-destructive, with pushes, PRs, destructive ops, and trust screens always paged. At the phase gate it delivers a recap (impact, choices with forks, evidence, gaps) and asks before continuing. Outside Herdr (`HERDR_ENV` unset) the skill is inert and degrades to plain `/dev-resume` behavior, so it ships safely to environments without Herdr. Sequential Tier 0: no plugin manifest, parallel workers, or ticker wakeups (deferred).
 
 ## v1.41.0 - 2026-10-07
 

@@ -191,7 +191,13 @@ for r in active:
 triggered = []
 if fail_on in ORDER:
     thr = ORDER[fail_on]
-    triggered = [r for r in active if r["risk"] in ORDER and ORDER[r["risk"]] >= thr]
+    # Stale findings (older than stale_days) inform but never fail the gate:
+    # skills.sh re-audits on every release, so a stale risk level is a snapshot
+    # of an artifact that no longer exists. They stay visible as [STALE] rows.
+    triggered = [
+        r for r in active
+        if not r["stale"] and r["risk"] in ORDER and ORDER[r["risk"]] >= thr
+    ]
 
 
 def fmt_when(r):

@@ -1,101 +1,10683 @@
 #!/usr/bin/env node
-"use strict";var Rf=Object.create;var Vt=Object.defineProperty;var kf=Object.getOwnPropertyDescriptor;var Tf=Object.getOwnPropertyNames;var Of=Object.getPrototypeOf,Ff=Object.prototype.hasOwnProperty;var y=(e,t)=>()=>(t||e((t={exports:{}}).exports,t),t.exports),Lf=(e,t)=>{for(var r in t)Vt(e,r,{get:t[r],enumerable:!0})},hs=(e,t,r,n)=>{if(t&&typeof t=="object"||typeof t=="function")for(let i of Tf(t))!Ff.call(e,i)&&i!==r&&Vt(e,i,{get:()=>t[i],enumerable:!(n=kf(t,i))||n.enumerable});return e};var Vr=(e,t,r)=>(r=e!=null?Rf(Of(e)):{},hs(t||!e||!e.__esModule?Vt(r,"default",{value:e,enumerable:!0}):r,e)),Df=e=>hs(Vt({},"__esModule",{value:!0}),e);var Tt=y((S_,gs)=>{var $f=Object.prototype.toString;gs.exports=function(t){if(t===void 0)return"undefined";if(t===null)return"null";var r=typeof t;if(r==="boolean")return"boolean";if(r==="string")return"string";if(r==="number")return"number";if(r==="symbol")return"symbol";if(r==="function")return Hf(t)?"generatorfunction":"function";if(If(t))return"array";if(Wf(t))return"buffer";if(Bf(t))return"arguments";if(Nf(t))return"date";if(Mf(t))return"error";if(jf(t))return"regexp";switch(ds(t)){case"Symbol":return"symbol";case"Promise":return"promise";case"WeakMap":return"weakmap";case"WeakSet":return"weakset";case"Map":return"map";case"Set":return"set";case"Int8Array":return"int8array";case"Uint8Array":return"uint8array";case"Uint8ClampedArray":return"uint8clampedarray";case"Int16Array":return"int16array";case"Uint16Array":return"uint16array";case"Int32Array":return"int32array";case"Uint32Array":return"uint32array";case"Float32Array":return"float32array";case"Float64Array":return"float64array"}if(qf(t))return"generator";switch(r=$f.call(t),r){case"[object Object]":return"object";case"[object Map Iterator]":return"mapiterator";case"[object Set Iterator]":return"setiterator";case"[object String Iterator]":return"stringiterator";case"[object Array Iterator]":return"arrayiterator"}return r.slice(8,-1).toLowerCase().replace(/\s/g,"")};function ds(e){return typeof e.constructor=="function"?e.constructor.name:null}function If(e){return Array.isArray?Array.isArray(e):e instanceof Array}function Mf(e){return e instanceof Error||typeof e.message=="string"&&e.constructor&&typeof e.constructor.stackTraceLimit=="number"}function Nf(e){return e instanceof Date?!0:typeof e.toDateString=="function"&&typeof e.getDate=="function"&&typeof e.setDate=="function"}function jf(e){return e instanceof RegExp?!0:typeof e.flags=="string"&&typeof e.ignoreCase=="boolean"&&typeof e.multiline=="boolean"&&typeof e.global=="boolean"}function Hf(e,t){return ds(e)==="GeneratorFunction"}function qf(e){return typeof e.throw=="function"&&typeof e.return=="function"&&typeof e.next=="function"}function Bf(e){try{if(typeof e.length=="number"&&typeof e.callee=="function")return!0}catch(t){if(t.message.indexOf("callee")!==-1)return!0}return!1}function Wf(e){return e.constructor&&typeof e.constructor.isBuffer=="function"?e.constructor.isBuffer(e):!1}});var ys=y((b_,ms)=>{"use strict";ms.exports=function(t){return typeof t<"u"&&t!==null&&(typeof t=="object"||typeof t=="function")}});var Ss=y((A_,_s)=>{"use strict";var xs=ys();_s.exports=function(t){xs(t)||(t={});for(var r=arguments.length,n=1;n<r;n++){var i=arguments[n];xs(i)&&Uf(t,i)}return t};function Uf(e,t){for(var r in t)Gf(t,r)&&(e[r]=t[r])}function Gf(e,t){return Object.prototype.hasOwnProperty.call(e,t)}});var vs=y((v_,As)=>{"use strict";var Yf=Tt(),Kf=Ss();As.exports=function(e,t){typeof t=="function"&&(t={parse:t});var r=Xf(e),n={section_delimiter:"---",parse:Qf},i=Kf({},n,t),s=i.section_delimiter,o=r.content.split(/\r?\n/),a=null,u=bs(),c=[],l=[];function p(b){r.content=b,a=[],c=[]}function f(b){l.length&&(u.key=Jf(l[0],s),u.content=b,i.parse(u,a),a.push(u),u=bs(),c=[],l=[])}for(var d=0;d<o.length;d++){var g=o[d],h=l.length,m=g.trim();if(Vf(m,s)){if(m.length===3&&d!==0){if(h===0||h===2){c.push(g);continue}l.push(m),u.data=c.join(`
-`),c=[];continue}a===null&&p(c.join(`
-`)),h===2&&f(c.join(`
-`)),l.push(m);continue}c.push(g)}return a===null?p(c.join(`
-`)):f(c.join(`
-`)),r.sections=a,r};function Vf(e,t){return!(e.slice(0,t.length)!==t||e.charAt(t.length+1)===t.slice(-1))}function Xf(e){if(Yf(e)!=="object"&&(e={content:e}),typeof e.content!="string"&&!zf(e.content))throw new TypeError("expected a buffer or string");return e.content=e.content.toString(),e.sections=[],e}function Jf(e,t){return e?e.slice(t.length).trim():""}function bs(){return{key:"",data:"",content:""}}function Qf(e){return e}function zf(e){return e&&e.constructor&&typeof e.constructor.isBuffer=="function"?e.constructor.isBuffer(e):!1}});var Qe=y((E_,Je)=>{"use strict";function Es(e){return typeof e>"u"||e===null}function Zf(e){return typeof e=="object"&&e!==null}function ep(e){return Array.isArray(e)?e:Es(e)?[]:[e]}function tp(e,t){var r,n,i,s;if(t)for(s=Object.keys(t),r=0,n=s.length;r<n;r+=1)i=s[r],e[i]=t[i];return e}function rp(e,t){var r="",n;for(n=0;n<t;n+=1)r+=e;return r}function np(e){return e===0&&Number.NEGATIVE_INFINITY===1/e}Je.exports.isNothing=Es;Je.exports.isObject=Zf;Je.exports.toArray=ep;Je.exports.repeat=rp;Je.exports.isNegativeZero=np;Je.exports.extend=tp});var ft=y((w_,ws)=>{"use strict";function Ot(e,t){Error.call(this),this.name="YAMLException",this.reason=e,this.mark=t,this.message=(this.reason||"(unknown reason)")+(this.mark?" "+this.mark.toString():""),Error.captureStackTrace?Error.captureStackTrace(this,this.constructor):this.stack=new Error().stack||""}Ot.prototype=Object.create(Error.prototype);Ot.prototype.constructor=Ot;Ot.prototype.toString=function(t){var r=this.name+": ";return r+=this.reason||"(unknown reason)",!t&&this.mark&&(r+=" "+this.mark.toString()),r};ws.exports=Ot});var Rs=y((P_,Cs)=>{"use strict";var Ps=Qe();function Xr(e,t,r,n,i){this.name=e,this.buffer=t,this.position=r,this.line=n,this.column=i}Xr.prototype.getSnippet=function(t,r){var n,i,s,o,a;if(!this.buffer)return null;for(t=t||4,r=r||75,n="",i=this.position;i>0&&`\0\r
-\x85\u2028\u2029`.indexOf(this.buffer.charAt(i-1))===-1;)if(i-=1,this.position-i>r/2-1){n=" ... ",i+=5;break}for(s="",o=this.position;o<this.buffer.length&&`\0\r
-\x85\u2028\u2029`.indexOf(this.buffer.charAt(o))===-1;)if(o+=1,o-this.position>r/2-1){s=" ... ",o-=5;break}return a=this.buffer.slice(i,o),Ps.repeat(" ",t)+n+a+s+`
-`+Ps.repeat(" ",t+this.position-i+n.length)+"^"};Xr.prototype.toString=function(t){var r,n="";return this.name&&(n+='in "'+this.name+'" '),n+="at line "+(this.line+1)+", column "+(this.column+1),t||(r=this.getSnippet(),r&&(n+=`:
-`+r)),n};Cs.exports=Xr});var z=y((C_,Ts)=>{"use strict";var ks=ft(),ip=["kind","resolve","construct","instanceOf","predicate","represent","defaultStyle","styleAliases"],sp=["scalar","sequence","mapping"];function op(e){var t={};return e!==null&&Object.keys(e).forEach(function(r){e[r].forEach(function(n){t[String(n)]=r})}),t}function ap(e,t){if(t=t||{},Object.keys(t).forEach(function(r){if(ip.indexOf(r)===-1)throw new ks('Unknown option "'+r+'" is met in definition of "'+e+'" YAML type.')}),this.tag=e,this.kind=t.kind||null,this.resolve=t.resolve||function(){return!0},this.construct=t.construct||function(r){return r},this.instanceOf=t.instanceOf||null,this.predicate=t.predicate||null,this.represent=t.represent||null,this.defaultStyle=t.defaultStyle||null,this.styleAliases=op(t.styleAliases||null),sp.indexOf(this.kind)===-1)throw new ks('Unknown kind "'+this.kind+'" is specified for "'+e+'" YAML type.')}Ts.exports=ap});var ze=y((R_,Fs)=>{"use strict";var Os=Qe(),Xt=ft(),up=z();function Jr(e,t,r){var n=[];return e.include.forEach(function(i){r=Jr(i,t,r)}),e[t].forEach(function(i){r.forEach(function(s,o){s.tag===i.tag&&s.kind===i.kind&&n.push(o)}),r.push(i)}),r.filter(function(i,s){return n.indexOf(s)===-1})}function cp(){var e={scalar:{},sequence:{},mapping:{},fallback:{}},t,r;function n(i){e[i.kind][i.tag]=e.fallback[i.tag]=i}for(t=0,r=arguments.length;t<r;t+=1)arguments[t].forEach(n);return e}function pt(e){this.include=e.include||[],this.implicit=e.implicit||[],this.explicit=e.explicit||[],this.implicit.forEach(function(t){if(t.loadKind&&t.loadKind!=="scalar")throw new Xt("There is a non-scalar type in the implicit list of a schema. Implicit resolving of such types is not supported.")}),this.compiledImplicit=Jr(this,"implicit",[]),this.compiledExplicit=Jr(this,"explicit",[]),this.compiledTypeMap=cp(this.compiledImplicit,this.compiledExplicit)}pt.DEFAULT=null;pt.create=function(){var t,r;switch(arguments.length){case 1:t=pt.DEFAULT,r=arguments[0];break;case 2:t=arguments[0],r=arguments[1];break;default:throw new Xt("Wrong number of arguments for Schema.create function")}if(t=Os.toArray(t),r=Os.toArray(r),!t.every(function(n){return n instanceof pt}))throw new Xt("Specified list of super schemas (or a single Schema object) contains a non-Schema object.");if(!r.every(function(n){return n instanceof up}))throw new Xt("Specified list of YAML types (or a single Type object) contains a non-Type object.");return new pt({include:t,explicit:r})};Fs.exports=pt});var Ds=y((k_,Ls)=>{"use strict";var lp=z();Ls.exports=new lp("tag:yaml.org,2002:str",{kind:"scalar",construct:function(e){return e!==null?e:""}})});var Is=y((T_,$s)=>{"use strict";var fp=z();$s.exports=new fp("tag:yaml.org,2002:seq",{kind:"sequence",construct:function(e){return e!==null?e:[]}})});var Ns=y((O_,Ms)=>{"use strict";var pp=z();Ms.exports=new pp("tag:yaml.org,2002:map",{kind:"mapping",construct:function(e){return e!==null?e:{}}})});var Jt=y((F_,js)=>{"use strict";var hp=ze();js.exports=new hp({explicit:[Ds(),Is(),Ns()]})});var qs=y((L_,Hs)=>{"use strict";var dp=z();function gp(e){if(e===null)return!0;var t=e.length;return t===1&&e==="~"||t===4&&(e==="null"||e==="Null"||e==="NULL")}function mp(){return null}function yp(e){return e===null}Hs.exports=new dp("tag:yaml.org,2002:null",{kind:"scalar",resolve:gp,construct:mp,predicate:yp,represent:{canonical:function(){return"~"},lowercase:function(){return"null"},uppercase:function(){return"NULL"},camelcase:function(){return"Null"}},defaultStyle:"lowercase"})});var Ws=y((D_,Bs)=>{"use strict";var xp=z();function _p(e){if(e===null)return!1;var t=e.length;return t===4&&(e==="true"||e==="True"||e==="TRUE")||t===5&&(e==="false"||e==="False"||e==="FALSE")}function Sp(e){return e==="true"||e==="True"||e==="TRUE"}function bp(e){return Object.prototype.toString.call(e)==="[object Boolean]"}Bs.exports=new xp("tag:yaml.org,2002:bool",{kind:"scalar",resolve:_p,construct:Sp,predicate:bp,represent:{lowercase:function(e){return e?"true":"false"},uppercase:function(e){return e?"TRUE":"FALSE"},camelcase:function(e){return e?"True":"False"}},defaultStyle:"lowercase"})});var Gs=y(($_,Us)=>{"use strict";var Ap=Qe(),vp=z();function Ep(e){return 48<=e&&e<=57||65<=e&&e<=70||97<=e&&e<=102}function wp(e){return 48<=e&&e<=55}function Pp(e){return 48<=e&&e<=57}function Cp(e){if(e===null)return!1;var t=e.length,r=0,n=!1,i;if(!t)return!1;if(i=e[r],(i==="-"||i==="+")&&(i=e[++r]),i==="0"){if(r+1===t)return!0;if(i=e[++r],i==="b"){for(r++;r<t;r++)if(i=e[r],i!=="_"){if(i!=="0"&&i!=="1")return!1;n=!0}return n&&i!=="_"}if(i==="x"){for(r++;r<t;r++)if(i=e[r],i!=="_"){if(!Ep(e.charCodeAt(r)))return!1;n=!0}return n&&i!=="_"}for(;r<t;r++)if(i=e[r],i!=="_"){if(!wp(e.charCodeAt(r)))return!1;n=!0}return n&&i!=="_"}if(i==="_")return!1;for(;r<t;r++)if(i=e[r],i!=="_"){if(i===":")break;if(!Pp(e.charCodeAt(r)))return!1;n=!0}return!n||i==="_"?!1:i!==":"?!0:/^(:[0-5]?[0-9])+$/.test(e.slice(r))}function Rp(e){var t=e,r=1,n,i,s=[];return t.indexOf("_")!==-1&&(t=t.replace(/_/g,"")),n=t[0],(n==="-"||n==="+")&&(n==="-"&&(r=-1),t=t.slice(1),n=t[0]),t==="0"?0:n==="0"?t[1]==="b"?r*parseInt(t.slice(2),2):t[1]==="x"?r*parseInt(t,16):r*parseInt(t,8):t.indexOf(":")!==-1?(t.split(":").forEach(function(o){s.unshift(parseInt(o,10))}),t=0,i=1,s.forEach(function(o){t+=o*i,i*=60}),r*t):r*parseInt(t,10)}function kp(e){return Object.prototype.toString.call(e)==="[object Number]"&&e%1===0&&!Ap.isNegativeZero(e)}Us.exports=new vp("tag:yaml.org,2002:int",{kind:"scalar",resolve:Cp,construct:Rp,predicate:kp,represent:{binary:function(e){return e>=0?"0b"+e.toString(2):"-0b"+e.toString(2).slice(1)},octal:function(e){return e>=0?"0"+e.toString(8):"-0"+e.toString(8).slice(1)},decimal:function(e){return e.toString(10)},hexadecimal:function(e){return e>=0?"0x"+e.toString(16).toUpperCase():"-0x"+e.toString(16).toUpperCase().slice(1)}},defaultStyle:"decimal",styleAliases:{binary:[2,"bin"],octal:[8,"oct"],decimal:[10,"dec"],hexadecimal:[16,"hex"]}})});var Vs=y((I_,Ks)=>{"use strict";var Ys=Qe(),Tp=z(),Op=new RegExp("^(?:[-+]?(?:0|[1-9][0-9_]*)(?:\\.[0-9_]*)?(?:[eE][-+]?[0-9]+)?|\\.[0-9_]+(?:[eE][-+]?[0-9]+)?|[-+]?[0-9][0-9_]*(?::[0-5]?[0-9])+\\.[0-9_]*|[-+]?\\.(?:inf|Inf|INF)|\\.(?:nan|NaN|NAN))$");function Fp(e){return!(e===null||!Op.test(e)||e[e.length-1]==="_")}function Lp(e){var t,r,n,i;return t=e.replace(/_/g,"").toLowerCase(),r=t[0]==="-"?-1:1,i=[],"+-".indexOf(t[0])>=0&&(t=t.slice(1)),t===".inf"?r===1?Number.POSITIVE_INFINITY:Number.NEGATIVE_INFINITY:t===".nan"?NaN:t.indexOf(":")>=0?(t.split(":").forEach(function(s){i.unshift(parseFloat(s,10))}),t=0,n=1,i.forEach(function(s){t+=s*n,n*=60}),r*t):r*parseFloat(t,10)}var Dp=/^[-+]?[0-9]+e/;function $p(e,t){var r;if(isNaN(e))switch(t){case"lowercase":return".nan";case"uppercase":return".NAN";case"camelcase":return".NaN"}else if(Number.POSITIVE_INFINITY===e)switch(t){case"lowercase":return".inf";case"uppercase":return".INF";case"camelcase":return".Inf"}else if(Number.NEGATIVE_INFINITY===e)switch(t){case"lowercase":return"-.inf";case"uppercase":return"-.INF";case"camelcase":return"-.Inf"}else if(Ys.isNegativeZero(e))return"-0.0";return r=e.toString(10),Dp.test(r)?r.replace("e",".e"):r}function Ip(e){return Object.prototype.toString.call(e)==="[object Number]"&&(e%1!==0||Ys.isNegativeZero(e))}Ks.exports=new Tp("tag:yaml.org,2002:float",{kind:"scalar",resolve:Fp,construct:Lp,predicate:Ip,represent:$p,defaultStyle:"lowercase"})});var Qr=y((M_,Xs)=>{"use strict";var Mp=ze();Xs.exports=new Mp({include:[Jt()],implicit:[qs(),Ws(),Gs(),Vs()]})});var zr=y((N_,Js)=>{"use strict";var Np=ze();Js.exports=new Np({include:[Qr()]})});var eo=y((j_,Zs)=>{"use strict";var jp=z(),Qs=new RegExp("^([0-9][0-9][0-9][0-9])-([0-9][0-9])-([0-9][0-9])$"),zs=new RegExp("^([0-9][0-9][0-9][0-9])-([0-9][0-9]?)-([0-9][0-9]?)(?:[Tt]|[ \\t]+)([0-9][0-9]?):([0-9][0-9]):([0-9][0-9])(?:\\.([0-9]*))?(?:[ \\t]*(Z|([-+])([0-9][0-9]?)(?::([0-9][0-9]))?))?$");function Hp(e){return e===null?!1:Qs.exec(e)!==null||zs.exec(e)!==null}function qp(e){var t,r,n,i,s,o,a,u=0,c=null,l,p,f;if(t=Qs.exec(e),t===null&&(t=zs.exec(e)),t===null)throw new Error("Date resolve error");if(r=+t[1],n=+t[2]-1,i=+t[3],!t[4])return new Date(Date.UTC(r,n,i));if(s=+t[4],o=+t[5],a=+t[6],t[7]){for(u=t[7].slice(0,3);u.length<3;)u+="0";u=+u}return t[9]&&(l=+t[10],p=+(t[11]||0),c=(l*60+p)*6e4,t[9]==="-"&&(c=-c)),f=new Date(Date.UTC(r,n,i,s,o,a,u)),c&&f.setTime(f.getTime()-c),f}function Bp(e){return e.toISOString()}Zs.exports=new jp("tag:yaml.org,2002:timestamp",{kind:"scalar",resolve:Hp,construct:qp,instanceOf:Date,represent:Bp})});var ro=y((H_,to)=>{"use strict";var Wp=z();function Up(e){return e==="<<"||e===null}to.exports=new Wp("tag:yaml.org,2002:merge",{kind:"scalar",resolve:Up})});var so=y((q_,io)=>{"use strict";var Ze;try{no=require,Ze=no("buffer").Buffer}catch{}var no,Gp=z(),Zr=`ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=
-\r`;function Yp(e){if(e===null)return!1;var t,r,n=0,i=e.length,s=Zr;for(r=0;r<i;r++)if(t=s.indexOf(e.charAt(r)),!(t>64)){if(t<0)return!1;n+=6}return n%8===0}function Kp(e){var t,r,n=e.replace(/[\r\n=]/g,""),i=n.length,s=Zr,o=0,a=[];for(t=0;t<i;t++)t%4===0&&t&&(a.push(o>>16&255),a.push(o>>8&255),a.push(o&255)),o=o<<6|s.indexOf(n.charAt(t));return r=i%4*6,r===0?(a.push(o>>16&255),a.push(o>>8&255),a.push(o&255)):r===18?(a.push(o>>10&255),a.push(o>>2&255)):r===12&&a.push(o>>4&255),Ze?Ze.from?Ze.from(a):new Ze(a):a}function Vp(e){var t="",r=0,n,i,s=e.length,o=Zr;for(n=0;n<s;n++)n%3===0&&n&&(t+=o[r>>18&63],t+=o[r>>12&63],t+=o[r>>6&63],t+=o[r&63]),r=(r<<8)+e[n];return i=s%3,i===0?(t+=o[r>>18&63],t+=o[r>>12&63],t+=o[r>>6&63],t+=o[r&63]):i===2?(t+=o[r>>10&63],t+=o[r>>4&63],t+=o[r<<2&63],t+=o[64]):i===1&&(t+=o[r>>2&63],t+=o[r<<4&63],t+=o[64],t+=o[64]),t}function Xp(e){return Ze&&Ze.isBuffer(e)}io.exports=new Gp("tag:yaml.org,2002:binary",{kind:"scalar",resolve:Yp,construct:Kp,predicate:Xp,represent:Vp})});var ao=y((B_,oo)=>{"use strict";var Jp=z(),Qp=Object.prototype.hasOwnProperty,zp=Object.prototype.toString;function Zp(e){if(e===null)return!0;var t=[],r,n,i,s,o,a=e;for(r=0,n=a.length;r<n;r+=1){if(i=a[r],o=!1,zp.call(i)!=="[object Object]")return!1;for(s in i)if(Qp.call(i,s))if(!o)o=!0;else return!1;if(!o)return!1;if(t.indexOf(s)===-1)t.push(s);else return!1}return!0}function eh(e){return e!==null?e:[]}oo.exports=new Jp("tag:yaml.org,2002:omap",{kind:"sequence",resolve:Zp,construct:eh})});var co=y((W_,uo)=>{"use strict";var th=z(),rh=Object.prototype.toString;function nh(e){if(e===null)return!0;var t,r,n,i,s,o=e;for(s=new Array(o.length),t=0,r=o.length;t<r;t+=1){if(n=o[t],rh.call(n)!=="[object Object]"||(i=Object.keys(n),i.length!==1))return!1;s[t]=[i[0],n[i[0]]]}return!0}function ih(e){if(e===null)return[];var t,r,n,i,s,o=e;for(s=new Array(o.length),t=0,r=o.length;t<r;t+=1)n=o[t],i=Object.keys(n),s[t]=[i[0],n[i[0]]];return s}uo.exports=new th("tag:yaml.org,2002:pairs",{kind:"sequence",resolve:nh,construct:ih})});var fo=y((U_,lo)=>{"use strict";var sh=z(),oh=Object.prototype.hasOwnProperty;function ah(e){if(e===null)return!0;var t,r=e;for(t in r)if(oh.call(r,t)&&r[t]!==null)return!1;return!0}function uh(e){return e!==null?e:{}}lo.exports=new sh("tag:yaml.org,2002:set",{kind:"mapping",resolve:ah,construct:uh})});var ht=y((G_,po)=>{"use strict";var ch=ze();po.exports=new ch({include:[zr()],implicit:[eo(),ro()],explicit:[so(),ao(),co(),fo()]})});var go=y((Y_,ho)=>{"use strict";var lh=z();function fh(){return!0}function ph(){}function hh(){return""}function dh(e){return typeof e>"u"}ho.exports=new lh("tag:yaml.org,2002:js/undefined",{kind:"scalar",resolve:fh,construct:ph,predicate:dh,represent:hh})});var yo=y((K_,mo)=>{"use strict";var gh=z();function mh(e){if(e===null||e.length===0)return!1;var t=e,r=/\/([gim]*)$/.exec(e),n="";return!(t[0]==="/"&&(r&&(n=r[1]),n.length>3||t[t.length-n.length-1]!=="/"))}function yh(e){var t=e,r=/\/([gim]*)$/.exec(e),n="";return t[0]==="/"&&(r&&(n=r[1]),t=t.slice(1,t.length-n.length-1)),new RegExp(t,n)}function xh(e){var t="/"+e.source+"/";return e.global&&(t+="g"),e.multiline&&(t+="m"),e.ignoreCase&&(t+="i"),t}function _h(e){return Object.prototype.toString.call(e)==="[object RegExp]"}mo.exports=new gh("tag:yaml.org,2002:js/regexp",{kind:"scalar",resolve:mh,construct:yh,predicate:_h,represent:xh})});var So=y((V_,_o)=>{"use strict";var Qt;try{xo=require,Qt=xo("esprima")}catch{typeof window<"u"&&(Qt=window.esprima)}var xo,Sh=z();function bh(e){if(e===null)return!1;try{var t="("+e+")",r=Qt.parse(t,{range:!0});return!(r.type!=="Program"||r.body.length!==1||r.body[0].type!=="ExpressionStatement"||r.body[0].expression.type!=="ArrowFunctionExpression"&&r.body[0].expression.type!=="FunctionExpression")}catch{return!1}}function Ah(e){var t="("+e+")",r=Qt.parse(t,{range:!0}),n=[],i;if(r.type!=="Program"||r.body.length!==1||r.body[0].type!=="ExpressionStatement"||r.body[0].expression.type!=="ArrowFunctionExpression"&&r.body[0].expression.type!=="FunctionExpression")throw new Error("Failed to resolve function");return r.body[0].expression.params.forEach(function(s){n.push(s.name)}),i=r.body[0].expression.body.range,r.body[0].expression.body.type==="BlockStatement"?(function(){throw new Error("js-yaml js/function type disabled by dev-workflow build")})(n,t.slice(i[0]+1,i[1]-1)):(function(){throw new Error("js-yaml js/function type disabled by dev-workflow build")})(n,"return "+t.slice(i[0],i[1]))}function vh(e){return e.toString()}function Eh(e){return Object.prototype.toString.call(e)==="[object Function]"}_o.exports=new Sh("tag:yaml.org,2002:js/function",{kind:"scalar",resolve:bh,construct:Ah,predicate:Eh,represent:vh})});var Ft=y((X_,Ao)=>{"use strict";var bo=ze();Ao.exports=bo.DEFAULT=new bo({include:[ht()],explicit:[go(),yo(),So()]})});var Bo=y((J_,Lt)=>{"use strict";var Pe=Qe(),ko=ft(),wh=Rs(),To=ht(),Ph=Ft(),Le=Object.prototype.hasOwnProperty,zt=1,Oo=2,Fo=3,Zt=4,en=1,Ch=2,vo=3,Rh=/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F-\x84\x86-\x9F\uFFFE\uFFFF]|[\uD800-\uDBFF](?![\uDC00-\uDFFF])|(?:[^\uD800-\uDBFF]|^)[\uDC00-\uDFFF]/,kh=/[\x85\u2028\u2029]/,Th=/[,\[\]\{\}]/,Lo=/^(?:!|!!|![a-z\-]+!)$/i,Do=/^(?:!|[^,\[\]\{\}])(?:%[0-9a-f]{2}|[0-9a-z\-#;\/\?:@&=\+\$,_\.!~\*'\(\)\[\]])*$/i;function Eo(e){return Object.prototype.toString.call(e)}function Se(e){return e===10||e===13}function tt(e){return e===9||e===32}function oe(e){return e===9||e===32||e===10||e===13}function dt(e){return e===44||e===91||e===93||e===123||e===125}function Oh(e){var t;return 48<=e&&e<=57?e-48:(t=e|32,97<=t&&t<=102?t-97+10:-1)}function Fh(e){return e===120?2:e===117?4:e===85?8:0}function Lh(e){return 48<=e&&e<=57?e-48:-1}function wo(e){return e===48?"\0":e===97?"\x07":e===98?"\b":e===116||e===9?"	":e===110?`
-`:e===118?"\v":e===102?"\f":e===114?"\r":e===101?"\x1B":e===32?" ":e===34?'"':e===47?"/":e===92?"\\":e===78?"\x85":e===95?"\xA0":e===76?"\u2028":e===80?"\u2029":""}function Dh(e){return e<=65535?String.fromCharCode(e):String.fromCharCode((e-65536>>10)+55296,(e-65536&1023)+56320)}function $o(e,t,r){t==="__proto__"?Object.defineProperty(e,t,{configurable:!0,enumerable:!0,writable:!0,value:r}):e[t]=r}var Io=new Array(256),Mo=new Array(256);for(et=0;et<256;et++)Io[et]=wo(et)?1:0,Mo[et]=wo(et);var et;function $h(e,t){this.input=e,this.filename=t.filename||null,this.schema=t.schema||Ph,this.onWarning=t.onWarning||null,this.legacy=t.legacy||!1,this.json=t.json||!1,this.listener=t.listener||null,this.implicitTypes=this.schema.compiledImplicit,this.typeMap=this.schema.compiledTypeMap,this.length=e.length,this.position=0,this.line=0,this.lineStart=0,this.lineIndent=0,this.documents=[]}function No(e,t){return new ko(t,new wh(e.filename,e.input,e.position,e.line,e.position-e.lineStart))}function P(e,t){throw No(e,t)}function er(e,t){e.onWarning&&e.onWarning.call(null,No(e,t))}var Po={YAML:function(t,r,n){var i,s,o;t.version!==null&&P(t,"duplication of %YAML directive"),n.length!==1&&P(t,"YAML directive accepts exactly one argument"),i=/^([0-9]+)\.([0-9]+)$/.exec(n[0]),i===null&&P(t,"ill-formed argument of the YAML directive"),s=parseInt(i[1],10),o=parseInt(i[2],10),s!==1&&P(t,"unacceptable YAML version of the document"),t.version=n[0],t.checkLineBreaks=o<2,o!==1&&o!==2&&er(t,"unsupported YAML version of the document")},TAG:function(t,r,n){var i,s;n.length!==2&&P(t,"TAG directive accepts exactly two arguments"),i=n[0],s=n[1],Lo.test(i)||P(t,"ill-formed tag handle (first argument) of the TAG directive"),Le.call(t.tagMap,i)&&P(t,'there is a previously declared suffix for "'+i+'" tag handle'),Do.test(s)||P(t,"ill-formed tag prefix (second argument) of the TAG directive"),t.tagMap[i]=s}};function Fe(e,t,r,n){var i,s,o,a;if(t<r){if(a=e.input.slice(t,r),n)for(i=0,s=a.length;i<s;i+=1)o=a.charCodeAt(i),o===9||32<=o&&o<=1114111||P(e,"expected valid JSON character");else Rh.test(a)&&P(e,"the stream contains non-printable characters");e.result+=a}}function Co(e,t,r,n){var i,s,o,a;for(Pe.isObject(r)||P(e,"cannot merge mappings; the provided source object is unacceptable"),i=Object.keys(r),o=0,a=i.length;o<a;o+=1)s=i[o],Le.call(t,s)||($o(t,s,r[s]),n[s]=!0)}function gt(e,t,r,n,i,s,o,a){var u,c;if(Array.isArray(i))for(i=Array.prototype.slice.call(i),u=0,c=i.length;u<c;u+=1)Array.isArray(i[u])&&P(e,"nested arrays are not supported inside keys"),typeof i=="object"&&Eo(i[u])==="[object Object]"&&(i[u]="[object Object]");if(typeof i=="object"&&Eo(i)==="[object Object]"&&(i="[object Object]"),i=String(i),t===null&&(t={}),n==="tag:yaml.org,2002:merge")if(Array.isArray(s))for(u=0,c=s.length;u<c;u+=1)Co(e,t,s[u],r);else Co(e,t,s,r);else!e.json&&!Le.call(r,i)&&Le.call(t,i)&&(e.line=o||e.line,e.position=a||e.position,P(e,"duplicated mapping key")),$o(t,i,s),delete r[i];return t}function tn(e){var t;t=e.input.charCodeAt(e.position),t===10?e.position++:t===13?(e.position++,e.input.charCodeAt(e.position)===10&&e.position++):P(e,"a line break is expected"),e.line+=1,e.lineStart=e.position}function V(e,t,r){for(var n=0,i=e.input.charCodeAt(e.position);i!==0;){for(;tt(i);)i=e.input.charCodeAt(++e.position);if(t&&i===35)do i=e.input.charCodeAt(++e.position);while(i!==10&&i!==13&&i!==0);if(Se(i))for(tn(e),i=e.input.charCodeAt(e.position),n++,e.lineIndent=0;i===32;)e.lineIndent++,i=e.input.charCodeAt(++e.position);else break}return r!==-1&&n!==0&&e.lineIndent<r&&er(e,"deficient indentation"),n}function tr(e){var t=e.position,r;return r=e.input.charCodeAt(t),!!((r===45||r===46)&&r===e.input.charCodeAt(t+1)&&r===e.input.charCodeAt(t+2)&&(t+=3,r=e.input.charCodeAt(t),r===0||oe(r)))}function rn(e,t){t===1?e.result+=" ":t>1&&(e.result+=Pe.repeat(`
-`,t-1))}function Ih(e,t,r){var n,i,s,o,a,u,c,l,p=e.kind,f=e.result,d;if(d=e.input.charCodeAt(e.position),oe(d)||dt(d)||d===35||d===38||d===42||d===33||d===124||d===62||d===39||d===34||d===37||d===64||d===96||(d===63||d===45)&&(i=e.input.charCodeAt(e.position+1),oe(i)||r&&dt(i)))return!1;for(e.kind="scalar",e.result="",s=o=e.position,a=!1;d!==0;){if(d===58){if(i=e.input.charCodeAt(e.position+1),oe(i)||r&&dt(i))break}else if(d===35){if(n=e.input.charCodeAt(e.position-1),oe(n))break}else{if(e.position===e.lineStart&&tr(e)||r&&dt(d))break;if(Se(d))if(u=e.line,c=e.lineStart,l=e.lineIndent,V(e,!1,-1),e.lineIndent>=t){a=!0,d=e.input.charCodeAt(e.position);continue}else{e.position=o,e.line=u,e.lineStart=c,e.lineIndent=l;break}}a&&(Fe(e,s,o,!1),rn(e,e.line-u),s=o=e.position,a=!1),tt(d)||(o=e.position+1),d=e.input.charCodeAt(++e.position)}return Fe(e,s,o,!1),e.result?!0:(e.kind=p,e.result=f,!1)}function Mh(e,t){var r,n,i;if(r=e.input.charCodeAt(e.position),r!==39)return!1;for(e.kind="scalar",e.result="",e.position++,n=i=e.position;(r=e.input.charCodeAt(e.position))!==0;)if(r===39)if(Fe(e,n,e.position,!0),r=e.input.charCodeAt(++e.position),r===39)n=e.position,e.position++,i=e.position;else return!0;else Se(r)?(Fe(e,n,i,!0),rn(e,V(e,!1,t)),n=i=e.position):e.position===e.lineStart&&tr(e)?P(e,"unexpected end of the document within a single quoted scalar"):(e.position++,i=e.position);P(e,"unexpected end of the stream within a single quoted scalar")}function Nh(e,t){var r,n,i,s,o,a;if(a=e.input.charCodeAt(e.position),a!==34)return!1;for(e.kind="scalar",e.result="",e.position++,r=n=e.position;(a=e.input.charCodeAt(e.position))!==0;){if(a===34)return Fe(e,r,e.position,!0),e.position++,!0;if(a===92){if(Fe(e,r,e.position,!0),a=e.input.charCodeAt(++e.position),Se(a))V(e,!1,t);else if(a<256&&Io[a])e.result+=Mo[a],e.position++;else if((o=Fh(a))>0){for(i=o,s=0;i>0;i--)a=e.input.charCodeAt(++e.position),(o=Oh(a))>=0?s=(s<<4)+o:P(e,"expected hexadecimal character");e.result+=Dh(s),e.position++}else P(e,"unknown escape sequence");r=n=e.position}else Se(a)?(Fe(e,r,n,!0),rn(e,V(e,!1,t)),r=n=e.position):e.position===e.lineStart&&tr(e)?P(e,"unexpected end of the document within a double quoted scalar"):(e.position++,n=e.position)}P(e,"unexpected end of the stream within a double quoted scalar")}function jh(e,t){var r=!0,n,i=e.tag,s,o=e.anchor,a,u,c,l,p,f={},d,g,h,m;if(m=e.input.charCodeAt(e.position),m===91)u=93,p=!1,s=[];else if(m===123)u=125,p=!0,s={};else return!1;for(e.anchor!==null&&(e.anchorMap[e.anchor]=s),m=e.input.charCodeAt(++e.position);m!==0;){if(V(e,!0,t),m=e.input.charCodeAt(e.position),m===u)return e.position++,e.tag=i,e.anchor=o,e.kind=p?"mapping":"sequence",e.result=s,!0;r||P(e,"missed comma between flow collection entries"),g=d=h=null,c=l=!1,m===63&&(a=e.input.charCodeAt(e.position+1),oe(a)&&(c=l=!0,e.position++,V(e,!0,t))),n=e.line,mt(e,t,zt,!1,!0),g=e.tag,d=e.result,V(e,!0,t),m=e.input.charCodeAt(e.position),(l||e.line===n)&&m===58&&(c=!0,m=e.input.charCodeAt(++e.position),V(e,!0,t),mt(e,t,zt,!1,!0),h=e.result),p?gt(e,s,f,g,d,h):c?s.push(gt(e,null,f,g,d,h)):s.push(d),V(e,!0,t),m=e.input.charCodeAt(e.position),m===44?(r=!0,m=e.input.charCodeAt(++e.position)):r=!1}P(e,"unexpected end of the stream within a flow collection")}function Hh(e,t){var r,n,i=en,s=!1,o=!1,a=t,u=0,c=!1,l,p;if(p=e.input.charCodeAt(e.position),p===124)n=!1;else if(p===62)n=!0;else return!1;for(e.kind="scalar",e.result="";p!==0;)if(p=e.input.charCodeAt(++e.position),p===43||p===45)en===i?i=p===43?vo:Ch:P(e,"repeat of a chomping mode identifier");else if((l=Lh(p))>=0)l===0?P(e,"bad explicit indentation width of a block scalar; it cannot be less than one"):o?P(e,"repeat of an indentation width identifier"):(a=t+l-1,o=!0);else break;if(tt(p)){do p=e.input.charCodeAt(++e.position);while(tt(p));if(p===35)do p=e.input.charCodeAt(++e.position);while(!Se(p)&&p!==0)}for(;p!==0;){for(tn(e),e.lineIndent=0,p=e.input.charCodeAt(e.position);(!o||e.lineIndent<a)&&p===32;)e.lineIndent++,p=e.input.charCodeAt(++e.position);if(!o&&e.lineIndent>a&&(a=e.lineIndent),Se(p)){u++;continue}if(e.lineIndent<a){i===vo?e.result+=Pe.repeat(`
-`,s?1+u:u):i===en&&s&&(e.result+=`
-`);break}for(n?tt(p)?(c=!0,e.result+=Pe.repeat(`
-`,s?1+u:u)):c?(c=!1,e.result+=Pe.repeat(`
-`,u+1)):u===0?s&&(e.result+=" "):e.result+=Pe.repeat(`
-`,u):e.result+=Pe.repeat(`
-`,s?1+u:u),s=!0,o=!0,u=0,r=e.position;!Se(p)&&p!==0;)p=e.input.charCodeAt(++e.position);Fe(e,r,e.position,!1)}return!0}function Ro(e,t){var r,n=e.tag,i=e.anchor,s=[],o,a=!1,u;for(e.anchor!==null&&(e.anchorMap[e.anchor]=s),u=e.input.charCodeAt(e.position);u!==0&&!(u!==45||(o=e.input.charCodeAt(e.position+1),!oe(o)));){if(a=!0,e.position++,V(e,!0,-1)&&e.lineIndent<=t){s.push(null),u=e.input.charCodeAt(e.position);continue}if(r=e.line,mt(e,t,Fo,!1,!0),s.push(e.result),V(e,!0,-1),u=e.input.charCodeAt(e.position),(e.line===r||e.lineIndent>t)&&u!==0)P(e,"bad indentation of a sequence entry");else if(e.lineIndent<t)break}return a?(e.tag=n,e.anchor=i,e.kind="sequence",e.result=s,!0):!1}function qh(e,t,r){var n,i,s,o,a=e.tag,u=e.anchor,c={},l={},p=null,f=null,d=null,g=!1,h=!1,m;for(e.anchor!==null&&(e.anchorMap[e.anchor]=c),m=e.input.charCodeAt(e.position);m!==0;){if(n=e.input.charCodeAt(e.position+1),s=e.line,o=e.position,(m===63||m===58)&&oe(n))m===63?(g&&(gt(e,c,l,p,f,null),p=f=d=null),h=!0,g=!0,i=!0):g?(g=!1,i=!0):P(e,"incomplete explicit mapping pair; a key node is missed; or followed by a non-tabulated empty line"),e.position+=1,m=n;else if(mt(e,r,Oo,!1,!0))if(e.line===s){for(m=e.input.charCodeAt(e.position);tt(m);)m=e.input.charCodeAt(++e.position);if(m===58)m=e.input.charCodeAt(++e.position),oe(m)||P(e,"a whitespace character is expected after the key-value separator within a block mapping"),g&&(gt(e,c,l,p,f,null),p=f=d=null),h=!0,g=!1,i=!1,p=e.tag,f=e.result;else if(h)P(e,"can not read an implicit mapping pair; a colon is missed");else return e.tag=a,e.anchor=u,!0}else if(h)P(e,"can not read a block mapping entry; a multiline key may not be an implicit key");else return e.tag=a,e.anchor=u,!0;else break;if((e.line===s||e.lineIndent>t)&&(mt(e,t,Zt,!0,i)&&(g?f=e.result:d=e.result),g||(gt(e,c,l,p,f,d,s,o),p=f=d=null),V(e,!0,-1),m=e.input.charCodeAt(e.position)),e.lineIndent>t&&m!==0)P(e,"bad indentation of a mapping entry");else if(e.lineIndent<t)break}return g&&gt(e,c,l,p,f,null),h&&(e.tag=a,e.anchor=u,e.kind="mapping",e.result=c),h}function Bh(e){var t,r=!1,n=!1,i,s,o;if(o=e.input.charCodeAt(e.position),o!==33)return!1;if(e.tag!==null&&P(e,"duplication of a tag property"),o=e.input.charCodeAt(++e.position),o===60?(r=!0,o=e.input.charCodeAt(++e.position)):o===33?(n=!0,i="!!",o=e.input.charCodeAt(++e.position)):i="!",t=e.position,r){do o=e.input.charCodeAt(++e.position);while(o!==0&&o!==62);e.position<e.length?(s=e.input.slice(t,e.position),o=e.input.charCodeAt(++e.position)):P(e,"unexpected end of the stream within a verbatim tag")}else{for(;o!==0&&!oe(o);)o===33&&(n?P(e,"tag suffix cannot contain exclamation marks"):(i=e.input.slice(t-1,e.position+1),Lo.test(i)||P(e,"named tag handle cannot contain such characters"),n=!0,t=e.position+1)),o=e.input.charCodeAt(++e.position);s=e.input.slice(t,e.position),Th.test(s)&&P(e,"tag suffix cannot contain flow indicator characters")}return s&&!Do.test(s)&&P(e,"tag name cannot contain such characters: "+s),r?e.tag=s:Le.call(e.tagMap,i)?e.tag=e.tagMap[i]+s:i==="!"?e.tag="!"+s:i==="!!"?e.tag="tag:yaml.org,2002:"+s:P(e,'undeclared tag handle "'+i+'"'),!0}function Wh(e){var t,r;if(r=e.input.charCodeAt(e.position),r!==38)return!1;for(e.anchor!==null&&P(e,"duplication of an anchor property"),r=e.input.charCodeAt(++e.position),t=e.position;r!==0&&!oe(r)&&!dt(r);)r=e.input.charCodeAt(++e.position);return e.position===t&&P(e,"name of an anchor node must contain at least one character"),e.anchor=e.input.slice(t,e.position),!0}function Uh(e){var t,r,n;if(n=e.input.charCodeAt(e.position),n!==42)return!1;for(n=e.input.charCodeAt(++e.position),t=e.position;n!==0&&!oe(n)&&!dt(n);)n=e.input.charCodeAt(++e.position);return e.position===t&&P(e,"name of an alias node must contain at least one character"),r=e.input.slice(t,e.position),Le.call(e.anchorMap,r)||P(e,'unidentified alias "'+r+'"'),e.result=e.anchorMap[r],V(e,!0,-1),!0}function mt(e,t,r,n,i){var s,o,a,u=1,c=!1,l=!1,p,f,d,g,h;if(e.listener!==null&&e.listener("open",e),e.tag=null,e.anchor=null,e.kind=null,e.result=null,s=o=a=Zt===r||Fo===r,n&&V(e,!0,-1)&&(c=!0,e.lineIndent>t?u=1:e.lineIndent===t?u=0:e.lineIndent<t&&(u=-1)),u===1)for(;Bh(e)||Wh(e);)V(e,!0,-1)?(c=!0,a=s,e.lineIndent>t?u=1:e.lineIndent===t?u=0:e.lineIndent<t&&(u=-1)):a=!1;if(a&&(a=c||i),(u===1||Zt===r)&&(zt===r||Oo===r?g=t:g=t+1,h=e.position-e.lineStart,u===1?a&&(Ro(e,h)||qh(e,h,g))||jh(e,g)?l=!0:(o&&Hh(e,g)||Mh(e,g)||Nh(e,g)?l=!0:Uh(e)?(l=!0,(e.tag!==null||e.anchor!==null)&&P(e,"alias node should not have any properties")):Ih(e,g,zt===r)&&(l=!0,e.tag===null&&(e.tag="?")),e.anchor!==null&&(e.anchorMap[e.anchor]=e.result)):u===0&&(l=a&&Ro(e,h))),e.tag!==null&&e.tag!=="!")if(e.tag==="?"){for(e.result!==null&&e.kind!=="scalar"&&P(e,'unacceptable node kind for !<?> tag; it should be "scalar", not "'+e.kind+'"'),p=0,f=e.implicitTypes.length;p<f;p+=1)if(d=e.implicitTypes[p],d.resolve(e.result)){e.result=d.construct(e.result),e.tag=d.tag,e.anchor!==null&&(e.anchorMap[e.anchor]=e.result);break}}else Le.call(e.typeMap[e.kind||"fallback"],e.tag)?(d=e.typeMap[e.kind||"fallback"][e.tag],e.result!==null&&d.kind!==e.kind&&P(e,"unacceptable node kind for !<"+e.tag+'> tag; it should be "'+d.kind+'", not "'+e.kind+'"'),d.resolve(e.result)?(e.result=d.construct(e.result),e.anchor!==null&&(e.anchorMap[e.anchor]=e.result)):P(e,"cannot resolve a node with !<"+e.tag+"> explicit tag")):P(e,"unknown tag !<"+e.tag+">");return e.listener!==null&&e.listener("close",e),e.tag!==null||e.anchor!==null||l}function Gh(e){var t=e.position,r,n,i,s=!1,o;for(e.version=null,e.checkLineBreaks=e.legacy,e.tagMap={},e.anchorMap={};(o=e.input.charCodeAt(e.position))!==0&&(V(e,!0,-1),o=e.input.charCodeAt(e.position),!(e.lineIndent>0||o!==37));){for(s=!0,o=e.input.charCodeAt(++e.position),r=e.position;o!==0&&!oe(o);)o=e.input.charCodeAt(++e.position);for(n=e.input.slice(r,e.position),i=[],n.length<1&&P(e,"directive name must not be less than one character in length");o!==0;){for(;tt(o);)o=e.input.charCodeAt(++e.position);if(o===35){do o=e.input.charCodeAt(++e.position);while(o!==0&&!Se(o));break}if(Se(o))break;for(r=e.position;o!==0&&!oe(o);)o=e.input.charCodeAt(++e.position);i.push(e.input.slice(r,e.position))}o!==0&&tn(e),Le.call(Po,n)?Po[n](e,n,i):er(e,'unknown document directive "'+n+'"')}if(V(e,!0,-1),e.lineIndent===0&&e.input.charCodeAt(e.position)===45&&e.input.charCodeAt(e.position+1)===45&&e.input.charCodeAt(e.position+2)===45?(e.position+=3,V(e,!0,-1)):s&&P(e,"directives end mark is expected"),mt(e,e.lineIndent-1,Zt,!1,!0),V(e,!0,-1),e.checkLineBreaks&&kh.test(e.input.slice(t,e.position))&&er(e,"non-ASCII line breaks are interpreted as content"),e.documents.push(e.result),e.position===e.lineStart&&tr(e)){e.input.charCodeAt(e.position)===46&&(e.position+=3,V(e,!0,-1));return}if(e.position<e.length-1)P(e,"end of the stream or a document separator is expected");else return}function jo(e,t){e=String(e),t=t||{},e.length!==0&&(e.charCodeAt(e.length-1)!==10&&e.charCodeAt(e.length-1)!==13&&(e+=`
-`),e.charCodeAt(0)===65279&&(e=e.slice(1)));var r=new $h(e,t),n=e.indexOf("\0");for(n!==-1&&(r.position=n,P(r,"null byte is not allowed in input")),r.input+="\0";r.input.charCodeAt(r.position)===32;)r.lineIndent+=1,r.position+=1;for(;r.position<r.length-1;)Gh(r);return r.documents}function Ho(e,t,r){t!==null&&typeof t=="object"&&typeof r>"u"&&(r=t,t=null);var n=jo(e,r);if(typeof t!="function")return n;for(var i=0,s=n.length;i<s;i+=1)t(n[i])}function qo(e,t){var r=jo(e,t);if(r.length!==0){if(r.length===1)return r[0];throw new ko("expected a single document in the stream, but found more")}}function Yh(e,t,r){return typeof t=="object"&&t!==null&&typeof r>"u"&&(r=t,t=null),Ho(e,t,Pe.extend({schema:To},r))}function Kh(e,t){return qo(e,Pe.extend({schema:To},t))}Lt.exports.loadAll=Ho;Lt.exports.load=qo;Lt.exports.safeLoadAll=Yh;Lt.exports.safeLoad=Kh});var fa=y((Q_,an)=>{"use strict";var $t=Qe(),It=ft(),Vh=Ft(),Xh=ht(),Jo=Object.prototype.toString,Qo=Object.prototype.hasOwnProperty,Jh=9,Dt=10,Qh=13,zh=32,Zh=33,ed=34,zo=35,td=37,rd=38,nd=39,id=42,Zo=44,sd=45,ea=58,od=61,ad=62,ud=63,cd=64,ta=91,ra=93,ld=96,na=123,fd=124,ia=125,Z={};Z[0]="\\0";Z[7]="\\a";Z[8]="\\b";Z[9]="\\t";Z[10]="\\n";Z[11]="\\v";Z[12]="\\f";Z[13]="\\r";Z[27]="\\e";Z[34]='\\"';Z[92]="\\\\";Z[133]="\\N";Z[160]="\\_";Z[8232]="\\L";Z[8233]="\\P";var pd=["y","Y","yes","Yes","YES","on","On","ON","n","N","no","No","NO","off","Off","OFF"];function hd(e,t){var r,n,i,s,o,a,u;if(t===null)return{};for(r={},n=Object.keys(t),i=0,s=n.length;i<s;i+=1)o=n[i],a=String(t[o]),o.slice(0,2)==="!!"&&(o="tag:yaml.org,2002:"+o.slice(2)),u=e.compiledTypeMap.fallback[o],u&&Qo.call(u.styleAliases,a)&&(a=u.styleAliases[a]),r[o]=a;return r}function Wo(e){var t,r,n;if(t=e.toString(16).toUpperCase(),e<=255)r="x",n=2;else if(e<=65535)r="u",n=4;else if(e<=4294967295)r="U",n=8;else throw new It("code point within a string may not be greater than 0xFFFFFFFF");return"\\"+r+$t.repeat("0",n-t.length)+t}function dd(e){this.schema=e.schema||Vh,this.indent=Math.max(1,e.indent||2),this.noArrayIndent=e.noArrayIndent||!1,this.skipInvalid=e.skipInvalid||!1,this.flowLevel=$t.isNothing(e.flowLevel)?-1:e.flowLevel,this.styleMap=hd(this.schema,e.styles||null),this.sortKeys=e.sortKeys||!1,this.lineWidth=e.lineWidth||80,this.noRefs=e.noRefs||!1,this.noCompatMode=e.noCompatMode||!1,this.condenseFlow=e.condenseFlow||!1,this.implicitTypes=this.schema.compiledImplicit,this.explicitTypes=this.schema.compiledExplicit,this.tag=null,this.result="",this.duplicates=[],this.usedDuplicates=null}function Uo(e,t){for(var r=$t.repeat(" ",t),n=0,i=-1,s="",o,a=e.length;n<a;)i=e.indexOf(`
-`,n),i===-1?(o=e.slice(n),n=a):(o=e.slice(n,i+1),n=i+1),o.length&&o!==`
-`&&(s+=r),s+=o;return s}function nn(e,t){return`
-`+$t.repeat(" ",e.indent*t)}function gd(e,t){var r,n,i;for(r=0,n=e.implicitTypes.length;r<n;r+=1)if(i=e.implicitTypes[r],i.resolve(t))return!0;return!1}function on(e){return e===zh||e===Jh}function yt(e){return 32<=e&&e<=126||161<=e&&e<=55295&&e!==8232&&e!==8233||57344<=e&&e<=65533&&e!==65279||65536<=e&&e<=1114111}function md(e){return yt(e)&&!on(e)&&e!==65279&&e!==Qh&&e!==Dt}function Go(e,t){return yt(e)&&e!==65279&&e!==Zo&&e!==ta&&e!==ra&&e!==na&&e!==ia&&e!==ea&&(e!==zo||t&&md(t))}function yd(e){return yt(e)&&e!==65279&&!on(e)&&e!==sd&&e!==ud&&e!==ea&&e!==Zo&&e!==ta&&e!==ra&&e!==na&&e!==ia&&e!==zo&&e!==rd&&e!==id&&e!==Zh&&e!==fd&&e!==od&&e!==ad&&e!==nd&&e!==ed&&e!==td&&e!==cd&&e!==ld}function sa(e){var t=/^\n* /;return t.test(e)}var oa=1,aa=2,ua=3,ca=4,rr=5;function xd(e,t,r,n,i){var s,o,a,u=!1,c=!1,l=n!==-1,p=-1,f=yd(e.charCodeAt(0))&&!on(e.charCodeAt(e.length-1));if(t)for(s=0;s<e.length;s++){if(o=e.charCodeAt(s),!yt(o))return rr;a=s>0?e.charCodeAt(s-1):null,f=f&&Go(o,a)}else{for(s=0;s<e.length;s++){if(o=e.charCodeAt(s),o===Dt)u=!0,l&&(c=c||s-p-1>n&&e[p+1]!==" ",p=s);else if(!yt(o))return rr;a=s>0?e.charCodeAt(s-1):null,f=f&&Go(o,a)}c=c||l&&s-p-1>n&&e[p+1]!==" "}return!u&&!c?f&&!i(e)?oa:aa:r>9&&sa(e)?rr:c?ca:ua}function _d(e,t,r,n){e.dump=(function(){if(t.length===0)return"''";if(!e.noCompatMode&&pd.indexOf(t)!==-1)return"'"+t+"'";var i=e.indent*Math.max(1,r),s=e.lineWidth===-1?-1:Math.max(Math.min(e.lineWidth,40),e.lineWidth-i),o=n||e.flowLevel>-1&&r>=e.flowLevel;function a(u){return gd(e,u)}switch(xd(t,o,e.indent,s,a)){case oa:return t;case aa:return"'"+t.replace(/'/g,"''")+"'";case ua:return"|"+Yo(t,e.indent)+Ko(Uo(t,i));case ca:return">"+Yo(t,e.indent)+Ko(Uo(Sd(t,s),i));case rr:return'"'+bd(t,s)+'"';default:throw new It("impossible error: invalid scalar style")}})()}function Yo(e,t){var r=sa(e)?String(t):"",n=e[e.length-1]===`
-`,i=n&&(e[e.length-2]===`
-`||e===`
-`),s=i?"+":n?"":"-";return r+s+`
-`}function Ko(e){return e[e.length-1]===`
-`?e.slice(0,-1):e}function Sd(e,t){for(var r=/(\n+)([^\n]*)/g,n=(function(){var c=e.indexOf(`
-`);return c=c!==-1?c:e.length,r.lastIndex=c,Vo(e.slice(0,c),t)})(),i=e[0]===`
-`||e[0]===" ",s,o;o=r.exec(e);){var a=o[1],u=o[2];s=u[0]===" ",n+=a+(!i&&!s&&u!==""?`
-`:"")+Vo(u,t),i=s}return n}function Vo(e,t){if(e===""||e[0]===" ")return e;for(var r=/ [^ ]/g,n,i=0,s,o=0,a=0,u="";n=r.exec(e);)a=n.index,a-i>t&&(s=o>i?o:a,u+=`
-`+e.slice(i,s),i=s+1),o=a;return u+=`
-`,e.length-i>t&&o>i?u+=e.slice(i,o)+`
-`+e.slice(o+1):u+=e.slice(i),u.slice(1)}function bd(e){for(var t="",r,n,i,s=0;s<e.length;s++){if(r=e.charCodeAt(s),r>=55296&&r<=56319&&(n=e.charCodeAt(s+1),n>=56320&&n<=57343)){t+=Wo((r-55296)*1024+n-56320+65536),s++;continue}i=Z[r],t+=!i&&yt(r)?e[s]:i||Wo(r)}return t}function Ad(e,t,r){var n="",i=e.tag,s,o;for(s=0,o=r.length;s<o;s+=1)rt(e,t,r[s],!1,!1)&&(s!==0&&(n+=","+(e.condenseFlow?"":" ")),n+=e.dump);e.tag=i,e.dump="["+n+"]"}function vd(e,t,r,n){var i="",s=e.tag,o,a;for(o=0,a=r.length;o<a;o+=1)rt(e,t+1,r[o],!0,!0)&&((!n||o!==0)&&(i+=nn(e,t)),e.dump&&Dt===e.dump.charCodeAt(0)?i+="-":i+="- ",i+=e.dump);e.tag=s,e.dump=i||"[]"}function Ed(e,t,r){var n="",i=e.tag,s=Object.keys(r),o,a,u,c,l;for(o=0,a=s.length;o<a;o+=1)l="",o!==0&&(l+=", "),e.condenseFlow&&(l+='"'),u=s[o],c=r[u],rt(e,t,u,!1,!1)&&(e.dump.length>1024&&(l+="? "),l+=e.dump+(e.condenseFlow?'"':"")+":"+(e.condenseFlow?"":" "),rt(e,t,c,!1,!1)&&(l+=e.dump,n+=l));e.tag=i,e.dump="{"+n+"}"}function wd(e,t,r,n){var i="",s=e.tag,o=Object.keys(r),a,u,c,l,p,f;if(e.sortKeys===!0)o.sort();else if(typeof e.sortKeys=="function")o.sort(e.sortKeys);else if(e.sortKeys)throw new It("sortKeys must be a boolean or a function");for(a=0,u=o.length;a<u;a+=1)f="",(!n||a!==0)&&(f+=nn(e,t)),c=o[a],l=r[c],rt(e,t+1,c,!0,!0,!0)&&(p=e.tag!==null&&e.tag!=="?"||e.dump&&e.dump.length>1024,p&&(e.dump&&Dt===e.dump.charCodeAt(0)?f+="?":f+="? "),f+=e.dump,p&&(f+=nn(e,t)),rt(e,t+1,l,!0,p)&&(e.dump&&Dt===e.dump.charCodeAt(0)?f+=":":f+=": ",f+=e.dump,i+=f));e.tag=s,e.dump=i||"{}"}function Xo(e,t,r){var n,i,s,o,a,u;for(i=r?e.explicitTypes:e.implicitTypes,s=0,o=i.length;s<o;s+=1)if(a=i[s],(a.instanceOf||a.predicate)&&(!a.instanceOf||typeof t=="object"&&t instanceof a.instanceOf)&&(!a.predicate||a.predicate(t))){if(e.tag=r?a.tag:"?",a.represent){if(u=e.styleMap[a.tag]||a.defaultStyle,Jo.call(a.represent)==="[object Function]")n=a.represent(t,u);else if(Qo.call(a.represent,u))n=a.represent[u](t,u);else throw new It("!<"+a.tag+'> tag resolver accepts not "'+u+'" style');e.dump=n}return!0}return!1}function rt(e,t,r,n,i,s){e.tag=null,e.dump=r,Xo(e,r,!1)||Xo(e,r,!0);var o=Jo.call(e.dump);n&&(n=e.flowLevel<0||e.flowLevel>t);var a=o==="[object Object]"||o==="[object Array]",u,c;if(a&&(u=e.duplicates.indexOf(r),c=u!==-1),(e.tag!==null&&e.tag!=="?"||c||e.indent!==2&&t>0)&&(i=!1),c&&e.usedDuplicates[u])e.dump="*ref_"+u;else{if(a&&c&&!e.usedDuplicates[u]&&(e.usedDuplicates[u]=!0),o==="[object Object]")n&&Object.keys(e.dump).length!==0?(wd(e,t,e.dump,i),c&&(e.dump="&ref_"+u+e.dump)):(Ed(e,t,e.dump),c&&(e.dump="&ref_"+u+" "+e.dump));else if(o==="[object Array]"){var l=e.noArrayIndent&&t>0?t-1:t;n&&e.dump.length!==0?(vd(e,l,e.dump,i),c&&(e.dump="&ref_"+u+e.dump)):(Ad(e,l,e.dump),c&&(e.dump="&ref_"+u+" "+e.dump))}else if(o==="[object String]")e.tag!=="?"&&_d(e,e.dump,t,s);else{if(e.skipInvalid)return!1;throw new It("unacceptable kind of an object to dump "+o)}e.tag!==null&&e.tag!=="?"&&(e.dump="!<"+e.tag+"> "+e.dump)}return!0}function Pd(e,t){var r=[],n=[],i,s;for(sn(e,r,n),i=0,s=n.length;i<s;i+=1)t.duplicates.push(r[n[i]]);t.usedDuplicates=new Array(s)}function sn(e,t,r){var n,i,s;if(e!==null&&typeof e=="object")if(i=t.indexOf(e),i!==-1)r.indexOf(i)===-1&&r.push(i);else if(t.push(e),Array.isArray(e))for(i=0,s=e.length;i<s;i+=1)sn(e[i],t,r);else for(n=Object.keys(e),i=0,s=n.length;i<s;i+=1)sn(e[n[i]],t,r)}function la(e,t){t=t||{};var r=new dd(t);return r.noRefs||Pd(e,r),rt(r,0,e,!0,!0)?r.dump+`
-`:""}function Cd(e,t){return la(e,$t.extend({schema:Xh},t))}an.exports.dump=la;an.exports.safeDump=Cd});var ha=y((z_,G)=>{"use strict";var nr=Bo(),pa=fa();function ir(e){return function(){throw new Error("Function "+e+" is deprecated and cannot be used.")}}G.exports.Type=z();G.exports.Schema=ze();G.exports.FAILSAFE_SCHEMA=Jt();G.exports.JSON_SCHEMA=Qr();G.exports.CORE_SCHEMA=zr();G.exports.DEFAULT_SAFE_SCHEMA=ht();G.exports.DEFAULT_FULL_SCHEMA=Ft();G.exports.load=nr.load;G.exports.loadAll=nr.loadAll;G.exports.safeLoad=nr.safeLoad;G.exports.safeLoadAll=nr.safeLoadAll;G.exports.dump=pa.dump;G.exports.safeDump=pa.safeDump;G.exports.YAMLException=ft();G.exports.MINIMAL_SCHEMA=Jt();G.exports.SAFE_SCHEMA=ht();G.exports.DEFAULT_SCHEMA=Ft();G.exports.scan=ir("scan");G.exports.parse=ir("parse");G.exports.compose=ir("compose");G.exports.addConstructor=ir("addConstructor")});var ga=y((Z_,da)=>{"use strict";var Rd=ha();da.exports=Rd});var cn=y((ma,ya)=>{"use strict";var sr=ga(),un=ma=ya.exports;un.yaml={parse:sr.safeLoad.bind(sr),stringify:sr.safeDump.bind(sr)};un.json={parse:JSON.parse.bind(JSON),stringify:function(e,t){let r=Object.assign({replacer:null,space:2},t);return JSON.stringify(e,r.replacer,r.space)}};un.javascript={parse:function(){throw new Error("gray-matter JavaScript frontmatter engine disabled by dev-workflow build")},stringify:function(){throw new Error("stringifying JavaScript is not supported")}}});var _a=y((eS,xa)=>{"use strict";xa.exports=function(e){return typeof e=="string"&&e.charAt(0)==="\uFEFF"?e.slice(1):e}});var or=y(Ce=>{"use strict";var Sa=_a(),ba=Tt();Ce.define=function(e,t,r){Reflect.defineProperty(e,t,{enumerable:!1,configurable:!0,writable:!0,value:r})};Ce.isBuffer=function(e){return ba(e)==="buffer"};Ce.isObject=function(e){return ba(e)==="object"};Ce.toBuffer=function(e){return typeof e=="string"?Buffer.from(e):e};Ce.toString=function(e){if(Ce.isBuffer(e))return Sa(String(e));if(typeof e!="string")throw new TypeError("expected input to be a string or buffer");return Sa(e)};Ce.arrayify=function(e){return e?Array.isArray(e)?e:[e]:[]};Ce.startsWith=function(e,t,r){return typeof r!="number"&&(r=t.length),e.slice(0,r)===t}});var Mt=y((rS,Aa)=>{"use strict";var kd=cn(),Td=or();Aa.exports=function(e){let t=Object.assign({},e);return t.delimiters=Td.arrayify(t.delims||t.delimiters||"---"),t.delimiters.length===1&&t.delimiters.push(t.delimiters[0]),t.language=(t.language||t.lang||"yaml").toLowerCase(),t.engines=Object.assign({},kd,t.parsers,t.engines),t}});var ln=y((nS,va)=>{"use strict";va.exports=function(e,t){let r=t.engines[e]||t.engines[Od(e)];if(typeof r>"u")throw new Error('gray-matter engine "'+e+'" is not registered');return typeof r=="function"&&(r={parse:r}),r};function Od(e){switch(e.toLowerCase()){case"js":case"javascript":return"javascript";case"coffee":case"coffeescript":case"cson":return"coffee";case"yaml":case"yml":return"yaml";default:return e}}});var fn=y((iS,Ea)=>{"use strict";var Fd=Tt(),Ld=ln(),Dd=Mt();Ea.exports=function(e,t,r){if(t==null&&r==null)switch(Fd(e)){case"object":t=e.data,r={};break;case"string":return e;default:throw new TypeError("expected file to be a string or object")}let n=e.content,i=Dd(r);if(t==null){if(!i.data)return e;t=i.data}let s=e.language||i.language,o=Ld(s,i);if(typeof o.stringify!="function")throw new TypeError('expected "'+s+'.stringify" to be a function');t=Object.assign({},e.data,t);let a=i.delimiters[0],u=i.delimiters[1],c=o.stringify(t,r).trim(),l="";return c!=="{}"&&(l=xt(a)+xt(c)+xt(u)),typeof e.excerpt=="string"&&e.excerpt!==""&&n.indexOf(e.excerpt.trim())===-1&&(l+=xt(e.excerpt)+xt(u)),l+xt(n)};function xt(e){return e.slice(-1)!==`
-`?e+`
-`:e}});var Pa=y((sS,wa)=>{"use strict";var $d=Mt();wa.exports=function(e,t){let r=$d(t);if(e.data==null&&(e.data={}),typeof r.excerpt=="function")return r.excerpt(e,r);let n=e.data.excerpt_separator||r.excerpt_separator;if(n==null&&(r.excerpt===!1||r.excerpt==null))return e;let i=typeof r.excerpt=="string"?r.excerpt:n||r.delimiters[0],s=e.content.indexOf(i);return s!==-1&&(e.excerpt=e.content.slice(0,s)),e}});var ka=y((oS,Ra)=>{"use strict";var Ca=Tt(),Id=fn(),_t=or();Ra.exports=function(e){return Ca(e)!=="object"&&(e={content:e}),Ca(e.data)!=="object"&&(e.data={}),e.contents&&e.content==null&&(e.content=e.contents),_t.define(e,"orig",_t.toBuffer(e.content)),_t.define(e,"language",e.language||""),_t.define(e,"matter",e.matter||""),_t.define(e,"stringify",function(t,r){return r&&r.language&&(e.language=r.language),Id(e,t,r)}),e.content=_t.toString(e.content),e.isEmpty=!1,e.excerpt="",e}});var Oa=y((aS,Ta)=>{"use strict";var Md=ln(),Nd=Mt();Ta.exports=function(e,t,r){let n=Nd(r),i=Md(e,n);if(typeof i.parse!="function")throw new TypeError('expected "'+e+'.parse" to be a function');return i.parse(t,n)}});var hn=y((uS,Da)=>{"use strict";var jd=require("fs"),Hd=vs(),pn=Mt(),qd=fn(),Fa=Pa(),Bd=cn(),Wd=ka(),Ud=Oa(),La=or();function se(e,t){if(e==="")return{data:{},content:e,excerpt:"",orig:e};let r=Wd(e),n=se.cache[r.content];if(!t){if(n)return r=Object.assign({},n),r.orig=n.orig,r;se.cache[r.content]=r}return Gd(r,t)}function Gd(e,t){let r=pn(t),n=r.delimiters[0],i=`
-`+r.delimiters[1],s=e.content;r.language&&(e.language=r.language);let o=n.length;if(!La.startsWith(s,n,o))return Fa(e,r),e;if(s.charAt(o)===n.slice(-1))return e;s=s.slice(o);let a=s.length,u=se.language(s,r);u.name&&(e.language=u.name,s=s.slice(u.raw.length));let c=s.indexOf(i);return c===-1&&(c=a),e.matter=s.slice(0,c),e.matter.replace(/^\s*#[^\n]+/gm,"").trim()===""?(e.isEmpty=!0,e.empty=e.content,e.data={}):e.data=Ud(e.language,e.matter,r),c===a?e.content="":(e.content=s.slice(c+i.length),e.content[0]==="\r"&&(e.content=e.content.slice(1)),e.content[0]===`
-`&&(e.content=e.content.slice(1))),Fa(e,r),(r.sections===!0||typeof r.section=="function")&&Hd(e,r.section),e}se.engines=Bd;se.stringify=function(e,t,r){return typeof e=="string"&&(e=se(e,r)),qd(e,t,r)};se.read=function(e,t){let r=jd.readFileSync(e,"utf8"),n=se(r,t);return n.path=e,n};se.test=function(e,t){return La.startsWith(e,pn(t).delimiters[0])};se.language=function(e,t){let n=pn(t).delimiters[0];se.test(e)&&(e=e.slice(n.length));let i=e.slice(0,e.search(/\r?\n/));return{raw:i,name:i?i.trim():""}};se.cache={};se.clearCache=function(){se.cache={}};Da.exports=se});var Na=y(bt=>{"use strict";Object.defineProperty(bt,"__esModule",{value:!0});bt.splitWhen=bt.flatten=void 0;function Sg(e){return e.reduce((t,r)=>[].concat(t,r),[])}bt.flatten=Sg;function bg(e,t){let r=[[]],n=0;for(let i of e)t(i)?(n++,r[n]=[]):r[n].push(i);return r}bt.splitWhen=bg});var ja=y(mr=>{"use strict";Object.defineProperty(mr,"__esModule",{value:!0});mr.isEnoentCodeError=void 0;function Ag(e){return e.code==="ENOENT"}mr.isEnoentCodeError=Ag});var Ha=y(yr=>{"use strict";Object.defineProperty(yr,"__esModule",{value:!0});yr.createDirentFromStats=void 0;var _n=class{constructor(t,r){this.name=t,this.isBlockDevice=r.isBlockDevice.bind(r),this.isCharacterDevice=r.isCharacterDevice.bind(r),this.isDirectory=r.isDirectory.bind(r),this.isFIFO=r.isFIFO.bind(r),this.isFile=r.isFile.bind(r),this.isSocket=r.isSocket.bind(r),this.isSymbolicLink=r.isSymbolicLink.bind(r)}};function vg(e,t){return new _n(e,t)}yr.createDirentFromStats=vg});var Ua=y(X=>{"use strict";Object.defineProperty(X,"__esModule",{value:!0});X.convertPosixPathToPattern=X.convertWindowsPathToPattern=X.convertPathToPattern=X.escapePosixPath=X.escapeWindowsPath=X.escape=X.removeLeadingDotSegment=X.makeAbsolute=X.unixify=void 0;var Eg=require("os"),wg=require("path"),qa=Eg.platform()==="win32",Pg=2,Cg=/(\\?)([()*?[\]{|}]|^!|[!+@](?=\()|\\(?![!()*+?@[\]{|}]))/g,Rg=/(\\?)([()[\]{}]|^!|[!+@](?=\())/g,kg=/^\\\\([.?])/,Tg=/\\(?![!()+@[\]{}])/g;function Og(e){return e.replace(/\\/g,"/")}X.unixify=Og;function Fg(e,t){return wg.resolve(e,t)}X.makeAbsolute=Fg;function Lg(e){if(e.charAt(0)==="."){let t=e.charAt(1);if(t==="/"||t==="\\")return e.slice(Pg)}return e}X.removeLeadingDotSegment=Lg;X.escape=qa?Sn:bn;function Sn(e){return e.replace(Rg,"\\$2")}X.escapeWindowsPath=Sn;function bn(e){return e.replace(Cg,"\\$2")}X.escapePosixPath=bn;X.convertPathToPattern=qa?Ba:Wa;function Ba(e){return Sn(e).replace(kg,"//$1").replace(Tg,"/")}X.convertWindowsPathToPattern=Ba;function Wa(e){return bn(e)}X.convertPosixPathToPattern=Wa});var Ya=y((mS,Ga)=>{Ga.exports=function(t){if(typeof t!="string"||t==="")return!1;for(var r;r=/(\\).|([@?!+*]\(.*\))/g.exec(t);){if(r[2])return!0;t=t.slice(r.index+r[0].length)}return!1}});var Xa=y((yS,Va)=>{var Dg=Ya(),Ka={"{":"}","(":")","[":"]"},$g=function(e){if(e[0]==="!")return!0;for(var t=0,r=-2,n=-2,i=-2,s=-2,o=-2;t<e.length;){if(e[t]==="*"||e[t+1]==="?"&&/[\].+)]/.test(e[t])||n!==-1&&e[t]==="["&&e[t+1]!=="]"&&(n<t&&(n=e.indexOf("]",t)),n>t&&(o===-1||o>n||(o=e.indexOf("\\",t),o===-1||o>n)))||i!==-1&&e[t]==="{"&&e[t+1]!=="}"&&(i=e.indexOf("}",t),i>t&&(o=e.indexOf("\\",t),o===-1||o>i))||s!==-1&&e[t]==="("&&e[t+1]==="?"&&/[:!=]/.test(e[t+2])&&e[t+3]!==")"&&(s=e.indexOf(")",t),s>t&&(o=e.indexOf("\\",t),o===-1||o>s))||r!==-1&&e[t]==="("&&e[t+1]!=="|"&&(r<t&&(r=e.indexOf("|",t)),r!==-1&&e[r+1]!==")"&&(s=e.indexOf(")",r),s>r&&(o=e.indexOf("\\",r),o===-1||o>s))))return!0;if(e[t]==="\\"){var a=e[t+1];t+=2;var u=Ka[a];if(u){var c=e.indexOf(u,t);c!==-1&&(t=c+1)}if(e[t]==="!")return!0}else t++}return!1},Ig=function(e){if(e[0]==="!")return!0;for(var t=0;t<e.length;){if(/[*?{}()[\]]/.test(e[t]))return!0;if(e[t]==="\\"){var r=e[t+1];t+=2;var n=Ka[r];if(n){var i=e.indexOf(n,t);i!==-1&&(t=i+1)}if(e[t]==="!")return!0}else t++}return!1};Va.exports=function(t,r){if(typeof t!="string"||t==="")return!1;if(Dg(t))return!0;var n=$g;return r&&r.strict===!1&&(n=Ig),n(t)}});var Qa=y((xS,Ja)=>{"use strict";var Mg=Xa(),Ng=require("path").posix.dirname,jg=require("os").platform()==="win32",An="/",Hg=/\\/g,qg=/[\{\[].*[\}\]]$/,Bg=/(^|[^\\])([\{\[]|\([^\)]+$)/,Wg=/\\([\!\*\?\|\[\]\(\)\{\}])/g;Ja.exports=function(t,r){var n=Object.assign({flipBackslashes:!0},r);n.flipBackslashes&&jg&&t.indexOf(An)<0&&(t=t.replace(Hg,An)),qg.test(t)&&(t+=An),t+="a";do t=Ng(t);while(Mg(t)||Bg.test(t));return t.replace(Wg,"$1")}});var xr=y(fe=>{"use strict";fe.isInteger=e=>typeof e=="number"?Number.isInteger(e):typeof e=="string"&&e.trim()!==""?Number.isInteger(Number(e)):!1;fe.find=(e,t)=>e.nodes.find(r=>r.type===t);fe.exceedsLimit=(e,t,r=1,n)=>n===!1||!fe.isInteger(e)||!fe.isInteger(t)?!1:(Number(t)-Number(e))/Number(r)>=n;fe.escapeNode=(e,t=0,r)=>{let n=e.nodes[t];n&&(r&&n.type===r||n.type==="open"||n.type==="close")&&n.escaped!==!0&&(n.value="\\"+n.value,n.escaped=!0)};fe.encloseBrace=e=>e.type!=="brace"?!1:e.commas>>0+e.ranges>>0===0?(e.invalid=!0,!0):!1;fe.isInvalidBrace=e=>e.type!=="brace"?!1:e.invalid===!0||e.dollar?!0:e.commas>>0+e.ranges>>0===0||e.open!==!0||e.close!==!0?(e.invalid=!0,!0):!1;fe.isOpenOrClose=e=>e.type==="open"||e.type==="close"?!0:e.open===!0||e.close===!0;fe.reduce=e=>e.reduce((t,r)=>(r.type==="text"&&t.push(r.value),r.type==="range"&&(r.type="text"),t),[]);fe.flatten=(...e)=>{let t=[],r=n=>{for(let i=0;i<n.length;i++){let s=n[i];if(Array.isArray(s)){r(s);continue}s!==void 0&&t.push(s)}return t};return r(e),t}});var _r=y((SS,Za)=>{"use strict";var za=xr();Za.exports=(e,t={})=>{let r=(n,i={})=>{let s=t.escapeInvalid&&za.isInvalidBrace(i),o=n.invalid===!0&&t.escapeInvalid===!0,a="";if(n.value)return(s||o)&&za.isOpenOrClose(n)?"\\"+n.value:n.value;if(n.value)return n.value;if(n.nodes)for(let u of n.nodes)a+=r(u);return a};return r(e)}});var tu=y((bS,eu)=>{"use strict";eu.exports=function(e){return typeof e=="number"?e-e===0:typeof e=="string"&&e.trim()!==""?Number.isFinite?Number.isFinite(+e):isFinite(+e):!1}});var lu=y((AS,cu)=>{"use strict";var ru=tu(),ot=(e,t,r)=>{if(ru(e)===!1)throw new TypeError("toRegexRange: expected the first argument to be a number");if(t===void 0||e===t)return String(e);if(ru(t)===!1)throw new TypeError("toRegexRange: expected the second argument to be a number.");let n={relaxZeros:!0,...r};typeof n.strictZeros=="boolean"&&(n.relaxZeros=n.strictZeros===!1);let i=String(n.relaxZeros),s=String(n.shorthand),o=String(n.capture),a=String(n.wrap),u=e+":"+t+"="+i+s+o+a;if(ot.cache.hasOwnProperty(u))return ot.cache[u].result;let c=Math.min(e,t),l=Math.max(e,t);if(Math.abs(c-l)===1){let h=e+"|"+t;return n.capture?`(${h})`:n.wrap===!1?h:`(?:${h})`}let p=uu(e)||uu(t),f={min:e,max:t,a:c,b:l},d=[],g=[];if(p&&(f.isPadded=p,f.maxLen=String(f.max).length),c<0){let h=l<0?Math.abs(l):1;g=nu(h,Math.abs(c),f,n),c=f.a=0}return l>=0&&(d=nu(c,l,f,n)),f.negatives=g,f.positives=d,f.result=Ug(g,d,n),n.capture===!0?f.result=`(${f.result})`:n.wrap!==!1&&d.length+g.length>1&&(f.result=`(?:${f.result})`),ot.cache[u]=f,f.result};function Ug(e,t,r){let n=vn(e,t,"-",!1,r)||[],i=vn(t,e,"",!1,r)||[],s=vn(e,t,"-?",!0,r)||[];return n.concat(s).concat(i).join("|")}function Gg(e,t){let r=1,n=1,i=su(e,r),s=new Set([t]);for(;e<=i&&i<=t;)s.add(i),r+=1,i=su(e,r);for(i=ou(t+1,n)-1;e<i&&i<=t;)s.add(i),n+=1,i=ou(t+1,n)-1;return s=[...s],s.sort(Vg),s}function Yg(e,t,r){if(e===t)return{pattern:e,count:[],digits:0};let n=Kg(e,t),i=n.length,s="",o=0;for(let a=0;a<i;a++){let[u,c]=n[a];u===c?s+=u:u!=="0"||c!=="9"?s+=Xg(u,c,r):o++}return o&&(s+=r.shorthand===!0?"\\d":"[0-9]"),{pattern:s,count:[o],digits:i}}function nu(e,t,r,n){let i=Gg(e,t),s=[],o=e,a;for(let u=0;u<i.length;u++){let c=i[u],l=Yg(String(o),String(c),n),p="";if(!r.isPadded&&a&&a.pattern===l.pattern){a.count.length>1&&a.count.pop(),a.count.push(l.count[0]),a.string=a.pattern+au(a.count),o=c+1;continue}r.isPadded&&(p=Jg(c,r,n)),l.string=p+l.pattern+au(l.count),s.push(l),o=c+1,a=l}return s}function vn(e,t,r,n,i){let s=[];for(let o of e){let{string:a}=o;!n&&!iu(t,"string",a)&&s.push(r+a),n&&iu(t,"string",a)&&s.push(r+a)}return s}function Kg(e,t){let r=[];for(let n=0;n<e.length;n++)r.push([e[n],t[n]]);return r}function Vg(e,t){return e>t?1:t>e?-1:0}function iu(e,t,r){return e.some(n=>n[t]===r)}function su(e,t){return Number(String(e).slice(0,-t)+"9".repeat(t))}function ou(e,t){return e-e%Math.pow(10,t)}function au(e){let[t=0,r=""]=e;return r||t>1?`{${t+(r?","+r:"")}}`:""}function Xg(e,t,r){return`[${e}${t-e===1?"":"-"}${t}]`}function uu(e){return/^-?(0+)\d/.test(e)}function Jg(e,t,r){if(!t.isPadded)return e;let n=Math.abs(t.maxLen-String(e).length),i=r.relaxZeros!==!1;switch(n){case 0:return"";case 1:return i?"0?":"0";case 2:return i?"0{0,2}":"00";default:return i?`0{0,${n}}`:`0{${n}}`}}ot.cache={};ot.clearCache=()=>ot.cache={};cu.exports=ot});var Pn=y((vS,yu)=>{"use strict";var Qg=require("util"),pu=lu(),fu=e=>e!==null&&typeof e=="object"&&!Array.isArray(e),zg=e=>t=>e===!0?Number(t):String(t),En=e=>typeof e=="number"||typeof e=="string"&&e!=="",Nt=e=>Number.isInteger(+e),wn=e=>{let t=`${e}`,r=-1;if(t[0]==="-"&&(t=t.slice(1)),t==="0")return!1;for(;t[++r]==="0";);return r>0},Zg=(e,t,r)=>typeof e=="string"||typeof t=="string"?!0:r.stringify===!0,em=(e,t,r)=>{if(t>0){let n=e[0]==="-"?"-":"";n&&(e=e.slice(1)),e=n+e.padStart(n?t-1:t,"0")}return r===!1?String(e):e},br=(e,t)=>{let r=e[0]==="-"?"-":"";for(r&&(e=e.slice(1),t--);e.length<t;)e="0"+e;return r?"-"+e:e},tm=(e,t,r)=>{e.negatives.sort((a,u)=>a<u?-1:a>u?1:0),e.positives.sort((a,u)=>a<u?-1:a>u?1:0);let n=t.capture?"":"?:",i="",s="",o;return e.positives.length&&(i=e.positives.map(a=>br(String(a),r)).join("|")),e.negatives.length&&(s=`-(${n}${e.negatives.map(a=>br(String(a),r)).join("|")})`),i&&s?o=`${i}|${s}`:o=i||s,t.wrap?`(${n}${o})`:o},hu=(e,t,r,n)=>{if(r)return pu(e,t,{wrap:!1,...n});let i=String.fromCharCode(e);if(e===t)return i;let s=String.fromCharCode(t);return`[${i}-${s}]`},du=(e,t,r)=>{if(Array.isArray(e)){let n=r.wrap===!0,i=r.capture?"":"?:";return n?`(${i}${e.join("|")})`:e.join("|")}return pu(e,t,r)},gu=(...e)=>new RangeError("Invalid range arguments: "+Qg.inspect(...e)),mu=(e,t,r)=>{if(r.strictRanges===!0)throw gu([e,t]);return[]},rm=(e,t)=>{if(t.strictRanges===!0)throw new TypeError(`Expected step "${e}" to be a number`);return[]},nm=(e,t,r=1,n={})=>{let i=Number(e),s=Number(t);if(!Number.isInteger(i)||!Number.isInteger(s)){if(n.strictRanges===!0)throw gu([e,t]);return[]}i===0&&(i=0),s===0&&(s=0);let o=i>s,a=String(e),u=String(t),c=String(r);r=Math.max(Math.abs(r),1);let l=wn(a)||wn(u)||wn(c),p=l?Math.max(a.length,u.length,c.length):0,f=l===!1&&Zg(e,t,n)===!1,d=n.transform||zg(f);if(n.toRegex&&r===1)return hu(br(e,p),br(t,p),!0,n);let g={negatives:[],positives:[]},h=w=>g[w<0?"negatives":"positives"].push(Math.abs(w)),m=[],b=0;for(;o?i>=s:i<=s;)n.toRegex===!0&&r>1?h(i):m.push(em(d(i,b),p,f)),i=o?i-r:i+r,b++;return n.toRegex===!0?r>1?tm(g,n,p):du(m,null,{wrap:!1,...n}):m},im=(e,t,r=1,n={})=>{if(!Nt(e)&&e.length>1||!Nt(t)&&t.length>1)return mu(e,t,n);let i=n.transform||(f=>String.fromCharCode(f)),s=`${e}`.charCodeAt(0),o=`${t}`.charCodeAt(0),a=s>o,u=Math.min(s,o),c=Math.max(s,o);if(n.toRegex&&r===1)return hu(u,c,!1,n);let l=[],p=0;for(;a?s>=o:s<=o;)l.push(i(s,p)),s=a?s-r:s+r,p++;return n.toRegex===!0?du(l,null,{wrap:!1,options:n}):l},Sr=(e,t,r,n={})=>{if(t==null&&En(e))return[e];if(!En(e)||!En(t))return mu(e,t,n);if(typeof r=="function")return Sr(e,t,1,{transform:r});if(fu(r))return Sr(e,t,0,r);let i={...n};return i.capture===!0&&(i.wrap=!0),r=r||i.step||1,Nt(r)?Nt(e)&&Nt(t)?nm(e,t,r,i):im(e,t,Math.max(Math.abs(r),1),i):r!=null&&!fu(r)?rm(r,i):Sr(e,t,1,r)};yu.exports=Sr});var Su=y((ES,_u)=>{"use strict";var sm=Pn(),xu=xr(),om=(e,t={})=>{let r=(n,i={})=>{let s=xu.isInvalidBrace(i),o=n.invalid===!0&&t.escapeInvalid===!0,a=s===!0||o===!0,u=t.escapeInvalid===!0?"\\":"",c="";if(n.isOpen===!0)return u+n.value;if(n.isClose===!0)return console.log("node.isClose",u,n.value),u+n.value;if(n.type==="open")return a?u+n.value:"(";if(n.type==="close")return a?u+n.value:")";if(n.type==="comma")return n.prev.type==="comma"?"":a?n.value:"|";if(n.value)return n.value;if(n.nodes&&n.ranges>0){let l=xu.reduce(n.nodes),p=sm(...l,{...t,wrap:!1,toRegex:!0,strictZeros:!0});if(p.length!==0)return l.length>1&&p.length>1?`(${p})`:p}if(n.nodes)for(let l of n.nodes)c+=r(l,n);return c};return r(e)};_u.exports=om});var vu=y((wS,Au)=>{"use strict";var am=Pn(),bu=_r(),At=xr(),at=(e="",t="",r=!1)=>{let n=[];if(e=[].concat(e),t=[].concat(t),!t.length)return e;if(!e.length)return r?At.flatten(t).map(i=>`{${i}}`):t;for(let i of e)if(Array.isArray(i))for(let s of i)n.push(at(s,t,r));else for(let s of t)r===!0&&typeof s=="string"&&(s=`{${s}}`),n.push(Array.isArray(s)?at(i,s,r):i+s);return At.flatten(n)},um=(e,t={})=>{let r=t.rangeLimit===void 0?1e3:t.rangeLimit,n=(i,s={})=>{i.queue=[];let o=s,a=s.queue;for(;o.type!=="brace"&&o.type!=="root"&&o.parent;)o=o.parent,a=o.queue;if(i.invalid||i.dollar){a.push(at(a.pop(),bu(i,t)));return}if(i.type==="brace"&&i.invalid!==!0&&i.nodes.length===2){a.push(at(a.pop(),["{}"]));return}if(i.nodes&&i.ranges>0){let p=At.reduce(i.nodes);if(At.exceedsLimit(...p,t.step,r))throw new RangeError("expanded array length exceeds range limit. Use options.rangeLimit to increase or disable the limit.");let f=am(...p,t);f.length===0&&(f=bu(i,t)),a.push(at(a.pop(),f)),i.nodes=[];return}let u=At.encloseBrace(i),c=i.queue,l=i;for(;l.type!=="brace"&&l.type!=="root"&&l.parent;)l=l.parent,c=l.queue;for(let p=0;p<i.nodes.length;p++){let f=i.nodes[p];if(f.type==="comma"&&i.type==="brace"){p===1&&c.push(""),c.push("");continue}if(f.type==="close"){a.push(at(a.pop(),c,u));continue}if(f.value&&f.type!=="open"){c.push(at(c.pop(),f.value));continue}f.nodes&&n(f,i)}return c};return At.flatten(n(e))};Au.exports=um});var wu=y((PS,Eu)=>{"use strict";Eu.exports={MAX_LENGTH:1e4,CHAR_0:"0",CHAR_9:"9",CHAR_UPPERCASE_A:"A",CHAR_LOWERCASE_A:"a",CHAR_UPPERCASE_Z:"Z",CHAR_LOWERCASE_Z:"z",CHAR_LEFT_PARENTHESES:"(",CHAR_RIGHT_PARENTHESES:")",CHAR_ASTERISK:"*",CHAR_AMPERSAND:"&",CHAR_AT:"@",CHAR_BACKSLASH:"\\",CHAR_BACKTICK:"`",CHAR_CARRIAGE_RETURN:"\r",CHAR_CIRCUMFLEX_ACCENT:"^",CHAR_COLON:":",CHAR_COMMA:",",CHAR_DOLLAR:"$",CHAR_DOT:".",CHAR_DOUBLE_QUOTE:'"',CHAR_EQUAL:"=",CHAR_EXCLAMATION_MARK:"!",CHAR_FORM_FEED:"\f",CHAR_FORWARD_SLASH:"/",CHAR_HASH:"#",CHAR_HYPHEN_MINUS:"-",CHAR_LEFT_ANGLE_BRACKET:"<",CHAR_LEFT_CURLY_BRACE:"{",CHAR_LEFT_SQUARE_BRACKET:"[",CHAR_LINE_FEED:`
-`,CHAR_NO_BREAK_SPACE:"\xA0",CHAR_PERCENT:"%",CHAR_PLUS:"+",CHAR_QUESTION_MARK:"?",CHAR_RIGHT_ANGLE_BRACKET:">",CHAR_RIGHT_CURLY_BRACE:"}",CHAR_RIGHT_SQUARE_BRACKET:"]",CHAR_SEMICOLON:";",CHAR_SINGLE_QUOTE:"'",CHAR_SPACE:" ",CHAR_TAB:"	",CHAR_UNDERSCORE:"_",CHAR_VERTICAL_LINE:"|",CHAR_ZERO_WIDTH_NOBREAK_SPACE:"\uFEFF"}});var Tu=y((CS,ku)=>{"use strict";var cm=_r(),{MAX_LENGTH:Pu,CHAR_BACKSLASH:Cn,CHAR_BACKTICK:lm,CHAR_COMMA:fm,CHAR_DOT:pm,CHAR_LEFT_PARENTHESES:hm,CHAR_RIGHT_PARENTHESES:dm,CHAR_LEFT_CURLY_BRACE:gm,CHAR_RIGHT_CURLY_BRACE:mm,CHAR_LEFT_SQUARE_BRACKET:Cu,CHAR_RIGHT_SQUARE_BRACKET:Ru,CHAR_DOUBLE_QUOTE:ym,CHAR_SINGLE_QUOTE:xm,CHAR_NO_BREAK_SPACE:_m,CHAR_ZERO_WIDTH_NOBREAK_SPACE:Sm}=wu(),bm=(e,t={})=>{if(typeof e!="string")throw new TypeError("Expected a string");let r=t||{},n=typeof r.maxLength=="number"?Math.min(Pu,r.maxLength):Pu;if(e.length>n)throw new SyntaxError(`Input length (${e.length}), exceeds max characters (${n})`);let i={type:"root",input:e,nodes:[]},s=[i],o=i,a=i,u=0,c=e.length,l=0,p=0,f,d=()=>e[l++],g=h=>{if(h.type==="text"&&a.type==="dot"&&(a.type="text"),a&&a.type==="text"&&h.type==="text"){a.value+=h.value;return}return o.nodes.push(h),h.parent=o,h.prev=a,a=h,h};for(g({type:"bos"});l<c;)if(o=s[s.length-1],f=d(),!(f===Sm||f===_m)){if(f===Cn){g({type:"text",value:(t.keepEscaping?f:"")+d()});continue}if(f===Ru){g({type:"text",value:"\\"+f});continue}if(f===Cu){u++;let h;for(;l<c&&(h=d());){if(f+=h,h===Cu){u++;continue}if(h===Cn){f+=d();continue}if(h===Ru&&(u--,u===0))break}g({type:"text",value:f});continue}if(f===hm){o=g({type:"paren",nodes:[]}),s.push(o),g({type:"text",value:f});continue}if(f===dm){if(o.type!=="paren"){g({type:"text",value:f});continue}o=s.pop(),g({type:"text",value:f}),o=s[s.length-1];continue}if(f===ym||f===xm||f===lm){let h=f,m;for(t.keepQuotes!==!0&&(f="");l<c&&(m=d());){if(m===Cn){f+=m+d();continue}if(m===h){t.keepQuotes===!0&&(f+=m);break}f+=m}g({type:"text",value:f});continue}if(f===gm){p++;let m={type:"brace",open:!0,close:!1,dollar:a.value&&a.value.slice(-1)==="$"||o.dollar===!0,depth:p,commas:0,ranges:0,nodes:[]};o=g(m),s.push(o),g({type:"open",value:f});continue}if(f===mm){if(o.type!=="brace"){g({type:"text",value:f});continue}let h="close";o=s.pop(),o.close=!0,g({type:h,value:f}),p--,o=s[s.length-1];continue}if(f===fm&&p>0){if(o.ranges>0){o.ranges=0;let h=o.nodes.shift();o.nodes=[h,{type:"text",value:cm(o)}]}g({type:"comma",value:f}),o.commas++;continue}if(f===pm&&p>0&&o.commas===0){let h=o.nodes;if(p===0||h.length===0){g({type:"text",value:f});continue}if(a.type==="dot"){if(o.range=[],a.value+=f,a.type="range",o.nodes.length!==3&&o.nodes.length!==5){o.invalid=!0,o.ranges=0,a.type="text";continue}o.ranges++,o.args=[];continue}if(a.type==="range"){h.pop();let m=h[h.length-1];m.value+=a.value+f,a=m,o.ranges--;continue}g({type:"dot",value:f});continue}g({type:"text",value:f})}do if(o=s.pop(),o.type!=="root"){o.nodes.forEach(b=>{b.nodes||(b.type==="open"&&(b.isOpen=!0),b.type==="close"&&(b.isClose=!0),b.nodes||(b.type="text"),b.invalid=!0)});let h=s[s.length-1],m=h.nodes.indexOf(o);h.nodes.splice(m,1,...o.nodes)}while(s.length>0);return g({type:"eos"}),i};ku.exports=bm});var Lu=y((RS,Fu)=>{"use strict";var Ou=_r(),Am=Su(),vm=vu(),Em=Tu(),le=(e,t={})=>{let r=[];if(Array.isArray(e))for(let n of e){let i=le.create(n,t);Array.isArray(i)?r.push(...i):r.push(i)}else r=[].concat(le.create(e,t));return t&&t.expand===!0&&t.nodupes===!0&&(r=[...new Set(r)]),r};le.parse=(e,t={})=>Em(e,t);le.stringify=(e,t={})=>Ou(typeof e=="string"?le.parse(e,t):e,t);le.compile=(e,t={})=>(typeof e=="string"&&(e=le.parse(e,t)),Am(e,t));le.expand=(e,t={})=>{typeof e=="string"&&(e=le.parse(e,t));let r=vm(e,t);return t.noempty===!0&&(r=r.filter(Boolean)),t.nodupes===!0&&(r=[...new Set(r)]),r};le.create=(e,t={})=>e===""||e.length<3?[e]:t.expand!==!0?le.compile(e,t):le.expand(e,t);Fu.exports=le});var jt=y((kS,Nu)=>{"use strict";var wm=require("path"),Ae="\\\\/",Du=`[^${Ae}]`,Pm=0,Re="\\.",Cm="\\+",Rm="\\?",Ar="\\/",km="(?=.)",$u="[^/]",Rn=`(?:${Ar}|$)`,Iu=`(?:^|${Ar})`,kn=`${Re}{1,2}${Rn}`,Tm=`(?!${Re})`,Om=`(?!${Iu}${kn})`,Fm=`(?!${Re}{0,1}${Rn})`,Lm=`(?!${kn})`,Dm=`[^.${Ar}]`,$m=`${$u}*?`,Mu={DOT_LITERAL:Re,PLUS_LITERAL:Cm,QMARK_LITERAL:Rm,SLASH_LITERAL:Ar,ONE_CHAR:km,QMARK:$u,END_ANCHOR:Rn,DOTS_SLASH:kn,NO_DOT:Tm,NO_DOTS:Om,NO_DOT_SLASH:Fm,NO_DOTS_SLASH:Lm,QMARK_NO_DOT:Dm,STAR:$m,START_ANCHOR:Iu},Im={...Mu,SLASH_LITERAL:`[${Ae}]`,QMARK:Du,STAR:`${Du}*?`,DOTS_SLASH:`${Re}{1,2}(?:[${Ae}]|$)`,NO_DOT:`(?!${Re})`,NO_DOTS:`(?!(?:^|[${Ae}])${Re}{1,2}(?:[${Ae}]|$))`,NO_DOT_SLASH:`(?!${Re}{0,1}(?:[${Ae}]|$))`,NO_DOTS_SLASH:`(?!${Re}{1,2}(?:[${Ae}]|$))`,QMARK_NO_DOT:`[^.${Ae}]`,START_ANCHOR:`(?:^|[${Ae}])`,END_ANCHOR:`(?:[${Ae}]|$)`},Mm={__proto__:null,alnum:"a-zA-Z0-9",alpha:"a-zA-Z",ascii:"\\x00-\\x7F",blank:" \\t",cntrl:"\\x00-\\x1F\\x7F",digit:"0-9",graph:"\\x21-\\x7E",lower:"a-z",print:"\\x20-\\x7E ",punct:"\\-!\"#$%&'()\\*+,./:;<=>?@[\\]^_`{|}~",space:" \\t\\r\\n\\v\\f",upper:"A-Z",word:"A-Za-z0-9_",xdigit:"A-Fa-f0-9"};Nu.exports={DEFAULT_MAX_EXTGLOB_RECURSION:Pm,MAX_LENGTH:1024*64,POSIX_REGEX_SOURCE:Mm,REGEX_BACKSLASH:/\\(?![*+?^${}(|)[\]])/g,REGEX_NON_SPECIAL_CHARS:/^[^@![\].,$*+?^{}()|\\/]+/,REGEX_SPECIAL_CHARS:/[-*+?.^${}(|)[\]]/,REGEX_SPECIAL_CHARS_BACKREF:/(\\?)((\W)(\3*))/g,REGEX_SPECIAL_CHARS_GLOBAL:/([-*+?.^${}(|)[\]])/g,REGEX_REMOVE_BACKSLASH:/(?:\[.*?[^\\]\]|\\(?=.))/g,REPLACEMENTS:{__proto__:null,"***":"*","**/**":"**","**/**/**":"**"},CHAR_0:48,CHAR_9:57,CHAR_UPPERCASE_A:65,CHAR_LOWERCASE_A:97,CHAR_UPPERCASE_Z:90,CHAR_LOWERCASE_Z:122,CHAR_LEFT_PARENTHESES:40,CHAR_RIGHT_PARENTHESES:41,CHAR_ASTERISK:42,CHAR_AMPERSAND:38,CHAR_AT:64,CHAR_BACKWARD_SLASH:92,CHAR_CARRIAGE_RETURN:13,CHAR_CIRCUMFLEX_ACCENT:94,CHAR_COLON:58,CHAR_COMMA:44,CHAR_DOT:46,CHAR_DOUBLE_QUOTE:34,CHAR_EQUAL:61,CHAR_EXCLAMATION_MARK:33,CHAR_FORM_FEED:12,CHAR_FORWARD_SLASH:47,CHAR_GRAVE_ACCENT:96,CHAR_HASH:35,CHAR_HYPHEN_MINUS:45,CHAR_LEFT_ANGLE_BRACKET:60,CHAR_LEFT_CURLY_BRACE:123,CHAR_LEFT_SQUARE_BRACKET:91,CHAR_LINE_FEED:10,CHAR_NO_BREAK_SPACE:160,CHAR_PERCENT:37,CHAR_PLUS:43,CHAR_QUESTION_MARK:63,CHAR_RIGHT_ANGLE_BRACKET:62,CHAR_RIGHT_CURLY_BRACE:125,CHAR_RIGHT_SQUARE_BRACKET:93,CHAR_SEMICOLON:59,CHAR_SINGLE_QUOTE:39,CHAR_SPACE:32,CHAR_TAB:9,CHAR_UNDERSCORE:95,CHAR_VERTICAL_LINE:124,CHAR_ZERO_WIDTH_NOBREAK_SPACE:65279,SEP:wm.sep,extglobChars(e){return{"!":{type:"negate",open:"(?:(?!(?:",close:`))${e.STAR})`},"?":{type:"qmark",open:"(?:",close:")?"},"+":{type:"plus",open:"(?:",close:")+"},"*":{type:"star",open:"(?:",close:")*"},"@":{type:"at",open:"(?:",close:")"}}},globChars(e){return e===!0?Im:Mu}}});var Ht=y(ae=>{"use strict";var Nm=require("path"),jm=process.platform==="win32",{REGEX_BACKSLASH:Hm,REGEX_REMOVE_BACKSLASH:qm,REGEX_SPECIAL_CHARS:Bm,REGEX_SPECIAL_CHARS_GLOBAL:Wm}=jt();ae.isObject=e=>e!==null&&typeof e=="object"&&!Array.isArray(e);ae.hasRegexChars=e=>Bm.test(e);ae.isRegexChar=e=>e.length===1&&ae.hasRegexChars(e);ae.escapeRegex=e=>e.replace(Wm,"\\$1");ae.toPosixSlashes=e=>e.replace(Hm,"/");ae.removeBackslashes=e=>e.replace(qm,t=>t==="\\"?"":t);ae.supportsLookbehinds=()=>{let e=process.version.slice(1).split(".").map(Number);return e.length===3&&e[0]>=9||e[0]===8&&e[1]>=10};ae.isWindows=e=>e&&typeof e.windows=="boolean"?e.windows:jm===!0||Nm.sep==="\\";ae.escapeLast=(e,t,r)=>{let n=e.lastIndexOf(t,r);return n===-1?e:e[n-1]==="\\"?ae.escapeLast(e,t,n-1):`${e.slice(0,n)}\\${e.slice(n)}`};ae.removePrefix=(e,t={})=>{let r=e;return r.startsWith("./")&&(r=r.slice(2),t.prefix="./"),r};ae.wrapOutput=(e,t={},r={})=>{let n=r.contains?"":"^",i=r.contains?"":"$",s=`${n}(?:${e})${i}`;return t.negated===!0&&(s=`(?:^(?!${s}).*$)`),s}});var Yu=y((OS,Gu)=>{"use strict";var ju=Ht(),{CHAR_ASTERISK:Tn,CHAR_AT:Um,CHAR_BACKWARD_SLASH:qt,CHAR_COMMA:Gm,CHAR_DOT:On,CHAR_EXCLAMATION_MARK:Fn,CHAR_FORWARD_SLASH:Uu,CHAR_LEFT_CURLY_BRACE:Ln,CHAR_LEFT_PARENTHESES:Dn,CHAR_LEFT_SQUARE_BRACKET:Ym,CHAR_PLUS:Km,CHAR_QUESTION_MARK:Hu,CHAR_RIGHT_CURLY_BRACE:Vm,CHAR_RIGHT_PARENTHESES:qu,CHAR_RIGHT_SQUARE_BRACKET:Xm}=jt(),Bu=e=>e===Uu||e===qt,Wu=e=>{e.isPrefix!==!0&&(e.depth=e.isGlobstar?1/0:1)},Jm=(e,t)=>{let r=t||{},n=e.length-1,i=r.parts===!0||r.scanToEnd===!0,s=[],o=[],a=[],u=e,c=-1,l=0,p=0,f=!1,d=!1,g=!1,h=!1,m=!1,b=!1,w=!1,k=!1,$=!1,U=!1,R=0,F,E,L={value:"",depth:0,isGlob:!1},J=()=>c>=n,S=()=>u.charCodeAt(c+1),H=()=>(F=E,u.charCodeAt(++c));for(;c<n;){E=H();let ie;if(E===qt){w=L.backslashes=!0,E=H(),E===Ln&&(b=!0);continue}if(b===!0||E===Ln){for(R++;J()!==!0&&(E=H());){if(E===qt){w=L.backslashes=!0,H();continue}if(E===Ln){R++;continue}if(b!==!0&&E===On&&(E=H())===On){if(f=L.isBrace=!0,g=L.isGlob=!0,U=!0,i===!0)continue;break}if(b!==!0&&E===Gm){if(f=L.isBrace=!0,g=L.isGlob=!0,U=!0,i===!0)continue;break}if(E===Vm&&(R--,R===0)){b=!1,f=L.isBrace=!0,U=!0;break}}if(i===!0)continue;break}if(E===Uu){if(s.push(c),o.push(L),L={value:"",depth:0,isGlob:!1},U===!0)continue;if(F===On&&c===l+1){l+=2;continue}p=c+1;continue}if(r.noext!==!0&&(E===Km||E===Um||E===Tn||E===Hu||E===Fn)===!0&&S()===Dn){if(g=L.isGlob=!0,h=L.isExtglob=!0,U=!0,E===Fn&&c===l&&($=!0),i===!0){for(;J()!==!0&&(E=H());){if(E===qt){w=L.backslashes=!0,E=H();continue}if(E===qu){g=L.isGlob=!0,U=!0;break}}continue}break}if(E===Tn){if(F===Tn&&(m=L.isGlobstar=!0),g=L.isGlob=!0,U=!0,i===!0)continue;break}if(E===Hu){if(g=L.isGlob=!0,U=!0,i===!0)continue;break}if(E===Ym){for(;J()!==!0&&(ie=H());){if(ie===qt){w=L.backslashes=!0,H();continue}if(ie===Xm){d=L.isBracket=!0,g=L.isGlob=!0,U=!0;break}}if(i===!0)continue;break}if(r.nonegate!==!0&&E===Fn&&c===l){k=L.negated=!0,l++;continue}if(r.noparen!==!0&&E===Dn){if(g=L.isGlob=!0,i===!0){for(;J()!==!0&&(E=H());){if(E===Dn){w=L.backslashes=!0,E=H();continue}if(E===qu){U=!0;break}}continue}break}if(g===!0){if(U=!0,i===!0)continue;break}}r.noext===!0&&(h=!1,g=!1);let M=u,Te="",x="";l>0&&(Te=u.slice(0,l),u=u.slice(l),p-=l),M&&g===!0&&p>0?(M=u.slice(0,p),x=u.slice(p)):g===!0?(M="",x=u):M=u,M&&M!==""&&M!=="/"&&M!==u&&Bu(M.charCodeAt(M.length-1))&&(M=M.slice(0,-1)),r.unescape===!0&&(x&&(x=ju.removeBackslashes(x)),M&&w===!0&&(M=ju.removeBackslashes(M)));let _={prefix:Te,input:e,start:l,base:M,glob:x,isBrace:f,isBracket:d,isGlob:g,isExtglob:h,isGlobstar:m,negated:k,negatedExtglob:$};if(r.tokens===!0&&(_.maxDepth=0,Bu(E)||o.push(L),_.tokens=o),r.parts===!0||r.tokens===!0){let ie;for(let D=0;D<s.length;D++){let me=ie?ie+1:l,ye=s[D],ce=e.slice(me,ye);r.tokens&&(D===0&&l!==0?(o[D].isPrefix=!0,o[D].value=Te):o[D].value=ce,Wu(o[D]),_.maxDepth+=o[D].depth),(D!==0||ce!=="")&&a.push(ce),ie=ye}if(ie&&ie+1<e.length){let D=e.slice(ie+1);a.push(D),r.tokens&&(o[o.length-1].value=D,Wu(o[o.length-1]),_.maxDepth+=o[o.length-1].depth)}_.slashes=s,_.parts=a}return _};Gu.exports=Jm});var Qu=y((FS,Ju)=>{"use strict";var Bt=jt(),ee=Ht(),{MAX_LENGTH:vr,POSIX_REGEX_SOURCE:Qm,REGEX_NON_SPECIAL_CHARS:zm,REGEX_SPECIAL_CHARS_BACKREF:Zm,REPLACEMENTS:Ku}=Bt,ey=(e,t)=>{if(typeof t.expandRange=="function")return t.expandRange(...e,t);e.sort();let r=`[${e.join("-")}]`;try{new RegExp(r)}catch{return e.map(i=>ee.escapeRegex(i)).join("..")}return r},vt=(e,t)=>`Missing ${e}: "${t}" - use "\\\\${t}" to match literal characters`,Vu=e=>{let t=[],r=0,n=0,i=0,s="",o=!1;for(let a of e){if(o===!0){s+=a,o=!1;continue}if(a==="\\"){s+=a,o=!0;continue}if(a==='"'){i=i===1?0:1,s+=a;continue}if(i===0){if(a==="[")r++;else if(a==="]"&&r>0)r--;else if(r===0){if(a==="(")n++;else if(a===")"&&n>0)n--;else if(a==="|"&&n===0){t.push(s),s="";continue}}}s+=a}return t.push(s),t},ty=e=>{let t=!1;for(let r of e){if(t===!0){t=!1;continue}if(r==="\\"){t=!0;continue}if(/[?*+@!()[\]{}]/.test(r))return!1}return!0},Xu=e=>{let t=e.trim(),r=!0;for(;r===!0;)r=!1,/^@\([^\\()[\]{}|]+\)$/.test(t)&&(t=t.slice(2,-1),r=!0);if(ty(t))return t.replace(/\\(.)/g,"$1")},ry=e=>{let t=e.map(Xu).filter(Boolean);for(let r=0;r<t.length;r++)for(let n=r+1;n<t.length;n++){let i=t[r],s=t[n],o=i[0];if(!(!o||i!==o.repeat(i.length)||s!==o.repeat(s.length))&&(i===s||i.startsWith(s)||s.startsWith(i)))return!0}return!1},$n=(e,t=!0)=>{if(e[0]!=="+"&&e[0]!=="*"||e[1]!=="(")return;let r=0,n=0,i=0,s=!1;for(let o=1;o<e.length;o++){let a=e[o];if(s===!0){s=!1;continue}if(a==="\\"){s=!0;continue}if(a==='"'){i=i===1?0:1;continue}if(i!==1){if(a==="["){r++;continue}if(a==="]"&&r>0){r--;continue}if(!(r>0)){if(a==="("){n++;continue}if(a===")"&&(n--,n===0))return t===!0&&o!==e.length-1?void 0:{type:e[0],body:e.slice(2,o),end:o}}}}},ny=e=>{let t=0,r=[];for(;t<e.length;){let i=$n(e.slice(t),!1);if(!i||i.type!=="*")return;let s=Vu(i.body).map(a=>a.trim());if(s.length!==1)return;let o=Xu(s[0]);if(!o||o.length!==1)return;r.push(o),t+=i.end+1}return r.length<1?void 0:`${r.length===1?ee.escapeRegex(r[0]):`[${r.map(i=>ee.escapeRegex(i)).join("")}]`}*`},iy=e=>{let t=0,r=e.trim(),n=$n(r);for(;n;)t++,r=n.body.trim(),n=$n(r);return t},sy=(e,t)=>{if(t.maxExtglobRecursion===!1)return{risky:!1};let r=typeof t.maxExtglobRecursion=="number"?t.maxExtglobRecursion:Bt.DEFAULT_MAX_EXTGLOB_RECURSION,n=Vu(e).map(i=>i.trim());if(n.length>1&&(n.some(i=>i==="")||n.some(i=>/^[*?]+$/.test(i))||ry(n)))return{risky:!0};for(let i of n){let s=ny(i);if(s)return{risky:!0,safeOutput:s};if(iy(i)>r)return{risky:!0}}return{risky:!1}},In=(e,t)=>{if(typeof e!="string")throw new TypeError("Expected a string");e=Ku[e]||e;let r={...t},n=typeof r.maxLength=="number"?Math.min(vr,r.maxLength):vr,i=e.length;if(i>n)throw new SyntaxError(`Input length: ${i}, exceeds maximum allowed length: ${n}`);let s={type:"bos",value:"",output:r.prepend||""},o=[s],a=r.capture?"":"?:",u=ee.isWindows(t),c=Bt.globChars(u),l=Bt.extglobChars(c),{DOT_LITERAL:p,PLUS_LITERAL:f,SLASH_LITERAL:d,ONE_CHAR:g,DOTS_SLASH:h,NO_DOT:m,NO_DOT_SLASH:b,NO_DOTS_SLASH:w,QMARK:k,QMARK_NO_DOT:$,STAR:U,START_ANCHOR:R}=c,F=v=>`(${a}(?:(?!${R}${v.dot?h:p}).)*?)`,E=r.dot?"":m,L=r.dot?k:$,J=r.bash===!0?F(r):U;r.capture&&(J=`(${J})`),typeof r.noext=="boolean"&&(r.noextglob=r.noext);let S={input:e,index:-1,start:0,dot:r.dot===!0,consumed:"",output:"",prefix:"",backtrack:!1,negated:!1,brackets:0,braces:0,parens:0,quotes:0,globstar:!1,tokens:o};e=ee.removePrefix(e,S),i=e.length;let H=[],M=[],Te=[],x=s,_,ie=()=>S.index===i-1,D=S.peek=(v=1)=>e[S.index+v],me=S.advance=()=>e[++S.index]||"",ye=()=>e.slice(S.index+1),ce=(v="",q=0)=>{S.consumed+=v,S.index+=q},Gt=v=>{S.output+=v.output!=null?v.output:v.value,ce(v.value)},Pf=()=>{let v=1;for(;D()==="!"&&(D(2)!=="("||D(3)==="?");)me(),S.start++,v++;return v%2===0?!1:(S.negated=!0,S.start++,!0)},Yt=v=>{S[v]++,Te.push(v)},Oe=v=>{S[v]--,Te.pop()},O=v=>{if(x.type==="globstar"){let q=S.braces>0&&(v.type==="comma"||v.type==="brace"),A=v.extglob===!0||H.length&&(v.type==="pipe"||v.type==="paren");v.type!=="slash"&&v.type!=="paren"&&!q&&!A&&(S.output=S.output.slice(0,-x.output.length),x.type="star",x.value="*",x.output=J,S.output+=x.output)}if(H.length&&v.type!=="paren"&&(H[H.length-1].inner+=v.value),(v.value||v.output)&&Gt(v),x&&x.type==="text"&&v.type==="text"){x.value+=v.value,x.output=(x.output||"")+v.value;return}v.prev=x,o.push(v),x=v},Kt=(v,q)=>{let A={...l[q],conditions:1,inner:""};A.prev=x,A.parens=S.parens,A.output=S.output,A.startIndex=S.index,A.tokensIndex=o.length;let T=(r.capture?"(":"")+A.open;Yt("parens"),O({type:v,value:q,output:S.output?"":g}),O({type:"paren",extglob:!0,value:me(),output:T}),H.push(A)},Cf=v=>{let q=e.slice(v.startIndex,S.index+1),A=e.slice(v.startIndex+2,S.index),T=sy(A,r);if((v.type==="plus"||v.type==="star")&&T.risky){let I=T.safeOutput?(v.output?"":g)+(r.capture?`(${T.safeOutput})`:T.safeOutput):void 0,xe=o[v.tokensIndex];xe.type="text",xe.value=q,xe.output=I||ee.escapeRegex(q);for(let _e=v.tokensIndex+1;_e<o.length;_e++)o[_e].value="",o[_e].output="",delete o[_e].suffix;S.output=v.output+xe.output,S.backtrack=!0,O({type:"paren",extglob:!0,value:_,output:""}),Oe("parens");return}let N=v.close+(r.capture?")":""),Q;if(v.type==="negate"){let I=J;if(v.inner&&v.inner.length>1&&v.inner.includes("/")&&(I=F(r)),(I!==J||ie()||/^\)+$/.test(ye()))&&(N=v.close=`)$))${I}`),v.inner.includes("*")&&(Q=ye())&&/^\.[^\\/.]+$/.test(Q)){let xe=In(Q,{...t,fastpaths:!1}).output;N=v.close=`)${xe})${I})`}v.prev.type==="bos"&&(S.negatedExtglob=!0)}O({type:"paren",extglob:!0,value:_,output:N}),Oe("parens")};if(r.fastpaths!==!1&&!/(^[*!]|[/()[\]{}"])/.test(e)){let v=!1,q=e.replace(Zm,(A,T,N,Q,I,xe)=>Q==="\\"?(v=!0,A):Q==="?"?T?T+Q+(I?k.repeat(I.length):""):xe===0?L+(I?k.repeat(I.length):""):k.repeat(N.length):Q==="."?p.repeat(N.length):Q==="*"?T?T+Q+(I?J:""):J:T?A:`\\${A}`);return v===!0&&(r.unescape===!0?q=q.replace(/\\/g,""):q=q.replace(/\\+/g,A=>A.length%2===0?"\\\\":A?"\\":"")),q===e&&r.contains===!0?(S.output=e,S):(S.output=ee.wrapOutput(q,S,t),S)}for(;!ie();){if(_=me(),_==="\0")continue;if(_==="\\"){let A=D();if(A==="/"&&r.bash!==!0||A==="."||A===";")continue;if(!A){_+="\\",O({type:"text",value:_});continue}let T=/^\\+/.exec(ye()),N=0;if(T&&T[0].length>2&&(N=T[0].length,S.index+=N,N%2!==0&&(_+="\\")),r.unescape===!0?_=me():_+=me(),S.brackets===0){O({type:"text",value:_});continue}}if(S.brackets>0&&(_!=="]"||x.value==="["||x.value==="[^")){if(r.posix!==!1&&_===":"){let A=x.value.slice(1);if(A.includes("[")&&(x.posix=!0,A.includes(":"))){let T=x.value.lastIndexOf("["),N=x.value.slice(0,T),Q=x.value.slice(T+2),I=Qm[Q];if(I){x.value=N+I,S.backtrack=!0,me(),!s.output&&o.indexOf(x)===1&&(s.output=g);continue}}}(_==="["&&D()!==":"||_==="-"&&D()==="]")&&(_=`\\${_}`),_==="]"&&(x.value==="["||x.value==="[^")&&(_=`\\${_}`),r.posix===!0&&_==="!"&&x.value==="["&&(_="^"),x.value+=_,Gt({value:_});continue}if(S.quotes===1&&_!=='"'){_=ee.escapeRegex(_),x.value+=_,Gt({value:_});continue}if(_==='"'){S.quotes=S.quotes===1?0:1,r.keepQuotes===!0&&O({type:"text",value:_});continue}if(_==="("){Yt("parens"),O({type:"paren",value:_});continue}if(_===")"){if(S.parens===0&&r.strictBrackets===!0)throw new SyntaxError(vt("opening","("));let A=H[H.length-1];if(A&&S.parens===A.parens+1){Cf(H.pop());continue}O({type:"paren",value:_,output:S.parens?")":"\\)"}),Oe("parens");continue}if(_==="["){if(r.nobracket===!0||!ye().includes("]")){if(r.nobracket!==!0&&r.strictBrackets===!0)throw new SyntaxError(vt("closing","]"));_=`\\${_}`}else Yt("brackets");O({type:"bracket",value:_});continue}if(_==="]"){if(r.nobracket===!0||x&&x.type==="bracket"&&x.value.length===1){O({type:"text",value:_,output:`\\${_}`});continue}if(S.brackets===0){if(r.strictBrackets===!0)throw new SyntaxError(vt("opening","["));O({type:"text",value:_,output:`\\${_}`});continue}Oe("brackets");let A=x.value.slice(1);if(x.posix!==!0&&A[0]==="^"&&!A.includes("/")&&(_=`/${_}`),x.value+=_,Gt({value:_}),r.literalBrackets===!1||ee.hasRegexChars(A))continue;let T=ee.escapeRegex(x.value);if(S.output=S.output.slice(0,-x.value.length),r.literalBrackets===!0){S.output+=T,x.value=T;continue}x.value=`(${a}${T}|${x.value})`,S.output+=x.value;continue}if(_==="{"&&r.nobrace!==!0){Yt("braces");let A={type:"brace",value:_,output:"(",outputIndex:S.output.length,tokensIndex:S.tokens.length};M.push(A),O(A);continue}if(_==="}"){let A=M[M.length-1];if(r.nobrace===!0||!A){O({type:"text",value:_,output:_});continue}let T=")";if(A.dots===!0){let N=o.slice(),Q=[];for(let I=N.length-1;I>=0&&(o.pop(),N[I].type!=="brace");I--)N[I].type!=="dots"&&Q.unshift(N[I].value);T=ey(Q,r),S.backtrack=!0}if(A.comma!==!0&&A.dots!==!0){let N=S.output.slice(0,A.outputIndex),Q=S.tokens.slice(A.tokensIndex);A.value=A.output="\\{",_=T="\\}",S.output=N;for(let I of Q)S.output+=I.output||I.value}O({type:"brace",value:_,output:T}),Oe("braces"),M.pop();continue}if(_==="|"){H.length>0&&H[H.length-1].conditions++,O({type:"text",value:_});continue}if(_===","){let A=_,T=M[M.length-1];T&&Te[Te.length-1]==="braces"&&(T.comma=!0,A="|"),O({type:"comma",value:_,output:A});continue}if(_==="/"){if(x.type==="dot"&&S.index===S.start+1){S.start=S.index+1,S.consumed="",S.output="",o.pop(),x=s;continue}O({type:"slash",value:_,output:d});continue}if(_==="."){if(S.braces>0&&x.type==="dot"){x.value==="."&&(x.output=p);let A=M[M.length-1];x.type="dots",x.output+=_,x.value+=_,A.dots=!0;continue}if(S.braces+S.parens===0&&x.type!=="bos"&&x.type!=="slash"){O({type:"text",value:_,output:p});continue}O({type:"dot",value:_,output:p});continue}if(_==="?"){if(!(x&&x.value==="(")&&r.noextglob!==!0&&D()==="("&&D(2)!=="?"){Kt("qmark",_);continue}if(x&&x.type==="paren"){let T=D(),N=_;if(T==="<"&&!ee.supportsLookbehinds())throw new Error("Node.js v10 or higher is required for regex lookbehinds");(x.value==="("&&!/[!=<:]/.test(T)||T==="<"&&!/<([!=]|\w+>)/.test(ye()))&&(N=`\\${_}`),O({type:"text",value:_,output:N});continue}if(r.dot!==!0&&(x.type==="slash"||x.type==="bos")){O({type:"qmark",value:_,output:$});continue}O({type:"qmark",value:_,output:k});continue}if(_==="!"){if(r.noextglob!==!0&&D()==="("&&(D(2)!=="?"||!/[!=<:]/.test(D(3)))){Kt("negate",_);continue}if(r.nonegate!==!0&&S.index===0){Pf();continue}}if(_==="+"){if(r.noextglob!==!0&&D()==="("&&D(2)!=="?"){Kt("plus",_);continue}if(x&&x.value==="("||r.regex===!1){O({type:"plus",value:_,output:f});continue}if(x&&(x.type==="bracket"||x.type==="paren"||x.type==="brace")||S.parens>0){O({type:"plus",value:_});continue}O({type:"plus",value:f});continue}if(_==="@"){if(r.noextglob!==!0&&D()==="("&&D(2)!=="?"){O({type:"at",extglob:!0,value:_,output:""});continue}O({type:"text",value:_});continue}if(_!=="*"){(_==="$"||_==="^")&&(_=`\\${_}`);let A=zm.exec(ye());A&&(_+=A[0],S.index+=A[0].length),O({type:"text",value:_});continue}if(x&&(x.type==="globstar"||x.star===!0)){x.type="star",x.star=!0,x.value+=_,x.output=J,S.backtrack=!0,S.globstar=!0,ce(_);continue}let v=ye();if(r.noextglob!==!0&&/^\([^?]/.test(v)){Kt("star",_);continue}if(x.type==="star"){if(r.noglobstar===!0){ce(_);continue}let A=x.prev,T=A.prev,N=A.type==="slash"||A.type==="bos",Q=T&&(T.type==="star"||T.type==="globstar");if(r.bash===!0&&(!N||v[0]&&v[0]!=="/")){O({type:"star",value:_,output:""});continue}let I=S.braces>0&&(A.type==="comma"||A.type==="brace"),xe=H.length&&(A.type==="pipe"||A.type==="paren");if(!N&&A.type!=="paren"&&!I&&!xe){O({type:"star",value:_,output:""});continue}for(;v.slice(0,3)==="/**";){let _e=e[S.index+4];if(_e&&_e!=="/")break;v=v.slice(3),ce("/**",3)}if(A.type==="bos"&&ie()){x.type="globstar",x.value+=_,x.output=F(r),S.output=x.output,S.globstar=!0,ce(_);continue}if(A.type==="slash"&&A.prev.type!=="bos"&&!Q&&ie()){S.output=S.output.slice(0,-(A.output+x.output).length),A.output=`(?:${A.output}`,x.type="globstar",x.output=F(r)+(r.strictSlashes?")":"|$)"),x.value+=_,S.globstar=!0,S.output+=A.output+x.output,ce(_);continue}if(A.type==="slash"&&A.prev.type!=="bos"&&v[0]==="/"){let _e=v[1]!==void 0?"|$":"";S.output=S.output.slice(0,-(A.output+x.output).length),A.output=`(?:${A.output}`,x.type="globstar",x.output=`${F(r)}${d}|${d}${_e})`,x.value+=_,S.output+=A.output+x.output,S.globstar=!0,ce(_+me()),O({type:"slash",value:"/",output:""});continue}if(A.type==="bos"&&v[0]==="/"){x.type="globstar",x.value+=_,x.output=`(?:^|${d}|${F(r)}${d})`,S.output=x.output,S.globstar=!0,ce(_+me()),O({type:"slash",value:"/",output:""});continue}S.output=S.output.slice(0,-x.output.length),x.type="globstar",x.output=F(r),x.value+=_,S.output+=x.output,S.globstar=!0,ce(_);continue}let q={type:"star",value:_,output:J};if(r.bash===!0){q.output=".*?",(x.type==="bos"||x.type==="slash")&&(q.output=E+q.output),O(q);continue}if(x&&(x.type==="bracket"||x.type==="paren")&&r.regex===!0){q.output=_,O(q);continue}(S.index===S.start||x.type==="slash"||x.type==="dot")&&(x.type==="dot"?(S.output+=b,x.output+=b):r.dot===!0?(S.output+=w,x.output+=w):(S.output+=E,x.output+=E),D()!=="*"&&(S.output+=g,x.output+=g)),O(q)}for(;S.brackets>0;){if(r.strictBrackets===!0)throw new SyntaxError(vt("closing","]"));S.output=ee.escapeLast(S.output,"["),Oe("brackets")}for(;S.parens>0;){if(r.strictBrackets===!0)throw new SyntaxError(vt("closing",")"));S.output=ee.escapeLast(S.output,"("),Oe("parens")}for(;S.braces>0;){if(r.strictBrackets===!0)throw new SyntaxError(vt("closing","}"));S.output=ee.escapeLast(S.output,"{"),Oe("braces")}if(r.strictSlashes!==!0&&(x.type==="star"||x.type==="bracket")&&O({type:"maybe_slash",value:"",output:`${d}?`}),S.backtrack===!0){S.output="";for(let v of S.tokens)S.output+=v.output!=null?v.output:v.value,v.suffix&&(S.output+=v.suffix)}return S};In.fastpaths=(e,t)=>{let r={...t},n=typeof r.maxLength=="number"?Math.min(vr,r.maxLength):vr,i=e.length;if(i>n)throw new SyntaxError(`Input length: ${i}, exceeds maximum allowed length: ${n}`);e=Ku[e]||e;let s=ee.isWindows(t),{DOT_LITERAL:o,SLASH_LITERAL:a,ONE_CHAR:u,DOTS_SLASH:c,NO_DOT:l,NO_DOTS:p,NO_DOTS_SLASH:f,STAR:d,START_ANCHOR:g}=Bt.globChars(s),h=r.dot?p:l,m=r.dot?f:l,b=r.capture?"":"?:",w={negated:!1,prefix:""},k=r.bash===!0?".*?":d;r.capture&&(k=`(${k})`);let $=E=>E.noglobstar===!0?k:`(${b}(?:(?!${g}${E.dot?c:o}).)*?)`,U=E=>{switch(E){case"*":return`${h}${u}${k}`;case".*":return`${o}${u}${k}`;case"*.*":return`${h}${k}${o}${u}${k}`;case"*/*":return`${h}${k}${a}${u}${m}${k}`;case"**":return h+$(r);case"**/*":return`(?:${h}${$(r)}${a})?${m}${u}${k}`;case"**/*.*":return`(?:${h}${$(r)}${a})?${m}${k}${o}${u}${k}`;case"**/.*":return`(?:${h}${$(r)}${a})?${o}${u}${k}`;default:{let L=/^(.*?)\.(\w+)$/.exec(E);if(!L)return;let J=U(L[1]);return J?J+o+L[2]:void 0}}},R=ee.removePrefix(e,w),F=U(R);return F&&r.strictSlashes!==!0&&(F+=`${a}?`),F};Ju.exports=In});var Zu=y((LS,zu)=>{"use strict";var oy=require("path"),ay=Yu(),Mn=Qu(),Nn=Ht(),uy=jt(),cy=e=>e&&typeof e=="object"&&!Array.isArray(e),Y=(e,t,r=!1)=>{if(Array.isArray(e)){let l=e.map(f=>Y(f,t,r));return f=>{for(let d of l){let g=d(f);if(g)return g}return!1}}let n=cy(e)&&e.tokens&&e.input;if(e===""||typeof e!="string"&&!n)throw new TypeError("Expected pattern to be a non-empty string");let i=t||{},s=Nn.isWindows(t),o=n?Y.compileRe(e,t):Y.makeRe(e,t,!1,!0),a=o.state;delete o.state;let u=()=>!1;if(i.ignore){let l={...t,ignore:null,onMatch:null,onResult:null};u=Y(i.ignore,l,r)}let c=(l,p=!1)=>{let{isMatch:f,match:d,output:g}=Y.test(l,o,t,{glob:e,posix:s}),h={glob:e,state:a,regex:o,posix:s,input:l,output:g,match:d,isMatch:f};return typeof i.onResult=="function"&&i.onResult(h),f===!1?(h.isMatch=!1,p?h:!1):u(l)?(typeof i.onIgnore=="function"&&i.onIgnore(h),h.isMatch=!1,p?h:!1):(typeof i.onMatch=="function"&&i.onMatch(h),p?h:!0)};return r&&(c.state=a),c};Y.test=(e,t,r,{glob:n,posix:i}={})=>{if(typeof e!="string")throw new TypeError("Expected input to be a string");if(e==="")return{isMatch:!1,output:""};let s=r||{},o=s.format||(i?Nn.toPosixSlashes:null),a=e===n,u=a&&o?o(e):e;return a===!1&&(u=o?o(e):e,a=u===n),(a===!1||s.capture===!0)&&(s.matchBase===!0||s.basename===!0?a=Y.matchBase(e,t,r,i):a=t.exec(u)),{isMatch:!!a,match:a,output:u}};Y.matchBase=(e,t,r,n=Nn.isWindows(r))=>(t instanceof RegExp?t:Y.makeRe(t,r)).test(oy.basename(e));Y.isMatch=(e,t,r)=>Y(t,r)(e);Y.parse=(e,t)=>Array.isArray(e)?e.map(r=>Y.parse(r,t)):Mn(e,{...t,fastpaths:!1});Y.scan=(e,t)=>ay(e,t);Y.compileRe=(e,t,r=!1,n=!1)=>{if(r===!0)return e.output;let i=t||{},s=i.contains?"":"^",o=i.contains?"":"$",a=`${s}(?:${e.output})${o}`;e&&e.negated===!0&&(a=`^(?!${a}).*$`);let u=Y.toRegex(a,t);return n===!0&&(u.state=e),u};Y.makeRe=(e,t={},r=!1,n=!1)=>{if(!e||typeof e!="string")throw new TypeError("Expected a non-empty string");let i={negated:!1,fastpaths:!0};return t.fastpaths!==!1&&(e[0]==="."||e[0]==="*")&&(i.output=Mn.fastpaths(e,t)),i.output||(i=Mn(e,t)),Y.compileRe(i,t,r,n)};Y.toRegex=(e,t)=>{try{let r=t||{};return new RegExp(e,r.flags||(r.nocase?"i":""))}catch(r){if(t&&t.debug===!0)throw r;return/$^/}};Y.constants=uy;zu.exports=Y});var tc=y((DS,ec)=>{"use strict";ec.exports=Zu()});var ac=y(($S,oc)=>{"use strict";var nc=require("util"),ic=Lu(),ve=tc(),jn=Ht(),rc=e=>e===""||e==="./",sc=e=>{let t=e.indexOf("{");return t>-1&&e.indexOf("}",t)>-1},j=(e,t,r)=>{t=[].concat(t),e=[].concat(e);let n=new Set,i=new Set,s=new Set,o=0,a=l=>{s.add(l.output),r&&r.onResult&&r.onResult(l)};for(let l=0;l<t.length;l++){let p=ve(String(t[l]),{...r,onResult:a},!0),f=p.state.negated||p.state.negatedExtglob;f&&o++;for(let d of e){let g=p(d,!0);(f?!g.isMatch:g.isMatch)&&(f?n.add(g.output):(n.delete(g.output),i.add(g.output)))}}let c=(o===t.length?[...s]:[...i]).filter(l=>!n.has(l));if(r&&c.length===0){if(r.failglob===!0)throw new Error(`No matches found for "${t.join(", ")}"`);if(r.nonull===!0||r.nullglob===!0)return r.unescape?t.map(l=>l.replace(/\\/g,"")):t}return c};j.match=j;j.matcher=(e,t)=>ve(e,t);j.isMatch=(e,t,r)=>ve(t,r)(e);j.any=j.isMatch;j.not=(e,t,r={})=>{t=[].concat(t).map(String);let n=new Set,i=[],s=a=>{r.onResult&&r.onResult(a),i.push(a.output)},o=new Set(j(e,t,{...r,onResult:s}));for(let a of i)o.has(a)||n.add(a);return[...n]};j.contains=(e,t,r)=>{if(typeof e!="string")throw new TypeError(`Expected a string: "${nc.inspect(e)}"`);if(Array.isArray(t))return t.some(n=>j.contains(e,n,r));if(typeof t=="string"){if(rc(e)||rc(t))return!1;if(e.includes(t)||e.startsWith("./")&&e.slice(2).includes(t))return!0}return j.isMatch(e,t,{...r,contains:!0})};j.matchKeys=(e,t,r)=>{if(!jn.isObject(e))throw new TypeError("Expected the first argument to be an object");let n=j(Object.keys(e),t,r),i={};for(let s of n)i[s]=e[s];return i};j.some=(e,t,r)=>{let n=[].concat(e);for(let i of[].concat(t)){let s=ve(String(i),r);if(n.some(o=>s(o)))return!0}return!1};j.every=(e,t,r)=>{let n=[].concat(e);for(let i of[].concat(t)){let s=ve(String(i),r);if(!n.every(o=>s(o)))return!1}return!0};j.all=(e,t,r)=>{if(typeof e!="string")throw new TypeError(`Expected a string: "${nc.inspect(e)}"`);return[].concat(t).every(n=>ve(n,r)(e))};j.capture=(e,t,r)=>{let n=jn.isWindows(r),s=ve.makeRe(String(e),{...r,capture:!0}).exec(n?jn.toPosixSlashes(t):t);if(s)return s.slice(1).map(o=>o===void 0?"":o)};j.makeRe=(...e)=>ve.makeRe(...e);j.scan=(...e)=>ve.scan(...e);j.parse=(e,t)=>{let r=[];for(let n of[].concat(e||[]))for(let i of ic(String(n),t))r.push(ve.parse(i,t));return r};j.braces=(e,t)=>{if(typeof e!="string")throw new TypeError("Expected a string");return t&&t.nobrace===!0||!sc(e)?[e]:ic(e,t)};j.braceExpand=(e,t)=>{if(typeof e!="string")throw new TypeError("Expected a string");return j.braces(e,{...t,expand:!0})};j.hasBraces=sc;oc.exports=j});var yc=y(C=>{"use strict";Object.defineProperty(C,"__esModule",{value:!0});C.isAbsolute=C.partitionAbsoluteAndRelative=C.removeDuplicateSlashes=C.matchAny=C.convertPatternsToRe=C.makeRe=C.getPatternParts=C.expandBraceExpansion=C.expandPatternsWithBraceExpansion=C.isAffectDepthOfReadingPattern=C.endsWithSlashGlobStar=C.hasGlobStar=C.getBaseDirectory=C.isPatternRelatedToParentDirectory=C.getPatternsOutsideCurrentDirectory=C.getPatternsInsideCurrentDirectory=C.getPositivePatterns=C.getNegativePatterns=C.isPositivePattern=C.isNegativePattern=C.convertToNegativePattern=C.convertToPositivePattern=C.isDynamicPattern=C.isStaticPattern=void 0;var uc=require("path"),ly=Qa(),Hn=ac(),cc="**",fy="\\",py=/[*?]|^!/,hy=/\[[^[]*]/,dy=/(?:^|[^!*+?@])\([^(]*\|[^|]*\)/,gy=/[!*+?@]\([^(]*\)/,my=/,|\.\./,yy=/(?!^)\/{2,}/g;function lc(e,t={}){return!fc(e,t)}C.isStaticPattern=lc;function fc(e,t={}){return e===""?!1:!!(t.caseSensitiveMatch===!1||e.includes(fy)||py.test(e)||hy.test(e)||dy.test(e)||t.extglob!==!1&&gy.test(e)||t.braceExpansion!==!1&&xy(e))}C.isDynamicPattern=fc;function xy(e){let t=e.indexOf("{");if(t===-1)return!1;let r=e.indexOf("}",t+1);if(r===-1)return!1;let n=e.slice(t,r);return my.test(n)}function _y(e){return Er(e)?e.slice(1):e}C.convertToPositivePattern=_y;function Sy(e){return"!"+e}C.convertToNegativePattern=Sy;function Er(e){return e.startsWith("!")&&e[1]!=="("}C.isNegativePattern=Er;function pc(e){return!Er(e)}C.isPositivePattern=pc;function by(e){return e.filter(Er)}C.getNegativePatterns=by;function Ay(e){return e.filter(pc)}C.getPositivePatterns=Ay;function vy(e){return e.filter(t=>!qn(t))}C.getPatternsInsideCurrentDirectory=vy;function Ey(e){return e.filter(qn)}C.getPatternsOutsideCurrentDirectory=Ey;function qn(e){return e.startsWith("..")||e.startsWith("./..")}C.isPatternRelatedToParentDirectory=qn;function wy(e){return ly(e,{flipBackslashes:!1})}C.getBaseDirectory=wy;function Py(e){return e.includes(cc)}C.hasGlobStar=Py;function hc(e){return e.endsWith("/"+cc)}C.endsWithSlashGlobStar=hc;function Cy(e){let t=uc.basename(e);return hc(e)||lc(t)}C.isAffectDepthOfReadingPattern=Cy;function Ry(e){return e.reduce((t,r)=>t.concat(dc(r)),[])}C.expandPatternsWithBraceExpansion=Ry;function dc(e){let t=Hn.braces(e,{expand:!0,nodupes:!0,keepEscaping:!0});return t.sort((r,n)=>r.length-n.length),t.filter(r=>r!=="")}C.expandBraceExpansion=dc;function ky(e,t){let{parts:r}=Hn.scan(e,Object.assign(Object.assign({},t),{parts:!0}));return r.length===0&&(r=[e]),r[0].startsWith("/")&&(r[0]=r[0].slice(1),r.unshift("")),r}C.getPatternParts=ky;function gc(e,t){return Hn.makeRe(e,t)}C.makeRe=gc;function Ty(e,t){return e.map(r=>gc(r,t))}C.convertPatternsToRe=Ty;function Oy(e,t){return t.some(r=>r.test(e))}C.matchAny=Oy;function Fy(e){return e.replace(yy,"/")}C.removeDuplicateSlashes=Fy;function Ly(e){let t=[],r=[];for(let n of e)mc(n)?t.push(n):r.push(n);return[t,r]}C.partitionAbsoluteAndRelative=Ly;function mc(e){return uc.isAbsolute(e)}C.isAbsolute=mc});var bc=y((MS,Sc)=>{"use strict";var Dy=require("stream"),xc=Dy.PassThrough,$y=Array.prototype.slice;Sc.exports=Iy;function Iy(){let e=[],t=$y.call(arguments),r=!1,n=t[t.length-1];n&&!Array.isArray(n)&&n.pipe==null?t.pop():n={};let i=n.end!==!1,s=n.pipeError===!0;n.objectMode==null&&(n.objectMode=!0),n.highWaterMark==null&&(n.highWaterMark=64*1024);let o=xc(n);function a(){for(let l=0,p=arguments.length;l<p;l++)e.push(_c(arguments[l],n));return u(),this}function u(){if(r)return;r=!0;let l=e.shift();if(!l){process.nextTick(c);return}Array.isArray(l)||(l=[l]);let p=l.length+1;function f(){--p>0||(r=!1,u())}function d(g){function h(){g.removeListener("merge2UnpipeEnd",h),g.removeListener("end",h),s&&g.removeListener("error",m),f()}function m(b){o.emit("error",b)}if(g._readableState.endEmitted)return f();g.on("merge2UnpipeEnd",h),g.on("end",h),s&&g.on("error",m),g.pipe(o,{end:!1}),g.resume()}for(let g=0;g<l.length;g++)d(l[g]);f()}function c(){r=!1,o.emit("queueDrain"),i&&o.end()}return o.setMaxListeners(0),o.add=a,o.on("unpipe",function(l){l.emit("merge2UnpipeEnd")}),t.length&&a.apply(null,t),o}function _c(e,t){if(Array.isArray(e))for(let r=0,n=e.length;r<n;r++)e[r]=_c(e[r],t);else{if(!e._readableState&&e.pipe&&(e=e.pipe(xc(t))),!e._readableState||!e.pause||!e.pipe)throw new Error("Only readable stream can be merged.");e.pause()}return e}});var vc=y(wr=>{"use strict";Object.defineProperty(wr,"__esModule",{value:!0});wr.merge=void 0;var My=bc();function Ny(e){let t=My(e);return e.forEach(r=>{r.once("error",n=>t.emit("error",n))}),t.once("close",()=>Ac(e)),t.once("end",()=>Ac(e)),t}wr.merge=Ny;function Ac(e){e.forEach(t=>t.emit("close"))}});var Ec=y(Et=>{"use strict";Object.defineProperty(Et,"__esModule",{value:!0});Et.isEmpty=Et.isString=void 0;function jy(e){return typeof e=="string"}Et.isString=jy;function Hy(e){return e===""}Et.isEmpty=Hy});var ke=y(te=>{"use strict";Object.defineProperty(te,"__esModule",{value:!0});te.string=te.stream=te.pattern=te.path=te.fs=te.errno=te.array=void 0;var qy=Na();te.array=qy;var By=ja();te.errno=By;var Wy=Ha();te.fs=Wy;var Uy=Ua();te.path=Uy;var Gy=yc();te.pattern=Gy;var Yy=vc();te.stream=Yy;var Ky=Ec();te.string=Ky});var Rc=y(re=>{"use strict";Object.defineProperty(re,"__esModule",{value:!0});re.convertPatternGroupToTask=re.convertPatternGroupsToTasks=re.groupPatternsByBaseDirectory=re.getNegativePatternsAsPositive=re.getPositivePatterns=re.convertPatternsToTasks=re.generate=void 0;var de=ke();function Vy(e,t){let r=wc(e,t),n=wc(t.ignore,t),i=Pc(r),s=Cc(r,n),o=i.filter(l=>de.pattern.isStaticPattern(l,t)),a=i.filter(l=>de.pattern.isDynamicPattern(l,t)),u=Bn(o,s,!1),c=Bn(a,s,!0);return u.concat(c)}re.generate=Vy;function wc(e,t){let r=e;return t.braceExpansion&&(r=de.pattern.expandPatternsWithBraceExpansion(r)),t.baseNameMatch&&(r=r.map(n=>n.includes("/")?n:`**/${n}`)),r.map(n=>de.pattern.removeDuplicateSlashes(n))}function Bn(e,t,r){let n=[],i=de.pattern.getPatternsOutsideCurrentDirectory(e),s=de.pattern.getPatternsInsideCurrentDirectory(e),o=Wn(i),a=Wn(s);return n.push(...Un(o,t,r)),"."in a?n.push(Gn(".",s,t,r)):n.push(...Un(a,t,r)),n}re.convertPatternsToTasks=Bn;function Pc(e){return de.pattern.getPositivePatterns(e)}re.getPositivePatterns=Pc;function Cc(e,t){return de.pattern.getNegativePatterns(e).concat(t).map(de.pattern.convertToPositivePattern)}re.getNegativePatternsAsPositive=Cc;function Wn(e){let t={};return e.reduce((r,n)=>{let i=de.pattern.getBaseDirectory(n);return i in r?r[i].push(n):r[i]=[n],r},t)}re.groupPatternsByBaseDirectory=Wn;function Un(e,t,r){return Object.keys(e).map(n=>Gn(n,e[n],t,r))}re.convertPatternGroupsToTasks=Un;function Gn(e,t,r,n){return{dynamic:n,positive:t,negative:r,base:e,patterns:[].concat(t,r.map(de.pattern.convertToNegativePattern))}}re.convertPatternGroupToTask=Gn});var Tc=y(Pr=>{"use strict";Object.defineProperty(Pr,"__esModule",{value:!0});Pr.read=void 0;function Xy(e,t,r){t.fs.lstat(e,(n,i)=>{if(n!==null){kc(r,n);return}if(!i.isSymbolicLink()||!t.followSymbolicLink){Yn(r,i);return}t.fs.stat(e,(s,o)=>{if(s!==null){if(t.throwErrorOnBrokenSymbolicLink){kc(r,s);return}Yn(r,i);return}t.markSymbolicLink&&(o.isSymbolicLink=()=>!0),Yn(r,o)})})}Pr.read=Xy;function kc(e,t){e(t)}function Yn(e,t){e(null,t)}});var Oc=y(Cr=>{"use strict";Object.defineProperty(Cr,"__esModule",{value:!0});Cr.read=void 0;function Jy(e,t){let r=t.fs.lstatSync(e);if(!r.isSymbolicLink()||!t.followSymbolicLink)return r;try{let n=t.fs.statSync(e);return t.markSymbolicLink&&(n.isSymbolicLink=()=>!0),n}catch(n){if(!t.throwErrorOnBrokenSymbolicLink)return r;throw n}}Cr.read=Jy});var Fc=y(Ne=>{"use strict";Object.defineProperty(Ne,"__esModule",{value:!0});Ne.createFileSystemAdapter=Ne.FILE_SYSTEM_ADAPTER=void 0;var Rr=require("fs");Ne.FILE_SYSTEM_ADAPTER={lstat:Rr.lstat,stat:Rr.stat,lstatSync:Rr.lstatSync,statSync:Rr.statSync};function Qy(e){return e===void 0?Ne.FILE_SYSTEM_ADAPTER:Object.assign(Object.assign({},Ne.FILE_SYSTEM_ADAPTER),e)}Ne.createFileSystemAdapter=Qy});var Lc=y(Vn=>{"use strict";Object.defineProperty(Vn,"__esModule",{value:!0});var zy=Fc(),Kn=class{constructor(t={}){this._options=t,this.followSymbolicLink=this._getValue(this._options.followSymbolicLink,!0),this.fs=zy.createFileSystemAdapter(this._options.fs),this.markSymbolicLink=this._getValue(this._options.markSymbolicLink,!1),this.throwErrorOnBrokenSymbolicLink=this._getValue(this._options.throwErrorOnBrokenSymbolicLink,!0)}_getValue(t,r){return t??r}};Vn.default=Kn});var ut=y(je=>{"use strict";Object.defineProperty(je,"__esModule",{value:!0});je.statSync=je.stat=je.Settings=void 0;var Dc=Tc(),Zy=Oc(),Xn=Lc();je.Settings=Xn.default;function ex(e,t,r){if(typeof t=="function"){Dc.read(e,Jn(),t);return}Dc.read(e,Jn(t),r)}je.stat=ex;function tx(e,t){let r=Jn(t);return Zy.read(e,r)}je.statSync=tx;function Jn(e={}){return e instanceof Xn.default?e:new Xn.default(e)}});var Mc=y((KS,Ic)=>{var $c;Ic.exports=typeof queueMicrotask=="function"?queueMicrotask.bind(typeof window<"u"?window:global):e=>($c||($c=Promise.resolve())).then(e).catch(t=>setTimeout(()=>{throw t},0))});var jc=y((VS,Nc)=>{Nc.exports=nx;var rx=Mc();function nx(e,t){let r,n,i,s=!0;Array.isArray(e)?(r=[],n=e.length):(i=Object.keys(e),r={},n=i.length);function o(u){function c(){t&&t(u,r),t=null}s?rx(c):c()}function a(u,c,l){r[u]=l,(--n===0||c)&&o(c)}n?i?i.forEach(function(u){e[u](function(c,l){a(u,c,l)})}):e.forEach(function(u,c){u(function(l,p){a(c,l,p)})}):o(null),s=!1}});var Qn=y(Tr=>{"use strict";Object.defineProperty(Tr,"__esModule",{value:!0});Tr.IS_SUPPORT_READDIR_WITH_FILE_TYPES=void 0;var kr=process.versions.node.split(".");if(kr[0]===void 0||kr[1]===void 0)throw new Error(`Unexpected behavior. The 'process.versions.node' variable has invalid value: ${process.versions.node}`);var Hc=Number.parseInt(kr[0],10),ix=Number.parseInt(kr[1],10),qc=10,sx=10,ox=Hc>qc,ax=Hc===qc&&ix>=sx;Tr.IS_SUPPORT_READDIR_WITH_FILE_TYPES=ox||ax});var Bc=y(Or=>{"use strict";Object.defineProperty(Or,"__esModule",{value:!0});Or.createDirentFromStats=void 0;var zn=class{constructor(t,r){this.name=t,this.isBlockDevice=r.isBlockDevice.bind(r),this.isCharacterDevice=r.isCharacterDevice.bind(r),this.isDirectory=r.isDirectory.bind(r),this.isFIFO=r.isFIFO.bind(r),this.isFile=r.isFile.bind(r),this.isSocket=r.isSocket.bind(r),this.isSymbolicLink=r.isSymbolicLink.bind(r)}};function ux(e,t){return new zn(e,t)}Or.createDirentFromStats=ux});var Zn=y(Fr=>{"use strict";Object.defineProperty(Fr,"__esModule",{value:!0});Fr.fs=void 0;var cx=Bc();Fr.fs=cx});var ei=y(Lr=>{"use strict";Object.defineProperty(Lr,"__esModule",{value:!0});Lr.joinPathSegments=void 0;function lx(e,t,r){return e.endsWith(r)?e+t:e+r+t}Lr.joinPathSegments=lx});var Vc=y(He=>{"use strict";Object.defineProperty(He,"__esModule",{value:!0});He.readdir=He.readdirWithFileTypes=He.read=void 0;var fx=ut(),Wc=jc(),px=Qn(),Uc=Zn(),Gc=ei();function hx(e,t,r){if(!t.stats&&px.IS_SUPPORT_READDIR_WITH_FILE_TYPES){Yc(e,t,r);return}Kc(e,t,r)}He.read=hx;function Yc(e,t,r){t.fs.readdir(e,{withFileTypes:!0},(n,i)=>{if(n!==null){Dr(r,n);return}let s=i.map(a=>({dirent:a,name:a.name,path:Gc.joinPathSegments(e,a.name,t.pathSegmentSeparator)}));if(!t.followSymbolicLinks){ti(r,s);return}let o=s.map(a=>dx(a,t));Wc(o,(a,u)=>{if(a!==null){Dr(r,a);return}ti(r,u)})})}He.readdirWithFileTypes=Yc;function dx(e,t){return r=>{if(!e.dirent.isSymbolicLink()){r(null,e);return}t.fs.stat(e.path,(n,i)=>{if(n!==null){if(t.throwErrorOnBrokenSymbolicLink){r(n);return}r(null,e);return}e.dirent=Uc.fs.createDirentFromStats(e.name,i),r(null,e)})}}function Kc(e,t,r){t.fs.readdir(e,(n,i)=>{if(n!==null){Dr(r,n);return}let s=i.map(o=>{let a=Gc.joinPathSegments(e,o,t.pathSegmentSeparator);return u=>{fx.stat(a,t.fsStatSettings,(c,l)=>{if(c!==null){u(c);return}let p={name:o,path:a,dirent:Uc.fs.createDirentFromStats(o,l)};t.stats&&(p.stats=l),u(null,p)})}});Wc(s,(o,a)=>{if(o!==null){Dr(r,o);return}ti(r,a)})})}He.readdir=Kc;function Dr(e,t){e(t)}function ti(e,t){e(null,t)}});var Zc=y(qe=>{"use strict";Object.defineProperty(qe,"__esModule",{value:!0});qe.readdir=qe.readdirWithFileTypes=qe.read=void 0;var gx=ut(),mx=Qn(),Xc=Zn(),Jc=ei();function yx(e,t){return!t.stats&&mx.IS_SUPPORT_READDIR_WITH_FILE_TYPES?Qc(e,t):zc(e,t)}qe.read=yx;function Qc(e,t){return t.fs.readdirSync(e,{withFileTypes:!0}).map(n=>{let i={dirent:n,name:n.name,path:Jc.joinPathSegments(e,n.name,t.pathSegmentSeparator)};if(i.dirent.isSymbolicLink()&&t.followSymbolicLinks)try{let s=t.fs.statSync(i.path);i.dirent=Xc.fs.createDirentFromStats(i.name,s)}catch(s){if(t.throwErrorOnBrokenSymbolicLink)throw s}return i})}qe.readdirWithFileTypes=Qc;function zc(e,t){return t.fs.readdirSync(e).map(n=>{let i=Jc.joinPathSegments(e,n,t.pathSegmentSeparator),s=gx.statSync(i,t.fsStatSettings),o={name:n,path:i,dirent:Xc.fs.createDirentFromStats(n,s)};return t.stats&&(o.stats=s),o})}qe.readdir=zc});var el=y(Be=>{"use strict";Object.defineProperty(Be,"__esModule",{value:!0});Be.createFileSystemAdapter=Be.FILE_SYSTEM_ADAPTER=void 0;var wt=require("fs");Be.FILE_SYSTEM_ADAPTER={lstat:wt.lstat,stat:wt.stat,lstatSync:wt.lstatSync,statSync:wt.statSync,readdir:wt.readdir,readdirSync:wt.readdirSync};function xx(e){return e===void 0?Be.FILE_SYSTEM_ADAPTER:Object.assign(Object.assign({},Be.FILE_SYSTEM_ADAPTER),e)}Be.createFileSystemAdapter=xx});var tl=y(ni=>{"use strict";Object.defineProperty(ni,"__esModule",{value:!0});var _x=require("path"),Sx=ut(),bx=el(),ri=class{constructor(t={}){this._options=t,this.followSymbolicLinks=this._getValue(this._options.followSymbolicLinks,!1),this.fs=bx.createFileSystemAdapter(this._options.fs),this.pathSegmentSeparator=this._getValue(this._options.pathSegmentSeparator,_x.sep),this.stats=this._getValue(this._options.stats,!1),this.throwErrorOnBrokenSymbolicLink=this._getValue(this._options.throwErrorOnBrokenSymbolicLink,!0),this.fsStatSettings=new Sx.Settings({followSymbolicLink:this.followSymbolicLinks,fs:this.fs,throwErrorOnBrokenSymbolicLink:this.throwErrorOnBrokenSymbolicLink})}_getValue(t,r){return t??r}};ni.default=ri});var $r=y(We=>{"use strict";Object.defineProperty(We,"__esModule",{value:!0});We.Settings=We.scandirSync=We.scandir=void 0;var rl=Vc(),Ax=Zc(),ii=tl();We.Settings=ii.default;function vx(e,t,r){if(typeof t=="function"){rl.read(e,si(),t);return}rl.read(e,si(t),r)}We.scandir=vx;function Ex(e,t){let r=si(t);return Ax.read(e,r)}We.scandirSync=Ex;function si(e={}){return e instanceof ii.default?e:new ii.default(e)}});var il=y((ib,nl)=>{"use strict";function wx(e){var t=new e,r=t;function n(){var s=t;return s.next?t=s.next:(t=new e,r=t),s.next=null,s}function i(s){r.next=s,r=s}return{get:n,release:i}}nl.exports=wx});var ol=y((sb,oi)=>{"use strict";var Px=il();function sl(e,t,r){if(typeof e=="function"&&(r=t,t=e,e=null),!(r>=1))throw new Error("fastqueue concurrency must be equal to or greater than 1");var n=Px(Cx),i=null,s=null,o=0,a=null,u={push:h,drain:ue,saturated:ue,pause:l,paused:!1,get concurrency(){return r},set concurrency(R){if(!(R>=1))throw new Error("fastqueue concurrency must be equal to or greater than 1");if(r=R,!u.paused)for(;i&&o<r;)o++,b()},running:c,resume:d,idle:g,length:p,getQueue:f,unshift:m,empty:ue,kill:w,killAndDrain:k,error:U,abort:$};return u;function c(){return o}function l(){u.paused=!0}function p(){for(var R=i,F=0;R;)R=R.next,F++;return F}function f(){for(var R=i,F=[];R;)F.push(R.value),R=R.next;return F}function d(){if(u.paused){if(u.paused=!1,i===null){o++,b();return}for(;i&&o<r;)o++,b()}}function g(){return o===0&&u.length()===0}function h(R,F){var E=n.get();E.context=e,E.release=b,E.value=R,E.callback=F||ue,E.errorHandler=a,o>=r||u.paused?s?(s.next=E,s=E):(i=E,s=E,u.saturated()):(o++,t.call(e,E.value,E.worked))}function m(R,F){var E=n.get();E.context=e,E.release=b,E.value=R,E.callback=F||ue,E.errorHandler=a,o>=r||u.paused?i?(E.next=i,i=E):(i=E,s=E,u.saturated()):(o++,t.call(e,E.value,E.worked))}function b(R){R&&n.release(R);var F=i;F&&o<=r?u.paused?o--:(s===i&&(s=null),i=F.next,F.next=null,t.call(e,F.value,F.worked),s===null&&u.empty()):--o===0&&u.drain()}function w(){i=null,s=null,u.drain=ue}function k(){i=null,s=null,u.drain(),u.drain=ue}function $(){var R=i;for(i=null,s=null;R;){var F=R.next,E=R.callback,L=R.errorHandler,J=R.value,S=R.context;R.value=null,R.callback=ue,R.errorHandler=null,L&&L(new Error("abort"),J),E.call(S,new Error("abort")),R.release(R),R=F}u.drain=ue}function U(R){a=R}}function ue(){}function Cx(){this.value=null,this.callback=ue,this.next=null,this.release=ue,this.context=null,this.errorHandler=null;var e=this;this.worked=function(r,n){var i=e.callback,s=e.errorHandler,o=e.value;e.value=null,e.callback=ue,e.errorHandler&&s(r,o),i.call(e.context,r,n),e.release(e)}}function Rx(e,t,r){typeof e=="function"&&(r=t,t=e,e=null);function n(l,p){t.call(this,l).then(function(f){p(null,f)},p)}var i=sl(e,n,r),s=i.push,o=i.unshift;return i.push=a,i.unshift=u,i.drained=c,i;function a(l){var p=new Promise(function(f,d){s(l,function(g,h){if(g){d(g);return}f(h)})});return p.catch(ue),p}function u(l){var p=new Promise(function(f,d){o(l,function(g,h){if(g){d(g);return}f(h)})});return p.catch(ue),p}function c(){var l=new Promise(function(p){process.nextTick(function(){if(i.idle())p();else{var f=i.drain;i.drain=function(){typeof f=="function"&&f(),p(),i.drain=f}}})});return l}}oi.exports=sl;oi.exports.promise=Rx});var Ir=y(Ee=>{"use strict";Object.defineProperty(Ee,"__esModule",{value:!0});Ee.joinPathSegments=Ee.replacePathSegmentSeparator=Ee.isAppliedFilter=Ee.isFatalError=void 0;function kx(e,t){return e.errorFilter===null?!0:!e.errorFilter(t)}Ee.isFatalError=kx;function Tx(e,t){return e===null||e(t)}Ee.isAppliedFilter=Tx;function Ox(e,t){return e.split(/[/\\]/).join(t)}Ee.replacePathSegmentSeparator=Ox;function Fx(e,t,r){return e===""?t:e.endsWith(r)?e+t:e+r+t}Ee.joinPathSegments=Fx});var ci=y(ui=>{"use strict";Object.defineProperty(ui,"__esModule",{value:!0});var Lx=Ir(),ai=class{constructor(t,r){this._root=t,this._settings=r,this._root=Lx.replacePathSegmentSeparator(t,r.pathSegmentSeparator)}};ui.default=ai});var pi=y(fi=>{"use strict";Object.defineProperty(fi,"__esModule",{value:!0});var Dx=require("events"),$x=$r(),Ix=ol(),Mr=Ir(),Mx=ci(),li=class extends Mx.default{constructor(t,r){super(t,r),this._settings=r,this._scandir=$x.scandir,this._emitter=new Dx.EventEmitter,this._queue=Ix(this._worker.bind(this),this._settings.concurrency),this._isFatalError=!1,this._isDestroyed=!1,this._queue.drain=()=>{this._isFatalError||this._emitter.emit("end")}}read(){return this._isFatalError=!1,this._isDestroyed=!1,setImmediate(()=>{this._pushToQueue(this._root,this._settings.basePath)}),this._emitter}get isDestroyed(){return this._isDestroyed}destroy(){if(this._isDestroyed)throw new Error("The reader is already destroyed");this._isDestroyed=!0,this._queue.killAndDrain()}onEntry(t){this._emitter.on("entry",t)}onError(t){this._emitter.once("error",t)}onEnd(t){this._emitter.once("end",t)}_pushToQueue(t,r){let n={directory:t,base:r};this._queue.push(n,i=>{i!==null&&this._handleError(i)})}_worker(t,r){this._scandir(t.directory,this._settings.fsScandirSettings,(n,i)=>{if(n!==null){r(n,void 0);return}for(let s of i)this._handleEntry(s,t.base);r(null,void 0)})}_handleError(t){this._isDestroyed||!Mr.isFatalError(this._settings,t)||(this._isFatalError=!0,this._isDestroyed=!0,this._emitter.emit("error",t))}_handleEntry(t,r){if(this._isDestroyed||this._isFatalError)return;let n=t.path;r!==void 0&&(t.path=Mr.joinPathSegments(r,t.name,this._settings.pathSegmentSeparator)),Mr.isAppliedFilter(this._settings.entryFilter,t)&&this._emitEntry(t),t.dirent.isDirectory()&&Mr.isAppliedFilter(this._settings.deepFilter,t)&&this._pushToQueue(n,r===void 0?void 0:t.path)}_emitEntry(t){this._emitter.emit("entry",t)}};fi.default=li});var al=y(di=>{"use strict";Object.defineProperty(di,"__esModule",{value:!0});var Nx=pi(),hi=class{constructor(t,r){this._root=t,this._settings=r,this._reader=new Nx.default(this._root,this._settings),this._storage=[]}read(t){this._reader.onError(r=>{jx(t,r)}),this._reader.onEntry(r=>{this._storage.push(r)}),this._reader.onEnd(()=>{Hx(t,this._storage)}),this._reader.read()}};di.default=hi;function jx(e,t){e(t)}function Hx(e,t){e(null,t)}});var ul=y(mi=>{"use strict";Object.defineProperty(mi,"__esModule",{value:!0});var qx=require("stream"),Bx=pi(),gi=class{constructor(t,r){this._root=t,this._settings=r,this._reader=new Bx.default(this._root,this._settings),this._stream=new qx.Readable({objectMode:!0,read:()=>{},destroy:()=>{this._reader.isDestroyed||this._reader.destroy()}})}read(){return this._reader.onError(t=>{this._stream.emit("error",t)}),this._reader.onEntry(t=>{this._stream.push(t)}),this._reader.onEnd(()=>{this._stream.push(null)}),this._reader.read(),this._stream}};mi.default=gi});var cl=y(xi=>{"use strict";Object.defineProperty(xi,"__esModule",{value:!0});var Wx=$r(),Nr=Ir(),Ux=ci(),yi=class extends Ux.default{constructor(){super(...arguments),this._scandir=Wx.scandirSync,this._storage=[],this._queue=new Set}read(){return this._pushToQueue(this._root,this._settings.basePath),this._handleQueue(),this._storage}_pushToQueue(t,r){this._queue.add({directory:t,base:r})}_handleQueue(){for(let t of this._queue.values())this._handleDirectory(t.directory,t.base)}_handleDirectory(t,r){try{let n=this._scandir(t,this._settings.fsScandirSettings);for(let i of n)this._handleEntry(i,r)}catch(n){this._handleError(n)}}_handleError(t){if(Nr.isFatalError(this._settings,t))throw t}_handleEntry(t,r){let n=t.path;r!==void 0&&(t.path=Nr.joinPathSegments(r,t.name,this._settings.pathSegmentSeparator)),Nr.isAppliedFilter(this._settings.entryFilter,t)&&this._pushToStorage(t),t.dirent.isDirectory()&&Nr.isAppliedFilter(this._settings.deepFilter,t)&&this._pushToQueue(n,r===void 0?void 0:t.path)}_pushToStorage(t){this._storage.push(t)}};xi.default=yi});var ll=y(Si=>{"use strict";Object.defineProperty(Si,"__esModule",{value:!0});var Gx=cl(),_i=class{constructor(t,r){this._root=t,this._settings=r,this._reader=new Gx.default(this._root,this._settings)}read(){return this._reader.read()}};Si.default=_i});var fl=y(Ai=>{"use strict";Object.defineProperty(Ai,"__esModule",{value:!0});var Yx=require("path"),Kx=$r(),bi=class{constructor(t={}){this._options=t,this.basePath=this._getValue(this._options.basePath,void 0),this.concurrency=this._getValue(this._options.concurrency,Number.POSITIVE_INFINITY),this.deepFilter=this._getValue(this._options.deepFilter,null),this.entryFilter=this._getValue(this._options.entryFilter,null),this.errorFilter=this._getValue(this._options.errorFilter,null),this.pathSegmentSeparator=this._getValue(this._options.pathSegmentSeparator,Yx.sep),this.fsScandirSettings=new Kx.Settings({followSymbolicLinks:this._options.followSymbolicLinks,fs:this._options.fs,pathSegmentSeparator:this._options.pathSegmentSeparator,stats:this._options.stats,throwErrorOnBrokenSymbolicLink:this._options.throwErrorOnBrokenSymbolicLink})}_getValue(t,r){return t??r}};Ai.default=bi});var Hr=y(we=>{"use strict";Object.defineProperty(we,"__esModule",{value:!0});we.Settings=we.walkStream=we.walkSync=we.walk=void 0;var pl=al(),Vx=ul(),Xx=ll(),vi=fl();we.Settings=vi.default;function Jx(e,t,r){if(typeof t=="function"){new pl.default(e,jr()).read(t);return}new pl.default(e,jr(t)).read(r)}we.walk=Jx;function Qx(e,t){let r=jr(t);return new Xx.default(e,r).read()}we.walkSync=Qx;function zx(e,t){let r=jr(t);return new Vx.default(e,r).read()}we.walkStream=zx;function jr(e={}){return e instanceof vi.default?e:new vi.default(e)}});var qr=y(wi=>{"use strict";Object.defineProperty(wi,"__esModule",{value:!0});var Zx=require("path"),e0=ut(),hl=ke(),Ei=class{constructor(t){this._settings=t,this._fsStatSettings=new e0.Settings({followSymbolicLink:this._settings.followSymbolicLinks,fs:this._settings.fs,throwErrorOnBrokenSymbolicLink:this._settings.followSymbolicLinks})}_getFullEntryPath(t){return Zx.resolve(this._settings.cwd,t)}_makeEntry(t,r){let n={name:r,path:r,dirent:hl.fs.createDirentFromStats(r,t)};return this._settings.stats&&(n.stats=t),n}_isFatalError(t){return!hl.errno.isEnoentCodeError(t)&&!this._settings.suppressErrors}};wi.default=Ei});var Ri=y(Ci=>{"use strict";Object.defineProperty(Ci,"__esModule",{value:!0});var t0=require("stream"),r0=ut(),n0=Hr(),i0=qr(),Pi=class extends i0.default{constructor(){super(...arguments),this._walkStream=n0.walkStream,this._stat=r0.stat}dynamic(t,r){return this._walkStream(t,r)}static(t,r){let n=t.map(this._getFullEntryPath,this),i=new t0.PassThrough({objectMode:!0});i._write=(s,o,a)=>this._getEntry(n[s],t[s],r).then(u=>{u!==null&&r.entryFilter(u)&&i.push(u),s===n.length-1&&i.end(),a()}).catch(a);for(let s=0;s<n.length;s++)i.write(s);return i}_getEntry(t,r,n){return this._getStat(t).then(i=>this._makeEntry(i,r)).catch(i=>{if(n.errorFilter(i))return null;throw i})}_getStat(t){return new Promise((r,n)=>{this._stat(t,this._fsStatSettings,(i,s)=>i===null?r(s):n(i))})}};Ci.default=Pi});var dl=y(Ti=>{"use strict";Object.defineProperty(Ti,"__esModule",{value:!0});var s0=Hr(),o0=qr(),a0=Ri(),ki=class extends o0.default{constructor(){super(...arguments),this._walkAsync=s0.walk,this._readerStream=new a0.default(this._settings)}dynamic(t,r){return new Promise((n,i)=>{this._walkAsync(t,r,(s,o)=>{s===null?n(o):i(s)})})}async static(t,r){let n=[],i=this._readerStream.static(t,r);return new Promise((s,o)=>{i.once("error",o),i.on("data",a=>n.push(a)),i.once("end",()=>s(n))})}};Ti.default=ki});var gl=y(Fi=>{"use strict";Object.defineProperty(Fi,"__esModule",{value:!0});var Wt=ke(),Oi=class{constructor(t,r,n){this._patterns=t,this._settings=r,this._micromatchOptions=n,this._storage=[],this._fillStorage()}_fillStorage(){for(let t of this._patterns){let r=this._getPatternSegments(t),n=this._splitSegmentsIntoSections(r);this._storage.push({complete:n.length<=1,pattern:t,segments:r,sections:n})}}_getPatternSegments(t){return Wt.pattern.getPatternParts(t,this._micromatchOptions).map(n=>Wt.pattern.isDynamicPattern(n,this._settings)?{dynamic:!0,pattern:n,patternRe:Wt.pattern.makeRe(n,this._micromatchOptions)}:{dynamic:!1,pattern:n})}_splitSegmentsIntoSections(t){return Wt.array.splitWhen(t,r=>r.dynamic&&Wt.pattern.hasGlobStar(r.pattern))}};Fi.default=Oi});var ml=y(Di=>{"use strict";Object.defineProperty(Di,"__esModule",{value:!0});var u0=gl(),Li=class extends u0.default{match(t){let r=t.split("/"),n=r.length,i=this._storage.filter(s=>!s.complete||s.segments.length>n);for(let s of i){let o=s.sections[0];if(!s.complete&&n>o.length||r.every((u,c)=>{let l=s.segments[c];return!!(l.dynamic&&l.patternRe.test(u)||!l.dynamic&&l.pattern===u)}))return!0}return!1}};Di.default=Li});var yl=y(Ii=>{"use strict";Object.defineProperty(Ii,"__esModule",{value:!0});var Br=ke(),c0=ml(),$i=class{constructor(t,r){this._settings=t,this._micromatchOptions=r}getFilter(t,r,n){let i=this._getMatcher(r),s=this._getNegativePatternsRe(n);return o=>this._filter(t,o,i,s)}_getMatcher(t){return new c0.default(t,this._settings,this._micromatchOptions)}_getNegativePatternsRe(t){let r=t.filter(Br.pattern.isAffectDepthOfReadingPattern);return Br.pattern.convertPatternsToRe(r,this._micromatchOptions)}_filter(t,r,n,i){if(this._isSkippedByDeep(t,r.path)||this._isSkippedSymbolicLink(r))return!1;let s=Br.path.removeLeadingDotSegment(r.path);return this._isSkippedByPositivePatterns(s,n)?!1:this._isSkippedByNegativePatterns(s,i)}_isSkippedByDeep(t,r){return this._settings.deep===1/0?!1:this._getEntryLevel(t,r)>=this._settings.deep}_getEntryLevel(t,r){let n=r.split("/").length;if(t==="")return n;let i=t.split("/").length;return n-i}_isSkippedSymbolicLink(t){return!this._settings.followSymbolicLinks&&t.dirent.isSymbolicLink()}_isSkippedByPositivePatterns(t,r){return!this._settings.baseNameMatch&&!r.match(t)}_isSkippedByNegativePatterns(t,r){return!Br.pattern.matchAny(t,r)}};Ii.default=$i});var xl=y(Ni=>{"use strict";Object.defineProperty(Ni,"__esModule",{value:!0});var Ue=ke(),Mi=class{constructor(t,r){this._settings=t,this._micromatchOptions=r,this.index=new Map}getFilter(t,r){let[n,i]=Ue.pattern.partitionAbsoluteAndRelative(r),s={positive:{all:Ue.pattern.convertPatternsToRe(t,this._micromatchOptions)},negative:{absolute:Ue.pattern.convertPatternsToRe(n,Object.assign(Object.assign({},this._micromatchOptions),{dot:!0})),relative:Ue.pattern.convertPatternsToRe(i,Object.assign(Object.assign({},this._micromatchOptions),{dot:!0}))}};return o=>this._filter(o,s)}_filter(t,r){let n=Ue.path.removeLeadingDotSegment(t.path);if(this._settings.unique&&this._isDuplicateEntry(n)||this._onlyFileFilter(t)||this._onlyDirectoryFilter(t))return!1;let i=this._isMatchToPatternsSet(n,r,t.dirent.isDirectory());return this._settings.unique&&i&&this._createIndexRecord(n),i}_isDuplicateEntry(t){return this.index.has(t)}_createIndexRecord(t){this.index.set(t,void 0)}_onlyFileFilter(t){return this._settings.onlyFiles&&!t.dirent.isFile()}_onlyDirectoryFilter(t){return this._settings.onlyDirectories&&!t.dirent.isDirectory()}_isMatchToPatternsSet(t,r,n){return!(!this._isMatchToPatterns(t,r.positive.all,n)||this._isMatchToPatterns(t,r.negative.relative,n)||this._isMatchToAbsoluteNegative(t,r.negative.absolute,n))}_isMatchToAbsoluteNegative(t,r,n){if(r.length===0)return!1;let i=Ue.path.makeAbsolute(this._settings.cwd,t);return this._isMatchToPatterns(i,r,n)}_isMatchToPatterns(t,r,n){if(r.length===0)return!1;let i=Ue.pattern.matchAny(t,r);return!i&&n?Ue.pattern.matchAny(t+"/",r):i}};Ni.default=Mi});var _l=y(Hi=>{"use strict";Object.defineProperty(Hi,"__esModule",{value:!0});var l0=ke(),ji=class{constructor(t){this._settings=t}getFilter(){return t=>this._isNonFatalError(t)}_isNonFatalError(t){return l0.errno.isEnoentCodeError(t)||this._settings.suppressErrors}};Hi.default=ji});var bl=y(Bi=>{"use strict";Object.defineProperty(Bi,"__esModule",{value:!0});var Sl=ke(),qi=class{constructor(t){this._settings=t}getTransformer(){return t=>this._transform(t)}_transform(t){let r=t.path;return this._settings.absolute&&(r=Sl.path.makeAbsolute(this._settings.cwd,r),r=Sl.path.unixify(r)),this._settings.markDirectories&&t.dirent.isDirectory()&&(r+="/"),this._settings.objectMode?Object.assign(Object.assign({},t),{path:r}):r}};Bi.default=qi});var Wr=y(Ui=>{"use strict";Object.defineProperty(Ui,"__esModule",{value:!0});var f0=require("path"),p0=yl(),h0=xl(),d0=_l(),g0=bl(),Wi=class{constructor(t){this._settings=t,this.errorFilter=new d0.default(this._settings),this.entryFilter=new h0.default(this._settings,this._getMicromatchOptions()),this.deepFilter=new p0.default(this._settings,this._getMicromatchOptions()),this.entryTransformer=new g0.default(this._settings)}_getRootDirectory(t){return f0.resolve(this._settings.cwd,t.base)}_getReaderOptions(t){let r=t.base==="."?"":t.base;return{basePath:r,pathSegmentSeparator:"/",concurrency:this._settings.concurrency,deepFilter:this.deepFilter.getFilter(r,t.positive,t.negative),entryFilter:this.entryFilter.getFilter(t.positive,t.negative),errorFilter:this.errorFilter.getFilter(),followSymbolicLinks:this._settings.followSymbolicLinks,fs:this._settings.fs,stats:this._settings.stats,throwErrorOnBrokenSymbolicLink:this._settings.throwErrorOnBrokenSymbolicLink,transform:this.entryTransformer.getTransformer()}}_getMicromatchOptions(){return{dot:this._settings.dot,matchBase:this._settings.baseNameMatch,nobrace:!this._settings.braceExpansion,nocase:!this._settings.caseSensitiveMatch,noext:!this._settings.extglob,noglobstar:!this._settings.globstar,posix:!0,strictSlashes:!1}}};Ui.default=Wi});var Al=y(Yi=>{"use strict";Object.defineProperty(Yi,"__esModule",{value:!0});var m0=dl(),y0=Wr(),Gi=class extends y0.default{constructor(){super(...arguments),this._reader=new m0.default(this._settings)}async read(t){let r=this._getRootDirectory(t),n=this._getReaderOptions(t);return(await this.api(r,t,n)).map(s=>n.transform(s))}api(t,r,n){return r.dynamic?this._reader.dynamic(t,n):this._reader.static(r.patterns,n)}};Yi.default=Gi});var vl=y(Vi=>{"use strict";Object.defineProperty(Vi,"__esModule",{value:!0});var x0=require("stream"),_0=Ri(),S0=Wr(),Ki=class extends S0.default{constructor(){super(...arguments),this._reader=new _0.default(this._settings)}read(t){let r=this._getRootDirectory(t),n=this._getReaderOptions(t),i=this.api(r,t,n),s=new x0.Readable({objectMode:!0,read:()=>{}});return i.once("error",o=>s.emit("error",o)).on("data",o=>s.emit("data",n.transform(o))).once("end",()=>s.emit("end")),s.once("close",()=>i.destroy()),s}api(t,r,n){return r.dynamic?this._reader.dynamic(t,n):this._reader.static(r.patterns,n)}};Vi.default=Ki});var El=y(Ji=>{"use strict";Object.defineProperty(Ji,"__esModule",{value:!0});var b0=ut(),A0=Hr(),v0=qr(),Xi=class extends v0.default{constructor(){super(...arguments),this._walkSync=A0.walkSync,this._statSync=b0.statSync}dynamic(t,r){return this._walkSync(t,r)}static(t,r){let n=[];for(let i of t){let s=this._getFullEntryPath(i),o=this._getEntry(s,i,r);o===null||!r.entryFilter(o)||n.push(o)}return n}_getEntry(t,r,n){try{let i=this._getStat(t);return this._makeEntry(i,r)}catch(i){if(n.errorFilter(i))return null;throw i}}_getStat(t){return this._statSync(t,this._fsStatSettings)}};Ji.default=Xi});var wl=y(zi=>{"use strict";Object.defineProperty(zi,"__esModule",{value:!0});var E0=El(),w0=Wr(),Qi=class extends w0.default{constructor(){super(...arguments),this._reader=new E0.default(this._settings)}read(t){let r=this._getRootDirectory(t),n=this._getReaderOptions(t);return this.api(r,t,n).map(n.transform)}api(t,r,n){return r.dynamic?this._reader.dynamic(t,n):this._reader.static(r.patterns,n)}};zi.default=Qi});var Pl=y(Ct=>{"use strict";Object.defineProperty(Ct,"__esModule",{value:!0});Ct.DEFAULT_FILE_SYSTEM_ADAPTER=void 0;var Pt=require("fs"),P0=require("os"),C0=Math.max(P0.cpus().length,1);Ct.DEFAULT_FILE_SYSTEM_ADAPTER={lstat:Pt.lstat,lstatSync:Pt.lstatSync,stat:Pt.stat,statSync:Pt.statSync,readdir:Pt.readdir,readdirSync:Pt.readdirSync};var Zi=class{constructor(t={}){this._options=t,this.absolute=this._getValue(this._options.absolute,!1),this.baseNameMatch=this._getValue(this._options.baseNameMatch,!1),this.braceExpansion=this._getValue(this._options.braceExpansion,!0),this.caseSensitiveMatch=this._getValue(this._options.caseSensitiveMatch,!0),this.concurrency=this._getValue(this._options.concurrency,C0),this.cwd=this._getValue(this._options.cwd,process.cwd()),this.deep=this._getValue(this._options.deep,1/0),this.dot=this._getValue(this._options.dot,!1),this.extglob=this._getValue(this._options.extglob,!0),this.followSymbolicLinks=this._getValue(this._options.followSymbolicLinks,!0),this.fs=this._getFileSystemMethods(this._options.fs),this.globstar=this._getValue(this._options.globstar,!0),this.ignore=this._getValue(this._options.ignore,[]),this.markDirectories=this._getValue(this._options.markDirectories,!1),this.objectMode=this._getValue(this._options.objectMode,!1),this.onlyDirectories=this._getValue(this._options.onlyDirectories,!1),this.onlyFiles=this._getValue(this._options.onlyFiles,!0),this.stats=this._getValue(this._options.stats,!1),this.suppressErrors=this._getValue(this._options.suppressErrors,!1),this.throwErrorOnBrokenSymbolicLink=this._getValue(this._options.throwErrorOnBrokenSymbolicLink,!1),this.unique=this._getValue(this._options.unique,!0),this.onlyDirectories&&(this.onlyFiles=!1),this.stats&&(this.objectMode=!0),this.ignore=[].concat(this.ignore)}_getValue(t,r){return t===void 0?r:t}_getFileSystemMethods(t={}){return Object.assign(Object.assign({},Ct.DEFAULT_FILE_SYSTEM_ADAPTER),t)}};Ct.default=Zi});var kl=y((Tb,Rl)=>{"use strict";var Cl=Rc(),R0=Al(),k0=vl(),T0=wl(),es=Pl(),pe=ke();async function ts(e,t){ge(e);let r=rs(e,R0.default,t),n=await Promise.all(r);return pe.array.flatten(n)}(function(e){e.glob=e,e.globSync=t,e.globStream=r,e.async=e;function t(c,l){ge(c);let p=rs(c,T0.default,l);return pe.array.flatten(p)}e.sync=t;function r(c,l){ge(c);let p=rs(c,k0.default,l);return pe.stream.merge(p)}e.stream=r;function n(c,l){ge(c);let p=[].concat(c),f=new es.default(l);return Cl.generate(p,f)}e.generateTasks=n;function i(c,l){ge(c);let p=new es.default(l);return pe.pattern.isDynamicPattern(c,p)}e.isDynamicPattern=i;function s(c){return ge(c),pe.path.escape(c)}e.escapePath=s;function o(c){return ge(c),pe.path.convertPathToPattern(c)}e.convertPathToPattern=o;let a;(function(c){function l(f){return ge(f),pe.path.escapePosixPath(f)}c.escapePath=l;function p(f){return ge(f),pe.path.convertPosixPathToPattern(f)}c.convertPathToPattern=p})(a=e.posix||(e.posix={}));let u;(function(c){function l(f){return ge(f),pe.path.escapeWindowsPath(f)}c.escapePath=l;function p(f){return ge(f),pe.path.convertWindowsPathToPattern(f)}c.convertPathToPattern=p})(u=e.win32||(e.win32={}))})(ts||(ts={}));function rs(e,t,r){let n=[].concat(e),i=new es.default(r),s=Cl.generate(n,i),o=new t(i);return s.map(o.read,o)}function ge(e){if(![].concat(e).every(n=>pe.string.isString(n)&&!pe.string.isEmpty(n)))throw new TypeError("Patterns must be a string (non empty) or an array of strings")}Rl.exports=ts});var y_={};Lf(y_,{parseFlags:()=>W});module.exports=Df(y_);var lt={gate:0,active:1,"checkpoint-only":2,stale:3,"no-prd":4,empty:5,complete:6,archived:7};var he=require("fs/promises"),be=require("path"),fr=Vr(hn(),1);var Yd=["\u2705","\u23ED\uFE0F","\u26D4","\u23F9\uFE0F"],ar="\u2B1C \u2705 \u23ED\uFE0F \u26D4 \u23F9\uFE0F",dn=String.raw`\p{Extended_Pictographic}[️‍\p{Extended_Pictographic}]*`,Kd=new RegExp(String.raw`^\s*(\d+)\.\s*(${dn})`,"u"),Vd=new RegExp(String.raw`^\s*-\s+(${dn})`,"u"),Xd=new RegExp(String.raw`^(${dn})`,"u"),Jd=/️/g;function gn(e){return e.replace(Jd,"")}var Qd=Yd.map(gn),zd=gn("\u2B1C");function De(e){let t=gn(e);return t===zd?"pending":Qd.includes(t)?"resolved":"unknown"}function ur(e){let t=e.match(Kd);return t?{number:parseInt(t[1],10),marker:t[2]}:null}function cr(e){let t=e.match(Vd);return t?{marker:t[1]}:null}function lr(e){let t=e.trim().match(Xd);return t?t[1]:""}function pr(e){return e.replace(/:white_check_mark:/g,"\u2705").replace(/:white_large_square:/g,"\u2B1C").replace(/:next_track_button:|:track_next:/g,"\u23ED\uFE0F").replace(/:stop_button:/g,"\u23F9\uFE0F")}async function $e(e){let t;try{t=await(0,he.readFile)(e,"utf-8")}catch{return null}let r=tg(t),n=Ia(t,"Last Updated"),i=Ia(t,"Created"),{phases:s,warnings:o}=ug(t,(0,be.basename)(e)),a=0,u=0;for(let f of s)a+=f.done,u+=f.total;let c=u>0?Math.round(a/u*100):0,l=eg(t),p=ag(t);return{summary:r,tags:l,keywordTags:p,phases:s,progress:{done:a,total:u,percent:c},lastUpdated:n,created:i,...o.length>0?{warnings:o}:{}}}function Zd(e,t){let r=new Set,n=[];for(let i of[...e,...t]){let s=i.toLowerCase();r.has(s)||(r.add(s),n.push(i))}return n}function eg(e){let t;try{t=(0,fr.default)(e).data}catch{return[]}return Array.isArray(t.tags)?t.tags.filter(r=>typeof r=="string").map(r=>r.trim()).filter(r=>r.length>0):[]}function tg(e){for(let t of["Executive Summary","Overview","Summary","Background"]){let r=rg(e,t);if(r)return r}return ig(e)??ng(e)}function rg(e,t){let r=new RegExp(`^##\\s+${t}\\s*\\n(?:[ \\t]*\\n)*([^\\n#].*)`,"im"),n=e.match(r);return n?n[1].trim():null}function ng(e){let t=e.match(/^#\s+(.+)$/m);return t?t[1].trim():null}function ig(e){let t=e.split(`
-`),r=0;for(;r<t.length&&t[r].trim()==="";)r++;if(r<t.length&&t[r].trim()==="---"){for(r++;r<t.length&&t[r].trim()!=="---";)r++;r<t.length&&r++}for(;r<t.length;r++){let n=t[r].trim();if(n!==""&&!n.startsWith("#")&&!/^([-*_])\1{2,}$/.test(n)&&!/^\*\*[^*]+\*\*\s*:/.test(n)&&!/^[-*+]\s/.test(n)&&!/^\d+\.\s/.test(n)&&!n.startsWith("|")&&!n.startsWith(">")&&!n.startsWith("\u23F8\uFE0F"))return n}return null}var sg=new Set(["the","a","an","and","or","but","for","to","of","in","on","at","by","with","from","into","is","are","be","was","were","this","that","these","those","it","its","as","all","any","via","per","not","no","we","you","will","can","could","should","would","must","may","when","then","than","also","if","so","out","up","down","over","under","about","each","both","first","second","third","next","new","only","one","two","add","build","write","run","use","using","make","create","update","implement","extend","define","support","edit","fix","check","phase","phases","step","steps","goal","goals","summary","executive","implementation","order","verification","verify","gate","status","created","updated","plan","overview","background","notes","note","decisions","blockers","context","todo","done","test","tests","fixture","fixtures","part","reference","references","file","files","master-plan","00-master-plan","sub-prd","checkpoint","session-log","readme"]),og=8,$a=/\.(ts|tsx|js|cjs|mjs|jsx|md|json|sh|yml|yaml|css|html)$/i;function ag(e){let t=new Map,r=(c,l)=>{let p=c.toLowerCase().trim().replace(/^[-_.]+|[-_.]+$/g,"");if(p.length<2||/^\d+$/.test(p)||sg.has(p))return;let f=t.get(p);f?f.count++:t.set(p,{count:1,first:l})},n=/^#{2,6}\s+(.+)$/gm,i;for(;(i=n.exec(e))!==null;){let c=i[1].replace(/^Phase\s+\d+\s*[:\-—–]\s*/i,"");for(let l of c.match(/[A-Za-z][A-Za-z0-9]+/g)??[])r(l,i.index)}let s=/`([^`]+)`/g,o;for(;(o=s.exec(e))!==null;){let c=o[1].trim();if(!($a.test(c)||c.includes("/")&&!c.startsWith("/")))continue;let p=c.split("/").pop()??c;r(p.replace($a,""),o.index)}let a=/\b[A-Za-z][A-Za-z0-9]+\b/g,u;for(;(u=a.exec(e))!==null;)(u[0].match(/[A-Z]/g)?.length??0)>=2&&r(u[0],u.index);return[...t.entries()].sort((c,l)=>l[1].count-c[1].count||c[1].first-l[1].first).slice(0,og).map(([c])=>c)}function Ia(e,t){let r=new RegExp(`\\*\\*${t}\\*\\*:\\s*(.+)`),n=e.match(r);return n?n[1].trim():null}function ug(e,t){let r=pr(e),n=[],i=[],s=/###?\s*Phase\s+(\d+)[:\s—–-]+\s*(.+)/g,o=[],a;for(;(a=s.exec(r))!==null;)o.push({number:parseInt(a[1],10),title:a[2].trim(),index:a.index});for(let u=0;u<o.length;u++){let c=o[u].index,l=u+1<o.length?o[u+1].index:r.length,p=r.slice(c,l),f=o[u].title,d=null;f.includes("\u2705")?(d="\u2705",f=f.replace(/\s*✅\s*/,"").trim()):f.includes("\u2B1C")&&(d="\u2B1C",f=f.replace(/\s*⬜\s*/,"").trim());let{done:g,total:h,warnings:m}=cg(p,{file:t,phase:o[u].number});i.push(...m);let b;if(h>0)b=g===h?"complete":g>0?"in-progress":"not-started";else if(d)b=d==="\u2705"?"complete":"not-started";else{let w=fg(p),k=lg(p);b=w??k??"not-started"}n.push({number:o[u].number,title:f,done:g,total:h,status:b})}return{phases:n,warnings:i}}function mn(e,t,r){let n;return t!==""?n=`unrecognized status marker ${JSON.stringify(t)}`:r!==void 0&&r.trim()!==""?n=`no status marker in ${JSON.stringify(r.trim())}`:n="empty status cell",`${e}: ${n} (expected ${ar}) \u2014 counted as not done`}function cg(e,t){let r=0,n=0,i=[],s=!1,o=e.split(`
-`);for(let a of o){let u=a.trim();if(/^\*\*Verification\*\*/.test(u)){s=!0;continue}if(s&&(u===""||u.startsWith("#")||u.startsWith("\u23F8\uFE0F"))&&(s=!1),s||u.includes("\u23F8\uFE0F")&&u.includes("GATE")||u.startsWith("#")||u.startsWith("|"))continue;let c=ur(u);if(c){n++;let d=De(c.marker);d==="resolved"?r++:d==="unknown"&&i.push(mn(`\`${t.file}\` Phase ${t.phase} step ${c.number}`,c.marker));continue}let l=u.match(/^\d+\.\s+`?\[(x| )\]`?/);if(l){n++,l[1]==="x"&&r++;continue}let p=cr(u);if(p){n++;let d=De(p.marker);d==="resolved"?r++:d==="unknown"&&i.push(mn(`\`${t.file}\` Phase ${t.phase} step ${n}`,p.marker));continue}let f=u.match(/^-\s+\[(x| )\]/);if(f){n++,f[1]==="x"&&r++;continue}}return{done:r,total:n,warnings:i}}function lg(e){let t=e.match(/\*\*Status\*\*:\s*`?\[( |x)\]`?/i);return t?t[1]==="x"?"complete":"not-started":null}function fg(e){let t=e.split(`
-`),r=0;for(;r<t.length&&t[r].trim()==="";)r++;for(r<t.length&&t[r].trim().startsWith("#")&&r++;r<t.length;r++){let n=t[r].trim();if(n==="")continue;if(n.startsWith("#")||n.startsWith("\u23F8\uFE0F")||/^\d+\.\s/.test(n)||/^-\s/.test(n)||n.startsWith("|"))return null;if(/^See\s+\[/i.test(n))continue;let i=n.match(/^(✅|⬜|❌|⏭️|⏹️)\s*\**\s*(DONE|SHIPPED|MERGED|CLOSED|COMPLETE|COMPLETED|DROPPED|SKIPPED|DEFERRED|NOT[\s-]?STARTED|TODO|IN[\s-]?PROGRESS)\b/i);if(!i)return null;let s=i[1],o=i[2].toUpperCase().replace(/[\s-]/g,"");return o==="INPROGRESS"?"in-progress":o==="NOTSTARTED"||o==="TODO"||s==="\u2B1C"?"not-started":"complete"}return null}async function Ie(e){let t;try{t=await(0,he.readFile)(e,"utf-8")}catch{return null}let r={},n=t;try{let b=(0,fr.default)(t);r=b.data,n=b.content}catch{}let i=typeof r.branch=="string"?r.branch:null,s=typeof r.last_commit=="string"?r.last_commit:null,o=typeof r.uncommitted_changes=="boolean"?r.uncommitted_changes:null,a=typeof r.checkpointed=="string"?r.checkpointed:r.checkpointed instanceof Date?r.checkpointed.toISOString():null,u=nt(t,"next_action"),c=it(t,"decisions"),l=it(t,"blockers"),p=it(t,"notes"),f=nt(t,"context"),d=nt(t,"current_state"),g=nt(t,"key_files"),h=pg(t),m=hg(n);return{branch:i,lastCommit:s,uncommittedChanges:o,checkpointed:a,nextAction:u,decisions:c,blockers:l,notes:p,context:f,currentState:d,keyFiles:g,prdFiles:h,continuationPrompt:m}}function nt(e,t){let r=new RegExp(`<${t}>([\\s\\S]*?)</${t}>`,"gi");if(!e.includes("`")){let c=[...e.matchAll(r)],l=c[c.length-1];return l?l[1].trim():null}let n=[],i=0,o=[...e.replace(/`[^`]*`/g,c=>{let l=`\0INLINE_CODE_${i++}\0`;return n.push({placeholder:l,original:c}),l}).matchAll(r)],a=o[o.length-1];if(!a)return null;let u=a[1].trim();for(let{placeholder:c,original:l}of n)u=u.replace(c,l);return u}function it(e,t){let r=nt(e,t);if(!r)return[];let n=[],i=r.split(`
-`);for(let s of i){let a=s.trim().match(/^-\s+(.+)/);if(a){let u=a[1].replace(/<\/(?:decisions|blockers|notes|context|current_state|next_action|key_files)>$/i,"").trim();n.push(u)}}return n}function pg(e){let t=e.match(/Read the following PRD files in order:\s*\n([\s\S]*?)(?:\n\n|\n<)/i);if(!t)return[];let r=[],n=t[1].split(`
-`);for(let i of n){let o=i.trim().match(/^\d+\.\s+(.+)/);o&&r.push(o[1].trim())}return r}function hg(e){let t=/^---\s*$/gm,r=-1,n;for(;(n=t.exec(e))!==null;)r=n.index;if(r===-1)return null;let i=e.slice(r+3).trim();return i||null}async function St(e){let t;try{t=pr(await(0,he.readFile)(e,"utf-8"))}catch{return null}let r=(0,be.basename)(e,".md"),n=t.match(/^#\s+Sub-PRD:\s*(.+)/m),i=n?n[1].trim():r,s=[],o=/## Implementation Progress[\s\S]*?\|[\s\S]*?\|[\s\S]*?\|([\s\S]*?)(?=\n---|\n##|$)/,a=t.match(o),u=[];if(a){let d=a[1],g=/^[ \t]*\|\s*\*{0,2}(\d[\w.]*)\*{0,2}\s*\|([^|]*)\|([^|]*)\|/gm,h;for(;(h=g.exec(d))!==null;){let m=lr(h[3]),b=De(m),w={number:h[1],description:h[2].trim(),status:b==="resolved"?"done":"pending"};b==="unknown"&&(w.unrecognizedMarker=m,u.push(mn(`\`${(0,be.basename)(e)}\` step ${w.number}`,m,h[3]))),s.push(w)}}let c=s.filter(d=>d.status==="done").length,l=s.length,p=dg(t),f=l===0?p??"not-started":c===l?"complete":c>0?"in-progress":"not-started";return{id:r,title:i,done:c,total:l,status:f,steps:s,headerStatus:p,...u.length>0?{warnings:u}:{}}}function dg(e){let t=e.match(/\*\*Status\*\*:\s*(.+)/i);if(!t)return null;let r=t[1].trim().toLowerCase();return["complete","completed","done","shipped","merged","closed","deferred","dropped","skipped"].includes(r)?"complete":r.startsWith("in progress")||r.startsWith("in-progress")?"in-progress":r==="not started"||r==="not-started"||r==="pending"?"not-started":null}var gg=720*60*60*1e3;function mg(e){let{hasMasterPlan:t,allComplete:r,checkpointDate:n,lastUpdated:i,now:s,isEmpty:o,atGate:a,progressDone:u}=e;if(o)return"empty";if(!t)return n?"checkpoint-only":"no-prd";if(r)return"complete";if(a)return"gate";let c=n||i;if(c){let l=new Date(c).getTime();return s.getTime()-l>gg||u===0&&!n?"stale":"active"}return"stale"}async function st(e,t){let r=await _g(e),n=await $e((0,be.resolve)(e,"00-master-plan.md")),i=await Ie((0,be.resolve)(e,"checkpoint.md")),s=n?.phases??[],o=n?await yn(e):[],a=o.length>s.length,u=a?o:s,c=n?.progress??null;if(n&&a){let h=o.reduce((b,w)=>b+w.done,0),m=o.reduce((b,w)=>b+w.total,0);m>0&&(c={done:h,total:m,percent:Math.round(h/m*100)})}else if(n&&n.progress.total===0){let h=await Ma(e);if(h&&h.total>0)c=h;else if(n.phases.length>0){let m=n.phases.filter(w=>w.status==="complete").length,b=n.phases.length;c={done:m,total:b,percent:Math.round(m/b*100)}}}else if(n&&n.progress.total>0&&n.progress.done===n.progress.total){let h=await Ma(e);if(h&&h.total>0){let m=n.progress.done+h.done,b=n.progress.total+h.total;c={done:m,total:b,percent:Math.round(m/b*100)}}}let l=c!==null&&c.total>0&&c.done===c.total,p=!l&&u.some(h=>h.status==="complete")&&u.some(h=>h.status==="not-started")&&!u.some(h=>h.status==="in-progress"),f=mg({hasMasterPlan:n!==null,allComplete:l,checkpointDate:i?.checkpointed??null,lastUpdated:n?.lastUpdated??null,now:new Date,isEmpty:r&&n===null&&i===null,atGate:p,progressDone:c?.done}),d=null;if(n){let h=u.find(w=>w.status==="in-progress"),m=u.find(w=>w.status==="not-started"),b=h||m;if(b)d={number:b.number,total:u.length,title:b.title};else if(!l){let w=o.find(k=>k.status==="in-progress")??o.find(k=>k.status==="not-started");w&&(d={number:w.number,total:o.length,title:w.title})}}let g=dr([...n?.warnings??[],...await xg(e)]);return{name:t,status:f,progress:c,currentPhase:d,lastCheckpoint:i?.checkpointed??null,created:n?.created??null,lastUpdated:n?.lastUpdated??null,nextAction:i?.nextAction??null,branch:i?.branch??null,summary:n?.summary??null,tags:n?Zd(n.tags,n.keywordTags):[],...g.length>0?{warnings:g}:{}}}function Me(e){let t=/^(\d+)-.+\.md$/i.exec(e);return t!==null&&parseInt(t[1],10)>0}function hr(e){let t=e.id.match(/^(\d+)/);return{number:t?parseInt(t[1],10):0,title:e.title,done:e.done,total:e.total,status:e.status}}var yg=20;function dr(e,t=yg){return e.length<=t?e:[...e.slice(0,t),`\u2026and ${e.length-t} more`]}async function xg(e){try{let r=(await(0,he.readdir)(e)).filter(Me).sort();if(r.length===0)return[];let n=[];for(let i of r){let s=await St((0,be.resolve)(e,i));s?.warnings&&n.push(...s.warnings)}return n}catch{return[]}}async function Ma(e){try{let r=(await(0,he.readdir)(e)).filter(Me).sort();if(r.length===0)return null;let n=0,i=0;for(let o of r){let a=await St((0,be.resolve)(e,o));a&&(n+=a.done,i+=a.total)}let s=i>0?Math.round(n/i*100):0;return{done:n,total:i,percent:s}}catch{return null}}async function yn(e){try{let r=(await(0,he.readdir)(e)).filter(Me).sort();if(r.length===0)return[];let n=[];for(let i of r){let s=await St((0,be.resolve)(e,i));s&&n.push(hr(s))}return n}catch{return[]}}async function xn(e){let t;try{t=await(0,he.readFile)(e,"utf-8")}catch{return[]}if(!t.trim())return[];let r=/^## Session\s+\d+\s*—\s*.+/gm,n=[],i;for(;(i=r.exec(t))!==null;)n.push({index:i.index,text:i[0]});if(n.length===0)return[];let s=[];for(let o=0;o<n.length;o++){let a=n[o].index,u=o+1<n.length?n[o+1].index:t.length,c=t.slice(a,u);try{let l=c.match(/^## Session\s+\d+\s*—\s*(.+)/),p=l?l[1].trim():"",f=nt(c,"context"),d=it(c,"decisions"),g=it(c,"blockers"),h=it(c,"notes");s.push({session:o+1,date:p,context:f,decisions:d,blockers:g,notes:h})}catch(l){process.stderr.write(`Warning: skipping malformed session entry at position ${o+1}: ${l instanceof Error?l.message:l}
-`)}}return s}async function gr(e){let t;try{t=await(0,he.readFile)(e,"utf-8")}catch{return null}let r={};try{r=(0,fr.default)(t).data}catch{}let n=typeof r.session_count=="number"?r.session_count:0,i=typeof r.consolidated_through=="number"?r.consolidated_through:0,s=typeof r.generated=="string"?r.generated:r.generated instanceof Date?r.generated.toISOString():null,o=nt(t,"aggregate"),a=it(t,"decisions");return{sessionCount:n,consolidatedThrough:i,generated:s,aggregate:o,decisions:a}}async function _g(e){try{let t=await(0,he.readdir)(e);return t.length===0||t.length===1&&t[0]===".gitkeep"}catch{return!0}}var ns=Vr(kl(),1),Ll=require("fs/promises"),Ge=require("path");var O0=3;async function Ye(e,t={}){let r=t.maxDepth??O0,n=new Map;for(let i of e){let s=Fl(r,".dev"),o;try{o=await(0,ns.default)(s,{cwd:i,onlyDirectories:!0,absolute:!0,dot:!0,ignore:["**/node_modules/**","**/.dev-archive/**"]})}catch{continue}for(let c of o){let l=(0,Ge.dirname)(c),p=await Tl(c);if(p.length===0)continue;let f=Ol(n,l);for(let d of p){let g=(0,Ge.resolve)(c,d),h=await st(g,d);f.features.push(h)}n.set(l,f)}let a=Fl(r,".dev-archive"),u;try{u=await(0,ns.default)(a,{cwd:i,onlyDirectories:!0,absolute:!0,dot:!0,ignore:["**/node_modules/**"]})}catch{continue}for(let c of u){let l=(0,Ge.dirname)(c),p=await Tl(c);if(p.length===0)continue;let f=Ol(n,l),d=new Set(f.features.map(g=>g.name));for(let g of p){if(d.has(g))continue;let h=(0,Ge.resolve)(c,g),m=await st(h,g);m.status="archived",f.features.push(m)}n.set(l,f)}}return Array.from(n.values())}async function Tl(e){try{return(await(0,Ll.readdir)(e,{withFileTypes:!0})).filter(r=>r.isDirectory()).map(r=>r.name)}catch{return[]}}function Ol(e,t){return e.get(t)??{name:(0,Ge.basename)(t),path:t,features:[]}}function Fl(e,t=".dev"){let r=[];for(let n=0;n<e;n++){let i=n===0?"":new Array(n).fill("*").join("/")+"/";r.push(i+t)}return r}var Rt=require("fs/promises"),ss=Vr(hn(),1);async function Dl(e,t){let r={};t.branch!==void 0&&(r.branch=t.branch),t.lastCommit!==void 0&&(r.last_commit=t.lastCommit),t.uncommittedChanges!==void 0&&(r.uncommitted_changes=t.uncommittedChanges),r.checkpointed=t.checkpointed??new Date().toISOString();let n="";if(t.prdFiles&&t.prdFiles.length>0){n+=`Read the following PRD files in order:
+"use strict";
+var __create = Object.create;
+var __defProp = Object.defineProperty;
+var __getOwnPropDesc = Object.getOwnPropertyDescriptor;
+var __getOwnPropNames = Object.getOwnPropertyNames;
+var __getProtoOf = Object.getPrototypeOf;
+var __hasOwnProp = Object.prototype.hasOwnProperty;
+var __commonJS = (cb, mod) => function __require() {
+  return mod || (0, cb[__getOwnPropNames(cb)[0]])((mod = { exports: {} }).exports, mod), mod.exports;
+};
+var __export = (target, all) => {
+  for (var name in all)
+    __defProp(target, name, { get: all[name], enumerable: true });
+};
+var __copyProps = (to, from, except, desc) => {
+  if (from && typeof from === "object" || typeof from === "function") {
+    for (let key of __getOwnPropNames(from))
+      if (!__hasOwnProp.call(to, key) && key !== except)
+        __defProp(to, key, { get: () => from[key], enumerable: !(desc = __getOwnPropDesc(from, key)) || desc.enumerable });
+  }
+  return to;
+};
+var __toESM = (mod, isNodeMode, target) => (target = mod != null ? __create(__getProtoOf(mod)) : {}, __copyProps(
+  // If the importer is in node compatibility mode or this is not an ESM
+  // file that has been converted to a CommonJS file using a Babel-
+  // compatible transform (i.e. "__esModule" has not been set), then set
+  // "default" to the CommonJS "module.exports" for node compatibility.
+  isNodeMode || !mod || !mod.__esModule ? __defProp(target, "default", { value: mod, enumerable: true }) : target,
+  mod
+));
+var __toCommonJS = (mod) => __copyProps(__defProp({}, "__esModule", { value: true }), mod);
 
-`;for(let s=0;s<t.prdFiles.length;s++)n+=`${s+1}. ${t.prdFiles[s]}
-`;n+=`
-`}if(n+=`<context>
-${t.context}
+// ../dev-workflow-core/node_modules/kind-of/index.js
+var require_kind_of = __commonJS({
+  "../dev-workflow-core/node_modules/kind-of/index.js"(exports2, module2) {
+    var toString = Object.prototype.toString;
+    module2.exports = function kindOf(val) {
+      if (val === void 0) return "undefined";
+      if (val === null) return "null";
+      var type = typeof val;
+      if (type === "boolean") return "boolean";
+      if (type === "string") return "string";
+      if (type === "number") return "number";
+      if (type === "symbol") return "symbol";
+      if (type === "function") {
+        return isGeneratorFn(val) ? "generatorfunction" : "function";
+      }
+      if (isArray(val)) return "array";
+      if (isBuffer(val)) return "buffer";
+      if (isArguments(val)) return "arguments";
+      if (isDate(val)) return "date";
+      if (isError(val)) return "error";
+      if (isRegexp(val)) return "regexp";
+      switch (ctorName(val)) {
+        case "Symbol":
+          return "symbol";
+        case "Promise":
+          return "promise";
+        // Set, Map, WeakSet, WeakMap
+        case "WeakMap":
+          return "weakmap";
+        case "WeakSet":
+          return "weakset";
+        case "Map":
+          return "map";
+        case "Set":
+          return "set";
+        // 8-bit typed arrays
+        case "Int8Array":
+          return "int8array";
+        case "Uint8Array":
+          return "uint8array";
+        case "Uint8ClampedArray":
+          return "uint8clampedarray";
+        // 16-bit typed arrays
+        case "Int16Array":
+          return "int16array";
+        case "Uint16Array":
+          return "uint16array";
+        // 32-bit typed arrays
+        case "Int32Array":
+          return "int32array";
+        case "Uint32Array":
+          return "uint32array";
+        case "Float32Array":
+          return "float32array";
+        case "Float64Array":
+          return "float64array";
+      }
+      if (isGeneratorObj(val)) {
+        return "generator";
+      }
+      type = toString.call(val);
+      switch (type) {
+        case "[object Object]":
+          return "object";
+        // iterators
+        case "[object Map Iterator]":
+          return "mapiterator";
+        case "[object Set Iterator]":
+          return "setiterator";
+        case "[object String Iterator]":
+          return "stringiterator";
+        case "[object Array Iterator]":
+          return "arrayiterator";
+      }
+      return type.slice(8, -1).toLowerCase().replace(/\s/g, "");
+    };
+    function ctorName(val) {
+      return typeof val.constructor === "function" ? val.constructor.name : null;
+    }
+    function isArray(val) {
+      if (Array.isArray) return Array.isArray(val);
+      return val instanceof Array;
+    }
+    function isError(val) {
+      return val instanceof Error || typeof val.message === "string" && val.constructor && typeof val.constructor.stackTraceLimit === "number";
+    }
+    function isDate(val) {
+      if (val instanceof Date) return true;
+      return typeof val.toDateString === "function" && typeof val.getDate === "function" && typeof val.setDate === "function";
+    }
+    function isRegexp(val) {
+      if (val instanceof RegExp) return true;
+      return typeof val.flags === "string" && typeof val.ignoreCase === "boolean" && typeof val.multiline === "boolean" && typeof val.global === "boolean";
+    }
+    function isGeneratorFn(name, val) {
+      return ctorName(name) === "GeneratorFunction";
+    }
+    function isGeneratorObj(val) {
+      return typeof val.throw === "function" && typeof val.return === "function" && typeof val.next === "function";
+    }
+    function isArguments(val) {
+      try {
+        if (typeof val.length === "number" && typeof val.callee === "function") {
+          return true;
+        }
+      } catch (err) {
+        if (err.message.indexOf("callee") !== -1) {
+          return true;
+        }
+      }
+      return false;
+    }
+    function isBuffer(val) {
+      if (val.constructor && typeof val.constructor.isBuffer === "function") {
+        return val.constructor.isBuffer(val);
+      }
+      return false;
+    }
+  }
+});
+
+// ../dev-workflow-core/node_modules/is-extendable/index.js
+var require_is_extendable = __commonJS({
+  "../dev-workflow-core/node_modules/is-extendable/index.js"(exports2, module2) {
+    "use strict";
+    module2.exports = function isExtendable(val) {
+      return typeof val !== "undefined" && val !== null && (typeof val === "object" || typeof val === "function");
+    };
+  }
+});
+
+// ../dev-workflow-core/node_modules/extend-shallow/index.js
+var require_extend_shallow = __commonJS({
+  "../dev-workflow-core/node_modules/extend-shallow/index.js"(exports2, module2) {
+    "use strict";
+    var isObject = require_is_extendable();
+    module2.exports = function extend(o) {
+      if (!isObject(o)) {
+        o = {};
+      }
+      var len = arguments.length;
+      for (var i = 1; i < len; i++) {
+        var obj = arguments[i];
+        if (isObject(obj)) {
+          assign(o, obj);
+        }
+      }
+      return o;
+    };
+    function assign(a, b) {
+      for (var key in b) {
+        if (hasOwn(b, key)) {
+          a[key] = b[key];
+        }
+      }
+    }
+    function hasOwn(obj, key) {
+      return Object.prototype.hasOwnProperty.call(obj, key);
+    }
+  }
+});
+
+// ../dev-workflow-core/node_modules/section-matter/index.js
+var require_section_matter = __commonJS({
+  "../dev-workflow-core/node_modules/section-matter/index.js"(exports2, module2) {
+    "use strict";
+    var typeOf = require_kind_of();
+    var extend = require_extend_shallow();
+    module2.exports = function(input, options) {
+      if (typeof options === "function") {
+        options = { parse: options };
+      }
+      var file = toObject(input);
+      var defaults = { section_delimiter: "---", parse: identity };
+      var opts = extend({}, defaults, options);
+      var delim = opts.section_delimiter;
+      var lines = file.content.split(/\r?\n/);
+      var sections = null;
+      var section = createSection();
+      var content = [];
+      var stack = [];
+      function initSections(val) {
+        file.content = val;
+        sections = [];
+        content = [];
+      }
+      function closeSection(val) {
+        if (stack.length) {
+          section.key = getKey(stack[0], delim);
+          section.content = val;
+          opts.parse(section, sections);
+          sections.push(section);
+          section = createSection();
+          content = [];
+          stack = [];
+        }
+      }
+      for (var i = 0; i < lines.length; i++) {
+        var line = lines[i];
+        var len = stack.length;
+        var ln = line.trim();
+        if (isDelimiter(ln, delim)) {
+          if (ln.length === 3 && i !== 0) {
+            if (len === 0 || len === 2) {
+              content.push(line);
+              continue;
+            }
+            stack.push(ln);
+            section.data = content.join("\n");
+            content = [];
+            continue;
+          }
+          if (sections === null) {
+            initSections(content.join("\n"));
+          }
+          if (len === 2) {
+            closeSection(content.join("\n"));
+          }
+          stack.push(ln);
+          continue;
+        }
+        content.push(line);
+      }
+      if (sections === null) {
+        initSections(content.join("\n"));
+      } else {
+        closeSection(content.join("\n"));
+      }
+      file.sections = sections;
+      return file;
+    };
+    function isDelimiter(line, delim) {
+      if (line.slice(0, delim.length) !== delim) {
+        return false;
+      }
+      if (line.charAt(delim.length + 1) === delim.slice(-1)) {
+        return false;
+      }
+      return true;
+    }
+    function toObject(input) {
+      if (typeOf(input) !== "object") {
+        input = { content: input };
+      }
+      if (typeof input.content !== "string" && !isBuffer(input.content)) {
+        throw new TypeError("expected a buffer or string");
+      }
+      input.content = input.content.toString();
+      input.sections = [];
+      return input;
+    }
+    function getKey(val, delim) {
+      return val ? val.slice(delim.length).trim() : "";
+    }
+    function createSection() {
+      return { key: "", data: "", content: "" };
+    }
+    function identity(val) {
+      return val;
+    }
+    function isBuffer(val) {
+      if (val && val.constructor && typeof val.constructor.isBuffer === "function") {
+        return val.constructor.isBuffer(val);
+      }
+      return false;
+    }
+  }
+});
+
+// ../dev-workflow-core/node_modules/js-yaml/lib/js-yaml/common.js
+var require_common = __commonJS({
+  "../dev-workflow-core/node_modules/js-yaml/lib/js-yaml/common.js"(exports2, module2) {
+    "use strict";
+    function isNothing(subject) {
+      return typeof subject === "undefined" || subject === null;
+    }
+    function isObject(subject) {
+      return typeof subject === "object" && subject !== null;
+    }
+    function toArray(sequence) {
+      if (Array.isArray(sequence)) return sequence;
+      else if (isNothing(sequence)) return [];
+      return [sequence];
+    }
+    function extend(target, source) {
+      var index, length, key, sourceKeys;
+      if (source) {
+        sourceKeys = Object.keys(source);
+        for (index = 0, length = sourceKeys.length; index < length; index += 1) {
+          key = sourceKeys[index];
+          target[key] = source[key];
+        }
+      }
+      return target;
+    }
+    function repeat(string, count) {
+      var result = "", cycle;
+      for (cycle = 0; cycle < count; cycle += 1) {
+        result += string;
+      }
+      return result;
+    }
+    function isNegativeZero(number) {
+      return number === 0 && Number.NEGATIVE_INFINITY === 1 / number;
+    }
+    module2.exports.isNothing = isNothing;
+    module2.exports.isObject = isObject;
+    module2.exports.toArray = toArray;
+    module2.exports.repeat = repeat;
+    module2.exports.isNegativeZero = isNegativeZero;
+    module2.exports.extend = extend;
+  }
+});
+
+// ../dev-workflow-core/node_modules/js-yaml/lib/js-yaml/exception.js
+var require_exception = __commonJS({
+  "../dev-workflow-core/node_modules/js-yaml/lib/js-yaml/exception.js"(exports2, module2) {
+    "use strict";
+    function YAMLException(reason, mark) {
+      Error.call(this);
+      this.name = "YAMLException";
+      this.reason = reason;
+      this.mark = mark;
+      this.message = (this.reason || "(unknown reason)") + (this.mark ? " " + this.mark.toString() : "");
+      if (Error.captureStackTrace) {
+        Error.captureStackTrace(this, this.constructor);
+      } else {
+        this.stack = new Error().stack || "";
+      }
+    }
+    YAMLException.prototype = Object.create(Error.prototype);
+    YAMLException.prototype.constructor = YAMLException;
+    YAMLException.prototype.toString = function toString(compact) {
+      var result = this.name + ": ";
+      result += this.reason || "(unknown reason)";
+      if (!compact && this.mark) {
+        result += " " + this.mark.toString();
+      }
+      return result;
+    };
+    module2.exports = YAMLException;
+  }
+});
+
+// ../dev-workflow-core/node_modules/js-yaml/lib/js-yaml/mark.js
+var require_mark = __commonJS({
+  "../dev-workflow-core/node_modules/js-yaml/lib/js-yaml/mark.js"(exports2, module2) {
+    "use strict";
+    var common = require_common();
+    function Mark(name, buffer, position, line, column) {
+      this.name = name;
+      this.buffer = buffer;
+      this.position = position;
+      this.line = line;
+      this.column = column;
+    }
+    Mark.prototype.getSnippet = function getSnippet(indent, maxLength) {
+      var head, start, tail, end, snippet;
+      if (!this.buffer) return null;
+      indent = indent || 4;
+      maxLength = maxLength || 75;
+      head = "";
+      start = this.position;
+      while (start > 0 && "\0\r\n\x85\u2028\u2029".indexOf(this.buffer.charAt(start - 1)) === -1) {
+        start -= 1;
+        if (this.position - start > maxLength / 2 - 1) {
+          head = " ... ";
+          start += 5;
+          break;
+        }
+      }
+      tail = "";
+      end = this.position;
+      while (end < this.buffer.length && "\0\r\n\x85\u2028\u2029".indexOf(this.buffer.charAt(end)) === -1) {
+        end += 1;
+        if (end - this.position > maxLength / 2 - 1) {
+          tail = " ... ";
+          end -= 5;
+          break;
+        }
+      }
+      snippet = this.buffer.slice(start, end);
+      return common.repeat(" ", indent) + head + snippet + tail + "\n" + common.repeat(" ", indent + this.position - start + head.length) + "^";
+    };
+    Mark.prototype.toString = function toString(compact) {
+      var snippet, where = "";
+      if (this.name) {
+        where += 'in "' + this.name + '" ';
+      }
+      where += "at line " + (this.line + 1) + ", column " + (this.column + 1);
+      if (!compact) {
+        snippet = this.getSnippet();
+        if (snippet) {
+          where += ":\n" + snippet;
+        }
+      }
+      return where;
+    };
+    module2.exports = Mark;
+  }
+});
+
+// ../dev-workflow-core/node_modules/js-yaml/lib/js-yaml/type.js
+var require_type = __commonJS({
+  "../dev-workflow-core/node_modules/js-yaml/lib/js-yaml/type.js"(exports2, module2) {
+    "use strict";
+    var YAMLException = require_exception();
+    var TYPE_CONSTRUCTOR_OPTIONS = [
+      "kind",
+      "resolve",
+      "construct",
+      "instanceOf",
+      "predicate",
+      "represent",
+      "defaultStyle",
+      "styleAliases"
+    ];
+    var YAML_NODE_KINDS = [
+      "scalar",
+      "sequence",
+      "mapping"
+    ];
+    function compileStyleAliases(map) {
+      var result = {};
+      if (map !== null) {
+        Object.keys(map).forEach(function(style) {
+          map[style].forEach(function(alias) {
+            result[String(alias)] = style;
+          });
+        });
+      }
+      return result;
+    }
+    function Type(tag, options) {
+      options = options || {};
+      Object.keys(options).forEach(function(name) {
+        if (TYPE_CONSTRUCTOR_OPTIONS.indexOf(name) === -1) {
+          throw new YAMLException('Unknown option "' + name + '" is met in definition of "' + tag + '" YAML type.');
+        }
+      });
+      this.tag = tag;
+      this.kind = options["kind"] || null;
+      this.resolve = options["resolve"] || function() {
+        return true;
+      };
+      this.construct = options["construct"] || function(data) {
+        return data;
+      };
+      this.instanceOf = options["instanceOf"] || null;
+      this.predicate = options["predicate"] || null;
+      this.represent = options["represent"] || null;
+      this.defaultStyle = options["defaultStyle"] || null;
+      this.styleAliases = compileStyleAliases(options["styleAliases"] || null);
+      if (YAML_NODE_KINDS.indexOf(this.kind) === -1) {
+        throw new YAMLException('Unknown kind "' + this.kind + '" is specified for "' + tag + '" YAML type.');
+      }
+    }
+    module2.exports = Type;
+  }
+});
+
+// ../dev-workflow-core/node_modules/js-yaml/lib/js-yaml/schema.js
+var require_schema = __commonJS({
+  "../dev-workflow-core/node_modules/js-yaml/lib/js-yaml/schema.js"(exports2, module2) {
+    "use strict";
+    var common = require_common();
+    var YAMLException = require_exception();
+    var Type = require_type();
+    function compileList(schema, name, result) {
+      var exclude = [];
+      schema.include.forEach(function(includedSchema) {
+        result = compileList(includedSchema, name, result);
+      });
+      schema[name].forEach(function(currentType) {
+        result.forEach(function(previousType, previousIndex) {
+          if (previousType.tag === currentType.tag && previousType.kind === currentType.kind) {
+            exclude.push(previousIndex);
+          }
+        });
+        result.push(currentType);
+      });
+      return result.filter(function(type, index) {
+        return exclude.indexOf(index) === -1;
+      });
+    }
+    function compileMap() {
+      var result = {
+        scalar: {},
+        sequence: {},
+        mapping: {},
+        fallback: {}
+      }, index, length;
+      function collectType(type) {
+        result[type.kind][type.tag] = result["fallback"][type.tag] = type;
+      }
+      for (index = 0, length = arguments.length; index < length; index += 1) {
+        arguments[index].forEach(collectType);
+      }
+      return result;
+    }
+    function Schema(definition) {
+      this.include = definition.include || [];
+      this.implicit = definition.implicit || [];
+      this.explicit = definition.explicit || [];
+      this.implicit.forEach(function(type) {
+        if (type.loadKind && type.loadKind !== "scalar") {
+          throw new YAMLException("There is a non-scalar type in the implicit list of a schema. Implicit resolving of such types is not supported.");
+        }
+      });
+      this.compiledImplicit = compileList(this, "implicit", []);
+      this.compiledExplicit = compileList(this, "explicit", []);
+      this.compiledTypeMap = compileMap(this.compiledImplicit, this.compiledExplicit);
+    }
+    Schema.DEFAULT = null;
+    Schema.create = function createSchema() {
+      var schemas, types;
+      switch (arguments.length) {
+        case 1:
+          schemas = Schema.DEFAULT;
+          types = arguments[0];
+          break;
+        case 2:
+          schemas = arguments[0];
+          types = arguments[1];
+          break;
+        default:
+          throw new YAMLException("Wrong number of arguments for Schema.create function");
+      }
+      schemas = common.toArray(schemas);
+      types = common.toArray(types);
+      if (!schemas.every(function(schema) {
+        return schema instanceof Schema;
+      })) {
+        throw new YAMLException("Specified list of super schemas (or a single Schema object) contains a non-Schema object.");
+      }
+      if (!types.every(function(type) {
+        return type instanceof Type;
+      })) {
+        throw new YAMLException("Specified list of YAML types (or a single Type object) contains a non-Type object.");
+      }
+      return new Schema({
+        include: schemas,
+        explicit: types
+      });
+    };
+    module2.exports = Schema;
+  }
+});
+
+// ../dev-workflow-core/node_modules/js-yaml/lib/js-yaml/type/str.js
+var require_str = __commonJS({
+  "../dev-workflow-core/node_modules/js-yaml/lib/js-yaml/type/str.js"(exports2, module2) {
+    "use strict";
+    var Type = require_type();
+    module2.exports = new Type("tag:yaml.org,2002:str", {
+      kind: "scalar",
+      construct: function(data) {
+        return data !== null ? data : "";
+      }
+    });
+  }
+});
+
+// ../dev-workflow-core/node_modules/js-yaml/lib/js-yaml/type/seq.js
+var require_seq = __commonJS({
+  "../dev-workflow-core/node_modules/js-yaml/lib/js-yaml/type/seq.js"(exports2, module2) {
+    "use strict";
+    var Type = require_type();
+    module2.exports = new Type("tag:yaml.org,2002:seq", {
+      kind: "sequence",
+      construct: function(data) {
+        return data !== null ? data : [];
+      }
+    });
+  }
+});
+
+// ../dev-workflow-core/node_modules/js-yaml/lib/js-yaml/type/map.js
+var require_map = __commonJS({
+  "../dev-workflow-core/node_modules/js-yaml/lib/js-yaml/type/map.js"(exports2, module2) {
+    "use strict";
+    var Type = require_type();
+    module2.exports = new Type("tag:yaml.org,2002:map", {
+      kind: "mapping",
+      construct: function(data) {
+        return data !== null ? data : {};
+      }
+    });
+  }
+});
+
+// ../dev-workflow-core/node_modules/js-yaml/lib/js-yaml/schema/failsafe.js
+var require_failsafe = __commonJS({
+  "../dev-workflow-core/node_modules/js-yaml/lib/js-yaml/schema/failsafe.js"(exports2, module2) {
+    "use strict";
+    var Schema = require_schema();
+    module2.exports = new Schema({
+      explicit: [
+        require_str(),
+        require_seq(),
+        require_map()
+      ]
+    });
+  }
+});
+
+// ../dev-workflow-core/node_modules/js-yaml/lib/js-yaml/type/null.js
+var require_null = __commonJS({
+  "../dev-workflow-core/node_modules/js-yaml/lib/js-yaml/type/null.js"(exports2, module2) {
+    "use strict";
+    var Type = require_type();
+    function resolveYamlNull(data) {
+      if (data === null) return true;
+      var max = data.length;
+      return max === 1 && data === "~" || max === 4 && (data === "null" || data === "Null" || data === "NULL");
+    }
+    function constructYamlNull() {
+      return null;
+    }
+    function isNull(object) {
+      return object === null;
+    }
+    module2.exports = new Type("tag:yaml.org,2002:null", {
+      kind: "scalar",
+      resolve: resolveYamlNull,
+      construct: constructYamlNull,
+      predicate: isNull,
+      represent: {
+        canonical: function() {
+          return "~";
+        },
+        lowercase: function() {
+          return "null";
+        },
+        uppercase: function() {
+          return "NULL";
+        },
+        camelcase: function() {
+          return "Null";
+        }
+      },
+      defaultStyle: "lowercase"
+    });
+  }
+});
+
+// ../dev-workflow-core/node_modules/js-yaml/lib/js-yaml/type/bool.js
+var require_bool = __commonJS({
+  "../dev-workflow-core/node_modules/js-yaml/lib/js-yaml/type/bool.js"(exports2, module2) {
+    "use strict";
+    var Type = require_type();
+    function resolveYamlBoolean(data) {
+      if (data === null) return false;
+      var max = data.length;
+      return max === 4 && (data === "true" || data === "True" || data === "TRUE") || max === 5 && (data === "false" || data === "False" || data === "FALSE");
+    }
+    function constructYamlBoolean(data) {
+      return data === "true" || data === "True" || data === "TRUE";
+    }
+    function isBoolean(object) {
+      return Object.prototype.toString.call(object) === "[object Boolean]";
+    }
+    module2.exports = new Type("tag:yaml.org,2002:bool", {
+      kind: "scalar",
+      resolve: resolveYamlBoolean,
+      construct: constructYamlBoolean,
+      predicate: isBoolean,
+      represent: {
+        lowercase: function(object) {
+          return object ? "true" : "false";
+        },
+        uppercase: function(object) {
+          return object ? "TRUE" : "FALSE";
+        },
+        camelcase: function(object) {
+          return object ? "True" : "False";
+        }
+      },
+      defaultStyle: "lowercase"
+    });
+  }
+});
+
+// ../dev-workflow-core/node_modules/js-yaml/lib/js-yaml/type/int.js
+var require_int = __commonJS({
+  "../dev-workflow-core/node_modules/js-yaml/lib/js-yaml/type/int.js"(exports2, module2) {
+    "use strict";
+    var common = require_common();
+    var Type = require_type();
+    function isHexCode(c) {
+      return 48 <= c && c <= 57 || 65 <= c && c <= 70 || 97 <= c && c <= 102;
+    }
+    function isOctCode(c) {
+      return 48 <= c && c <= 55;
+    }
+    function isDecCode(c) {
+      return 48 <= c && c <= 57;
+    }
+    function resolveYamlInteger(data) {
+      if (data === null) return false;
+      var max = data.length, index = 0, hasDigits = false, ch;
+      if (!max) return false;
+      ch = data[index];
+      if (ch === "-" || ch === "+") {
+        ch = data[++index];
+      }
+      if (ch === "0") {
+        if (index + 1 === max) return true;
+        ch = data[++index];
+        if (ch === "b") {
+          index++;
+          for (; index < max; index++) {
+            ch = data[index];
+            if (ch === "_") continue;
+            if (ch !== "0" && ch !== "1") return false;
+            hasDigits = true;
+          }
+          return hasDigits && ch !== "_";
+        }
+        if (ch === "x") {
+          index++;
+          for (; index < max; index++) {
+            ch = data[index];
+            if (ch === "_") continue;
+            if (!isHexCode(data.charCodeAt(index))) return false;
+            hasDigits = true;
+          }
+          return hasDigits && ch !== "_";
+        }
+        for (; index < max; index++) {
+          ch = data[index];
+          if (ch === "_") continue;
+          if (!isOctCode(data.charCodeAt(index))) return false;
+          hasDigits = true;
+        }
+        return hasDigits && ch !== "_";
+      }
+      if (ch === "_") return false;
+      for (; index < max; index++) {
+        ch = data[index];
+        if (ch === "_") continue;
+        if (ch === ":") break;
+        if (!isDecCode(data.charCodeAt(index))) {
+          return false;
+        }
+        hasDigits = true;
+      }
+      if (!hasDigits || ch === "_") return false;
+      if (ch !== ":") return true;
+      return /^(:[0-5]?[0-9])+$/.test(data.slice(index));
+    }
+    function constructYamlInteger(data) {
+      var value = data, sign = 1, ch, base, digits = [];
+      if (value.indexOf("_") !== -1) {
+        value = value.replace(/_/g, "");
+      }
+      ch = value[0];
+      if (ch === "-" || ch === "+") {
+        if (ch === "-") sign = -1;
+        value = value.slice(1);
+        ch = value[0];
+      }
+      if (value === "0") return 0;
+      if (ch === "0") {
+        if (value[1] === "b") return sign * parseInt(value.slice(2), 2);
+        if (value[1] === "x") return sign * parseInt(value, 16);
+        return sign * parseInt(value, 8);
+      }
+      if (value.indexOf(":") !== -1) {
+        value.split(":").forEach(function(v) {
+          digits.unshift(parseInt(v, 10));
+        });
+        value = 0;
+        base = 1;
+        digits.forEach(function(d) {
+          value += d * base;
+          base *= 60;
+        });
+        return sign * value;
+      }
+      return sign * parseInt(value, 10);
+    }
+    function isInteger(object) {
+      return Object.prototype.toString.call(object) === "[object Number]" && (object % 1 === 0 && !common.isNegativeZero(object));
+    }
+    module2.exports = new Type("tag:yaml.org,2002:int", {
+      kind: "scalar",
+      resolve: resolveYamlInteger,
+      construct: constructYamlInteger,
+      predicate: isInteger,
+      represent: {
+        binary: function(obj) {
+          return obj >= 0 ? "0b" + obj.toString(2) : "-0b" + obj.toString(2).slice(1);
+        },
+        octal: function(obj) {
+          return obj >= 0 ? "0" + obj.toString(8) : "-0" + obj.toString(8).slice(1);
+        },
+        decimal: function(obj) {
+          return obj.toString(10);
+        },
+        /* eslint-disable max-len */
+        hexadecimal: function(obj) {
+          return obj >= 0 ? "0x" + obj.toString(16).toUpperCase() : "-0x" + obj.toString(16).toUpperCase().slice(1);
+        }
+      },
+      defaultStyle: "decimal",
+      styleAliases: {
+        binary: [2, "bin"],
+        octal: [8, "oct"],
+        decimal: [10, "dec"],
+        hexadecimal: [16, "hex"]
+      }
+    });
+  }
+});
+
+// ../dev-workflow-core/node_modules/js-yaml/lib/js-yaml/type/float.js
+var require_float = __commonJS({
+  "../dev-workflow-core/node_modules/js-yaml/lib/js-yaml/type/float.js"(exports2, module2) {
+    "use strict";
+    var common = require_common();
+    var Type = require_type();
+    var YAML_FLOAT_PATTERN = new RegExp(
+      // 2.5e4, 2.5 and integers
+      "^(?:[-+]?(?:0|[1-9][0-9_]*)(?:\\.[0-9_]*)?(?:[eE][-+]?[0-9]+)?|\\.[0-9_]+(?:[eE][-+]?[0-9]+)?|[-+]?[0-9][0-9_]*(?::[0-5]?[0-9])+\\.[0-9_]*|[-+]?\\.(?:inf|Inf|INF)|\\.(?:nan|NaN|NAN))$"
+    );
+    function resolveYamlFloat(data) {
+      if (data === null) return false;
+      if (!YAML_FLOAT_PATTERN.test(data) || // Quick hack to not allow integers end with `_`
+      // Probably should update regexp & check speed
+      data[data.length - 1] === "_") {
+        return false;
+      }
+      return true;
+    }
+    function constructYamlFloat(data) {
+      var value, sign, base, digits;
+      value = data.replace(/_/g, "").toLowerCase();
+      sign = value[0] === "-" ? -1 : 1;
+      digits = [];
+      if ("+-".indexOf(value[0]) >= 0) {
+        value = value.slice(1);
+      }
+      if (value === ".inf") {
+        return sign === 1 ? Number.POSITIVE_INFINITY : Number.NEGATIVE_INFINITY;
+      } else if (value === ".nan") {
+        return NaN;
+      } else if (value.indexOf(":") >= 0) {
+        value.split(":").forEach(function(v) {
+          digits.unshift(parseFloat(v, 10));
+        });
+        value = 0;
+        base = 1;
+        digits.forEach(function(d) {
+          value += d * base;
+          base *= 60;
+        });
+        return sign * value;
+      }
+      return sign * parseFloat(value, 10);
+    }
+    var SCIENTIFIC_WITHOUT_DOT = /^[-+]?[0-9]+e/;
+    function representYamlFloat(object, style) {
+      var res;
+      if (isNaN(object)) {
+        switch (style) {
+          case "lowercase":
+            return ".nan";
+          case "uppercase":
+            return ".NAN";
+          case "camelcase":
+            return ".NaN";
+        }
+      } else if (Number.POSITIVE_INFINITY === object) {
+        switch (style) {
+          case "lowercase":
+            return ".inf";
+          case "uppercase":
+            return ".INF";
+          case "camelcase":
+            return ".Inf";
+        }
+      } else if (Number.NEGATIVE_INFINITY === object) {
+        switch (style) {
+          case "lowercase":
+            return "-.inf";
+          case "uppercase":
+            return "-.INF";
+          case "camelcase":
+            return "-.Inf";
+        }
+      } else if (common.isNegativeZero(object)) {
+        return "-0.0";
+      }
+      res = object.toString(10);
+      return SCIENTIFIC_WITHOUT_DOT.test(res) ? res.replace("e", ".e") : res;
+    }
+    function isFloat(object) {
+      return Object.prototype.toString.call(object) === "[object Number]" && (object % 1 !== 0 || common.isNegativeZero(object));
+    }
+    module2.exports = new Type("tag:yaml.org,2002:float", {
+      kind: "scalar",
+      resolve: resolveYamlFloat,
+      construct: constructYamlFloat,
+      predicate: isFloat,
+      represent: representYamlFloat,
+      defaultStyle: "lowercase"
+    });
+  }
+});
+
+// ../dev-workflow-core/node_modules/js-yaml/lib/js-yaml/schema/json.js
+var require_json = __commonJS({
+  "../dev-workflow-core/node_modules/js-yaml/lib/js-yaml/schema/json.js"(exports2, module2) {
+    "use strict";
+    var Schema = require_schema();
+    module2.exports = new Schema({
+      include: [
+        require_failsafe()
+      ],
+      implicit: [
+        require_null(),
+        require_bool(),
+        require_int(),
+        require_float()
+      ]
+    });
+  }
+});
+
+// ../dev-workflow-core/node_modules/js-yaml/lib/js-yaml/schema/core.js
+var require_core = __commonJS({
+  "../dev-workflow-core/node_modules/js-yaml/lib/js-yaml/schema/core.js"(exports2, module2) {
+    "use strict";
+    var Schema = require_schema();
+    module2.exports = new Schema({
+      include: [
+        require_json()
+      ]
+    });
+  }
+});
+
+// ../dev-workflow-core/node_modules/js-yaml/lib/js-yaml/type/timestamp.js
+var require_timestamp = __commonJS({
+  "../dev-workflow-core/node_modules/js-yaml/lib/js-yaml/type/timestamp.js"(exports2, module2) {
+    "use strict";
+    var Type = require_type();
+    var YAML_DATE_REGEXP = new RegExp(
+      "^([0-9][0-9][0-9][0-9])-([0-9][0-9])-([0-9][0-9])$"
+    );
+    var YAML_TIMESTAMP_REGEXP = new RegExp(
+      "^([0-9][0-9][0-9][0-9])-([0-9][0-9]?)-([0-9][0-9]?)(?:[Tt]|[ \\t]+)([0-9][0-9]?):([0-9][0-9]):([0-9][0-9])(?:\\.([0-9]*))?(?:[ \\t]*(Z|([-+])([0-9][0-9]?)(?::([0-9][0-9]))?))?$"
+    );
+    function resolveYamlTimestamp(data) {
+      if (data === null) return false;
+      if (YAML_DATE_REGEXP.exec(data) !== null) return true;
+      if (YAML_TIMESTAMP_REGEXP.exec(data) !== null) return true;
+      return false;
+    }
+    function constructYamlTimestamp(data) {
+      var match, year, month, day, hour, minute, second, fraction = 0, delta = null, tz_hour, tz_minute, date;
+      match = YAML_DATE_REGEXP.exec(data);
+      if (match === null) match = YAML_TIMESTAMP_REGEXP.exec(data);
+      if (match === null) throw new Error("Date resolve error");
+      year = +match[1];
+      month = +match[2] - 1;
+      day = +match[3];
+      if (!match[4]) {
+        return new Date(Date.UTC(year, month, day));
+      }
+      hour = +match[4];
+      minute = +match[5];
+      second = +match[6];
+      if (match[7]) {
+        fraction = match[7].slice(0, 3);
+        while (fraction.length < 3) {
+          fraction += "0";
+        }
+        fraction = +fraction;
+      }
+      if (match[9]) {
+        tz_hour = +match[10];
+        tz_minute = +(match[11] || 0);
+        delta = (tz_hour * 60 + tz_minute) * 6e4;
+        if (match[9] === "-") delta = -delta;
+      }
+      date = new Date(Date.UTC(year, month, day, hour, minute, second, fraction));
+      if (delta) date.setTime(date.getTime() - delta);
+      return date;
+    }
+    function representYamlTimestamp(object) {
+      return object.toISOString();
+    }
+    module2.exports = new Type("tag:yaml.org,2002:timestamp", {
+      kind: "scalar",
+      resolve: resolveYamlTimestamp,
+      construct: constructYamlTimestamp,
+      instanceOf: Date,
+      represent: representYamlTimestamp
+    });
+  }
+});
+
+// ../dev-workflow-core/node_modules/js-yaml/lib/js-yaml/type/merge.js
+var require_merge = __commonJS({
+  "../dev-workflow-core/node_modules/js-yaml/lib/js-yaml/type/merge.js"(exports2, module2) {
+    "use strict";
+    var Type = require_type();
+    function resolveYamlMerge(data) {
+      return data === "<<" || data === null;
+    }
+    module2.exports = new Type("tag:yaml.org,2002:merge", {
+      kind: "scalar",
+      resolve: resolveYamlMerge
+    });
+  }
+});
+
+// ../dev-workflow-core/node_modules/js-yaml/lib/js-yaml/type/binary.js
+var require_binary = __commonJS({
+  "../dev-workflow-core/node_modules/js-yaml/lib/js-yaml/type/binary.js"(exports2, module2) {
+    "use strict";
+    var NodeBuffer;
+    try {
+      _require = require;
+      NodeBuffer = _require("buffer").Buffer;
+    } catch (__) {
+    }
+    var _require;
+    var Type = require_type();
+    var BASE64_MAP = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=\n\r";
+    function resolveYamlBinary(data) {
+      if (data === null) return false;
+      var code, idx, bitlen = 0, max = data.length, map = BASE64_MAP;
+      for (idx = 0; idx < max; idx++) {
+        code = map.indexOf(data.charAt(idx));
+        if (code > 64) continue;
+        if (code < 0) return false;
+        bitlen += 6;
+      }
+      return bitlen % 8 === 0;
+    }
+    function constructYamlBinary(data) {
+      var idx, tailbits, input = data.replace(/[\r\n=]/g, ""), max = input.length, map = BASE64_MAP, bits = 0, result = [];
+      for (idx = 0; idx < max; idx++) {
+        if (idx % 4 === 0 && idx) {
+          result.push(bits >> 16 & 255);
+          result.push(bits >> 8 & 255);
+          result.push(bits & 255);
+        }
+        bits = bits << 6 | map.indexOf(input.charAt(idx));
+      }
+      tailbits = max % 4 * 6;
+      if (tailbits === 0) {
+        result.push(bits >> 16 & 255);
+        result.push(bits >> 8 & 255);
+        result.push(bits & 255);
+      } else if (tailbits === 18) {
+        result.push(bits >> 10 & 255);
+        result.push(bits >> 2 & 255);
+      } else if (tailbits === 12) {
+        result.push(bits >> 4 & 255);
+      }
+      if (NodeBuffer) {
+        return NodeBuffer.from ? NodeBuffer.from(result) : new NodeBuffer(result);
+      }
+      return result;
+    }
+    function representYamlBinary(object) {
+      var result = "", bits = 0, idx, tail, max = object.length, map = BASE64_MAP;
+      for (idx = 0; idx < max; idx++) {
+        if (idx % 3 === 0 && idx) {
+          result += map[bits >> 18 & 63];
+          result += map[bits >> 12 & 63];
+          result += map[bits >> 6 & 63];
+          result += map[bits & 63];
+        }
+        bits = (bits << 8) + object[idx];
+      }
+      tail = max % 3;
+      if (tail === 0) {
+        result += map[bits >> 18 & 63];
+        result += map[bits >> 12 & 63];
+        result += map[bits >> 6 & 63];
+        result += map[bits & 63];
+      } else if (tail === 2) {
+        result += map[bits >> 10 & 63];
+        result += map[bits >> 4 & 63];
+        result += map[bits << 2 & 63];
+        result += map[64];
+      } else if (tail === 1) {
+        result += map[bits >> 2 & 63];
+        result += map[bits << 4 & 63];
+        result += map[64];
+        result += map[64];
+      }
+      return result;
+    }
+    function isBinary(object) {
+      return NodeBuffer && NodeBuffer.isBuffer(object);
+    }
+    module2.exports = new Type("tag:yaml.org,2002:binary", {
+      kind: "scalar",
+      resolve: resolveYamlBinary,
+      construct: constructYamlBinary,
+      predicate: isBinary,
+      represent: representYamlBinary
+    });
+  }
+});
+
+// ../dev-workflow-core/node_modules/js-yaml/lib/js-yaml/type/omap.js
+var require_omap = __commonJS({
+  "../dev-workflow-core/node_modules/js-yaml/lib/js-yaml/type/omap.js"(exports2, module2) {
+    "use strict";
+    var Type = require_type();
+    var _hasOwnProperty = Object.prototype.hasOwnProperty;
+    var _toString = Object.prototype.toString;
+    function resolveYamlOmap(data) {
+      if (data === null) return true;
+      var objectKeys = [], index, length, pair, pairKey, pairHasKey, object = data;
+      for (index = 0, length = object.length; index < length; index += 1) {
+        pair = object[index];
+        pairHasKey = false;
+        if (_toString.call(pair) !== "[object Object]") return false;
+        for (pairKey in pair) {
+          if (_hasOwnProperty.call(pair, pairKey)) {
+            if (!pairHasKey) pairHasKey = true;
+            else return false;
+          }
+        }
+        if (!pairHasKey) return false;
+        if (objectKeys.indexOf(pairKey) === -1) objectKeys.push(pairKey);
+        else return false;
+      }
+      return true;
+    }
+    function constructYamlOmap(data) {
+      return data !== null ? data : [];
+    }
+    module2.exports = new Type("tag:yaml.org,2002:omap", {
+      kind: "sequence",
+      resolve: resolveYamlOmap,
+      construct: constructYamlOmap
+    });
+  }
+});
+
+// ../dev-workflow-core/node_modules/js-yaml/lib/js-yaml/type/pairs.js
+var require_pairs = __commonJS({
+  "../dev-workflow-core/node_modules/js-yaml/lib/js-yaml/type/pairs.js"(exports2, module2) {
+    "use strict";
+    var Type = require_type();
+    var _toString = Object.prototype.toString;
+    function resolveYamlPairs(data) {
+      if (data === null) return true;
+      var index, length, pair, keys, result, object = data;
+      result = new Array(object.length);
+      for (index = 0, length = object.length; index < length; index += 1) {
+        pair = object[index];
+        if (_toString.call(pair) !== "[object Object]") return false;
+        keys = Object.keys(pair);
+        if (keys.length !== 1) return false;
+        result[index] = [keys[0], pair[keys[0]]];
+      }
+      return true;
+    }
+    function constructYamlPairs(data) {
+      if (data === null) return [];
+      var index, length, pair, keys, result, object = data;
+      result = new Array(object.length);
+      for (index = 0, length = object.length; index < length; index += 1) {
+        pair = object[index];
+        keys = Object.keys(pair);
+        result[index] = [keys[0], pair[keys[0]]];
+      }
+      return result;
+    }
+    module2.exports = new Type("tag:yaml.org,2002:pairs", {
+      kind: "sequence",
+      resolve: resolveYamlPairs,
+      construct: constructYamlPairs
+    });
+  }
+});
+
+// ../dev-workflow-core/node_modules/js-yaml/lib/js-yaml/type/set.js
+var require_set = __commonJS({
+  "../dev-workflow-core/node_modules/js-yaml/lib/js-yaml/type/set.js"(exports2, module2) {
+    "use strict";
+    var Type = require_type();
+    var _hasOwnProperty = Object.prototype.hasOwnProperty;
+    function resolveYamlSet(data) {
+      if (data === null) return true;
+      var key, object = data;
+      for (key in object) {
+        if (_hasOwnProperty.call(object, key)) {
+          if (object[key] !== null) return false;
+        }
+      }
+      return true;
+    }
+    function constructYamlSet(data) {
+      return data !== null ? data : {};
+    }
+    module2.exports = new Type("tag:yaml.org,2002:set", {
+      kind: "mapping",
+      resolve: resolveYamlSet,
+      construct: constructYamlSet
+    });
+  }
+});
+
+// ../dev-workflow-core/node_modules/js-yaml/lib/js-yaml/schema/default_safe.js
+var require_default_safe = __commonJS({
+  "../dev-workflow-core/node_modules/js-yaml/lib/js-yaml/schema/default_safe.js"(exports2, module2) {
+    "use strict";
+    var Schema = require_schema();
+    module2.exports = new Schema({
+      include: [
+        require_core()
+      ],
+      implicit: [
+        require_timestamp(),
+        require_merge()
+      ],
+      explicit: [
+        require_binary(),
+        require_omap(),
+        require_pairs(),
+        require_set()
+      ]
+    });
+  }
+});
+
+// ../dev-workflow-core/node_modules/js-yaml/lib/js-yaml/type/js/undefined.js
+var require_undefined = __commonJS({
+  "../dev-workflow-core/node_modules/js-yaml/lib/js-yaml/type/js/undefined.js"(exports2, module2) {
+    "use strict";
+    var Type = require_type();
+    function resolveJavascriptUndefined() {
+      return true;
+    }
+    function constructJavascriptUndefined() {
+      return void 0;
+    }
+    function representJavascriptUndefined() {
+      return "";
+    }
+    function isUndefined(object) {
+      return typeof object === "undefined";
+    }
+    module2.exports = new Type("tag:yaml.org,2002:js/undefined", {
+      kind: "scalar",
+      resolve: resolveJavascriptUndefined,
+      construct: constructJavascriptUndefined,
+      predicate: isUndefined,
+      represent: representJavascriptUndefined
+    });
+  }
+});
+
+// ../dev-workflow-core/node_modules/js-yaml/lib/js-yaml/type/js/regexp.js
+var require_regexp = __commonJS({
+  "../dev-workflow-core/node_modules/js-yaml/lib/js-yaml/type/js/regexp.js"(exports2, module2) {
+    "use strict";
+    var Type = require_type();
+    function resolveJavascriptRegExp(data) {
+      if (data === null) return false;
+      if (data.length === 0) return false;
+      var regexp = data, tail = /\/([gim]*)$/.exec(data), modifiers = "";
+      if (regexp[0] === "/") {
+        if (tail) modifiers = tail[1];
+        if (modifiers.length > 3) return false;
+        if (regexp[regexp.length - modifiers.length - 1] !== "/") return false;
+      }
+      return true;
+    }
+    function constructJavascriptRegExp(data) {
+      var regexp = data, tail = /\/([gim]*)$/.exec(data), modifiers = "";
+      if (regexp[0] === "/") {
+        if (tail) modifiers = tail[1];
+        regexp = regexp.slice(1, regexp.length - modifiers.length - 1);
+      }
+      return new RegExp(regexp, modifiers);
+    }
+    function representJavascriptRegExp(object) {
+      var result = "/" + object.source + "/";
+      if (object.global) result += "g";
+      if (object.multiline) result += "m";
+      if (object.ignoreCase) result += "i";
+      return result;
+    }
+    function isRegExp(object) {
+      return Object.prototype.toString.call(object) === "[object RegExp]";
+    }
+    module2.exports = new Type("tag:yaml.org,2002:js/regexp", {
+      kind: "scalar",
+      resolve: resolveJavascriptRegExp,
+      construct: constructJavascriptRegExp,
+      predicate: isRegExp,
+      represent: representJavascriptRegExp
+    });
+  }
+});
+
+// ../dev-workflow-core/node_modules/js-yaml/lib/js-yaml/type/js/function.js
+var require_function = __commonJS({
+  "../dev-workflow-core/node_modules/js-yaml/lib/js-yaml/type/js/function.js"(exports2, module2) {
+    "use strict";
+    var esprima;
+    try {
+      _require = require;
+      esprima = _require("esprima");
+    } catch (_) {
+      if (typeof window !== "undefined") esprima = window.esprima;
+    }
+    var _require;
+    var Type = require_type();
+    function resolveJavascriptFunction(data) {
+      if (data === null) return false;
+      try {
+        var source = "(" + data + ")", ast = esprima.parse(source, { range: true });
+        if (ast.type !== "Program" || ast.body.length !== 1 || ast.body[0].type !== "ExpressionStatement" || ast.body[0].expression.type !== "ArrowFunctionExpression" && ast.body[0].expression.type !== "FunctionExpression") {
+          return false;
+        }
+        return true;
+      } catch (err) {
+        return false;
+      }
+    }
+    function constructJavascriptFunction(data) {
+      var source = "(" + data + ")", ast = esprima.parse(source, { range: true }), params = [], body;
+      if (ast.type !== "Program" || ast.body.length !== 1 || ast.body[0].type !== "ExpressionStatement" || ast.body[0].expression.type !== "ArrowFunctionExpression" && ast.body[0].expression.type !== "FunctionExpression") {
+        throw new Error("Failed to resolve function");
+      }
+      ast.body[0].expression.params.forEach(function(param) {
+        params.push(param.name);
+      });
+      body = ast.body[0].expression.body.range;
+      if (ast.body[0].expression.body.type === "BlockStatement") {
+        return (function() {
+          throw new Error("js-yaml js/function type disabled by dev-workflow build");
+        })(params, source.slice(body[0] + 1, body[1] - 1));
+      }
+      return (function() {
+        throw new Error("js-yaml js/function type disabled by dev-workflow build");
+      })(params, "return " + source.slice(body[0], body[1]));
+    }
+    function representJavascriptFunction(object) {
+      return object.toString();
+    }
+    function isFunction(object) {
+      return Object.prototype.toString.call(object) === "[object Function]";
+    }
+    module2.exports = new Type("tag:yaml.org,2002:js/function", {
+      kind: "scalar",
+      resolve: resolveJavascriptFunction,
+      construct: constructJavascriptFunction,
+      predicate: isFunction,
+      represent: representJavascriptFunction
+    });
+  }
+});
+
+// ../dev-workflow-core/node_modules/js-yaml/lib/js-yaml/schema/default_full.js
+var require_default_full = __commonJS({
+  "../dev-workflow-core/node_modules/js-yaml/lib/js-yaml/schema/default_full.js"(exports2, module2) {
+    "use strict";
+    var Schema = require_schema();
+    module2.exports = Schema.DEFAULT = new Schema({
+      include: [
+        require_default_safe()
+      ],
+      explicit: [
+        require_undefined(),
+        require_regexp(),
+        require_function()
+      ]
+    });
+  }
+});
+
+// ../dev-workflow-core/node_modules/js-yaml/lib/js-yaml/loader.js
+var require_loader = __commonJS({
+  "../dev-workflow-core/node_modules/js-yaml/lib/js-yaml/loader.js"(exports2, module2) {
+    "use strict";
+    var common = require_common();
+    var YAMLException = require_exception();
+    var Mark = require_mark();
+    var DEFAULT_SAFE_SCHEMA = require_default_safe();
+    var DEFAULT_FULL_SCHEMA = require_default_full();
+    var _hasOwnProperty = Object.prototype.hasOwnProperty;
+    var CONTEXT_FLOW_IN = 1;
+    var CONTEXT_FLOW_OUT = 2;
+    var CONTEXT_BLOCK_IN = 3;
+    var CONTEXT_BLOCK_OUT = 4;
+    var CHOMPING_CLIP = 1;
+    var CHOMPING_STRIP = 2;
+    var CHOMPING_KEEP = 3;
+    var PATTERN_NON_PRINTABLE = /[\x00-\x08\x0B\x0C\x0E-\x1F\x7F-\x84\x86-\x9F\uFFFE\uFFFF]|[\uD800-\uDBFF](?![\uDC00-\uDFFF])|(?:[^\uD800-\uDBFF]|^)[\uDC00-\uDFFF]/;
+    var PATTERN_NON_ASCII_LINE_BREAKS = /[\x85\u2028\u2029]/;
+    var PATTERN_FLOW_INDICATORS = /[,\[\]\{\}]/;
+    var PATTERN_TAG_HANDLE = /^(?:!|!!|![a-z\-]+!)$/i;
+    var PATTERN_TAG_URI = /^(?:!|[^,\[\]\{\}])(?:%[0-9a-f]{2}|[0-9a-z\-#;\/\?:@&=\+\$,_\.!~\*'\(\)\[\]])*$/i;
+    function _class(obj) {
+      return Object.prototype.toString.call(obj);
+    }
+    function is_EOL(c) {
+      return c === 10 || c === 13;
+    }
+    function is_WHITE_SPACE(c) {
+      return c === 9 || c === 32;
+    }
+    function is_WS_OR_EOL(c) {
+      return c === 9 || c === 32 || c === 10 || c === 13;
+    }
+    function is_FLOW_INDICATOR(c) {
+      return c === 44 || c === 91 || c === 93 || c === 123 || c === 125;
+    }
+    function fromHexCode(c) {
+      var lc;
+      if (48 <= c && c <= 57) {
+        return c - 48;
+      }
+      lc = c | 32;
+      if (97 <= lc && lc <= 102) {
+        return lc - 97 + 10;
+      }
+      return -1;
+    }
+    function escapedHexLen(c) {
+      if (c === 120) {
+        return 2;
+      }
+      if (c === 117) {
+        return 4;
+      }
+      if (c === 85) {
+        return 8;
+      }
+      return 0;
+    }
+    function fromDecimalCode(c) {
+      if (48 <= c && c <= 57) {
+        return c - 48;
+      }
+      return -1;
+    }
+    function simpleEscapeSequence(c) {
+      return c === 48 ? "\0" : c === 97 ? "\x07" : c === 98 ? "\b" : c === 116 ? "	" : c === 9 ? "	" : c === 110 ? "\n" : c === 118 ? "\v" : c === 102 ? "\f" : c === 114 ? "\r" : c === 101 ? "\x1B" : c === 32 ? " " : c === 34 ? '"' : c === 47 ? "/" : c === 92 ? "\\" : c === 78 ? "\x85" : c === 95 ? "\xA0" : c === 76 ? "\u2028" : c === 80 ? "\u2029" : "";
+    }
+    function charFromCodepoint(c) {
+      if (c <= 65535) {
+        return String.fromCharCode(c);
+      }
+      return String.fromCharCode(
+        (c - 65536 >> 10) + 55296,
+        (c - 65536 & 1023) + 56320
+      );
+    }
+    function setProperty(object, key, value) {
+      if (key === "__proto__") {
+        Object.defineProperty(object, key, {
+          configurable: true,
+          enumerable: true,
+          writable: true,
+          value
+        });
+      } else {
+        object[key] = value;
+      }
+    }
+    var simpleEscapeCheck = new Array(256);
+    var simpleEscapeMap = new Array(256);
+    for (i = 0; i < 256; i++) {
+      simpleEscapeCheck[i] = simpleEscapeSequence(i) ? 1 : 0;
+      simpleEscapeMap[i] = simpleEscapeSequence(i);
+    }
+    var i;
+    function State(input, options) {
+      this.input = input;
+      this.filename = options["filename"] || null;
+      this.schema = options["schema"] || DEFAULT_FULL_SCHEMA;
+      this.onWarning = options["onWarning"] || null;
+      this.legacy = options["legacy"] || false;
+      this.json = options["json"] || false;
+      this.listener = options["listener"] || null;
+      this.implicitTypes = this.schema.compiledImplicit;
+      this.typeMap = this.schema.compiledTypeMap;
+      this.length = input.length;
+      this.position = 0;
+      this.line = 0;
+      this.lineStart = 0;
+      this.lineIndent = 0;
+      this.documents = [];
+    }
+    function generateError(state, message) {
+      return new YAMLException(
+        message,
+        new Mark(state.filename, state.input, state.position, state.line, state.position - state.lineStart)
+      );
+    }
+    function throwError(state, message) {
+      throw generateError(state, message);
+    }
+    function throwWarning(state, message) {
+      if (state.onWarning) {
+        state.onWarning.call(null, generateError(state, message));
+      }
+    }
+    var directiveHandlers = {
+      YAML: function handleYamlDirective(state, name, args) {
+        var match, major, minor;
+        if (state.version !== null) {
+          throwError(state, "duplication of %YAML directive");
+        }
+        if (args.length !== 1) {
+          throwError(state, "YAML directive accepts exactly one argument");
+        }
+        match = /^([0-9]+)\.([0-9]+)$/.exec(args[0]);
+        if (match === null) {
+          throwError(state, "ill-formed argument of the YAML directive");
+        }
+        major = parseInt(match[1], 10);
+        minor = parseInt(match[2], 10);
+        if (major !== 1) {
+          throwError(state, "unacceptable YAML version of the document");
+        }
+        state.version = args[0];
+        state.checkLineBreaks = minor < 2;
+        if (minor !== 1 && minor !== 2) {
+          throwWarning(state, "unsupported YAML version of the document");
+        }
+      },
+      TAG: function handleTagDirective(state, name, args) {
+        var handle, prefix;
+        if (args.length !== 2) {
+          throwError(state, "TAG directive accepts exactly two arguments");
+        }
+        handle = args[0];
+        prefix = args[1];
+        if (!PATTERN_TAG_HANDLE.test(handle)) {
+          throwError(state, "ill-formed tag handle (first argument) of the TAG directive");
+        }
+        if (_hasOwnProperty.call(state.tagMap, handle)) {
+          throwError(state, 'there is a previously declared suffix for "' + handle + '" tag handle');
+        }
+        if (!PATTERN_TAG_URI.test(prefix)) {
+          throwError(state, "ill-formed tag prefix (second argument) of the TAG directive");
+        }
+        state.tagMap[handle] = prefix;
+      }
+    };
+    function captureSegment(state, start, end, checkJson) {
+      var _position, _length, _character, _result;
+      if (start < end) {
+        _result = state.input.slice(start, end);
+        if (checkJson) {
+          for (_position = 0, _length = _result.length; _position < _length; _position += 1) {
+            _character = _result.charCodeAt(_position);
+            if (!(_character === 9 || 32 <= _character && _character <= 1114111)) {
+              throwError(state, "expected valid JSON character");
+            }
+          }
+        } else if (PATTERN_NON_PRINTABLE.test(_result)) {
+          throwError(state, "the stream contains non-printable characters");
+        }
+        state.result += _result;
+      }
+    }
+    function mergeMappings(state, destination, source, overridableKeys) {
+      var sourceKeys, key, index, quantity;
+      if (!common.isObject(source)) {
+        throwError(state, "cannot merge mappings; the provided source object is unacceptable");
+      }
+      sourceKeys = Object.keys(source);
+      for (index = 0, quantity = sourceKeys.length; index < quantity; index += 1) {
+        key = sourceKeys[index];
+        if (!_hasOwnProperty.call(destination, key)) {
+          setProperty(destination, key, source[key]);
+          overridableKeys[key] = true;
+        }
+      }
+    }
+    function storeMappingPair(state, _result, overridableKeys, keyTag, keyNode, valueNode, startLine, startPos) {
+      var index, quantity;
+      if (Array.isArray(keyNode)) {
+        keyNode = Array.prototype.slice.call(keyNode);
+        for (index = 0, quantity = keyNode.length; index < quantity; index += 1) {
+          if (Array.isArray(keyNode[index])) {
+            throwError(state, "nested arrays are not supported inside keys");
+          }
+          if (typeof keyNode === "object" && _class(keyNode[index]) === "[object Object]") {
+            keyNode[index] = "[object Object]";
+          }
+        }
+      }
+      if (typeof keyNode === "object" && _class(keyNode) === "[object Object]") {
+        keyNode = "[object Object]";
+      }
+      keyNode = String(keyNode);
+      if (_result === null) {
+        _result = {};
+      }
+      if (keyTag === "tag:yaml.org,2002:merge") {
+        if (Array.isArray(valueNode)) {
+          for (index = 0, quantity = valueNode.length; index < quantity; index += 1) {
+            mergeMappings(state, _result, valueNode[index], overridableKeys);
+          }
+        } else {
+          mergeMappings(state, _result, valueNode, overridableKeys);
+        }
+      } else {
+        if (!state.json && !_hasOwnProperty.call(overridableKeys, keyNode) && _hasOwnProperty.call(_result, keyNode)) {
+          state.line = startLine || state.line;
+          state.position = startPos || state.position;
+          throwError(state, "duplicated mapping key");
+        }
+        setProperty(_result, keyNode, valueNode);
+        delete overridableKeys[keyNode];
+      }
+      return _result;
+    }
+    function readLineBreak(state) {
+      var ch;
+      ch = state.input.charCodeAt(state.position);
+      if (ch === 10) {
+        state.position++;
+      } else if (ch === 13) {
+        state.position++;
+        if (state.input.charCodeAt(state.position) === 10) {
+          state.position++;
+        }
+      } else {
+        throwError(state, "a line break is expected");
+      }
+      state.line += 1;
+      state.lineStart = state.position;
+    }
+    function skipSeparationSpace(state, allowComments, checkIndent) {
+      var lineBreaks = 0, ch = state.input.charCodeAt(state.position);
+      while (ch !== 0) {
+        while (is_WHITE_SPACE(ch)) {
+          ch = state.input.charCodeAt(++state.position);
+        }
+        if (allowComments && ch === 35) {
+          do {
+            ch = state.input.charCodeAt(++state.position);
+          } while (ch !== 10 && ch !== 13 && ch !== 0);
+        }
+        if (is_EOL(ch)) {
+          readLineBreak(state);
+          ch = state.input.charCodeAt(state.position);
+          lineBreaks++;
+          state.lineIndent = 0;
+          while (ch === 32) {
+            state.lineIndent++;
+            ch = state.input.charCodeAt(++state.position);
+          }
+        } else {
+          break;
+        }
+      }
+      if (checkIndent !== -1 && lineBreaks !== 0 && state.lineIndent < checkIndent) {
+        throwWarning(state, "deficient indentation");
+      }
+      return lineBreaks;
+    }
+    function testDocumentSeparator(state) {
+      var _position = state.position, ch;
+      ch = state.input.charCodeAt(_position);
+      if ((ch === 45 || ch === 46) && ch === state.input.charCodeAt(_position + 1) && ch === state.input.charCodeAt(_position + 2)) {
+        _position += 3;
+        ch = state.input.charCodeAt(_position);
+        if (ch === 0 || is_WS_OR_EOL(ch)) {
+          return true;
+        }
+      }
+      return false;
+    }
+    function writeFoldedLines(state, count) {
+      if (count === 1) {
+        state.result += " ";
+      } else if (count > 1) {
+        state.result += common.repeat("\n", count - 1);
+      }
+    }
+    function readPlainScalar(state, nodeIndent, withinFlowCollection) {
+      var preceding, following, captureStart, captureEnd, hasPendingContent, _line, _lineStart, _lineIndent, _kind = state.kind, _result = state.result, ch;
+      ch = state.input.charCodeAt(state.position);
+      if (is_WS_OR_EOL(ch) || is_FLOW_INDICATOR(ch) || ch === 35 || ch === 38 || ch === 42 || ch === 33 || ch === 124 || ch === 62 || ch === 39 || ch === 34 || ch === 37 || ch === 64 || ch === 96) {
+        return false;
+      }
+      if (ch === 63 || ch === 45) {
+        following = state.input.charCodeAt(state.position + 1);
+        if (is_WS_OR_EOL(following) || withinFlowCollection && is_FLOW_INDICATOR(following)) {
+          return false;
+        }
+      }
+      state.kind = "scalar";
+      state.result = "";
+      captureStart = captureEnd = state.position;
+      hasPendingContent = false;
+      while (ch !== 0) {
+        if (ch === 58) {
+          following = state.input.charCodeAt(state.position + 1);
+          if (is_WS_OR_EOL(following) || withinFlowCollection && is_FLOW_INDICATOR(following)) {
+            break;
+          }
+        } else if (ch === 35) {
+          preceding = state.input.charCodeAt(state.position - 1);
+          if (is_WS_OR_EOL(preceding)) {
+            break;
+          }
+        } else if (state.position === state.lineStart && testDocumentSeparator(state) || withinFlowCollection && is_FLOW_INDICATOR(ch)) {
+          break;
+        } else if (is_EOL(ch)) {
+          _line = state.line;
+          _lineStart = state.lineStart;
+          _lineIndent = state.lineIndent;
+          skipSeparationSpace(state, false, -1);
+          if (state.lineIndent >= nodeIndent) {
+            hasPendingContent = true;
+            ch = state.input.charCodeAt(state.position);
+            continue;
+          } else {
+            state.position = captureEnd;
+            state.line = _line;
+            state.lineStart = _lineStart;
+            state.lineIndent = _lineIndent;
+            break;
+          }
+        }
+        if (hasPendingContent) {
+          captureSegment(state, captureStart, captureEnd, false);
+          writeFoldedLines(state, state.line - _line);
+          captureStart = captureEnd = state.position;
+          hasPendingContent = false;
+        }
+        if (!is_WHITE_SPACE(ch)) {
+          captureEnd = state.position + 1;
+        }
+        ch = state.input.charCodeAt(++state.position);
+      }
+      captureSegment(state, captureStart, captureEnd, false);
+      if (state.result) {
+        return true;
+      }
+      state.kind = _kind;
+      state.result = _result;
+      return false;
+    }
+    function readSingleQuotedScalar(state, nodeIndent) {
+      var ch, captureStart, captureEnd;
+      ch = state.input.charCodeAt(state.position);
+      if (ch !== 39) {
+        return false;
+      }
+      state.kind = "scalar";
+      state.result = "";
+      state.position++;
+      captureStart = captureEnd = state.position;
+      while ((ch = state.input.charCodeAt(state.position)) !== 0) {
+        if (ch === 39) {
+          captureSegment(state, captureStart, state.position, true);
+          ch = state.input.charCodeAt(++state.position);
+          if (ch === 39) {
+            captureStart = state.position;
+            state.position++;
+            captureEnd = state.position;
+          } else {
+            return true;
+          }
+        } else if (is_EOL(ch)) {
+          captureSegment(state, captureStart, captureEnd, true);
+          writeFoldedLines(state, skipSeparationSpace(state, false, nodeIndent));
+          captureStart = captureEnd = state.position;
+        } else if (state.position === state.lineStart && testDocumentSeparator(state)) {
+          throwError(state, "unexpected end of the document within a single quoted scalar");
+        } else {
+          state.position++;
+          captureEnd = state.position;
+        }
+      }
+      throwError(state, "unexpected end of the stream within a single quoted scalar");
+    }
+    function readDoubleQuotedScalar(state, nodeIndent) {
+      var captureStart, captureEnd, hexLength, hexResult, tmp, ch;
+      ch = state.input.charCodeAt(state.position);
+      if (ch !== 34) {
+        return false;
+      }
+      state.kind = "scalar";
+      state.result = "";
+      state.position++;
+      captureStart = captureEnd = state.position;
+      while ((ch = state.input.charCodeAt(state.position)) !== 0) {
+        if (ch === 34) {
+          captureSegment(state, captureStart, state.position, true);
+          state.position++;
+          return true;
+        } else if (ch === 92) {
+          captureSegment(state, captureStart, state.position, true);
+          ch = state.input.charCodeAt(++state.position);
+          if (is_EOL(ch)) {
+            skipSeparationSpace(state, false, nodeIndent);
+          } else if (ch < 256 && simpleEscapeCheck[ch]) {
+            state.result += simpleEscapeMap[ch];
+            state.position++;
+          } else if ((tmp = escapedHexLen(ch)) > 0) {
+            hexLength = tmp;
+            hexResult = 0;
+            for (; hexLength > 0; hexLength--) {
+              ch = state.input.charCodeAt(++state.position);
+              if ((tmp = fromHexCode(ch)) >= 0) {
+                hexResult = (hexResult << 4) + tmp;
+              } else {
+                throwError(state, "expected hexadecimal character");
+              }
+            }
+            state.result += charFromCodepoint(hexResult);
+            state.position++;
+          } else {
+            throwError(state, "unknown escape sequence");
+          }
+          captureStart = captureEnd = state.position;
+        } else if (is_EOL(ch)) {
+          captureSegment(state, captureStart, captureEnd, true);
+          writeFoldedLines(state, skipSeparationSpace(state, false, nodeIndent));
+          captureStart = captureEnd = state.position;
+        } else if (state.position === state.lineStart && testDocumentSeparator(state)) {
+          throwError(state, "unexpected end of the document within a double quoted scalar");
+        } else {
+          state.position++;
+          captureEnd = state.position;
+        }
+      }
+      throwError(state, "unexpected end of the stream within a double quoted scalar");
+    }
+    function readFlowCollection(state, nodeIndent) {
+      var readNext = true, _line, _tag = state.tag, _result, _anchor = state.anchor, following, terminator, isPair, isExplicitPair, isMapping, overridableKeys = {}, keyNode, keyTag, valueNode, ch;
+      ch = state.input.charCodeAt(state.position);
+      if (ch === 91) {
+        terminator = 93;
+        isMapping = false;
+        _result = [];
+      } else if (ch === 123) {
+        terminator = 125;
+        isMapping = true;
+        _result = {};
+      } else {
+        return false;
+      }
+      if (state.anchor !== null) {
+        state.anchorMap[state.anchor] = _result;
+      }
+      ch = state.input.charCodeAt(++state.position);
+      while (ch !== 0) {
+        skipSeparationSpace(state, true, nodeIndent);
+        ch = state.input.charCodeAt(state.position);
+        if (ch === terminator) {
+          state.position++;
+          state.tag = _tag;
+          state.anchor = _anchor;
+          state.kind = isMapping ? "mapping" : "sequence";
+          state.result = _result;
+          return true;
+        } else if (!readNext) {
+          throwError(state, "missed comma between flow collection entries");
+        }
+        keyTag = keyNode = valueNode = null;
+        isPair = isExplicitPair = false;
+        if (ch === 63) {
+          following = state.input.charCodeAt(state.position + 1);
+          if (is_WS_OR_EOL(following)) {
+            isPair = isExplicitPair = true;
+            state.position++;
+            skipSeparationSpace(state, true, nodeIndent);
+          }
+        }
+        _line = state.line;
+        composeNode(state, nodeIndent, CONTEXT_FLOW_IN, false, true);
+        keyTag = state.tag;
+        keyNode = state.result;
+        skipSeparationSpace(state, true, nodeIndent);
+        ch = state.input.charCodeAt(state.position);
+        if ((isExplicitPair || state.line === _line) && ch === 58) {
+          isPair = true;
+          ch = state.input.charCodeAt(++state.position);
+          skipSeparationSpace(state, true, nodeIndent);
+          composeNode(state, nodeIndent, CONTEXT_FLOW_IN, false, true);
+          valueNode = state.result;
+        }
+        if (isMapping) {
+          storeMappingPair(state, _result, overridableKeys, keyTag, keyNode, valueNode);
+        } else if (isPair) {
+          _result.push(storeMappingPair(state, null, overridableKeys, keyTag, keyNode, valueNode));
+        } else {
+          _result.push(keyNode);
+        }
+        skipSeparationSpace(state, true, nodeIndent);
+        ch = state.input.charCodeAt(state.position);
+        if (ch === 44) {
+          readNext = true;
+          ch = state.input.charCodeAt(++state.position);
+        } else {
+          readNext = false;
+        }
+      }
+      throwError(state, "unexpected end of the stream within a flow collection");
+    }
+    function readBlockScalar(state, nodeIndent) {
+      var captureStart, folding, chomping = CHOMPING_CLIP, didReadContent = false, detectedIndent = false, textIndent = nodeIndent, emptyLines = 0, atMoreIndented = false, tmp, ch;
+      ch = state.input.charCodeAt(state.position);
+      if (ch === 124) {
+        folding = false;
+      } else if (ch === 62) {
+        folding = true;
+      } else {
+        return false;
+      }
+      state.kind = "scalar";
+      state.result = "";
+      while (ch !== 0) {
+        ch = state.input.charCodeAt(++state.position);
+        if (ch === 43 || ch === 45) {
+          if (CHOMPING_CLIP === chomping) {
+            chomping = ch === 43 ? CHOMPING_KEEP : CHOMPING_STRIP;
+          } else {
+            throwError(state, "repeat of a chomping mode identifier");
+          }
+        } else if ((tmp = fromDecimalCode(ch)) >= 0) {
+          if (tmp === 0) {
+            throwError(state, "bad explicit indentation width of a block scalar; it cannot be less than one");
+          } else if (!detectedIndent) {
+            textIndent = nodeIndent + tmp - 1;
+            detectedIndent = true;
+          } else {
+            throwError(state, "repeat of an indentation width identifier");
+          }
+        } else {
+          break;
+        }
+      }
+      if (is_WHITE_SPACE(ch)) {
+        do {
+          ch = state.input.charCodeAt(++state.position);
+        } while (is_WHITE_SPACE(ch));
+        if (ch === 35) {
+          do {
+            ch = state.input.charCodeAt(++state.position);
+          } while (!is_EOL(ch) && ch !== 0);
+        }
+      }
+      while (ch !== 0) {
+        readLineBreak(state);
+        state.lineIndent = 0;
+        ch = state.input.charCodeAt(state.position);
+        while ((!detectedIndent || state.lineIndent < textIndent) && ch === 32) {
+          state.lineIndent++;
+          ch = state.input.charCodeAt(++state.position);
+        }
+        if (!detectedIndent && state.lineIndent > textIndent) {
+          textIndent = state.lineIndent;
+        }
+        if (is_EOL(ch)) {
+          emptyLines++;
+          continue;
+        }
+        if (state.lineIndent < textIndent) {
+          if (chomping === CHOMPING_KEEP) {
+            state.result += common.repeat("\n", didReadContent ? 1 + emptyLines : emptyLines);
+          } else if (chomping === CHOMPING_CLIP) {
+            if (didReadContent) {
+              state.result += "\n";
+            }
+          }
+          break;
+        }
+        if (folding) {
+          if (is_WHITE_SPACE(ch)) {
+            atMoreIndented = true;
+            state.result += common.repeat("\n", didReadContent ? 1 + emptyLines : emptyLines);
+          } else if (atMoreIndented) {
+            atMoreIndented = false;
+            state.result += common.repeat("\n", emptyLines + 1);
+          } else if (emptyLines === 0) {
+            if (didReadContent) {
+              state.result += " ";
+            }
+          } else {
+            state.result += common.repeat("\n", emptyLines);
+          }
+        } else {
+          state.result += common.repeat("\n", didReadContent ? 1 + emptyLines : emptyLines);
+        }
+        didReadContent = true;
+        detectedIndent = true;
+        emptyLines = 0;
+        captureStart = state.position;
+        while (!is_EOL(ch) && ch !== 0) {
+          ch = state.input.charCodeAt(++state.position);
+        }
+        captureSegment(state, captureStart, state.position, false);
+      }
+      return true;
+    }
+    function readBlockSequence(state, nodeIndent) {
+      var _line, _tag = state.tag, _anchor = state.anchor, _result = [], following, detected = false, ch;
+      if (state.anchor !== null) {
+        state.anchorMap[state.anchor] = _result;
+      }
+      ch = state.input.charCodeAt(state.position);
+      while (ch !== 0) {
+        if (ch !== 45) {
+          break;
+        }
+        following = state.input.charCodeAt(state.position + 1);
+        if (!is_WS_OR_EOL(following)) {
+          break;
+        }
+        detected = true;
+        state.position++;
+        if (skipSeparationSpace(state, true, -1)) {
+          if (state.lineIndent <= nodeIndent) {
+            _result.push(null);
+            ch = state.input.charCodeAt(state.position);
+            continue;
+          }
+        }
+        _line = state.line;
+        composeNode(state, nodeIndent, CONTEXT_BLOCK_IN, false, true);
+        _result.push(state.result);
+        skipSeparationSpace(state, true, -1);
+        ch = state.input.charCodeAt(state.position);
+        if ((state.line === _line || state.lineIndent > nodeIndent) && ch !== 0) {
+          throwError(state, "bad indentation of a sequence entry");
+        } else if (state.lineIndent < nodeIndent) {
+          break;
+        }
+      }
+      if (detected) {
+        state.tag = _tag;
+        state.anchor = _anchor;
+        state.kind = "sequence";
+        state.result = _result;
+        return true;
+      }
+      return false;
+    }
+    function readBlockMapping(state, nodeIndent, flowIndent) {
+      var following, allowCompact, _line, _pos, _tag = state.tag, _anchor = state.anchor, _result = {}, overridableKeys = {}, keyTag = null, keyNode = null, valueNode = null, atExplicitKey = false, detected = false, ch;
+      if (state.anchor !== null) {
+        state.anchorMap[state.anchor] = _result;
+      }
+      ch = state.input.charCodeAt(state.position);
+      while (ch !== 0) {
+        following = state.input.charCodeAt(state.position + 1);
+        _line = state.line;
+        _pos = state.position;
+        if ((ch === 63 || ch === 58) && is_WS_OR_EOL(following)) {
+          if (ch === 63) {
+            if (atExplicitKey) {
+              storeMappingPair(state, _result, overridableKeys, keyTag, keyNode, null);
+              keyTag = keyNode = valueNode = null;
+            }
+            detected = true;
+            atExplicitKey = true;
+            allowCompact = true;
+          } else if (atExplicitKey) {
+            atExplicitKey = false;
+            allowCompact = true;
+          } else {
+            throwError(state, "incomplete explicit mapping pair; a key node is missed; or followed by a non-tabulated empty line");
+          }
+          state.position += 1;
+          ch = following;
+        } else if (composeNode(state, flowIndent, CONTEXT_FLOW_OUT, false, true)) {
+          if (state.line === _line) {
+            ch = state.input.charCodeAt(state.position);
+            while (is_WHITE_SPACE(ch)) {
+              ch = state.input.charCodeAt(++state.position);
+            }
+            if (ch === 58) {
+              ch = state.input.charCodeAt(++state.position);
+              if (!is_WS_OR_EOL(ch)) {
+                throwError(state, "a whitespace character is expected after the key-value separator within a block mapping");
+              }
+              if (atExplicitKey) {
+                storeMappingPair(state, _result, overridableKeys, keyTag, keyNode, null);
+                keyTag = keyNode = valueNode = null;
+              }
+              detected = true;
+              atExplicitKey = false;
+              allowCompact = false;
+              keyTag = state.tag;
+              keyNode = state.result;
+            } else if (detected) {
+              throwError(state, "can not read an implicit mapping pair; a colon is missed");
+            } else {
+              state.tag = _tag;
+              state.anchor = _anchor;
+              return true;
+            }
+          } else if (detected) {
+            throwError(state, "can not read a block mapping entry; a multiline key may not be an implicit key");
+          } else {
+            state.tag = _tag;
+            state.anchor = _anchor;
+            return true;
+          }
+        } else {
+          break;
+        }
+        if (state.line === _line || state.lineIndent > nodeIndent) {
+          if (composeNode(state, nodeIndent, CONTEXT_BLOCK_OUT, true, allowCompact)) {
+            if (atExplicitKey) {
+              keyNode = state.result;
+            } else {
+              valueNode = state.result;
+            }
+          }
+          if (!atExplicitKey) {
+            storeMappingPair(state, _result, overridableKeys, keyTag, keyNode, valueNode, _line, _pos);
+            keyTag = keyNode = valueNode = null;
+          }
+          skipSeparationSpace(state, true, -1);
+          ch = state.input.charCodeAt(state.position);
+        }
+        if (state.lineIndent > nodeIndent && ch !== 0) {
+          throwError(state, "bad indentation of a mapping entry");
+        } else if (state.lineIndent < nodeIndent) {
+          break;
+        }
+      }
+      if (atExplicitKey) {
+        storeMappingPair(state, _result, overridableKeys, keyTag, keyNode, null);
+      }
+      if (detected) {
+        state.tag = _tag;
+        state.anchor = _anchor;
+        state.kind = "mapping";
+        state.result = _result;
+      }
+      return detected;
+    }
+    function readTagProperty(state) {
+      var _position, isVerbatim = false, isNamed = false, tagHandle, tagName, ch;
+      ch = state.input.charCodeAt(state.position);
+      if (ch !== 33) return false;
+      if (state.tag !== null) {
+        throwError(state, "duplication of a tag property");
+      }
+      ch = state.input.charCodeAt(++state.position);
+      if (ch === 60) {
+        isVerbatim = true;
+        ch = state.input.charCodeAt(++state.position);
+      } else if (ch === 33) {
+        isNamed = true;
+        tagHandle = "!!";
+        ch = state.input.charCodeAt(++state.position);
+      } else {
+        tagHandle = "!";
+      }
+      _position = state.position;
+      if (isVerbatim) {
+        do {
+          ch = state.input.charCodeAt(++state.position);
+        } while (ch !== 0 && ch !== 62);
+        if (state.position < state.length) {
+          tagName = state.input.slice(_position, state.position);
+          ch = state.input.charCodeAt(++state.position);
+        } else {
+          throwError(state, "unexpected end of the stream within a verbatim tag");
+        }
+      } else {
+        while (ch !== 0 && !is_WS_OR_EOL(ch)) {
+          if (ch === 33) {
+            if (!isNamed) {
+              tagHandle = state.input.slice(_position - 1, state.position + 1);
+              if (!PATTERN_TAG_HANDLE.test(tagHandle)) {
+                throwError(state, "named tag handle cannot contain such characters");
+              }
+              isNamed = true;
+              _position = state.position + 1;
+            } else {
+              throwError(state, "tag suffix cannot contain exclamation marks");
+            }
+          }
+          ch = state.input.charCodeAt(++state.position);
+        }
+        tagName = state.input.slice(_position, state.position);
+        if (PATTERN_FLOW_INDICATORS.test(tagName)) {
+          throwError(state, "tag suffix cannot contain flow indicator characters");
+        }
+      }
+      if (tagName && !PATTERN_TAG_URI.test(tagName)) {
+        throwError(state, "tag name cannot contain such characters: " + tagName);
+      }
+      if (isVerbatim) {
+        state.tag = tagName;
+      } else if (_hasOwnProperty.call(state.tagMap, tagHandle)) {
+        state.tag = state.tagMap[tagHandle] + tagName;
+      } else if (tagHandle === "!") {
+        state.tag = "!" + tagName;
+      } else if (tagHandle === "!!") {
+        state.tag = "tag:yaml.org,2002:" + tagName;
+      } else {
+        throwError(state, 'undeclared tag handle "' + tagHandle + '"');
+      }
+      return true;
+    }
+    function readAnchorProperty(state) {
+      var _position, ch;
+      ch = state.input.charCodeAt(state.position);
+      if (ch !== 38) return false;
+      if (state.anchor !== null) {
+        throwError(state, "duplication of an anchor property");
+      }
+      ch = state.input.charCodeAt(++state.position);
+      _position = state.position;
+      while (ch !== 0 && !is_WS_OR_EOL(ch) && !is_FLOW_INDICATOR(ch)) {
+        ch = state.input.charCodeAt(++state.position);
+      }
+      if (state.position === _position) {
+        throwError(state, "name of an anchor node must contain at least one character");
+      }
+      state.anchor = state.input.slice(_position, state.position);
+      return true;
+    }
+    function readAlias(state) {
+      var _position, alias, ch;
+      ch = state.input.charCodeAt(state.position);
+      if (ch !== 42) return false;
+      ch = state.input.charCodeAt(++state.position);
+      _position = state.position;
+      while (ch !== 0 && !is_WS_OR_EOL(ch) && !is_FLOW_INDICATOR(ch)) {
+        ch = state.input.charCodeAt(++state.position);
+      }
+      if (state.position === _position) {
+        throwError(state, "name of an alias node must contain at least one character");
+      }
+      alias = state.input.slice(_position, state.position);
+      if (!_hasOwnProperty.call(state.anchorMap, alias)) {
+        throwError(state, 'unidentified alias "' + alias + '"');
+      }
+      state.result = state.anchorMap[alias];
+      skipSeparationSpace(state, true, -1);
+      return true;
+    }
+    function composeNode(state, parentIndent, nodeContext, allowToSeek, allowCompact) {
+      var allowBlockStyles, allowBlockScalars, allowBlockCollections, indentStatus = 1, atNewLine = false, hasContent = false, typeIndex, typeQuantity, type, flowIndent, blockIndent;
+      if (state.listener !== null) {
+        state.listener("open", state);
+      }
+      state.tag = null;
+      state.anchor = null;
+      state.kind = null;
+      state.result = null;
+      allowBlockStyles = allowBlockScalars = allowBlockCollections = CONTEXT_BLOCK_OUT === nodeContext || CONTEXT_BLOCK_IN === nodeContext;
+      if (allowToSeek) {
+        if (skipSeparationSpace(state, true, -1)) {
+          atNewLine = true;
+          if (state.lineIndent > parentIndent) {
+            indentStatus = 1;
+          } else if (state.lineIndent === parentIndent) {
+            indentStatus = 0;
+          } else if (state.lineIndent < parentIndent) {
+            indentStatus = -1;
+          }
+        }
+      }
+      if (indentStatus === 1) {
+        while (readTagProperty(state) || readAnchorProperty(state)) {
+          if (skipSeparationSpace(state, true, -1)) {
+            atNewLine = true;
+            allowBlockCollections = allowBlockStyles;
+            if (state.lineIndent > parentIndent) {
+              indentStatus = 1;
+            } else if (state.lineIndent === parentIndent) {
+              indentStatus = 0;
+            } else if (state.lineIndent < parentIndent) {
+              indentStatus = -1;
+            }
+          } else {
+            allowBlockCollections = false;
+          }
+        }
+      }
+      if (allowBlockCollections) {
+        allowBlockCollections = atNewLine || allowCompact;
+      }
+      if (indentStatus === 1 || CONTEXT_BLOCK_OUT === nodeContext) {
+        if (CONTEXT_FLOW_IN === nodeContext || CONTEXT_FLOW_OUT === nodeContext) {
+          flowIndent = parentIndent;
+        } else {
+          flowIndent = parentIndent + 1;
+        }
+        blockIndent = state.position - state.lineStart;
+        if (indentStatus === 1) {
+          if (allowBlockCollections && (readBlockSequence(state, blockIndent) || readBlockMapping(state, blockIndent, flowIndent)) || readFlowCollection(state, flowIndent)) {
+            hasContent = true;
+          } else {
+            if (allowBlockScalars && readBlockScalar(state, flowIndent) || readSingleQuotedScalar(state, flowIndent) || readDoubleQuotedScalar(state, flowIndent)) {
+              hasContent = true;
+            } else if (readAlias(state)) {
+              hasContent = true;
+              if (state.tag !== null || state.anchor !== null) {
+                throwError(state, "alias node should not have any properties");
+              }
+            } else if (readPlainScalar(state, flowIndent, CONTEXT_FLOW_IN === nodeContext)) {
+              hasContent = true;
+              if (state.tag === null) {
+                state.tag = "?";
+              }
+            }
+            if (state.anchor !== null) {
+              state.anchorMap[state.anchor] = state.result;
+            }
+          }
+        } else if (indentStatus === 0) {
+          hasContent = allowBlockCollections && readBlockSequence(state, blockIndent);
+        }
+      }
+      if (state.tag !== null && state.tag !== "!") {
+        if (state.tag === "?") {
+          if (state.result !== null && state.kind !== "scalar") {
+            throwError(state, 'unacceptable node kind for !<?> tag; it should be "scalar", not "' + state.kind + '"');
+          }
+          for (typeIndex = 0, typeQuantity = state.implicitTypes.length; typeIndex < typeQuantity; typeIndex += 1) {
+            type = state.implicitTypes[typeIndex];
+            if (type.resolve(state.result)) {
+              state.result = type.construct(state.result);
+              state.tag = type.tag;
+              if (state.anchor !== null) {
+                state.anchorMap[state.anchor] = state.result;
+              }
+              break;
+            }
+          }
+        } else if (_hasOwnProperty.call(state.typeMap[state.kind || "fallback"], state.tag)) {
+          type = state.typeMap[state.kind || "fallback"][state.tag];
+          if (state.result !== null && type.kind !== state.kind) {
+            throwError(state, "unacceptable node kind for !<" + state.tag + '> tag; it should be "' + type.kind + '", not "' + state.kind + '"');
+          }
+          if (!type.resolve(state.result)) {
+            throwError(state, "cannot resolve a node with !<" + state.tag + "> explicit tag");
+          } else {
+            state.result = type.construct(state.result);
+            if (state.anchor !== null) {
+              state.anchorMap[state.anchor] = state.result;
+            }
+          }
+        } else {
+          throwError(state, "unknown tag !<" + state.tag + ">");
+        }
+      }
+      if (state.listener !== null) {
+        state.listener("close", state);
+      }
+      return state.tag !== null || state.anchor !== null || hasContent;
+    }
+    function readDocument(state) {
+      var documentStart = state.position, _position, directiveName, directiveArgs, hasDirectives = false, ch;
+      state.version = null;
+      state.checkLineBreaks = state.legacy;
+      state.tagMap = {};
+      state.anchorMap = {};
+      while ((ch = state.input.charCodeAt(state.position)) !== 0) {
+        skipSeparationSpace(state, true, -1);
+        ch = state.input.charCodeAt(state.position);
+        if (state.lineIndent > 0 || ch !== 37) {
+          break;
+        }
+        hasDirectives = true;
+        ch = state.input.charCodeAt(++state.position);
+        _position = state.position;
+        while (ch !== 0 && !is_WS_OR_EOL(ch)) {
+          ch = state.input.charCodeAt(++state.position);
+        }
+        directiveName = state.input.slice(_position, state.position);
+        directiveArgs = [];
+        if (directiveName.length < 1) {
+          throwError(state, "directive name must not be less than one character in length");
+        }
+        while (ch !== 0) {
+          while (is_WHITE_SPACE(ch)) {
+            ch = state.input.charCodeAt(++state.position);
+          }
+          if (ch === 35) {
+            do {
+              ch = state.input.charCodeAt(++state.position);
+            } while (ch !== 0 && !is_EOL(ch));
+            break;
+          }
+          if (is_EOL(ch)) break;
+          _position = state.position;
+          while (ch !== 0 && !is_WS_OR_EOL(ch)) {
+            ch = state.input.charCodeAt(++state.position);
+          }
+          directiveArgs.push(state.input.slice(_position, state.position));
+        }
+        if (ch !== 0) readLineBreak(state);
+        if (_hasOwnProperty.call(directiveHandlers, directiveName)) {
+          directiveHandlers[directiveName](state, directiveName, directiveArgs);
+        } else {
+          throwWarning(state, 'unknown document directive "' + directiveName + '"');
+        }
+      }
+      skipSeparationSpace(state, true, -1);
+      if (state.lineIndent === 0 && state.input.charCodeAt(state.position) === 45 && state.input.charCodeAt(state.position + 1) === 45 && state.input.charCodeAt(state.position + 2) === 45) {
+        state.position += 3;
+        skipSeparationSpace(state, true, -1);
+      } else if (hasDirectives) {
+        throwError(state, "directives end mark is expected");
+      }
+      composeNode(state, state.lineIndent - 1, CONTEXT_BLOCK_OUT, false, true);
+      skipSeparationSpace(state, true, -1);
+      if (state.checkLineBreaks && PATTERN_NON_ASCII_LINE_BREAKS.test(state.input.slice(documentStart, state.position))) {
+        throwWarning(state, "non-ASCII line breaks are interpreted as content");
+      }
+      state.documents.push(state.result);
+      if (state.position === state.lineStart && testDocumentSeparator(state)) {
+        if (state.input.charCodeAt(state.position) === 46) {
+          state.position += 3;
+          skipSeparationSpace(state, true, -1);
+        }
+        return;
+      }
+      if (state.position < state.length - 1) {
+        throwError(state, "end of the stream or a document separator is expected");
+      } else {
+        return;
+      }
+    }
+    function loadDocuments(input, options) {
+      input = String(input);
+      options = options || {};
+      if (input.length !== 0) {
+        if (input.charCodeAt(input.length - 1) !== 10 && input.charCodeAt(input.length - 1) !== 13) {
+          input += "\n";
+        }
+        if (input.charCodeAt(0) === 65279) {
+          input = input.slice(1);
+        }
+      }
+      var state = new State(input, options);
+      var nullpos = input.indexOf("\0");
+      if (nullpos !== -1) {
+        state.position = nullpos;
+        throwError(state, "null byte is not allowed in input");
+      }
+      state.input += "\0";
+      while (state.input.charCodeAt(state.position) === 32) {
+        state.lineIndent += 1;
+        state.position += 1;
+      }
+      while (state.position < state.length - 1) {
+        readDocument(state);
+      }
+      return state.documents;
+    }
+    function loadAll(input, iterator, options) {
+      if (iterator !== null && typeof iterator === "object" && typeof options === "undefined") {
+        options = iterator;
+        iterator = null;
+      }
+      var documents = loadDocuments(input, options);
+      if (typeof iterator !== "function") {
+        return documents;
+      }
+      for (var index = 0, length = documents.length; index < length; index += 1) {
+        iterator(documents[index]);
+      }
+    }
+    function load(input, options) {
+      var documents = loadDocuments(input, options);
+      if (documents.length === 0) {
+        return void 0;
+      } else if (documents.length === 1) {
+        return documents[0];
+      }
+      throw new YAMLException("expected a single document in the stream, but found more");
+    }
+    function safeLoadAll(input, iterator, options) {
+      if (typeof iterator === "object" && iterator !== null && typeof options === "undefined") {
+        options = iterator;
+        iterator = null;
+      }
+      return loadAll(input, iterator, common.extend({ schema: DEFAULT_SAFE_SCHEMA }, options));
+    }
+    function safeLoad(input, options) {
+      return load(input, common.extend({ schema: DEFAULT_SAFE_SCHEMA }, options));
+    }
+    module2.exports.loadAll = loadAll;
+    module2.exports.load = load;
+    module2.exports.safeLoadAll = safeLoadAll;
+    module2.exports.safeLoad = safeLoad;
+  }
+});
+
+// ../dev-workflow-core/node_modules/js-yaml/lib/js-yaml/dumper.js
+var require_dumper = __commonJS({
+  "../dev-workflow-core/node_modules/js-yaml/lib/js-yaml/dumper.js"(exports2, module2) {
+    "use strict";
+    var common = require_common();
+    var YAMLException = require_exception();
+    var DEFAULT_FULL_SCHEMA = require_default_full();
+    var DEFAULT_SAFE_SCHEMA = require_default_safe();
+    var _toString = Object.prototype.toString;
+    var _hasOwnProperty = Object.prototype.hasOwnProperty;
+    var CHAR_TAB = 9;
+    var CHAR_LINE_FEED = 10;
+    var CHAR_CARRIAGE_RETURN = 13;
+    var CHAR_SPACE = 32;
+    var CHAR_EXCLAMATION = 33;
+    var CHAR_DOUBLE_QUOTE = 34;
+    var CHAR_SHARP = 35;
+    var CHAR_PERCENT = 37;
+    var CHAR_AMPERSAND = 38;
+    var CHAR_SINGLE_QUOTE = 39;
+    var CHAR_ASTERISK = 42;
+    var CHAR_COMMA = 44;
+    var CHAR_MINUS = 45;
+    var CHAR_COLON = 58;
+    var CHAR_EQUALS = 61;
+    var CHAR_GREATER_THAN = 62;
+    var CHAR_QUESTION = 63;
+    var CHAR_COMMERCIAL_AT = 64;
+    var CHAR_LEFT_SQUARE_BRACKET = 91;
+    var CHAR_RIGHT_SQUARE_BRACKET = 93;
+    var CHAR_GRAVE_ACCENT = 96;
+    var CHAR_LEFT_CURLY_BRACKET = 123;
+    var CHAR_VERTICAL_LINE = 124;
+    var CHAR_RIGHT_CURLY_BRACKET = 125;
+    var ESCAPE_SEQUENCES = {};
+    ESCAPE_SEQUENCES[0] = "\\0";
+    ESCAPE_SEQUENCES[7] = "\\a";
+    ESCAPE_SEQUENCES[8] = "\\b";
+    ESCAPE_SEQUENCES[9] = "\\t";
+    ESCAPE_SEQUENCES[10] = "\\n";
+    ESCAPE_SEQUENCES[11] = "\\v";
+    ESCAPE_SEQUENCES[12] = "\\f";
+    ESCAPE_SEQUENCES[13] = "\\r";
+    ESCAPE_SEQUENCES[27] = "\\e";
+    ESCAPE_SEQUENCES[34] = '\\"';
+    ESCAPE_SEQUENCES[92] = "\\\\";
+    ESCAPE_SEQUENCES[133] = "\\N";
+    ESCAPE_SEQUENCES[160] = "\\_";
+    ESCAPE_SEQUENCES[8232] = "\\L";
+    ESCAPE_SEQUENCES[8233] = "\\P";
+    var DEPRECATED_BOOLEANS_SYNTAX = [
+      "y",
+      "Y",
+      "yes",
+      "Yes",
+      "YES",
+      "on",
+      "On",
+      "ON",
+      "n",
+      "N",
+      "no",
+      "No",
+      "NO",
+      "off",
+      "Off",
+      "OFF"
+    ];
+    function compileStyleMap(schema, map) {
+      var result, keys, index, length, tag, style, type;
+      if (map === null) return {};
+      result = {};
+      keys = Object.keys(map);
+      for (index = 0, length = keys.length; index < length; index += 1) {
+        tag = keys[index];
+        style = String(map[tag]);
+        if (tag.slice(0, 2) === "!!") {
+          tag = "tag:yaml.org,2002:" + tag.slice(2);
+        }
+        type = schema.compiledTypeMap["fallback"][tag];
+        if (type && _hasOwnProperty.call(type.styleAliases, style)) {
+          style = type.styleAliases[style];
+        }
+        result[tag] = style;
+      }
+      return result;
+    }
+    function encodeHex(character) {
+      var string, handle, length;
+      string = character.toString(16).toUpperCase();
+      if (character <= 255) {
+        handle = "x";
+        length = 2;
+      } else if (character <= 65535) {
+        handle = "u";
+        length = 4;
+      } else if (character <= 4294967295) {
+        handle = "U";
+        length = 8;
+      } else {
+        throw new YAMLException("code point within a string may not be greater than 0xFFFFFFFF");
+      }
+      return "\\" + handle + common.repeat("0", length - string.length) + string;
+    }
+    function State(options) {
+      this.schema = options["schema"] || DEFAULT_FULL_SCHEMA;
+      this.indent = Math.max(1, options["indent"] || 2);
+      this.noArrayIndent = options["noArrayIndent"] || false;
+      this.skipInvalid = options["skipInvalid"] || false;
+      this.flowLevel = common.isNothing(options["flowLevel"]) ? -1 : options["flowLevel"];
+      this.styleMap = compileStyleMap(this.schema, options["styles"] || null);
+      this.sortKeys = options["sortKeys"] || false;
+      this.lineWidth = options["lineWidth"] || 80;
+      this.noRefs = options["noRefs"] || false;
+      this.noCompatMode = options["noCompatMode"] || false;
+      this.condenseFlow = options["condenseFlow"] || false;
+      this.implicitTypes = this.schema.compiledImplicit;
+      this.explicitTypes = this.schema.compiledExplicit;
+      this.tag = null;
+      this.result = "";
+      this.duplicates = [];
+      this.usedDuplicates = null;
+    }
+    function indentString(string, spaces) {
+      var ind = common.repeat(" ", spaces), position = 0, next = -1, result = "", line, length = string.length;
+      while (position < length) {
+        next = string.indexOf("\n", position);
+        if (next === -1) {
+          line = string.slice(position);
+          position = length;
+        } else {
+          line = string.slice(position, next + 1);
+          position = next + 1;
+        }
+        if (line.length && line !== "\n") result += ind;
+        result += line;
+      }
+      return result;
+    }
+    function generateNextLine(state, level) {
+      return "\n" + common.repeat(" ", state.indent * level);
+    }
+    function testImplicitResolving(state, str) {
+      var index, length, type;
+      for (index = 0, length = state.implicitTypes.length; index < length; index += 1) {
+        type = state.implicitTypes[index];
+        if (type.resolve(str)) {
+          return true;
+        }
+      }
+      return false;
+    }
+    function isWhitespace(c) {
+      return c === CHAR_SPACE || c === CHAR_TAB;
+    }
+    function isPrintable(c) {
+      return 32 <= c && c <= 126 || 161 <= c && c <= 55295 && c !== 8232 && c !== 8233 || 57344 <= c && c <= 65533 && c !== 65279 || 65536 <= c && c <= 1114111;
+    }
+    function isNsChar(c) {
+      return isPrintable(c) && !isWhitespace(c) && c !== 65279 && c !== CHAR_CARRIAGE_RETURN && c !== CHAR_LINE_FEED;
+    }
+    function isPlainSafe(c, prev) {
+      return isPrintable(c) && c !== 65279 && c !== CHAR_COMMA && c !== CHAR_LEFT_SQUARE_BRACKET && c !== CHAR_RIGHT_SQUARE_BRACKET && c !== CHAR_LEFT_CURLY_BRACKET && c !== CHAR_RIGHT_CURLY_BRACKET && c !== CHAR_COLON && (c !== CHAR_SHARP || prev && isNsChar(prev));
+    }
+    function isPlainSafeFirst(c) {
+      return isPrintable(c) && c !== 65279 && !isWhitespace(c) && c !== CHAR_MINUS && c !== CHAR_QUESTION && c !== CHAR_COLON && c !== CHAR_COMMA && c !== CHAR_LEFT_SQUARE_BRACKET && c !== CHAR_RIGHT_SQUARE_BRACKET && c !== CHAR_LEFT_CURLY_BRACKET && c !== CHAR_RIGHT_CURLY_BRACKET && c !== CHAR_SHARP && c !== CHAR_AMPERSAND && c !== CHAR_ASTERISK && c !== CHAR_EXCLAMATION && c !== CHAR_VERTICAL_LINE && c !== CHAR_EQUALS && c !== CHAR_GREATER_THAN && c !== CHAR_SINGLE_QUOTE && c !== CHAR_DOUBLE_QUOTE && c !== CHAR_PERCENT && c !== CHAR_COMMERCIAL_AT && c !== CHAR_GRAVE_ACCENT;
+    }
+    function needIndentIndicator(string) {
+      var leadingSpaceRe = /^\n* /;
+      return leadingSpaceRe.test(string);
+    }
+    var STYLE_PLAIN = 1;
+    var STYLE_SINGLE = 2;
+    var STYLE_LITERAL = 3;
+    var STYLE_FOLDED = 4;
+    var STYLE_DOUBLE = 5;
+    function chooseScalarStyle(string, singleLineOnly, indentPerLevel, lineWidth, testAmbiguousType) {
+      var i;
+      var char, prev_char;
+      var hasLineBreak = false;
+      var hasFoldableLine = false;
+      var shouldTrackWidth = lineWidth !== -1;
+      var previousLineBreak = -1;
+      var plain = isPlainSafeFirst(string.charCodeAt(0)) && !isWhitespace(string.charCodeAt(string.length - 1));
+      if (singleLineOnly) {
+        for (i = 0; i < string.length; i++) {
+          char = string.charCodeAt(i);
+          if (!isPrintable(char)) {
+            return STYLE_DOUBLE;
+          }
+          prev_char = i > 0 ? string.charCodeAt(i - 1) : null;
+          plain = plain && isPlainSafe(char, prev_char);
+        }
+      } else {
+        for (i = 0; i < string.length; i++) {
+          char = string.charCodeAt(i);
+          if (char === CHAR_LINE_FEED) {
+            hasLineBreak = true;
+            if (shouldTrackWidth) {
+              hasFoldableLine = hasFoldableLine || // Foldable line = too long, and not more-indented.
+              i - previousLineBreak - 1 > lineWidth && string[previousLineBreak + 1] !== " ";
+              previousLineBreak = i;
+            }
+          } else if (!isPrintable(char)) {
+            return STYLE_DOUBLE;
+          }
+          prev_char = i > 0 ? string.charCodeAt(i - 1) : null;
+          plain = plain && isPlainSafe(char, prev_char);
+        }
+        hasFoldableLine = hasFoldableLine || shouldTrackWidth && (i - previousLineBreak - 1 > lineWidth && string[previousLineBreak + 1] !== " ");
+      }
+      if (!hasLineBreak && !hasFoldableLine) {
+        return plain && !testAmbiguousType(string) ? STYLE_PLAIN : STYLE_SINGLE;
+      }
+      if (indentPerLevel > 9 && needIndentIndicator(string)) {
+        return STYLE_DOUBLE;
+      }
+      return hasFoldableLine ? STYLE_FOLDED : STYLE_LITERAL;
+    }
+    function writeScalar(state, string, level, iskey) {
+      state.dump = (function() {
+        if (string.length === 0) {
+          return "''";
+        }
+        if (!state.noCompatMode && DEPRECATED_BOOLEANS_SYNTAX.indexOf(string) !== -1) {
+          return "'" + string + "'";
+        }
+        var indent = state.indent * Math.max(1, level);
+        var lineWidth = state.lineWidth === -1 ? -1 : Math.max(Math.min(state.lineWidth, 40), state.lineWidth - indent);
+        var singleLineOnly = iskey || state.flowLevel > -1 && level >= state.flowLevel;
+        function testAmbiguity(string2) {
+          return testImplicitResolving(state, string2);
+        }
+        switch (chooseScalarStyle(string, singleLineOnly, state.indent, lineWidth, testAmbiguity)) {
+          case STYLE_PLAIN:
+            return string;
+          case STYLE_SINGLE:
+            return "'" + string.replace(/'/g, "''") + "'";
+          case STYLE_LITERAL:
+            return "|" + blockHeader(string, state.indent) + dropEndingNewline(indentString(string, indent));
+          case STYLE_FOLDED:
+            return ">" + blockHeader(string, state.indent) + dropEndingNewline(indentString(foldString(string, lineWidth), indent));
+          case STYLE_DOUBLE:
+            return '"' + escapeString(string, lineWidth) + '"';
+          default:
+            throw new YAMLException("impossible error: invalid scalar style");
+        }
+      })();
+    }
+    function blockHeader(string, indentPerLevel) {
+      var indentIndicator = needIndentIndicator(string) ? String(indentPerLevel) : "";
+      var clip = string[string.length - 1] === "\n";
+      var keep = clip && (string[string.length - 2] === "\n" || string === "\n");
+      var chomp = keep ? "+" : clip ? "" : "-";
+      return indentIndicator + chomp + "\n";
+    }
+    function dropEndingNewline(string) {
+      return string[string.length - 1] === "\n" ? string.slice(0, -1) : string;
+    }
+    function foldString(string, width) {
+      var lineRe = /(\n+)([^\n]*)/g;
+      var result = (function() {
+        var nextLF = string.indexOf("\n");
+        nextLF = nextLF !== -1 ? nextLF : string.length;
+        lineRe.lastIndex = nextLF;
+        return foldLine(string.slice(0, nextLF), width);
+      })();
+      var prevMoreIndented = string[0] === "\n" || string[0] === " ";
+      var moreIndented;
+      var match;
+      while (match = lineRe.exec(string)) {
+        var prefix = match[1], line = match[2];
+        moreIndented = line[0] === " ";
+        result += prefix + (!prevMoreIndented && !moreIndented && line !== "" ? "\n" : "") + foldLine(line, width);
+        prevMoreIndented = moreIndented;
+      }
+      return result;
+    }
+    function foldLine(line, width) {
+      if (line === "" || line[0] === " ") return line;
+      var breakRe = / [^ ]/g;
+      var match;
+      var start = 0, end, curr = 0, next = 0;
+      var result = "";
+      while (match = breakRe.exec(line)) {
+        next = match.index;
+        if (next - start > width) {
+          end = curr > start ? curr : next;
+          result += "\n" + line.slice(start, end);
+          start = end + 1;
+        }
+        curr = next;
+      }
+      result += "\n";
+      if (line.length - start > width && curr > start) {
+        result += line.slice(start, curr) + "\n" + line.slice(curr + 1);
+      } else {
+        result += line.slice(start);
+      }
+      return result.slice(1);
+    }
+    function escapeString(string) {
+      var result = "";
+      var char, nextChar;
+      var escapeSeq;
+      for (var i = 0; i < string.length; i++) {
+        char = string.charCodeAt(i);
+        if (char >= 55296 && char <= 56319) {
+          nextChar = string.charCodeAt(i + 1);
+          if (nextChar >= 56320 && nextChar <= 57343) {
+            result += encodeHex((char - 55296) * 1024 + nextChar - 56320 + 65536);
+            i++;
+            continue;
+          }
+        }
+        escapeSeq = ESCAPE_SEQUENCES[char];
+        result += !escapeSeq && isPrintable(char) ? string[i] : escapeSeq || encodeHex(char);
+      }
+      return result;
+    }
+    function writeFlowSequence(state, level, object) {
+      var _result = "", _tag = state.tag, index, length;
+      for (index = 0, length = object.length; index < length; index += 1) {
+        if (writeNode(state, level, object[index], false, false)) {
+          if (index !== 0) _result += "," + (!state.condenseFlow ? " " : "");
+          _result += state.dump;
+        }
+      }
+      state.tag = _tag;
+      state.dump = "[" + _result + "]";
+    }
+    function writeBlockSequence(state, level, object, compact) {
+      var _result = "", _tag = state.tag, index, length;
+      for (index = 0, length = object.length; index < length; index += 1) {
+        if (writeNode(state, level + 1, object[index], true, true)) {
+          if (!compact || index !== 0) {
+            _result += generateNextLine(state, level);
+          }
+          if (state.dump && CHAR_LINE_FEED === state.dump.charCodeAt(0)) {
+            _result += "-";
+          } else {
+            _result += "- ";
+          }
+          _result += state.dump;
+        }
+      }
+      state.tag = _tag;
+      state.dump = _result || "[]";
+    }
+    function writeFlowMapping(state, level, object) {
+      var _result = "", _tag = state.tag, objectKeyList = Object.keys(object), index, length, objectKey, objectValue, pairBuffer;
+      for (index = 0, length = objectKeyList.length; index < length; index += 1) {
+        pairBuffer = "";
+        if (index !== 0) pairBuffer += ", ";
+        if (state.condenseFlow) pairBuffer += '"';
+        objectKey = objectKeyList[index];
+        objectValue = object[objectKey];
+        if (!writeNode(state, level, objectKey, false, false)) {
+          continue;
+        }
+        if (state.dump.length > 1024) pairBuffer += "? ";
+        pairBuffer += state.dump + (state.condenseFlow ? '"' : "") + ":" + (state.condenseFlow ? "" : " ");
+        if (!writeNode(state, level, objectValue, false, false)) {
+          continue;
+        }
+        pairBuffer += state.dump;
+        _result += pairBuffer;
+      }
+      state.tag = _tag;
+      state.dump = "{" + _result + "}";
+    }
+    function writeBlockMapping(state, level, object, compact) {
+      var _result = "", _tag = state.tag, objectKeyList = Object.keys(object), index, length, objectKey, objectValue, explicitPair, pairBuffer;
+      if (state.sortKeys === true) {
+        objectKeyList.sort();
+      } else if (typeof state.sortKeys === "function") {
+        objectKeyList.sort(state.sortKeys);
+      } else if (state.sortKeys) {
+        throw new YAMLException("sortKeys must be a boolean or a function");
+      }
+      for (index = 0, length = objectKeyList.length; index < length; index += 1) {
+        pairBuffer = "";
+        if (!compact || index !== 0) {
+          pairBuffer += generateNextLine(state, level);
+        }
+        objectKey = objectKeyList[index];
+        objectValue = object[objectKey];
+        if (!writeNode(state, level + 1, objectKey, true, true, true)) {
+          continue;
+        }
+        explicitPair = state.tag !== null && state.tag !== "?" || state.dump && state.dump.length > 1024;
+        if (explicitPair) {
+          if (state.dump && CHAR_LINE_FEED === state.dump.charCodeAt(0)) {
+            pairBuffer += "?";
+          } else {
+            pairBuffer += "? ";
+          }
+        }
+        pairBuffer += state.dump;
+        if (explicitPair) {
+          pairBuffer += generateNextLine(state, level);
+        }
+        if (!writeNode(state, level + 1, objectValue, true, explicitPair)) {
+          continue;
+        }
+        if (state.dump && CHAR_LINE_FEED === state.dump.charCodeAt(0)) {
+          pairBuffer += ":";
+        } else {
+          pairBuffer += ": ";
+        }
+        pairBuffer += state.dump;
+        _result += pairBuffer;
+      }
+      state.tag = _tag;
+      state.dump = _result || "{}";
+    }
+    function detectType(state, object, explicit) {
+      var _result, typeList, index, length, type, style;
+      typeList = explicit ? state.explicitTypes : state.implicitTypes;
+      for (index = 0, length = typeList.length; index < length; index += 1) {
+        type = typeList[index];
+        if ((type.instanceOf || type.predicate) && (!type.instanceOf || typeof object === "object" && object instanceof type.instanceOf) && (!type.predicate || type.predicate(object))) {
+          state.tag = explicit ? type.tag : "?";
+          if (type.represent) {
+            style = state.styleMap[type.tag] || type.defaultStyle;
+            if (_toString.call(type.represent) === "[object Function]") {
+              _result = type.represent(object, style);
+            } else if (_hasOwnProperty.call(type.represent, style)) {
+              _result = type.represent[style](object, style);
+            } else {
+              throw new YAMLException("!<" + type.tag + '> tag resolver accepts not "' + style + '" style');
+            }
+            state.dump = _result;
+          }
+          return true;
+        }
+      }
+      return false;
+    }
+    function writeNode(state, level, object, block, compact, iskey) {
+      state.tag = null;
+      state.dump = object;
+      if (!detectType(state, object, false)) {
+        detectType(state, object, true);
+      }
+      var type = _toString.call(state.dump);
+      if (block) {
+        block = state.flowLevel < 0 || state.flowLevel > level;
+      }
+      var objectOrArray = type === "[object Object]" || type === "[object Array]", duplicateIndex, duplicate;
+      if (objectOrArray) {
+        duplicateIndex = state.duplicates.indexOf(object);
+        duplicate = duplicateIndex !== -1;
+      }
+      if (state.tag !== null && state.tag !== "?" || duplicate || state.indent !== 2 && level > 0) {
+        compact = false;
+      }
+      if (duplicate && state.usedDuplicates[duplicateIndex]) {
+        state.dump = "*ref_" + duplicateIndex;
+      } else {
+        if (objectOrArray && duplicate && !state.usedDuplicates[duplicateIndex]) {
+          state.usedDuplicates[duplicateIndex] = true;
+        }
+        if (type === "[object Object]") {
+          if (block && Object.keys(state.dump).length !== 0) {
+            writeBlockMapping(state, level, state.dump, compact);
+            if (duplicate) {
+              state.dump = "&ref_" + duplicateIndex + state.dump;
+            }
+          } else {
+            writeFlowMapping(state, level, state.dump);
+            if (duplicate) {
+              state.dump = "&ref_" + duplicateIndex + " " + state.dump;
+            }
+          }
+        } else if (type === "[object Array]") {
+          var arrayLevel = state.noArrayIndent && level > 0 ? level - 1 : level;
+          if (block && state.dump.length !== 0) {
+            writeBlockSequence(state, arrayLevel, state.dump, compact);
+            if (duplicate) {
+              state.dump = "&ref_" + duplicateIndex + state.dump;
+            }
+          } else {
+            writeFlowSequence(state, arrayLevel, state.dump);
+            if (duplicate) {
+              state.dump = "&ref_" + duplicateIndex + " " + state.dump;
+            }
+          }
+        } else if (type === "[object String]") {
+          if (state.tag !== "?") {
+            writeScalar(state, state.dump, level, iskey);
+          }
+        } else {
+          if (state.skipInvalid) return false;
+          throw new YAMLException("unacceptable kind of an object to dump " + type);
+        }
+        if (state.tag !== null && state.tag !== "?") {
+          state.dump = "!<" + state.tag + "> " + state.dump;
+        }
+      }
+      return true;
+    }
+    function getDuplicateReferences(object, state) {
+      var objects = [], duplicatesIndexes = [], index, length;
+      inspectNode(object, objects, duplicatesIndexes);
+      for (index = 0, length = duplicatesIndexes.length; index < length; index += 1) {
+        state.duplicates.push(objects[duplicatesIndexes[index]]);
+      }
+      state.usedDuplicates = new Array(length);
+    }
+    function inspectNode(object, objects, duplicatesIndexes) {
+      var objectKeyList, index, length;
+      if (object !== null && typeof object === "object") {
+        index = objects.indexOf(object);
+        if (index !== -1) {
+          if (duplicatesIndexes.indexOf(index) === -1) {
+            duplicatesIndexes.push(index);
+          }
+        } else {
+          objects.push(object);
+          if (Array.isArray(object)) {
+            for (index = 0, length = object.length; index < length; index += 1) {
+              inspectNode(object[index], objects, duplicatesIndexes);
+            }
+          } else {
+            objectKeyList = Object.keys(object);
+            for (index = 0, length = objectKeyList.length; index < length; index += 1) {
+              inspectNode(object[objectKeyList[index]], objects, duplicatesIndexes);
+            }
+          }
+        }
+      }
+    }
+    function dump(input, options) {
+      options = options || {};
+      var state = new State(options);
+      if (!state.noRefs) getDuplicateReferences(input, state);
+      if (writeNode(state, 0, input, true, true)) return state.dump + "\n";
+      return "";
+    }
+    function safeDump(input, options) {
+      return dump(input, common.extend({ schema: DEFAULT_SAFE_SCHEMA }, options));
+    }
+    module2.exports.dump = dump;
+    module2.exports.safeDump = safeDump;
+  }
+});
+
+// ../dev-workflow-core/node_modules/js-yaml/lib/js-yaml.js
+var require_js_yaml = __commonJS({
+  "../dev-workflow-core/node_modules/js-yaml/lib/js-yaml.js"(exports2, module2) {
+    "use strict";
+    var loader = require_loader();
+    var dumper = require_dumper();
+    function deprecated(name) {
+      return function() {
+        throw new Error("Function " + name + " is deprecated and cannot be used.");
+      };
+    }
+    module2.exports.Type = require_type();
+    module2.exports.Schema = require_schema();
+    module2.exports.FAILSAFE_SCHEMA = require_failsafe();
+    module2.exports.JSON_SCHEMA = require_json();
+    module2.exports.CORE_SCHEMA = require_core();
+    module2.exports.DEFAULT_SAFE_SCHEMA = require_default_safe();
+    module2.exports.DEFAULT_FULL_SCHEMA = require_default_full();
+    module2.exports.load = loader.load;
+    module2.exports.loadAll = loader.loadAll;
+    module2.exports.safeLoad = loader.safeLoad;
+    module2.exports.safeLoadAll = loader.safeLoadAll;
+    module2.exports.dump = dumper.dump;
+    module2.exports.safeDump = dumper.safeDump;
+    module2.exports.YAMLException = require_exception();
+    module2.exports.MINIMAL_SCHEMA = require_failsafe();
+    module2.exports.SAFE_SCHEMA = require_default_safe();
+    module2.exports.DEFAULT_SCHEMA = require_default_full();
+    module2.exports.scan = deprecated("scan");
+    module2.exports.parse = deprecated("parse");
+    module2.exports.compose = deprecated("compose");
+    module2.exports.addConstructor = deprecated("addConstructor");
+  }
+});
+
+// ../dev-workflow-core/node_modules/js-yaml/index.js
+var require_js_yaml2 = __commonJS({
+  "../dev-workflow-core/node_modules/js-yaml/index.js"(exports2, module2) {
+    "use strict";
+    var yaml = require_js_yaml();
+    module2.exports = yaml;
+  }
+});
+
+// ../dev-workflow-core/node_modules/gray-matter/lib/engines.js
+var require_engines = __commonJS({
+  "../dev-workflow-core/node_modules/gray-matter/lib/engines.js"(exports2, module2) {
+    "use strict";
+    var yaml = require_js_yaml2();
+    var engines = exports2 = module2.exports;
+    engines.yaml = {
+      parse: yaml.safeLoad.bind(yaml),
+      stringify: yaml.safeDump.bind(yaml)
+    };
+    engines.json = {
+      parse: JSON.parse.bind(JSON),
+      stringify: function(obj, options) {
+        const opts = Object.assign({ replacer: null, space: 2 }, options);
+        return JSON.stringify(obj, opts.replacer, opts.space);
+      }
+    };
+    engines.javascript = {
+      parse: function() {
+        throw new Error("gray-matter JavaScript frontmatter engine disabled by dev-workflow build");
+      },
+      stringify: function() {
+        throw new Error("stringifying JavaScript is not supported");
+      }
+    };
+  }
+});
+
+// ../dev-workflow-core/node_modules/strip-bom-string/index.js
+var require_strip_bom_string = __commonJS({
+  "../dev-workflow-core/node_modules/strip-bom-string/index.js"(exports2, module2) {
+    "use strict";
+    module2.exports = function(str) {
+      if (typeof str === "string" && str.charAt(0) === "\uFEFF") {
+        return str.slice(1);
+      }
+      return str;
+    };
+  }
+});
+
+// ../dev-workflow-core/node_modules/gray-matter/lib/utils.js
+var require_utils = __commonJS({
+  "../dev-workflow-core/node_modules/gray-matter/lib/utils.js"(exports2) {
+    "use strict";
+    var stripBom = require_strip_bom_string();
+    var typeOf = require_kind_of();
+    exports2.define = function(obj, key, val) {
+      Reflect.defineProperty(obj, key, {
+        enumerable: false,
+        configurable: true,
+        writable: true,
+        value: val
+      });
+    };
+    exports2.isBuffer = function(val) {
+      return typeOf(val) === "buffer";
+    };
+    exports2.isObject = function(val) {
+      return typeOf(val) === "object";
+    };
+    exports2.toBuffer = function(input) {
+      return typeof input === "string" ? Buffer.from(input) : input;
+    };
+    exports2.toString = function(input) {
+      if (exports2.isBuffer(input)) return stripBom(String(input));
+      if (typeof input !== "string") {
+        throw new TypeError("expected input to be a string or buffer");
+      }
+      return stripBom(input);
+    };
+    exports2.arrayify = function(val) {
+      return val ? Array.isArray(val) ? val : [val] : [];
+    };
+    exports2.startsWith = function(str, substr, len) {
+      if (typeof len !== "number") len = substr.length;
+      return str.slice(0, len) === substr;
+    };
+  }
+});
+
+// ../dev-workflow-core/node_modules/gray-matter/lib/defaults.js
+var require_defaults = __commonJS({
+  "../dev-workflow-core/node_modules/gray-matter/lib/defaults.js"(exports2, module2) {
+    "use strict";
+    var engines = require_engines();
+    var utils = require_utils();
+    module2.exports = function(options) {
+      const opts = Object.assign({}, options);
+      opts.delimiters = utils.arrayify(opts.delims || opts.delimiters || "---");
+      if (opts.delimiters.length === 1) {
+        opts.delimiters.push(opts.delimiters[0]);
+      }
+      opts.language = (opts.language || opts.lang || "yaml").toLowerCase();
+      opts.engines = Object.assign({}, engines, opts.parsers, opts.engines);
+      return opts;
+    };
+  }
+});
+
+// ../dev-workflow-core/node_modules/gray-matter/lib/engine.js
+var require_engine = __commonJS({
+  "../dev-workflow-core/node_modules/gray-matter/lib/engine.js"(exports2, module2) {
+    "use strict";
+    module2.exports = function(name, options) {
+      let engine = options.engines[name] || options.engines[aliase(name)];
+      if (typeof engine === "undefined") {
+        throw new Error('gray-matter engine "' + name + '" is not registered');
+      }
+      if (typeof engine === "function") {
+        engine = { parse: engine };
+      }
+      return engine;
+    };
+    function aliase(name) {
+      switch (name.toLowerCase()) {
+        case "js":
+        case "javascript":
+          return "javascript";
+        case "coffee":
+        case "coffeescript":
+        case "cson":
+          return "coffee";
+        case "yaml":
+        case "yml":
+          return "yaml";
+        default: {
+          return name;
+        }
+      }
+    }
+  }
+});
+
+// ../dev-workflow-core/node_modules/gray-matter/lib/stringify.js
+var require_stringify = __commonJS({
+  "../dev-workflow-core/node_modules/gray-matter/lib/stringify.js"(exports2, module2) {
+    "use strict";
+    var typeOf = require_kind_of();
+    var getEngine = require_engine();
+    var defaults = require_defaults();
+    module2.exports = function(file, data, options) {
+      if (data == null && options == null) {
+        switch (typeOf(file)) {
+          case "object":
+            data = file.data;
+            options = {};
+            break;
+          case "string":
+            return file;
+          default: {
+            throw new TypeError("expected file to be a string or object");
+          }
+        }
+      }
+      const str = file.content;
+      const opts = defaults(options);
+      if (data == null) {
+        if (!opts.data) return file;
+        data = opts.data;
+      }
+      const language = file.language || opts.language;
+      const engine = getEngine(language, opts);
+      if (typeof engine.stringify !== "function") {
+        throw new TypeError('expected "' + language + '.stringify" to be a function');
+      }
+      data = Object.assign({}, file.data, data);
+      const open = opts.delimiters[0];
+      const close = opts.delimiters[1];
+      const matter3 = engine.stringify(data, options).trim();
+      let buf = "";
+      if (matter3 !== "{}") {
+        buf = newline(open) + newline(matter3) + newline(close);
+      }
+      if (typeof file.excerpt === "string" && file.excerpt !== "") {
+        if (str.indexOf(file.excerpt.trim()) === -1) {
+          buf += newline(file.excerpt) + newline(close);
+        }
+      }
+      return buf + newline(str);
+    };
+    function newline(str) {
+      return str.slice(-1) !== "\n" ? str + "\n" : str;
+    }
+  }
+});
+
+// ../dev-workflow-core/node_modules/gray-matter/lib/excerpt.js
+var require_excerpt = __commonJS({
+  "../dev-workflow-core/node_modules/gray-matter/lib/excerpt.js"(exports2, module2) {
+    "use strict";
+    var defaults = require_defaults();
+    module2.exports = function(file, options) {
+      const opts = defaults(options);
+      if (file.data == null) {
+        file.data = {};
+      }
+      if (typeof opts.excerpt === "function") {
+        return opts.excerpt(file, opts);
+      }
+      const sep = file.data.excerpt_separator || opts.excerpt_separator;
+      if (sep == null && (opts.excerpt === false || opts.excerpt == null)) {
+        return file;
+      }
+      const delimiter = typeof opts.excerpt === "string" ? opts.excerpt : sep || opts.delimiters[0];
+      const idx = file.content.indexOf(delimiter);
+      if (idx !== -1) {
+        file.excerpt = file.content.slice(0, idx);
+      }
+      return file;
+    };
+  }
+});
+
+// ../dev-workflow-core/node_modules/gray-matter/lib/to-file.js
+var require_to_file = __commonJS({
+  "../dev-workflow-core/node_modules/gray-matter/lib/to-file.js"(exports2, module2) {
+    "use strict";
+    var typeOf = require_kind_of();
+    var stringify = require_stringify();
+    var utils = require_utils();
+    module2.exports = function(file) {
+      if (typeOf(file) !== "object") {
+        file = { content: file };
+      }
+      if (typeOf(file.data) !== "object") {
+        file.data = {};
+      }
+      if (file.contents && file.content == null) {
+        file.content = file.contents;
+      }
+      utils.define(file, "orig", utils.toBuffer(file.content));
+      utils.define(file, "language", file.language || "");
+      utils.define(file, "matter", file.matter || "");
+      utils.define(file, "stringify", function(data, options) {
+        if (options && options.language) {
+          file.language = options.language;
+        }
+        return stringify(file, data, options);
+      });
+      file.content = utils.toString(file.content);
+      file.isEmpty = false;
+      file.excerpt = "";
+      return file;
+    };
+  }
+});
+
+// ../dev-workflow-core/node_modules/gray-matter/lib/parse.js
+var require_parse = __commonJS({
+  "../dev-workflow-core/node_modules/gray-matter/lib/parse.js"(exports2, module2) {
+    "use strict";
+    var getEngine = require_engine();
+    var defaults = require_defaults();
+    module2.exports = function(language, str, options) {
+      const opts = defaults(options);
+      const engine = getEngine(language, opts);
+      if (typeof engine.parse !== "function") {
+        throw new TypeError('expected "' + language + '.parse" to be a function');
+      }
+      return engine.parse(str, opts);
+    };
+  }
+});
+
+// ../dev-workflow-core/node_modules/gray-matter/index.js
+var require_gray_matter = __commonJS({
+  "../dev-workflow-core/node_modules/gray-matter/index.js"(exports2, module2) {
+    "use strict";
+    var fs = require("fs");
+    var sections = require_section_matter();
+    var defaults = require_defaults();
+    var stringify = require_stringify();
+    var excerpt = require_excerpt();
+    var engines = require_engines();
+    var toFile = require_to_file();
+    var parse = require_parse();
+    var utils = require_utils();
+    function matter3(input, options) {
+      if (input === "") {
+        return { data: {}, content: input, excerpt: "", orig: input };
+      }
+      let file = toFile(input);
+      const cached = matter3.cache[file.content];
+      if (!options) {
+        if (cached) {
+          file = Object.assign({}, cached);
+          file.orig = cached.orig;
+          return file;
+        }
+        matter3.cache[file.content] = file;
+      }
+      return parseMatter(file, options);
+    }
+    function parseMatter(file, options) {
+      const opts = defaults(options);
+      const open = opts.delimiters[0];
+      const close = "\n" + opts.delimiters[1];
+      let str = file.content;
+      if (opts.language) {
+        file.language = opts.language;
+      }
+      const openLen = open.length;
+      if (!utils.startsWith(str, open, openLen)) {
+        excerpt(file, opts);
+        return file;
+      }
+      if (str.charAt(openLen) === open.slice(-1)) {
+        return file;
+      }
+      str = str.slice(openLen);
+      const len = str.length;
+      const language = matter3.language(str, opts);
+      if (language.name) {
+        file.language = language.name;
+        str = str.slice(language.raw.length);
+      }
+      let closeIndex = str.indexOf(close);
+      if (closeIndex === -1) {
+        closeIndex = len;
+      }
+      file.matter = str.slice(0, closeIndex);
+      const block = file.matter.replace(/^\s*#[^\n]+/gm, "").trim();
+      if (block === "") {
+        file.isEmpty = true;
+        file.empty = file.content;
+        file.data = {};
+      } else {
+        file.data = parse(file.language, file.matter, opts);
+      }
+      if (closeIndex === len) {
+        file.content = "";
+      } else {
+        file.content = str.slice(closeIndex + close.length);
+        if (file.content[0] === "\r") {
+          file.content = file.content.slice(1);
+        }
+        if (file.content[0] === "\n") {
+          file.content = file.content.slice(1);
+        }
+      }
+      excerpt(file, opts);
+      if (opts.sections === true || typeof opts.section === "function") {
+        sections(file, opts.section);
+      }
+      return file;
+    }
+    matter3.engines = engines;
+    matter3.stringify = function(file, data, options) {
+      if (typeof file === "string") file = matter3(file, options);
+      return stringify(file, data, options);
+    };
+    matter3.read = function(filepath, options) {
+      const str = fs.readFileSync(filepath, "utf8");
+      const file = matter3(str, options);
+      file.path = filepath;
+      return file;
+    };
+    matter3.test = function(str, options) {
+      return utils.startsWith(str, defaults(options).delimiters[0]);
+    };
+    matter3.language = function(str, options) {
+      const opts = defaults(options);
+      const open = opts.delimiters[0];
+      if (matter3.test(str)) {
+        str = str.slice(open.length);
+      }
+      const language = str.slice(0, str.search(/\r?\n/));
+      return {
+        raw: language,
+        name: language ? language.trim() : ""
+      };
+    };
+    matter3.cache = {};
+    matter3.clearCache = function() {
+      matter3.cache = {};
+    };
+    module2.exports = matter3;
+  }
+});
+
+// ../dev-workflow-core/node_modules/fast-glob/out/utils/array.js
+var require_array = __commonJS({
+  "../dev-workflow-core/node_modules/fast-glob/out/utils/array.js"(exports2) {
+    "use strict";
+    Object.defineProperty(exports2, "__esModule", { value: true });
+    exports2.splitWhen = exports2.flatten = void 0;
+    function flatten(items) {
+      return items.reduce((collection, item) => [].concat(collection, item), []);
+    }
+    exports2.flatten = flatten;
+    function splitWhen(items, predicate) {
+      const result = [[]];
+      let groupIndex = 0;
+      for (const item of items) {
+        if (predicate(item)) {
+          groupIndex++;
+          result[groupIndex] = [];
+        } else {
+          result[groupIndex].push(item);
+        }
+      }
+      return result;
+    }
+    exports2.splitWhen = splitWhen;
+  }
+});
+
+// ../dev-workflow-core/node_modules/fast-glob/out/utils/errno.js
+var require_errno = __commonJS({
+  "../dev-workflow-core/node_modules/fast-glob/out/utils/errno.js"(exports2) {
+    "use strict";
+    Object.defineProperty(exports2, "__esModule", { value: true });
+    exports2.isEnoentCodeError = void 0;
+    function isEnoentCodeError(error) {
+      return error.code === "ENOENT";
+    }
+    exports2.isEnoentCodeError = isEnoentCodeError;
+  }
+});
+
+// ../dev-workflow-core/node_modules/fast-glob/out/utils/fs.js
+var require_fs = __commonJS({
+  "../dev-workflow-core/node_modules/fast-glob/out/utils/fs.js"(exports2) {
+    "use strict";
+    Object.defineProperty(exports2, "__esModule", { value: true });
+    exports2.createDirentFromStats = void 0;
+    var DirentFromStats = class {
+      constructor(name, stats) {
+        this.name = name;
+        this.isBlockDevice = stats.isBlockDevice.bind(stats);
+        this.isCharacterDevice = stats.isCharacterDevice.bind(stats);
+        this.isDirectory = stats.isDirectory.bind(stats);
+        this.isFIFO = stats.isFIFO.bind(stats);
+        this.isFile = stats.isFile.bind(stats);
+        this.isSocket = stats.isSocket.bind(stats);
+        this.isSymbolicLink = stats.isSymbolicLink.bind(stats);
+      }
+    };
+    function createDirentFromStats(name, stats) {
+      return new DirentFromStats(name, stats);
+    }
+    exports2.createDirentFromStats = createDirentFromStats;
+  }
+});
+
+// ../dev-workflow-core/node_modules/fast-glob/out/utils/path.js
+var require_path = __commonJS({
+  "../dev-workflow-core/node_modules/fast-glob/out/utils/path.js"(exports2) {
+    "use strict";
+    Object.defineProperty(exports2, "__esModule", { value: true });
+    exports2.convertPosixPathToPattern = exports2.convertWindowsPathToPattern = exports2.convertPathToPattern = exports2.escapePosixPath = exports2.escapeWindowsPath = exports2.escape = exports2.removeLeadingDotSegment = exports2.makeAbsolute = exports2.unixify = void 0;
+    var os = require("os");
+    var path = require("path");
+    var IS_WINDOWS_PLATFORM = os.platform() === "win32";
+    var LEADING_DOT_SEGMENT_CHARACTERS_COUNT = 2;
+    var POSIX_UNESCAPED_GLOB_SYMBOLS_RE = /(\\?)([()*?[\]{|}]|^!|[!+@](?=\()|\\(?![!()*+?@[\]{|}]))/g;
+    var WINDOWS_UNESCAPED_GLOB_SYMBOLS_RE = /(\\?)([()[\]{}]|^!|[!+@](?=\())/g;
+    var DOS_DEVICE_PATH_RE = /^\\\\([.?])/;
+    var WINDOWS_BACKSLASHES_RE = /\\(?![!()+@[\]{}])/g;
+    function unixify(filepath) {
+      return filepath.replace(/\\/g, "/");
+    }
+    exports2.unixify = unixify;
+    function makeAbsolute(cwd, filepath) {
+      return path.resolve(cwd, filepath);
+    }
+    exports2.makeAbsolute = makeAbsolute;
+    function removeLeadingDotSegment(entry) {
+      if (entry.charAt(0) === ".") {
+        const secondCharactery = entry.charAt(1);
+        if (secondCharactery === "/" || secondCharactery === "\\") {
+          return entry.slice(LEADING_DOT_SEGMENT_CHARACTERS_COUNT);
+        }
+      }
+      return entry;
+    }
+    exports2.removeLeadingDotSegment = removeLeadingDotSegment;
+    exports2.escape = IS_WINDOWS_PLATFORM ? escapeWindowsPath : escapePosixPath;
+    function escapeWindowsPath(pattern) {
+      return pattern.replace(WINDOWS_UNESCAPED_GLOB_SYMBOLS_RE, "\\$2");
+    }
+    exports2.escapeWindowsPath = escapeWindowsPath;
+    function escapePosixPath(pattern) {
+      return pattern.replace(POSIX_UNESCAPED_GLOB_SYMBOLS_RE, "\\$2");
+    }
+    exports2.escapePosixPath = escapePosixPath;
+    exports2.convertPathToPattern = IS_WINDOWS_PLATFORM ? convertWindowsPathToPattern : convertPosixPathToPattern;
+    function convertWindowsPathToPattern(filepath) {
+      return escapeWindowsPath(filepath).replace(DOS_DEVICE_PATH_RE, "//$1").replace(WINDOWS_BACKSLASHES_RE, "/");
+    }
+    exports2.convertWindowsPathToPattern = convertWindowsPathToPattern;
+    function convertPosixPathToPattern(filepath) {
+      return escapePosixPath(filepath);
+    }
+    exports2.convertPosixPathToPattern = convertPosixPathToPattern;
+  }
+});
+
+// ../dev-workflow-core/node_modules/is-extglob/index.js
+var require_is_extglob = __commonJS({
+  "../dev-workflow-core/node_modules/is-extglob/index.js"(exports2, module2) {
+    module2.exports = function isExtglob(str) {
+      if (typeof str !== "string" || str === "") {
+        return false;
+      }
+      var match;
+      while (match = /(\\).|([@?!+*]\(.*\))/g.exec(str)) {
+        if (match[2]) return true;
+        str = str.slice(match.index + match[0].length);
+      }
+      return false;
+    };
+  }
+});
+
+// ../dev-workflow-core/node_modules/is-glob/index.js
+var require_is_glob = __commonJS({
+  "../dev-workflow-core/node_modules/is-glob/index.js"(exports2, module2) {
+    var isExtglob = require_is_extglob();
+    var chars = { "{": "}", "(": ")", "[": "]" };
+    var strictCheck = function(str) {
+      if (str[0] === "!") {
+        return true;
+      }
+      var index = 0;
+      var pipeIndex = -2;
+      var closeSquareIndex = -2;
+      var closeCurlyIndex = -2;
+      var closeParenIndex = -2;
+      var backSlashIndex = -2;
+      while (index < str.length) {
+        if (str[index] === "*") {
+          return true;
+        }
+        if (str[index + 1] === "?" && /[\].+)]/.test(str[index])) {
+          return true;
+        }
+        if (closeSquareIndex !== -1 && str[index] === "[" && str[index + 1] !== "]") {
+          if (closeSquareIndex < index) {
+            closeSquareIndex = str.indexOf("]", index);
+          }
+          if (closeSquareIndex > index) {
+            if (backSlashIndex === -1 || backSlashIndex > closeSquareIndex) {
+              return true;
+            }
+            backSlashIndex = str.indexOf("\\", index);
+            if (backSlashIndex === -1 || backSlashIndex > closeSquareIndex) {
+              return true;
+            }
+          }
+        }
+        if (closeCurlyIndex !== -1 && str[index] === "{" && str[index + 1] !== "}") {
+          closeCurlyIndex = str.indexOf("}", index);
+          if (closeCurlyIndex > index) {
+            backSlashIndex = str.indexOf("\\", index);
+            if (backSlashIndex === -1 || backSlashIndex > closeCurlyIndex) {
+              return true;
+            }
+          }
+        }
+        if (closeParenIndex !== -1 && str[index] === "(" && str[index + 1] === "?" && /[:!=]/.test(str[index + 2]) && str[index + 3] !== ")") {
+          closeParenIndex = str.indexOf(")", index);
+          if (closeParenIndex > index) {
+            backSlashIndex = str.indexOf("\\", index);
+            if (backSlashIndex === -1 || backSlashIndex > closeParenIndex) {
+              return true;
+            }
+          }
+        }
+        if (pipeIndex !== -1 && str[index] === "(" && str[index + 1] !== "|") {
+          if (pipeIndex < index) {
+            pipeIndex = str.indexOf("|", index);
+          }
+          if (pipeIndex !== -1 && str[pipeIndex + 1] !== ")") {
+            closeParenIndex = str.indexOf(")", pipeIndex);
+            if (closeParenIndex > pipeIndex) {
+              backSlashIndex = str.indexOf("\\", pipeIndex);
+              if (backSlashIndex === -1 || backSlashIndex > closeParenIndex) {
+                return true;
+              }
+            }
+          }
+        }
+        if (str[index] === "\\") {
+          var open = str[index + 1];
+          index += 2;
+          var close = chars[open];
+          if (close) {
+            var n = str.indexOf(close, index);
+            if (n !== -1) {
+              index = n + 1;
+            }
+          }
+          if (str[index] === "!") {
+            return true;
+          }
+        } else {
+          index++;
+        }
+      }
+      return false;
+    };
+    var relaxedCheck = function(str) {
+      if (str[0] === "!") {
+        return true;
+      }
+      var index = 0;
+      while (index < str.length) {
+        if (/[*?{}()[\]]/.test(str[index])) {
+          return true;
+        }
+        if (str[index] === "\\") {
+          var open = str[index + 1];
+          index += 2;
+          var close = chars[open];
+          if (close) {
+            var n = str.indexOf(close, index);
+            if (n !== -1) {
+              index = n + 1;
+            }
+          }
+          if (str[index] === "!") {
+            return true;
+          }
+        } else {
+          index++;
+        }
+      }
+      return false;
+    };
+    module2.exports = function isGlob(str, options) {
+      if (typeof str !== "string" || str === "") {
+        return false;
+      }
+      if (isExtglob(str)) {
+        return true;
+      }
+      var check = strictCheck;
+      if (options && options.strict === false) {
+        check = relaxedCheck;
+      }
+      return check(str);
+    };
+  }
+});
+
+// ../dev-workflow-core/node_modules/glob-parent/index.js
+var require_glob_parent = __commonJS({
+  "../dev-workflow-core/node_modules/glob-parent/index.js"(exports2, module2) {
+    "use strict";
+    var isGlob = require_is_glob();
+    var pathPosixDirname = require("path").posix.dirname;
+    var isWin32 = require("os").platform() === "win32";
+    var slash = "/";
+    var backslash = /\\/g;
+    var enclosure = /[\{\[].*[\}\]]$/;
+    var globby = /(^|[^\\])([\{\[]|\([^\)]+$)/;
+    var escaped = /\\([\!\*\?\|\[\]\(\)\{\}])/g;
+    module2.exports = function globParent(str, opts) {
+      var options = Object.assign({ flipBackslashes: true }, opts);
+      if (options.flipBackslashes && isWin32 && str.indexOf(slash) < 0) {
+        str = str.replace(backslash, slash);
+      }
+      if (enclosure.test(str)) {
+        str += slash;
+      }
+      str += "a";
+      do {
+        str = pathPosixDirname(str);
+      } while (isGlob(str) || globby.test(str));
+      return str.replace(escaped, "$1");
+    };
+  }
+});
+
+// ../dev-workflow-core/node_modules/braces/lib/utils.js
+var require_utils2 = __commonJS({
+  "../dev-workflow-core/node_modules/braces/lib/utils.js"(exports2) {
+    "use strict";
+    exports2.isInteger = (num) => {
+      if (typeof num === "number") {
+        return Number.isInteger(num);
+      }
+      if (typeof num === "string" && num.trim() !== "") {
+        return Number.isInteger(Number(num));
+      }
+      return false;
+    };
+    exports2.find = (node, type) => node.nodes.find((node2) => node2.type === type);
+    exports2.exceedsLimit = (min, max, step = 1, limit) => {
+      if (limit === false) return false;
+      if (!exports2.isInteger(min) || !exports2.isInteger(max)) return false;
+      return (Number(max) - Number(min)) / Number(step) >= limit;
+    };
+    exports2.escapeNode = (block, n = 0, type) => {
+      const node = block.nodes[n];
+      if (!node) return;
+      if (type && node.type === type || node.type === "open" || node.type === "close") {
+        if (node.escaped !== true) {
+          node.value = "\\" + node.value;
+          node.escaped = true;
+        }
+      }
+    };
+    exports2.encloseBrace = (node) => {
+      if (node.type !== "brace") return false;
+      if (node.commas >> 0 + node.ranges >> 0 === 0) {
+        node.invalid = true;
+        return true;
+      }
+      return false;
+    };
+    exports2.isInvalidBrace = (block) => {
+      if (block.type !== "brace") return false;
+      if (block.invalid === true || block.dollar) return true;
+      if (block.commas >> 0 + block.ranges >> 0 === 0) {
+        block.invalid = true;
+        return true;
+      }
+      if (block.open !== true || block.close !== true) {
+        block.invalid = true;
+        return true;
+      }
+      return false;
+    };
+    exports2.isOpenOrClose = (node) => {
+      if (node.type === "open" || node.type === "close") {
+        return true;
+      }
+      return node.open === true || node.close === true;
+    };
+    exports2.reduce = (nodes) => nodes.reduce((acc, node) => {
+      if (node.type === "text") acc.push(node.value);
+      if (node.type === "range") node.type = "text";
+      return acc;
+    }, []);
+    exports2.flatten = (...args) => {
+      const result = [];
+      const flat = (arr) => {
+        for (let i = 0; i < arr.length; i++) {
+          const ele = arr[i];
+          if (Array.isArray(ele)) {
+            flat(ele);
+            continue;
+          }
+          if (ele !== void 0) {
+            result.push(ele);
+          }
+        }
+        return result;
+      };
+      flat(args);
+      return result;
+    };
+  }
+});
+
+// ../dev-workflow-core/node_modules/braces/lib/stringify.js
+var require_stringify2 = __commonJS({
+  "../dev-workflow-core/node_modules/braces/lib/stringify.js"(exports2, module2) {
+    "use strict";
+    var utils = require_utils2();
+    module2.exports = (ast, options = {}) => {
+      const stringify = (node, parent = {}) => {
+        const invalidBlock = options.escapeInvalid && utils.isInvalidBrace(parent);
+        const invalidNode = node.invalid === true && options.escapeInvalid === true;
+        let output = "";
+        if (node.value) {
+          if ((invalidBlock || invalidNode) && utils.isOpenOrClose(node)) {
+            return "\\" + node.value;
+          }
+          return node.value;
+        }
+        if (node.value) {
+          return node.value;
+        }
+        if (node.nodes) {
+          for (const child of node.nodes) {
+            output += stringify(child);
+          }
+        }
+        return output;
+      };
+      return stringify(ast);
+    };
+  }
+});
+
+// ../dev-workflow-core/node_modules/is-number/index.js
+var require_is_number = __commonJS({
+  "../dev-workflow-core/node_modules/is-number/index.js"(exports2, module2) {
+    "use strict";
+    module2.exports = function(num) {
+      if (typeof num === "number") {
+        return num - num === 0;
+      }
+      if (typeof num === "string" && num.trim() !== "") {
+        return Number.isFinite ? Number.isFinite(+num) : isFinite(+num);
+      }
+      return false;
+    };
+  }
+});
+
+// ../dev-workflow-core/node_modules/to-regex-range/index.js
+var require_to_regex_range = __commonJS({
+  "../dev-workflow-core/node_modules/to-regex-range/index.js"(exports2, module2) {
+    "use strict";
+    var isNumber = require_is_number();
+    var toRegexRange = (min, max, options) => {
+      if (isNumber(min) === false) {
+        throw new TypeError("toRegexRange: expected the first argument to be a number");
+      }
+      if (max === void 0 || min === max) {
+        return String(min);
+      }
+      if (isNumber(max) === false) {
+        throw new TypeError("toRegexRange: expected the second argument to be a number.");
+      }
+      let opts = { relaxZeros: true, ...options };
+      if (typeof opts.strictZeros === "boolean") {
+        opts.relaxZeros = opts.strictZeros === false;
+      }
+      let relax = String(opts.relaxZeros);
+      let shorthand = String(opts.shorthand);
+      let capture = String(opts.capture);
+      let wrap = String(opts.wrap);
+      let cacheKey = min + ":" + max + "=" + relax + shorthand + capture + wrap;
+      if (toRegexRange.cache.hasOwnProperty(cacheKey)) {
+        return toRegexRange.cache[cacheKey].result;
+      }
+      let a = Math.min(min, max);
+      let b = Math.max(min, max);
+      if (Math.abs(a - b) === 1) {
+        let result = min + "|" + max;
+        if (opts.capture) {
+          return `(${result})`;
+        }
+        if (opts.wrap === false) {
+          return result;
+        }
+        return `(?:${result})`;
+      }
+      let isPadded = hasPadding(min) || hasPadding(max);
+      let state = { min, max, a, b };
+      let positives = [];
+      let negatives = [];
+      if (isPadded) {
+        state.isPadded = isPadded;
+        state.maxLen = String(state.max).length;
+      }
+      if (a < 0) {
+        let newMin = b < 0 ? Math.abs(b) : 1;
+        negatives = splitToPatterns(newMin, Math.abs(a), state, opts);
+        a = state.a = 0;
+      }
+      if (b >= 0) {
+        positives = splitToPatterns(a, b, state, opts);
+      }
+      state.negatives = negatives;
+      state.positives = positives;
+      state.result = collatePatterns(negatives, positives, opts);
+      if (opts.capture === true) {
+        state.result = `(${state.result})`;
+      } else if (opts.wrap !== false && positives.length + negatives.length > 1) {
+        state.result = `(?:${state.result})`;
+      }
+      toRegexRange.cache[cacheKey] = state;
+      return state.result;
+    };
+    function collatePatterns(neg, pos, options) {
+      let onlyNegative = filterPatterns(neg, pos, "-", false, options) || [];
+      let onlyPositive = filterPatterns(pos, neg, "", false, options) || [];
+      let intersected = filterPatterns(neg, pos, "-?", true, options) || [];
+      let subpatterns = onlyNegative.concat(intersected).concat(onlyPositive);
+      return subpatterns.join("|");
+    }
+    function splitToRanges(min, max) {
+      let nines = 1;
+      let zeros = 1;
+      let stop = countNines(min, nines);
+      let stops = /* @__PURE__ */ new Set([max]);
+      while (min <= stop && stop <= max) {
+        stops.add(stop);
+        nines += 1;
+        stop = countNines(min, nines);
+      }
+      stop = countZeros(max + 1, zeros) - 1;
+      while (min < stop && stop <= max) {
+        stops.add(stop);
+        zeros += 1;
+        stop = countZeros(max + 1, zeros) - 1;
+      }
+      stops = [...stops];
+      stops.sort(compare);
+      return stops;
+    }
+    function rangeToPattern(start, stop, options) {
+      if (start === stop) {
+        return { pattern: start, count: [], digits: 0 };
+      }
+      let zipped = zip(start, stop);
+      let digits = zipped.length;
+      let pattern = "";
+      let count = 0;
+      for (let i = 0; i < digits; i++) {
+        let [startDigit, stopDigit] = zipped[i];
+        if (startDigit === stopDigit) {
+          pattern += startDigit;
+        } else if (startDigit !== "0" || stopDigit !== "9") {
+          pattern += toCharacterClass(startDigit, stopDigit, options);
+        } else {
+          count++;
+        }
+      }
+      if (count) {
+        pattern += options.shorthand === true ? "\\d" : "[0-9]";
+      }
+      return { pattern, count: [count], digits };
+    }
+    function splitToPatterns(min, max, tok, options) {
+      let ranges = splitToRanges(min, max);
+      let tokens = [];
+      let start = min;
+      let prev;
+      for (let i = 0; i < ranges.length; i++) {
+        let max2 = ranges[i];
+        let obj = rangeToPattern(String(start), String(max2), options);
+        let zeros = "";
+        if (!tok.isPadded && prev && prev.pattern === obj.pattern) {
+          if (prev.count.length > 1) {
+            prev.count.pop();
+          }
+          prev.count.push(obj.count[0]);
+          prev.string = prev.pattern + toQuantifier(prev.count);
+          start = max2 + 1;
+          continue;
+        }
+        if (tok.isPadded) {
+          zeros = padZeros(max2, tok, options);
+        }
+        obj.string = zeros + obj.pattern + toQuantifier(obj.count);
+        tokens.push(obj);
+        start = max2 + 1;
+        prev = obj;
+      }
+      return tokens;
+    }
+    function filterPatterns(arr, comparison, prefix, intersection, options) {
+      let result = [];
+      for (let ele of arr) {
+        let { string } = ele;
+        if (!intersection && !contains(comparison, "string", string)) {
+          result.push(prefix + string);
+        }
+        if (intersection && contains(comparison, "string", string)) {
+          result.push(prefix + string);
+        }
+      }
+      return result;
+    }
+    function zip(a, b) {
+      let arr = [];
+      for (let i = 0; i < a.length; i++) arr.push([a[i], b[i]]);
+      return arr;
+    }
+    function compare(a, b) {
+      return a > b ? 1 : b > a ? -1 : 0;
+    }
+    function contains(arr, key, val) {
+      return arr.some((ele) => ele[key] === val);
+    }
+    function countNines(min, len) {
+      return Number(String(min).slice(0, -len) + "9".repeat(len));
+    }
+    function countZeros(integer, zeros) {
+      return integer - integer % Math.pow(10, zeros);
+    }
+    function toQuantifier(digits) {
+      let [start = 0, stop = ""] = digits;
+      if (stop || start > 1) {
+        return `{${start + (stop ? "," + stop : "")}}`;
+      }
+      return "";
+    }
+    function toCharacterClass(a, b, options) {
+      return `[${a}${b - a === 1 ? "" : "-"}${b}]`;
+    }
+    function hasPadding(str) {
+      return /^-?(0+)\d/.test(str);
+    }
+    function padZeros(value, tok, options) {
+      if (!tok.isPadded) {
+        return value;
+      }
+      let diff = Math.abs(tok.maxLen - String(value).length);
+      let relax = options.relaxZeros !== false;
+      switch (diff) {
+        case 0:
+          return "";
+        case 1:
+          return relax ? "0?" : "0";
+        case 2:
+          return relax ? "0{0,2}" : "00";
+        default: {
+          return relax ? `0{0,${diff}}` : `0{${diff}}`;
+        }
+      }
+    }
+    toRegexRange.cache = {};
+    toRegexRange.clearCache = () => toRegexRange.cache = {};
+    module2.exports = toRegexRange;
+  }
+});
+
+// ../dev-workflow-core/node_modules/fill-range/index.js
+var require_fill_range = __commonJS({
+  "../dev-workflow-core/node_modules/fill-range/index.js"(exports2, module2) {
+    "use strict";
+    var util = require("util");
+    var toRegexRange = require_to_regex_range();
+    var isObject = (val) => val !== null && typeof val === "object" && !Array.isArray(val);
+    var transform = (toNumber) => {
+      return (value) => toNumber === true ? Number(value) : String(value);
+    };
+    var isValidValue = (value) => {
+      return typeof value === "number" || typeof value === "string" && value !== "";
+    };
+    var isNumber = (num) => Number.isInteger(+num);
+    var zeros = (input) => {
+      let value = `${input}`;
+      let index = -1;
+      if (value[0] === "-") value = value.slice(1);
+      if (value === "0") return false;
+      while (value[++index] === "0") ;
+      return index > 0;
+    };
+    var stringify = (start, end, options) => {
+      if (typeof start === "string" || typeof end === "string") {
+        return true;
+      }
+      return options.stringify === true;
+    };
+    var pad = (input, maxLength, toNumber) => {
+      if (maxLength > 0) {
+        let dash = input[0] === "-" ? "-" : "";
+        if (dash) input = input.slice(1);
+        input = dash + input.padStart(dash ? maxLength - 1 : maxLength, "0");
+      }
+      if (toNumber === false) {
+        return String(input);
+      }
+      return input;
+    };
+    var toMaxLen = (input, maxLength) => {
+      let negative = input[0] === "-" ? "-" : "";
+      if (negative) {
+        input = input.slice(1);
+        maxLength--;
+      }
+      while (input.length < maxLength) input = "0" + input;
+      return negative ? "-" + input : input;
+    };
+    var toSequence = (parts, options, maxLen) => {
+      parts.negatives.sort((a, b) => a < b ? -1 : a > b ? 1 : 0);
+      parts.positives.sort((a, b) => a < b ? -1 : a > b ? 1 : 0);
+      let prefix = options.capture ? "" : "?:";
+      let positives = "";
+      let negatives = "";
+      let result;
+      if (parts.positives.length) {
+        positives = parts.positives.map((v) => toMaxLen(String(v), maxLen)).join("|");
+      }
+      if (parts.negatives.length) {
+        negatives = `-(${prefix}${parts.negatives.map((v) => toMaxLen(String(v), maxLen)).join("|")})`;
+      }
+      if (positives && negatives) {
+        result = `${positives}|${negatives}`;
+      } else {
+        result = positives || negatives;
+      }
+      if (options.wrap) {
+        return `(${prefix}${result})`;
+      }
+      return result;
+    };
+    var toRange = (a, b, isNumbers, options) => {
+      if (isNumbers) {
+        return toRegexRange(a, b, { wrap: false, ...options });
+      }
+      let start = String.fromCharCode(a);
+      if (a === b) return start;
+      let stop = String.fromCharCode(b);
+      return `[${start}-${stop}]`;
+    };
+    var toRegex = (start, end, options) => {
+      if (Array.isArray(start)) {
+        let wrap = options.wrap === true;
+        let prefix = options.capture ? "" : "?:";
+        return wrap ? `(${prefix}${start.join("|")})` : start.join("|");
+      }
+      return toRegexRange(start, end, options);
+    };
+    var rangeError = (...args) => {
+      return new RangeError("Invalid range arguments: " + util.inspect(...args));
+    };
+    var invalidRange = (start, end, options) => {
+      if (options.strictRanges === true) throw rangeError([start, end]);
+      return [];
+    };
+    var invalidStep = (step, options) => {
+      if (options.strictRanges === true) {
+        throw new TypeError(`Expected step "${step}" to be a number`);
+      }
+      return [];
+    };
+    var fillNumbers = (start, end, step = 1, options = {}) => {
+      let a = Number(start);
+      let b = Number(end);
+      if (!Number.isInteger(a) || !Number.isInteger(b)) {
+        if (options.strictRanges === true) throw rangeError([start, end]);
+        return [];
+      }
+      if (a === 0) a = 0;
+      if (b === 0) b = 0;
+      let descending = a > b;
+      let startString = String(start);
+      let endString = String(end);
+      let stepString = String(step);
+      step = Math.max(Math.abs(step), 1);
+      let padded = zeros(startString) || zeros(endString) || zeros(stepString);
+      let maxLen = padded ? Math.max(startString.length, endString.length, stepString.length) : 0;
+      let toNumber = padded === false && stringify(start, end, options) === false;
+      let format = options.transform || transform(toNumber);
+      if (options.toRegex && step === 1) {
+        return toRange(toMaxLen(start, maxLen), toMaxLen(end, maxLen), true, options);
+      }
+      let parts = { negatives: [], positives: [] };
+      let push = (num) => parts[num < 0 ? "negatives" : "positives"].push(Math.abs(num));
+      let range = [];
+      let index = 0;
+      while (descending ? a >= b : a <= b) {
+        if (options.toRegex === true && step > 1) {
+          push(a);
+        } else {
+          range.push(pad(format(a, index), maxLen, toNumber));
+        }
+        a = descending ? a - step : a + step;
+        index++;
+      }
+      if (options.toRegex === true) {
+        return step > 1 ? toSequence(parts, options, maxLen) : toRegex(range, null, { wrap: false, ...options });
+      }
+      return range;
+    };
+    var fillLetters = (start, end, step = 1, options = {}) => {
+      if (!isNumber(start) && start.length > 1 || !isNumber(end) && end.length > 1) {
+        return invalidRange(start, end, options);
+      }
+      let format = options.transform || ((val) => String.fromCharCode(val));
+      let a = `${start}`.charCodeAt(0);
+      let b = `${end}`.charCodeAt(0);
+      let descending = a > b;
+      let min = Math.min(a, b);
+      let max = Math.max(a, b);
+      if (options.toRegex && step === 1) {
+        return toRange(min, max, false, options);
+      }
+      let range = [];
+      let index = 0;
+      while (descending ? a >= b : a <= b) {
+        range.push(format(a, index));
+        a = descending ? a - step : a + step;
+        index++;
+      }
+      if (options.toRegex === true) {
+        return toRegex(range, null, { wrap: false, options });
+      }
+      return range;
+    };
+    var fill = (start, end, step, options = {}) => {
+      if (end == null && isValidValue(start)) {
+        return [start];
+      }
+      if (!isValidValue(start) || !isValidValue(end)) {
+        return invalidRange(start, end, options);
+      }
+      if (typeof step === "function") {
+        return fill(start, end, 1, { transform: step });
+      }
+      if (isObject(step)) {
+        return fill(start, end, 0, step);
+      }
+      let opts = { ...options };
+      if (opts.capture === true) opts.wrap = true;
+      step = step || opts.step || 1;
+      if (!isNumber(step)) {
+        if (step != null && !isObject(step)) return invalidStep(step, opts);
+        return fill(start, end, 1, step);
+      }
+      if (isNumber(start) && isNumber(end)) {
+        return fillNumbers(start, end, step, opts);
+      }
+      return fillLetters(start, end, Math.max(Math.abs(step), 1), opts);
+    };
+    module2.exports = fill;
+  }
+});
+
+// ../dev-workflow-core/node_modules/braces/lib/compile.js
+var require_compile = __commonJS({
+  "../dev-workflow-core/node_modules/braces/lib/compile.js"(exports2, module2) {
+    "use strict";
+    var fill = require_fill_range();
+    var utils = require_utils2();
+    var compile = (ast, options = {}) => {
+      const walk = (node, parent = {}) => {
+        const invalidBlock = utils.isInvalidBrace(parent);
+        const invalidNode = node.invalid === true && options.escapeInvalid === true;
+        const invalid = invalidBlock === true || invalidNode === true;
+        const prefix = options.escapeInvalid === true ? "\\" : "";
+        let output = "";
+        if (node.isOpen === true) {
+          return prefix + node.value;
+        }
+        if (node.isClose === true) {
+          console.log("node.isClose", prefix, node.value);
+          return prefix + node.value;
+        }
+        if (node.type === "open") {
+          return invalid ? prefix + node.value : "(";
+        }
+        if (node.type === "close") {
+          return invalid ? prefix + node.value : ")";
+        }
+        if (node.type === "comma") {
+          return node.prev.type === "comma" ? "" : invalid ? node.value : "|";
+        }
+        if (node.value) {
+          return node.value;
+        }
+        if (node.nodes && node.ranges > 0) {
+          const args = utils.reduce(node.nodes);
+          const range = fill(...args, { ...options, wrap: false, toRegex: true, strictZeros: true });
+          if (range.length !== 0) {
+            return args.length > 1 && range.length > 1 ? `(${range})` : range;
+          }
+        }
+        if (node.nodes) {
+          for (const child of node.nodes) {
+            output += walk(child, node);
+          }
+        }
+        return output;
+      };
+      return walk(ast);
+    };
+    module2.exports = compile;
+  }
+});
+
+// ../dev-workflow-core/node_modules/braces/lib/expand.js
+var require_expand = __commonJS({
+  "../dev-workflow-core/node_modules/braces/lib/expand.js"(exports2, module2) {
+    "use strict";
+    var fill = require_fill_range();
+    var stringify = require_stringify2();
+    var utils = require_utils2();
+    var append = (queue = "", stash = "", enclose = false) => {
+      const result = [];
+      queue = [].concat(queue);
+      stash = [].concat(stash);
+      if (!stash.length) return queue;
+      if (!queue.length) {
+        return enclose ? utils.flatten(stash).map((ele) => `{${ele}}`) : stash;
+      }
+      for (const item of queue) {
+        if (Array.isArray(item)) {
+          for (const value of item) {
+            result.push(append(value, stash, enclose));
+          }
+        } else {
+          for (let ele of stash) {
+            if (enclose === true && typeof ele === "string") ele = `{${ele}}`;
+            result.push(Array.isArray(ele) ? append(item, ele, enclose) : item + ele);
+          }
+        }
+      }
+      return utils.flatten(result);
+    };
+    var expand = (ast, options = {}) => {
+      const rangeLimit = options.rangeLimit === void 0 ? 1e3 : options.rangeLimit;
+      const walk = (node, parent = {}) => {
+        node.queue = [];
+        let p = parent;
+        let q = parent.queue;
+        while (p.type !== "brace" && p.type !== "root" && p.parent) {
+          p = p.parent;
+          q = p.queue;
+        }
+        if (node.invalid || node.dollar) {
+          q.push(append(q.pop(), stringify(node, options)));
+          return;
+        }
+        if (node.type === "brace" && node.invalid !== true && node.nodes.length === 2) {
+          q.push(append(q.pop(), ["{}"]));
+          return;
+        }
+        if (node.nodes && node.ranges > 0) {
+          const args = utils.reduce(node.nodes);
+          if (utils.exceedsLimit(...args, options.step, rangeLimit)) {
+            throw new RangeError("expanded array length exceeds range limit. Use options.rangeLimit to increase or disable the limit.");
+          }
+          let range = fill(...args, options);
+          if (range.length === 0) {
+            range = stringify(node, options);
+          }
+          q.push(append(q.pop(), range));
+          node.nodes = [];
+          return;
+        }
+        const enclose = utils.encloseBrace(node);
+        let queue = node.queue;
+        let block = node;
+        while (block.type !== "brace" && block.type !== "root" && block.parent) {
+          block = block.parent;
+          queue = block.queue;
+        }
+        for (let i = 0; i < node.nodes.length; i++) {
+          const child = node.nodes[i];
+          if (child.type === "comma" && node.type === "brace") {
+            if (i === 1) queue.push("");
+            queue.push("");
+            continue;
+          }
+          if (child.type === "close") {
+            q.push(append(q.pop(), queue, enclose));
+            continue;
+          }
+          if (child.value && child.type !== "open") {
+            queue.push(append(queue.pop(), child.value));
+            continue;
+          }
+          if (child.nodes) {
+            walk(child, node);
+          }
+        }
+        return queue;
+      };
+      return utils.flatten(walk(ast));
+    };
+    module2.exports = expand;
+  }
+});
+
+// ../dev-workflow-core/node_modules/braces/lib/constants.js
+var require_constants = __commonJS({
+  "../dev-workflow-core/node_modules/braces/lib/constants.js"(exports2, module2) {
+    "use strict";
+    module2.exports = {
+      MAX_LENGTH: 1e4,
+      // Digits
+      CHAR_0: "0",
+      /* 0 */
+      CHAR_9: "9",
+      /* 9 */
+      // Alphabet chars.
+      CHAR_UPPERCASE_A: "A",
+      /* A */
+      CHAR_LOWERCASE_A: "a",
+      /* a */
+      CHAR_UPPERCASE_Z: "Z",
+      /* Z */
+      CHAR_LOWERCASE_Z: "z",
+      /* z */
+      CHAR_LEFT_PARENTHESES: "(",
+      /* ( */
+      CHAR_RIGHT_PARENTHESES: ")",
+      /* ) */
+      CHAR_ASTERISK: "*",
+      /* * */
+      // Non-alphabetic chars.
+      CHAR_AMPERSAND: "&",
+      /* & */
+      CHAR_AT: "@",
+      /* @ */
+      CHAR_BACKSLASH: "\\",
+      /* \ */
+      CHAR_BACKTICK: "`",
+      /* ` */
+      CHAR_CARRIAGE_RETURN: "\r",
+      /* \r */
+      CHAR_CIRCUMFLEX_ACCENT: "^",
+      /* ^ */
+      CHAR_COLON: ":",
+      /* : */
+      CHAR_COMMA: ",",
+      /* , */
+      CHAR_DOLLAR: "$",
+      /* . */
+      CHAR_DOT: ".",
+      /* . */
+      CHAR_DOUBLE_QUOTE: '"',
+      /* " */
+      CHAR_EQUAL: "=",
+      /* = */
+      CHAR_EXCLAMATION_MARK: "!",
+      /* ! */
+      CHAR_FORM_FEED: "\f",
+      /* \f */
+      CHAR_FORWARD_SLASH: "/",
+      /* / */
+      CHAR_HASH: "#",
+      /* # */
+      CHAR_HYPHEN_MINUS: "-",
+      /* - */
+      CHAR_LEFT_ANGLE_BRACKET: "<",
+      /* < */
+      CHAR_LEFT_CURLY_BRACE: "{",
+      /* { */
+      CHAR_LEFT_SQUARE_BRACKET: "[",
+      /* [ */
+      CHAR_LINE_FEED: "\n",
+      /* \n */
+      CHAR_NO_BREAK_SPACE: "\xA0",
+      /* \u00A0 */
+      CHAR_PERCENT: "%",
+      /* % */
+      CHAR_PLUS: "+",
+      /* + */
+      CHAR_QUESTION_MARK: "?",
+      /* ? */
+      CHAR_RIGHT_ANGLE_BRACKET: ">",
+      /* > */
+      CHAR_RIGHT_CURLY_BRACE: "}",
+      /* } */
+      CHAR_RIGHT_SQUARE_BRACKET: "]",
+      /* ] */
+      CHAR_SEMICOLON: ";",
+      /* ; */
+      CHAR_SINGLE_QUOTE: "'",
+      /* ' */
+      CHAR_SPACE: " ",
+      /*   */
+      CHAR_TAB: "	",
+      /* \t */
+      CHAR_UNDERSCORE: "_",
+      /* _ */
+      CHAR_VERTICAL_LINE: "|",
+      /* | */
+      CHAR_ZERO_WIDTH_NOBREAK_SPACE: "\uFEFF"
+      /* \uFEFF */
+    };
+  }
+});
+
+// ../dev-workflow-core/node_modules/braces/lib/parse.js
+var require_parse2 = __commonJS({
+  "../dev-workflow-core/node_modules/braces/lib/parse.js"(exports2, module2) {
+    "use strict";
+    var stringify = require_stringify2();
+    var {
+      MAX_LENGTH,
+      CHAR_BACKSLASH,
+      /* \ */
+      CHAR_BACKTICK,
+      /* ` */
+      CHAR_COMMA,
+      /* , */
+      CHAR_DOT,
+      /* . */
+      CHAR_LEFT_PARENTHESES,
+      /* ( */
+      CHAR_RIGHT_PARENTHESES,
+      /* ) */
+      CHAR_LEFT_CURLY_BRACE,
+      /* { */
+      CHAR_RIGHT_CURLY_BRACE,
+      /* } */
+      CHAR_LEFT_SQUARE_BRACKET,
+      /* [ */
+      CHAR_RIGHT_SQUARE_BRACKET,
+      /* ] */
+      CHAR_DOUBLE_QUOTE,
+      /* " */
+      CHAR_SINGLE_QUOTE,
+      /* ' */
+      CHAR_NO_BREAK_SPACE,
+      CHAR_ZERO_WIDTH_NOBREAK_SPACE
+    } = require_constants();
+    var parse = (input, options = {}) => {
+      if (typeof input !== "string") {
+        throw new TypeError("Expected a string");
+      }
+      const opts = options || {};
+      const max = typeof opts.maxLength === "number" ? Math.min(MAX_LENGTH, opts.maxLength) : MAX_LENGTH;
+      if (input.length > max) {
+        throw new SyntaxError(`Input length (${input.length}), exceeds max characters (${max})`);
+      }
+      const ast = { type: "root", input, nodes: [] };
+      const stack = [ast];
+      let block = ast;
+      let prev = ast;
+      let brackets = 0;
+      const length = input.length;
+      let index = 0;
+      let depth = 0;
+      let value;
+      const advance = () => input[index++];
+      const push = (node) => {
+        if (node.type === "text" && prev.type === "dot") {
+          prev.type = "text";
+        }
+        if (prev && prev.type === "text" && node.type === "text") {
+          prev.value += node.value;
+          return;
+        }
+        block.nodes.push(node);
+        node.parent = block;
+        node.prev = prev;
+        prev = node;
+        return node;
+      };
+      push({ type: "bos" });
+      while (index < length) {
+        block = stack[stack.length - 1];
+        value = advance();
+        if (value === CHAR_ZERO_WIDTH_NOBREAK_SPACE || value === CHAR_NO_BREAK_SPACE) {
+          continue;
+        }
+        if (value === CHAR_BACKSLASH) {
+          push({ type: "text", value: (options.keepEscaping ? value : "") + advance() });
+          continue;
+        }
+        if (value === CHAR_RIGHT_SQUARE_BRACKET) {
+          push({ type: "text", value: "\\" + value });
+          continue;
+        }
+        if (value === CHAR_LEFT_SQUARE_BRACKET) {
+          brackets++;
+          let next;
+          while (index < length && (next = advance())) {
+            value += next;
+            if (next === CHAR_LEFT_SQUARE_BRACKET) {
+              brackets++;
+              continue;
+            }
+            if (next === CHAR_BACKSLASH) {
+              value += advance();
+              continue;
+            }
+            if (next === CHAR_RIGHT_SQUARE_BRACKET) {
+              brackets--;
+              if (brackets === 0) {
+                break;
+              }
+            }
+          }
+          push({ type: "text", value });
+          continue;
+        }
+        if (value === CHAR_LEFT_PARENTHESES) {
+          block = push({ type: "paren", nodes: [] });
+          stack.push(block);
+          push({ type: "text", value });
+          continue;
+        }
+        if (value === CHAR_RIGHT_PARENTHESES) {
+          if (block.type !== "paren") {
+            push({ type: "text", value });
+            continue;
+          }
+          block = stack.pop();
+          push({ type: "text", value });
+          block = stack[stack.length - 1];
+          continue;
+        }
+        if (value === CHAR_DOUBLE_QUOTE || value === CHAR_SINGLE_QUOTE || value === CHAR_BACKTICK) {
+          const open = value;
+          let next;
+          if (options.keepQuotes !== true) {
+            value = "";
+          }
+          while (index < length && (next = advance())) {
+            if (next === CHAR_BACKSLASH) {
+              value += next + advance();
+              continue;
+            }
+            if (next === open) {
+              if (options.keepQuotes === true) value += next;
+              break;
+            }
+            value += next;
+          }
+          push({ type: "text", value });
+          continue;
+        }
+        if (value === CHAR_LEFT_CURLY_BRACE) {
+          depth++;
+          const dollar = prev.value && prev.value.slice(-1) === "$" || block.dollar === true;
+          const brace = {
+            type: "brace",
+            open: true,
+            close: false,
+            dollar,
+            depth,
+            commas: 0,
+            ranges: 0,
+            nodes: []
+          };
+          block = push(brace);
+          stack.push(block);
+          push({ type: "open", value });
+          continue;
+        }
+        if (value === CHAR_RIGHT_CURLY_BRACE) {
+          if (block.type !== "brace") {
+            push({ type: "text", value });
+            continue;
+          }
+          const type = "close";
+          block = stack.pop();
+          block.close = true;
+          push({ type, value });
+          depth--;
+          block = stack[stack.length - 1];
+          continue;
+        }
+        if (value === CHAR_COMMA && depth > 0) {
+          if (block.ranges > 0) {
+            block.ranges = 0;
+            const open = block.nodes.shift();
+            block.nodes = [open, { type: "text", value: stringify(block) }];
+          }
+          push({ type: "comma", value });
+          block.commas++;
+          continue;
+        }
+        if (value === CHAR_DOT && depth > 0 && block.commas === 0) {
+          const siblings = block.nodes;
+          if (depth === 0 || siblings.length === 0) {
+            push({ type: "text", value });
+            continue;
+          }
+          if (prev.type === "dot") {
+            block.range = [];
+            prev.value += value;
+            prev.type = "range";
+            if (block.nodes.length !== 3 && block.nodes.length !== 5) {
+              block.invalid = true;
+              block.ranges = 0;
+              prev.type = "text";
+              continue;
+            }
+            block.ranges++;
+            block.args = [];
+            continue;
+          }
+          if (prev.type === "range") {
+            siblings.pop();
+            const before = siblings[siblings.length - 1];
+            before.value += prev.value + value;
+            prev = before;
+            block.ranges--;
+            continue;
+          }
+          push({ type: "dot", value });
+          continue;
+        }
+        push({ type: "text", value });
+      }
+      do {
+        block = stack.pop();
+        if (block.type !== "root") {
+          block.nodes.forEach((node) => {
+            if (!node.nodes) {
+              if (node.type === "open") node.isOpen = true;
+              if (node.type === "close") node.isClose = true;
+              if (!node.nodes) node.type = "text";
+              node.invalid = true;
+            }
+          });
+          const parent = stack[stack.length - 1];
+          const index2 = parent.nodes.indexOf(block);
+          parent.nodes.splice(index2, 1, ...block.nodes);
+        }
+      } while (stack.length > 0);
+      push({ type: "eos" });
+      return ast;
+    };
+    module2.exports = parse;
+  }
+});
+
+// ../dev-workflow-core/node_modules/braces/index.js
+var require_braces = __commonJS({
+  "../dev-workflow-core/node_modules/braces/index.js"(exports2, module2) {
+    "use strict";
+    var stringify = require_stringify2();
+    var compile = require_compile();
+    var expand = require_expand();
+    var parse = require_parse2();
+    var braces = (input, options = {}) => {
+      let output = [];
+      if (Array.isArray(input)) {
+        for (const pattern of input) {
+          const result = braces.create(pattern, options);
+          if (Array.isArray(result)) {
+            output.push(...result);
+          } else {
+            output.push(result);
+          }
+        }
+      } else {
+        output = [].concat(braces.create(input, options));
+      }
+      if (options && options.expand === true && options.nodupes === true) {
+        output = [...new Set(output)];
+      }
+      return output;
+    };
+    braces.parse = (input, options = {}) => parse(input, options);
+    braces.stringify = (input, options = {}) => {
+      if (typeof input === "string") {
+        return stringify(braces.parse(input, options), options);
+      }
+      return stringify(input, options);
+    };
+    braces.compile = (input, options = {}) => {
+      if (typeof input === "string") {
+        input = braces.parse(input, options);
+      }
+      return compile(input, options);
+    };
+    braces.expand = (input, options = {}) => {
+      if (typeof input === "string") {
+        input = braces.parse(input, options);
+      }
+      let result = expand(input, options);
+      if (options.noempty === true) {
+        result = result.filter(Boolean);
+      }
+      if (options.nodupes === true) {
+        result = [...new Set(result)];
+      }
+      return result;
+    };
+    braces.create = (input, options = {}) => {
+      if (input === "" || input.length < 3) {
+        return [input];
+      }
+      return options.expand !== true ? braces.compile(input, options) : braces.expand(input, options);
+    };
+    module2.exports = braces;
+  }
+});
+
+// ../dev-workflow-core/node_modules/picomatch/lib/constants.js
+var require_constants2 = __commonJS({
+  "../dev-workflow-core/node_modules/picomatch/lib/constants.js"(exports2, module2) {
+    "use strict";
+    var path = require("path");
+    var WIN_SLASH = "\\\\/";
+    var WIN_NO_SLASH = `[^${WIN_SLASH}]`;
+    var DEFAULT_MAX_EXTGLOB_RECURSION = 0;
+    var DOT_LITERAL = "\\.";
+    var PLUS_LITERAL = "\\+";
+    var QMARK_LITERAL = "\\?";
+    var SLASH_LITERAL = "\\/";
+    var ONE_CHAR = "(?=.)";
+    var QMARK = "[^/]";
+    var END_ANCHOR = `(?:${SLASH_LITERAL}|$)`;
+    var START_ANCHOR = `(?:^|${SLASH_LITERAL})`;
+    var DOTS_SLASH = `${DOT_LITERAL}{1,2}${END_ANCHOR}`;
+    var NO_DOT = `(?!${DOT_LITERAL})`;
+    var NO_DOTS = `(?!${START_ANCHOR}${DOTS_SLASH})`;
+    var NO_DOT_SLASH = `(?!${DOT_LITERAL}{0,1}${END_ANCHOR})`;
+    var NO_DOTS_SLASH = `(?!${DOTS_SLASH})`;
+    var QMARK_NO_DOT = `[^.${SLASH_LITERAL}]`;
+    var STAR = `${QMARK}*?`;
+    var POSIX_CHARS = {
+      DOT_LITERAL,
+      PLUS_LITERAL,
+      QMARK_LITERAL,
+      SLASH_LITERAL,
+      ONE_CHAR,
+      QMARK,
+      END_ANCHOR,
+      DOTS_SLASH,
+      NO_DOT,
+      NO_DOTS,
+      NO_DOT_SLASH,
+      NO_DOTS_SLASH,
+      QMARK_NO_DOT,
+      STAR,
+      START_ANCHOR
+    };
+    var WINDOWS_CHARS = {
+      ...POSIX_CHARS,
+      SLASH_LITERAL: `[${WIN_SLASH}]`,
+      QMARK: WIN_NO_SLASH,
+      STAR: `${WIN_NO_SLASH}*?`,
+      DOTS_SLASH: `${DOT_LITERAL}{1,2}(?:[${WIN_SLASH}]|$)`,
+      NO_DOT: `(?!${DOT_LITERAL})`,
+      NO_DOTS: `(?!(?:^|[${WIN_SLASH}])${DOT_LITERAL}{1,2}(?:[${WIN_SLASH}]|$))`,
+      NO_DOT_SLASH: `(?!${DOT_LITERAL}{0,1}(?:[${WIN_SLASH}]|$))`,
+      NO_DOTS_SLASH: `(?!${DOT_LITERAL}{1,2}(?:[${WIN_SLASH}]|$))`,
+      QMARK_NO_DOT: `[^.${WIN_SLASH}]`,
+      START_ANCHOR: `(?:^|[${WIN_SLASH}])`,
+      END_ANCHOR: `(?:[${WIN_SLASH}]|$)`
+    };
+    var POSIX_REGEX_SOURCE = {
+      __proto__: null,
+      alnum: "a-zA-Z0-9",
+      alpha: "a-zA-Z",
+      ascii: "\\x00-\\x7F",
+      blank: " \\t",
+      cntrl: "\\x00-\\x1F\\x7F",
+      digit: "0-9",
+      graph: "\\x21-\\x7E",
+      lower: "a-z",
+      print: "\\x20-\\x7E ",
+      punct: "\\-!\"#$%&'()\\*+,./:;<=>?@[\\]^_`{|}~",
+      space: " \\t\\r\\n\\v\\f",
+      upper: "A-Z",
+      word: "A-Za-z0-9_",
+      xdigit: "A-Fa-f0-9"
+    };
+    module2.exports = {
+      DEFAULT_MAX_EXTGLOB_RECURSION,
+      MAX_LENGTH: 1024 * 64,
+      POSIX_REGEX_SOURCE,
+      // regular expressions
+      REGEX_BACKSLASH: /\\(?![*+?^${}(|)[\]])/g,
+      REGEX_NON_SPECIAL_CHARS: /^[^@![\].,$*+?^{}()|\\/]+/,
+      REGEX_SPECIAL_CHARS: /[-*+?.^${}(|)[\]]/,
+      REGEX_SPECIAL_CHARS_BACKREF: /(\\?)((\W)(\3*))/g,
+      REGEX_SPECIAL_CHARS_GLOBAL: /([-*+?.^${}(|)[\]])/g,
+      REGEX_REMOVE_BACKSLASH: /(?:\[.*?[^\\]\]|\\(?=.))/g,
+      // Replace globs with equivalent patterns to reduce parsing time.
+      REPLACEMENTS: {
+        __proto__: null,
+        "***": "*",
+        "**/**": "**",
+        "**/**/**": "**"
+      },
+      // Digits
+      CHAR_0: 48,
+      /* 0 */
+      CHAR_9: 57,
+      /* 9 */
+      // Alphabet chars.
+      CHAR_UPPERCASE_A: 65,
+      /* A */
+      CHAR_LOWERCASE_A: 97,
+      /* a */
+      CHAR_UPPERCASE_Z: 90,
+      /* Z */
+      CHAR_LOWERCASE_Z: 122,
+      /* z */
+      CHAR_LEFT_PARENTHESES: 40,
+      /* ( */
+      CHAR_RIGHT_PARENTHESES: 41,
+      /* ) */
+      CHAR_ASTERISK: 42,
+      /* * */
+      // Non-alphabetic chars.
+      CHAR_AMPERSAND: 38,
+      /* & */
+      CHAR_AT: 64,
+      /* @ */
+      CHAR_BACKWARD_SLASH: 92,
+      /* \ */
+      CHAR_CARRIAGE_RETURN: 13,
+      /* \r */
+      CHAR_CIRCUMFLEX_ACCENT: 94,
+      /* ^ */
+      CHAR_COLON: 58,
+      /* : */
+      CHAR_COMMA: 44,
+      /* , */
+      CHAR_DOT: 46,
+      /* . */
+      CHAR_DOUBLE_QUOTE: 34,
+      /* " */
+      CHAR_EQUAL: 61,
+      /* = */
+      CHAR_EXCLAMATION_MARK: 33,
+      /* ! */
+      CHAR_FORM_FEED: 12,
+      /* \f */
+      CHAR_FORWARD_SLASH: 47,
+      /* / */
+      CHAR_GRAVE_ACCENT: 96,
+      /* ` */
+      CHAR_HASH: 35,
+      /* # */
+      CHAR_HYPHEN_MINUS: 45,
+      /* - */
+      CHAR_LEFT_ANGLE_BRACKET: 60,
+      /* < */
+      CHAR_LEFT_CURLY_BRACE: 123,
+      /* { */
+      CHAR_LEFT_SQUARE_BRACKET: 91,
+      /* [ */
+      CHAR_LINE_FEED: 10,
+      /* \n */
+      CHAR_NO_BREAK_SPACE: 160,
+      /* \u00A0 */
+      CHAR_PERCENT: 37,
+      /* % */
+      CHAR_PLUS: 43,
+      /* + */
+      CHAR_QUESTION_MARK: 63,
+      /* ? */
+      CHAR_RIGHT_ANGLE_BRACKET: 62,
+      /* > */
+      CHAR_RIGHT_CURLY_BRACE: 125,
+      /* } */
+      CHAR_RIGHT_SQUARE_BRACKET: 93,
+      /* ] */
+      CHAR_SEMICOLON: 59,
+      /* ; */
+      CHAR_SINGLE_QUOTE: 39,
+      /* ' */
+      CHAR_SPACE: 32,
+      /*   */
+      CHAR_TAB: 9,
+      /* \t */
+      CHAR_UNDERSCORE: 95,
+      /* _ */
+      CHAR_VERTICAL_LINE: 124,
+      /* | */
+      CHAR_ZERO_WIDTH_NOBREAK_SPACE: 65279,
+      /* \uFEFF */
+      SEP: path.sep,
+      /**
+       * Create EXTGLOB_CHARS
+       */
+      extglobChars(chars) {
+        return {
+          "!": { type: "negate", open: "(?:(?!(?:", close: `))${chars.STAR})` },
+          "?": { type: "qmark", open: "(?:", close: ")?" },
+          "+": { type: "plus", open: "(?:", close: ")+" },
+          "*": { type: "star", open: "(?:", close: ")*" },
+          "@": { type: "at", open: "(?:", close: ")" }
+        };
+      },
+      /**
+       * Create GLOB_CHARS
+       */
+      globChars(win32) {
+        return win32 === true ? WINDOWS_CHARS : POSIX_CHARS;
+      }
+    };
+  }
+});
+
+// ../dev-workflow-core/node_modules/picomatch/lib/utils.js
+var require_utils3 = __commonJS({
+  "../dev-workflow-core/node_modules/picomatch/lib/utils.js"(exports2) {
+    "use strict";
+    var path = require("path");
+    var win32 = process.platform === "win32";
+    var {
+      REGEX_BACKSLASH,
+      REGEX_REMOVE_BACKSLASH,
+      REGEX_SPECIAL_CHARS,
+      REGEX_SPECIAL_CHARS_GLOBAL
+    } = require_constants2();
+    exports2.isObject = (val) => val !== null && typeof val === "object" && !Array.isArray(val);
+    exports2.hasRegexChars = (str) => REGEX_SPECIAL_CHARS.test(str);
+    exports2.isRegexChar = (str) => str.length === 1 && exports2.hasRegexChars(str);
+    exports2.escapeRegex = (str) => str.replace(REGEX_SPECIAL_CHARS_GLOBAL, "\\$1");
+    exports2.toPosixSlashes = (str) => str.replace(REGEX_BACKSLASH, "/");
+    exports2.removeBackslashes = (str) => {
+      return str.replace(REGEX_REMOVE_BACKSLASH, (match) => {
+        return match === "\\" ? "" : match;
+      });
+    };
+    exports2.supportsLookbehinds = () => {
+      const segs = process.version.slice(1).split(".").map(Number);
+      if (segs.length === 3 && segs[0] >= 9 || segs[0] === 8 && segs[1] >= 10) {
+        return true;
+      }
+      return false;
+    };
+    exports2.isWindows = (options) => {
+      if (options && typeof options.windows === "boolean") {
+        return options.windows;
+      }
+      return win32 === true || path.sep === "\\";
+    };
+    exports2.escapeLast = (input, char, lastIdx) => {
+      const idx = input.lastIndexOf(char, lastIdx);
+      if (idx === -1) return input;
+      if (input[idx - 1] === "\\") return exports2.escapeLast(input, char, idx - 1);
+      return `${input.slice(0, idx)}\\${input.slice(idx)}`;
+    };
+    exports2.removePrefix = (input, state = {}) => {
+      let output = input;
+      if (output.startsWith("./")) {
+        output = output.slice(2);
+        state.prefix = "./";
+      }
+      return output;
+    };
+    exports2.wrapOutput = (input, state = {}, options = {}) => {
+      const prepend = options.contains ? "" : "^";
+      const append = options.contains ? "" : "$";
+      let output = `${prepend}(?:${input})${append}`;
+      if (state.negated === true) {
+        output = `(?:^(?!${output}).*$)`;
+      }
+      return output;
+    };
+  }
+});
+
+// ../dev-workflow-core/node_modules/picomatch/lib/scan.js
+var require_scan = __commonJS({
+  "../dev-workflow-core/node_modules/picomatch/lib/scan.js"(exports2, module2) {
+    "use strict";
+    var utils = require_utils3();
+    var {
+      CHAR_ASTERISK,
+      /* * */
+      CHAR_AT,
+      /* @ */
+      CHAR_BACKWARD_SLASH,
+      /* \ */
+      CHAR_COMMA,
+      /* , */
+      CHAR_DOT,
+      /* . */
+      CHAR_EXCLAMATION_MARK,
+      /* ! */
+      CHAR_FORWARD_SLASH,
+      /* / */
+      CHAR_LEFT_CURLY_BRACE,
+      /* { */
+      CHAR_LEFT_PARENTHESES,
+      /* ( */
+      CHAR_LEFT_SQUARE_BRACKET,
+      /* [ */
+      CHAR_PLUS,
+      /* + */
+      CHAR_QUESTION_MARK,
+      /* ? */
+      CHAR_RIGHT_CURLY_BRACE,
+      /* } */
+      CHAR_RIGHT_PARENTHESES,
+      /* ) */
+      CHAR_RIGHT_SQUARE_BRACKET
+      /* ] */
+    } = require_constants2();
+    var isPathSeparator = (code) => {
+      return code === CHAR_FORWARD_SLASH || code === CHAR_BACKWARD_SLASH;
+    };
+    var depth = (token) => {
+      if (token.isPrefix !== true) {
+        token.depth = token.isGlobstar ? Infinity : 1;
+      }
+    };
+    var scan = (input, options) => {
+      const opts = options || {};
+      const length = input.length - 1;
+      const scanToEnd = opts.parts === true || opts.scanToEnd === true;
+      const slashes = [];
+      const tokens = [];
+      const parts = [];
+      let str = input;
+      let index = -1;
+      let start = 0;
+      let lastIndex = 0;
+      let isBrace = false;
+      let isBracket = false;
+      let isGlob = false;
+      let isExtglob = false;
+      let isGlobstar = false;
+      let braceEscaped = false;
+      let backslashes = false;
+      let negated = false;
+      let negatedExtglob = false;
+      let finished = false;
+      let braces = 0;
+      let prev;
+      let code;
+      let token = { value: "", depth: 0, isGlob: false };
+      const eos = () => index >= length;
+      const peek = () => str.charCodeAt(index + 1);
+      const advance = () => {
+        prev = code;
+        return str.charCodeAt(++index);
+      };
+      while (index < length) {
+        code = advance();
+        let next;
+        if (code === CHAR_BACKWARD_SLASH) {
+          backslashes = token.backslashes = true;
+          code = advance();
+          if (code === CHAR_LEFT_CURLY_BRACE) {
+            braceEscaped = true;
+          }
+          continue;
+        }
+        if (braceEscaped === true || code === CHAR_LEFT_CURLY_BRACE) {
+          braces++;
+          while (eos() !== true && (code = advance())) {
+            if (code === CHAR_BACKWARD_SLASH) {
+              backslashes = token.backslashes = true;
+              advance();
+              continue;
+            }
+            if (code === CHAR_LEFT_CURLY_BRACE) {
+              braces++;
+              continue;
+            }
+            if (braceEscaped !== true && code === CHAR_DOT && (code = advance()) === CHAR_DOT) {
+              isBrace = token.isBrace = true;
+              isGlob = token.isGlob = true;
+              finished = true;
+              if (scanToEnd === true) {
+                continue;
+              }
+              break;
+            }
+            if (braceEscaped !== true && code === CHAR_COMMA) {
+              isBrace = token.isBrace = true;
+              isGlob = token.isGlob = true;
+              finished = true;
+              if (scanToEnd === true) {
+                continue;
+              }
+              break;
+            }
+            if (code === CHAR_RIGHT_CURLY_BRACE) {
+              braces--;
+              if (braces === 0) {
+                braceEscaped = false;
+                isBrace = token.isBrace = true;
+                finished = true;
+                break;
+              }
+            }
+          }
+          if (scanToEnd === true) {
+            continue;
+          }
+          break;
+        }
+        if (code === CHAR_FORWARD_SLASH) {
+          slashes.push(index);
+          tokens.push(token);
+          token = { value: "", depth: 0, isGlob: false };
+          if (finished === true) continue;
+          if (prev === CHAR_DOT && index === start + 1) {
+            start += 2;
+            continue;
+          }
+          lastIndex = index + 1;
+          continue;
+        }
+        if (opts.noext !== true) {
+          const isExtglobChar = code === CHAR_PLUS || code === CHAR_AT || code === CHAR_ASTERISK || code === CHAR_QUESTION_MARK || code === CHAR_EXCLAMATION_MARK;
+          if (isExtglobChar === true && peek() === CHAR_LEFT_PARENTHESES) {
+            isGlob = token.isGlob = true;
+            isExtglob = token.isExtglob = true;
+            finished = true;
+            if (code === CHAR_EXCLAMATION_MARK && index === start) {
+              negatedExtglob = true;
+            }
+            if (scanToEnd === true) {
+              while (eos() !== true && (code = advance())) {
+                if (code === CHAR_BACKWARD_SLASH) {
+                  backslashes = token.backslashes = true;
+                  code = advance();
+                  continue;
+                }
+                if (code === CHAR_RIGHT_PARENTHESES) {
+                  isGlob = token.isGlob = true;
+                  finished = true;
+                  break;
+                }
+              }
+              continue;
+            }
+            break;
+          }
+        }
+        if (code === CHAR_ASTERISK) {
+          if (prev === CHAR_ASTERISK) isGlobstar = token.isGlobstar = true;
+          isGlob = token.isGlob = true;
+          finished = true;
+          if (scanToEnd === true) {
+            continue;
+          }
+          break;
+        }
+        if (code === CHAR_QUESTION_MARK) {
+          isGlob = token.isGlob = true;
+          finished = true;
+          if (scanToEnd === true) {
+            continue;
+          }
+          break;
+        }
+        if (code === CHAR_LEFT_SQUARE_BRACKET) {
+          while (eos() !== true && (next = advance())) {
+            if (next === CHAR_BACKWARD_SLASH) {
+              backslashes = token.backslashes = true;
+              advance();
+              continue;
+            }
+            if (next === CHAR_RIGHT_SQUARE_BRACKET) {
+              isBracket = token.isBracket = true;
+              isGlob = token.isGlob = true;
+              finished = true;
+              break;
+            }
+          }
+          if (scanToEnd === true) {
+            continue;
+          }
+          break;
+        }
+        if (opts.nonegate !== true && code === CHAR_EXCLAMATION_MARK && index === start) {
+          negated = token.negated = true;
+          start++;
+          continue;
+        }
+        if (opts.noparen !== true && code === CHAR_LEFT_PARENTHESES) {
+          isGlob = token.isGlob = true;
+          if (scanToEnd === true) {
+            while (eos() !== true && (code = advance())) {
+              if (code === CHAR_LEFT_PARENTHESES) {
+                backslashes = token.backslashes = true;
+                code = advance();
+                continue;
+              }
+              if (code === CHAR_RIGHT_PARENTHESES) {
+                finished = true;
+                break;
+              }
+            }
+            continue;
+          }
+          break;
+        }
+        if (isGlob === true) {
+          finished = true;
+          if (scanToEnd === true) {
+            continue;
+          }
+          break;
+        }
+      }
+      if (opts.noext === true) {
+        isExtglob = false;
+        isGlob = false;
+      }
+      let base = str;
+      let prefix = "";
+      let glob = "";
+      if (start > 0) {
+        prefix = str.slice(0, start);
+        str = str.slice(start);
+        lastIndex -= start;
+      }
+      if (base && isGlob === true && lastIndex > 0) {
+        base = str.slice(0, lastIndex);
+        glob = str.slice(lastIndex);
+      } else if (isGlob === true) {
+        base = "";
+        glob = str;
+      } else {
+        base = str;
+      }
+      if (base && base !== "" && base !== "/" && base !== str) {
+        if (isPathSeparator(base.charCodeAt(base.length - 1))) {
+          base = base.slice(0, -1);
+        }
+      }
+      if (opts.unescape === true) {
+        if (glob) glob = utils.removeBackslashes(glob);
+        if (base && backslashes === true) {
+          base = utils.removeBackslashes(base);
+        }
+      }
+      const state = {
+        prefix,
+        input,
+        start,
+        base,
+        glob,
+        isBrace,
+        isBracket,
+        isGlob,
+        isExtglob,
+        isGlobstar,
+        negated,
+        negatedExtglob
+      };
+      if (opts.tokens === true) {
+        state.maxDepth = 0;
+        if (!isPathSeparator(code)) {
+          tokens.push(token);
+        }
+        state.tokens = tokens;
+      }
+      if (opts.parts === true || opts.tokens === true) {
+        let prevIndex;
+        for (let idx = 0; idx < slashes.length; idx++) {
+          const n = prevIndex ? prevIndex + 1 : start;
+          const i = slashes[idx];
+          const value = input.slice(n, i);
+          if (opts.tokens) {
+            if (idx === 0 && start !== 0) {
+              tokens[idx].isPrefix = true;
+              tokens[idx].value = prefix;
+            } else {
+              tokens[idx].value = value;
+            }
+            depth(tokens[idx]);
+            state.maxDepth += tokens[idx].depth;
+          }
+          if (idx !== 0 || value !== "") {
+            parts.push(value);
+          }
+          prevIndex = i;
+        }
+        if (prevIndex && prevIndex + 1 < input.length) {
+          const value = input.slice(prevIndex + 1);
+          parts.push(value);
+          if (opts.tokens) {
+            tokens[tokens.length - 1].value = value;
+            depth(tokens[tokens.length - 1]);
+            state.maxDepth += tokens[tokens.length - 1].depth;
+          }
+        }
+        state.slashes = slashes;
+        state.parts = parts;
+      }
+      return state;
+    };
+    module2.exports = scan;
+  }
+});
+
+// ../dev-workflow-core/node_modules/picomatch/lib/parse.js
+var require_parse3 = __commonJS({
+  "../dev-workflow-core/node_modules/picomatch/lib/parse.js"(exports2, module2) {
+    "use strict";
+    var constants = require_constants2();
+    var utils = require_utils3();
+    var {
+      MAX_LENGTH,
+      POSIX_REGEX_SOURCE,
+      REGEX_NON_SPECIAL_CHARS,
+      REGEX_SPECIAL_CHARS_BACKREF,
+      REPLACEMENTS
+    } = constants;
+    var expandRange = (args, options) => {
+      if (typeof options.expandRange === "function") {
+        return options.expandRange(...args, options);
+      }
+      args.sort();
+      const value = `[${args.join("-")}]`;
+      try {
+        new RegExp(value);
+      } catch (ex) {
+        return args.map((v) => utils.escapeRegex(v)).join("..");
+      }
+      return value;
+    };
+    var syntaxError = (type, char) => {
+      return `Missing ${type}: "${char}" - use "\\\\${char}" to match literal characters`;
+    };
+    var splitTopLevel = (input) => {
+      const parts = [];
+      let bracket = 0;
+      let paren = 0;
+      let quote = 0;
+      let value = "";
+      let escaped = false;
+      for (const ch of input) {
+        if (escaped === true) {
+          value += ch;
+          escaped = false;
+          continue;
+        }
+        if (ch === "\\") {
+          value += ch;
+          escaped = true;
+          continue;
+        }
+        if (ch === '"') {
+          quote = quote === 1 ? 0 : 1;
+          value += ch;
+          continue;
+        }
+        if (quote === 0) {
+          if (ch === "[") {
+            bracket++;
+          } else if (ch === "]" && bracket > 0) {
+            bracket--;
+          } else if (bracket === 0) {
+            if (ch === "(") {
+              paren++;
+            } else if (ch === ")" && paren > 0) {
+              paren--;
+            } else if (ch === "|" && paren === 0) {
+              parts.push(value);
+              value = "";
+              continue;
+            }
+          }
+        }
+        value += ch;
+      }
+      parts.push(value);
+      return parts;
+    };
+    var isPlainBranch = (branch) => {
+      let escaped = false;
+      for (const ch of branch) {
+        if (escaped === true) {
+          escaped = false;
+          continue;
+        }
+        if (ch === "\\") {
+          escaped = true;
+          continue;
+        }
+        if (/[?*+@!()[\]{}]/.test(ch)) {
+          return false;
+        }
+      }
+      return true;
+    };
+    var normalizeSimpleBranch = (branch) => {
+      let value = branch.trim();
+      let changed = true;
+      while (changed === true) {
+        changed = false;
+        if (/^@\([^\\()[\]{}|]+\)$/.test(value)) {
+          value = value.slice(2, -1);
+          changed = true;
+        }
+      }
+      if (!isPlainBranch(value)) {
+        return;
+      }
+      return value.replace(/\\(.)/g, "$1");
+    };
+    var hasRepeatedCharPrefixOverlap = (branches) => {
+      const values = branches.map(normalizeSimpleBranch).filter(Boolean);
+      for (let i = 0; i < values.length; i++) {
+        for (let j = i + 1; j < values.length; j++) {
+          const a = values[i];
+          const b = values[j];
+          const char = a[0];
+          if (!char || a !== char.repeat(a.length) || b !== char.repeat(b.length)) {
+            continue;
+          }
+          if (a === b || a.startsWith(b) || b.startsWith(a)) {
+            return true;
+          }
+        }
+      }
+      return false;
+    };
+    var parseRepeatedExtglob = (pattern, requireEnd = true) => {
+      if (pattern[0] !== "+" && pattern[0] !== "*" || pattern[1] !== "(") {
+        return;
+      }
+      let bracket = 0;
+      let paren = 0;
+      let quote = 0;
+      let escaped = false;
+      for (let i = 1; i < pattern.length; i++) {
+        const ch = pattern[i];
+        if (escaped === true) {
+          escaped = false;
+          continue;
+        }
+        if (ch === "\\") {
+          escaped = true;
+          continue;
+        }
+        if (ch === '"') {
+          quote = quote === 1 ? 0 : 1;
+          continue;
+        }
+        if (quote === 1) {
+          continue;
+        }
+        if (ch === "[") {
+          bracket++;
+          continue;
+        }
+        if (ch === "]" && bracket > 0) {
+          bracket--;
+          continue;
+        }
+        if (bracket > 0) {
+          continue;
+        }
+        if (ch === "(") {
+          paren++;
+          continue;
+        }
+        if (ch === ")") {
+          paren--;
+          if (paren === 0) {
+            if (requireEnd === true && i !== pattern.length - 1) {
+              return;
+            }
+            return {
+              type: pattern[0],
+              body: pattern.slice(2, i),
+              end: i
+            };
+          }
+        }
+      }
+    };
+    var getStarExtglobSequenceOutput = (pattern) => {
+      let index = 0;
+      const chars = [];
+      while (index < pattern.length) {
+        const match = parseRepeatedExtglob(pattern.slice(index), false);
+        if (!match || match.type !== "*") {
+          return;
+        }
+        const branches = splitTopLevel(match.body).map((branch2) => branch2.trim());
+        if (branches.length !== 1) {
+          return;
+        }
+        const branch = normalizeSimpleBranch(branches[0]);
+        if (!branch || branch.length !== 1) {
+          return;
+        }
+        chars.push(branch);
+        index += match.end + 1;
+      }
+      if (chars.length < 1) {
+        return;
+      }
+      const source = chars.length === 1 ? utils.escapeRegex(chars[0]) : `[${chars.map((ch) => utils.escapeRegex(ch)).join("")}]`;
+      return `${source}*`;
+    };
+    var repeatedExtglobRecursion = (pattern) => {
+      let depth = 0;
+      let value = pattern.trim();
+      let match = parseRepeatedExtglob(value);
+      while (match) {
+        depth++;
+        value = match.body.trim();
+        match = parseRepeatedExtglob(value);
+      }
+      return depth;
+    };
+    var analyzeRepeatedExtglob = (body, options) => {
+      if (options.maxExtglobRecursion === false) {
+        return { risky: false };
+      }
+      const max = typeof options.maxExtglobRecursion === "number" ? options.maxExtglobRecursion : constants.DEFAULT_MAX_EXTGLOB_RECURSION;
+      const branches = splitTopLevel(body).map((branch) => branch.trim());
+      if (branches.length > 1) {
+        if (branches.some((branch) => branch === "") || branches.some((branch) => /^[*?]+$/.test(branch)) || hasRepeatedCharPrefixOverlap(branches)) {
+          return { risky: true };
+        }
+      }
+      for (const branch of branches) {
+        const safeOutput = getStarExtglobSequenceOutput(branch);
+        if (safeOutput) {
+          return { risky: true, safeOutput };
+        }
+        if (repeatedExtglobRecursion(branch) > max) {
+          return { risky: true };
+        }
+      }
+      return { risky: false };
+    };
+    var parse = (input, options) => {
+      if (typeof input !== "string") {
+        throw new TypeError("Expected a string");
+      }
+      input = REPLACEMENTS[input] || input;
+      const opts = { ...options };
+      const max = typeof opts.maxLength === "number" ? Math.min(MAX_LENGTH, opts.maxLength) : MAX_LENGTH;
+      let len = input.length;
+      if (len > max) {
+        throw new SyntaxError(`Input length: ${len}, exceeds maximum allowed length: ${max}`);
+      }
+      const bos = { type: "bos", value: "", output: opts.prepend || "" };
+      const tokens = [bos];
+      const capture = opts.capture ? "" : "?:";
+      const win32 = utils.isWindows(options);
+      const PLATFORM_CHARS = constants.globChars(win32);
+      const EXTGLOB_CHARS = constants.extglobChars(PLATFORM_CHARS);
+      const {
+        DOT_LITERAL,
+        PLUS_LITERAL,
+        SLASH_LITERAL,
+        ONE_CHAR,
+        DOTS_SLASH,
+        NO_DOT,
+        NO_DOT_SLASH,
+        NO_DOTS_SLASH,
+        QMARK,
+        QMARK_NO_DOT,
+        STAR,
+        START_ANCHOR
+      } = PLATFORM_CHARS;
+      const globstar = (opts2) => {
+        return `(${capture}(?:(?!${START_ANCHOR}${opts2.dot ? DOTS_SLASH : DOT_LITERAL}).)*?)`;
+      };
+      const nodot = opts.dot ? "" : NO_DOT;
+      const qmarkNoDot = opts.dot ? QMARK : QMARK_NO_DOT;
+      let star = opts.bash === true ? globstar(opts) : STAR;
+      if (opts.capture) {
+        star = `(${star})`;
+      }
+      if (typeof opts.noext === "boolean") {
+        opts.noextglob = opts.noext;
+      }
+      const state = {
+        input,
+        index: -1,
+        start: 0,
+        dot: opts.dot === true,
+        consumed: "",
+        output: "",
+        prefix: "",
+        backtrack: false,
+        negated: false,
+        brackets: 0,
+        braces: 0,
+        parens: 0,
+        quotes: 0,
+        globstar: false,
+        tokens
+      };
+      input = utils.removePrefix(input, state);
+      len = input.length;
+      const extglobs = [];
+      const braces = [];
+      const stack = [];
+      let prev = bos;
+      let value;
+      const eos = () => state.index === len - 1;
+      const peek = state.peek = (n = 1) => input[state.index + n];
+      const advance = state.advance = () => input[++state.index] || "";
+      const remaining = () => input.slice(state.index + 1);
+      const consume = (value2 = "", num = 0) => {
+        state.consumed += value2;
+        state.index += num;
+      };
+      const append = (token) => {
+        state.output += token.output != null ? token.output : token.value;
+        consume(token.value);
+      };
+      const negate = () => {
+        let count = 1;
+        while (peek() === "!" && (peek(2) !== "(" || peek(3) === "?")) {
+          advance();
+          state.start++;
+          count++;
+        }
+        if (count % 2 === 0) {
+          return false;
+        }
+        state.negated = true;
+        state.start++;
+        return true;
+      };
+      const increment = (type) => {
+        state[type]++;
+        stack.push(type);
+      };
+      const decrement = (type) => {
+        state[type]--;
+        stack.pop();
+      };
+      const push = (tok) => {
+        if (prev.type === "globstar") {
+          const isBrace = state.braces > 0 && (tok.type === "comma" || tok.type === "brace");
+          const isExtglob = tok.extglob === true || extglobs.length && (tok.type === "pipe" || tok.type === "paren");
+          if (tok.type !== "slash" && tok.type !== "paren" && !isBrace && !isExtglob) {
+            state.output = state.output.slice(0, -prev.output.length);
+            prev.type = "star";
+            prev.value = "*";
+            prev.output = star;
+            state.output += prev.output;
+          }
+        }
+        if (extglobs.length && tok.type !== "paren") {
+          extglobs[extglobs.length - 1].inner += tok.value;
+        }
+        if (tok.value || tok.output) append(tok);
+        if (prev && prev.type === "text" && tok.type === "text") {
+          prev.value += tok.value;
+          prev.output = (prev.output || "") + tok.value;
+          return;
+        }
+        tok.prev = prev;
+        tokens.push(tok);
+        prev = tok;
+      };
+      const extglobOpen = (type, value2) => {
+        const token = { ...EXTGLOB_CHARS[value2], conditions: 1, inner: "" };
+        token.prev = prev;
+        token.parens = state.parens;
+        token.output = state.output;
+        token.startIndex = state.index;
+        token.tokensIndex = tokens.length;
+        const output = (opts.capture ? "(" : "") + token.open;
+        increment("parens");
+        push({ type, value: value2, output: state.output ? "" : ONE_CHAR });
+        push({ type: "paren", extglob: true, value: advance(), output });
+        extglobs.push(token);
+      };
+      const extglobClose = (token) => {
+        const literal = input.slice(token.startIndex, state.index + 1);
+        const body = input.slice(token.startIndex + 2, state.index);
+        const analysis = analyzeRepeatedExtglob(body, opts);
+        if ((token.type === "plus" || token.type === "star") && analysis.risky) {
+          const safeOutput = analysis.safeOutput ? (token.output ? "" : ONE_CHAR) + (opts.capture ? `(${analysis.safeOutput})` : analysis.safeOutput) : void 0;
+          const open = tokens[token.tokensIndex];
+          open.type = "text";
+          open.value = literal;
+          open.output = safeOutput || utils.escapeRegex(literal);
+          for (let i = token.tokensIndex + 1; i < tokens.length; i++) {
+            tokens[i].value = "";
+            tokens[i].output = "";
+            delete tokens[i].suffix;
+          }
+          state.output = token.output + open.output;
+          state.backtrack = true;
+          push({ type: "paren", extglob: true, value, output: "" });
+          decrement("parens");
+          return;
+        }
+        let output = token.close + (opts.capture ? ")" : "");
+        let rest;
+        if (token.type === "negate") {
+          let extglobStar = star;
+          if (token.inner && token.inner.length > 1 && token.inner.includes("/")) {
+            extglobStar = globstar(opts);
+          }
+          if (extglobStar !== star || eos() || /^\)+$/.test(remaining())) {
+            output = token.close = `)$))${extglobStar}`;
+          }
+          if (token.inner.includes("*") && (rest = remaining()) && /^\.[^\\/.]+$/.test(rest)) {
+            const expression = parse(rest, { ...options, fastpaths: false }).output;
+            output = token.close = `)${expression})${extglobStar})`;
+          }
+          if (token.prev.type === "bos") {
+            state.negatedExtglob = true;
+          }
+        }
+        push({ type: "paren", extglob: true, value, output });
+        decrement("parens");
+      };
+      if (opts.fastpaths !== false && !/(^[*!]|[/()[\]{}"])/.test(input)) {
+        let backslashes = false;
+        let output = input.replace(REGEX_SPECIAL_CHARS_BACKREF, (m, esc, chars, first, rest, index) => {
+          if (first === "\\") {
+            backslashes = true;
+            return m;
+          }
+          if (first === "?") {
+            if (esc) {
+              return esc + first + (rest ? QMARK.repeat(rest.length) : "");
+            }
+            if (index === 0) {
+              return qmarkNoDot + (rest ? QMARK.repeat(rest.length) : "");
+            }
+            return QMARK.repeat(chars.length);
+          }
+          if (first === ".") {
+            return DOT_LITERAL.repeat(chars.length);
+          }
+          if (first === "*") {
+            if (esc) {
+              return esc + first + (rest ? star : "");
+            }
+            return star;
+          }
+          return esc ? m : `\\${m}`;
+        });
+        if (backslashes === true) {
+          if (opts.unescape === true) {
+            output = output.replace(/\\/g, "");
+          } else {
+            output = output.replace(/\\+/g, (m) => {
+              return m.length % 2 === 0 ? "\\\\" : m ? "\\" : "";
+            });
+          }
+        }
+        if (output === input && opts.contains === true) {
+          state.output = input;
+          return state;
+        }
+        state.output = utils.wrapOutput(output, state, options);
+        return state;
+      }
+      while (!eos()) {
+        value = advance();
+        if (value === "\0") {
+          continue;
+        }
+        if (value === "\\") {
+          const next = peek();
+          if (next === "/" && opts.bash !== true) {
+            continue;
+          }
+          if (next === "." || next === ";") {
+            continue;
+          }
+          if (!next) {
+            value += "\\";
+            push({ type: "text", value });
+            continue;
+          }
+          const match = /^\\+/.exec(remaining());
+          let slashes = 0;
+          if (match && match[0].length > 2) {
+            slashes = match[0].length;
+            state.index += slashes;
+            if (slashes % 2 !== 0) {
+              value += "\\";
+            }
+          }
+          if (opts.unescape === true) {
+            value = advance();
+          } else {
+            value += advance();
+          }
+          if (state.brackets === 0) {
+            push({ type: "text", value });
+            continue;
+          }
+        }
+        if (state.brackets > 0 && (value !== "]" || prev.value === "[" || prev.value === "[^")) {
+          if (opts.posix !== false && value === ":") {
+            const inner = prev.value.slice(1);
+            if (inner.includes("[")) {
+              prev.posix = true;
+              if (inner.includes(":")) {
+                const idx = prev.value.lastIndexOf("[");
+                const pre = prev.value.slice(0, idx);
+                const rest2 = prev.value.slice(idx + 2);
+                const posix = POSIX_REGEX_SOURCE[rest2];
+                if (posix) {
+                  prev.value = pre + posix;
+                  state.backtrack = true;
+                  advance();
+                  if (!bos.output && tokens.indexOf(prev) === 1) {
+                    bos.output = ONE_CHAR;
+                  }
+                  continue;
+                }
+              }
+            }
+          }
+          if (value === "[" && peek() !== ":" || value === "-" && peek() === "]") {
+            value = `\\${value}`;
+          }
+          if (value === "]" && (prev.value === "[" || prev.value === "[^")) {
+            value = `\\${value}`;
+          }
+          if (opts.posix === true && value === "!" && prev.value === "[") {
+            value = "^";
+          }
+          prev.value += value;
+          append({ value });
+          continue;
+        }
+        if (state.quotes === 1 && value !== '"') {
+          value = utils.escapeRegex(value);
+          prev.value += value;
+          append({ value });
+          continue;
+        }
+        if (value === '"') {
+          state.quotes = state.quotes === 1 ? 0 : 1;
+          if (opts.keepQuotes === true) {
+            push({ type: "text", value });
+          }
+          continue;
+        }
+        if (value === "(") {
+          increment("parens");
+          push({ type: "paren", value });
+          continue;
+        }
+        if (value === ")") {
+          if (state.parens === 0 && opts.strictBrackets === true) {
+            throw new SyntaxError(syntaxError("opening", "("));
+          }
+          const extglob = extglobs[extglobs.length - 1];
+          if (extglob && state.parens === extglob.parens + 1) {
+            extglobClose(extglobs.pop());
+            continue;
+          }
+          push({ type: "paren", value, output: state.parens ? ")" : "\\)" });
+          decrement("parens");
+          continue;
+        }
+        if (value === "[") {
+          if (opts.nobracket === true || !remaining().includes("]")) {
+            if (opts.nobracket !== true && opts.strictBrackets === true) {
+              throw new SyntaxError(syntaxError("closing", "]"));
+            }
+            value = `\\${value}`;
+          } else {
+            increment("brackets");
+          }
+          push({ type: "bracket", value });
+          continue;
+        }
+        if (value === "]") {
+          if (opts.nobracket === true || prev && prev.type === "bracket" && prev.value.length === 1) {
+            push({ type: "text", value, output: `\\${value}` });
+            continue;
+          }
+          if (state.brackets === 0) {
+            if (opts.strictBrackets === true) {
+              throw new SyntaxError(syntaxError("opening", "["));
+            }
+            push({ type: "text", value, output: `\\${value}` });
+            continue;
+          }
+          decrement("brackets");
+          const prevValue = prev.value.slice(1);
+          if (prev.posix !== true && prevValue[0] === "^" && !prevValue.includes("/")) {
+            value = `/${value}`;
+          }
+          prev.value += value;
+          append({ value });
+          if (opts.literalBrackets === false || utils.hasRegexChars(prevValue)) {
+            continue;
+          }
+          const escaped = utils.escapeRegex(prev.value);
+          state.output = state.output.slice(0, -prev.value.length);
+          if (opts.literalBrackets === true) {
+            state.output += escaped;
+            prev.value = escaped;
+            continue;
+          }
+          prev.value = `(${capture}${escaped}|${prev.value})`;
+          state.output += prev.value;
+          continue;
+        }
+        if (value === "{" && opts.nobrace !== true) {
+          increment("braces");
+          const open = {
+            type: "brace",
+            value,
+            output: "(",
+            outputIndex: state.output.length,
+            tokensIndex: state.tokens.length
+          };
+          braces.push(open);
+          push(open);
+          continue;
+        }
+        if (value === "}") {
+          const brace = braces[braces.length - 1];
+          if (opts.nobrace === true || !brace) {
+            push({ type: "text", value, output: value });
+            continue;
+          }
+          let output = ")";
+          if (brace.dots === true) {
+            const arr = tokens.slice();
+            const range = [];
+            for (let i = arr.length - 1; i >= 0; i--) {
+              tokens.pop();
+              if (arr[i].type === "brace") {
+                break;
+              }
+              if (arr[i].type !== "dots") {
+                range.unshift(arr[i].value);
+              }
+            }
+            output = expandRange(range, opts);
+            state.backtrack = true;
+          }
+          if (brace.comma !== true && brace.dots !== true) {
+            const out = state.output.slice(0, brace.outputIndex);
+            const toks = state.tokens.slice(brace.tokensIndex);
+            brace.value = brace.output = "\\{";
+            value = output = "\\}";
+            state.output = out;
+            for (const t of toks) {
+              state.output += t.output || t.value;
+            }
+          }
+          push({ type: "brace", value, output });
+          decrement("braces");
+          braces.pop();
+          continue;
+        }
+        if (value === "|") {
+          if (extglobs.length > 0) {
+            extglobs[extglobs.length - 1].conditions++;
+          }
+          push({ type: "text", value });
+          continue;
+        }
+        if (value === ",") {
+          let output = value;
+          const brace = braces[braces.length - 1];
+          if (brace && stack[stack.length - 1] === "braces") {
+            brace.comma = true;
+            output = "|";
+          }
+          push({ type: "comma", value, output });
+          continue;
+        }
+        if (value === "/") {
+          if (prev.type === "dot" && state.index === state.start + 1) {
+            state.start = state.index + 1;
+            state.consumed = "";
+            state.output = "";
+            tokens.pop();
+            prev = bos;
+            continue;
+          }
+          push({ type: "slash", value, output: SLASH_LITERAL });
+          continue;
+        }
+        if (value === ".") {
+          if (state.braces > 0 && prev.type === "dot") {
+            if (prev.value === ".") prev.output = DOT_LITERAL;
+            const brace = braces[braces.length - 1];
+            prev.type = "dots";
+            prev.output += value;
+            prev.value += value;
+            brace.dots = true;
+            continue;
+          }
+          if (state.braces + state.parens === 0 && prev.type !== "bos" && prev.type !== "slash") {
+            push({ type: "text", value, output: DOT_LITERAL });
+            continue;
+          }
+          push({ type: "dot", value, output: DOT_LITERAL });
+          continue;
+        }
+        if (value === "?") {
+          const isGroup = prev && prev.value === "(";
+          if (!isGroup && opts.noextglob !== true && peek() === "(" && peek(2) !== "?") {
+            extglobOpen("qmark", value);
+            continue;
+          }
+          if (prev && prev.type === "paren") {
+            const next = peek();
+            let output = value;
+            if (next === "<" && !utils.supportsLookbehinds()) {
+              throw new Error("Node.js v10 or higher is required for regex lookbehinds");
+            }
+            if (prev.value === "(" && !/[!=<:]/.test(next) || next === "<" && !/<([!=]|\w+>)/.test(remaining())) {
+              output = `\\${value}`;
+            }
+            push({ type: "text", value, output });
+            continue;
+          }
+          if (opts.dot !== true && (prev.type === "slash" || prev.type === "bos")) {
+            push({ type: "qmark", value, output: QMARK_NO_DOT });
+            continue;
+          }
+          push({ type: "qmark", value, output: QMARK });
+          continue;
+        }
+        if (value === "!") {
+          if (opts.noextglob !== true && peek() === "(") {
+            if (peek(2) !== "?" || !/[!=<:]/.test(peek(3))) {
+              extglobOpen("negate", value);
+              continue;
+            }
+          }
+          if (opts.nonegate !== true && state.index === 0) {
+            negate();
+            continue;
+          }
+        }
+        if (value === "+") {
+          if (opts.noextglob !== true && peek() === "(" && peek(2) !== "?") {
+            extglobOpen("plus", value);
+            continue;
+          }
+          if (prev && prev.value === "(" || opts.regex === false) {
+            push({ type: "plus", value, output: PLUS_LITERAL });
+            continue;
+          }
+          if (prev && (prev.type === "bracket" || prev.type === "paren" || prev.type === "brace") || state.parens > 0) {
+            push({ type: "plus", value });
+            continue;
+          }
+          push({ type: "plus", value: PLUS_LITERAL });
+          continue;
+        }
+        if (value === "@") {
+          if (opts.noextglob !== true && peek() === "(" && peek(2) !== "?") {
+            push({ type: "at", extglob: true, value, output: "" });
+            continue;
+          }
+          push({ type: "text", value });
+          continue;
+        }
+        if (value !== "*") {
+          if (value === "$" || value === "^") {
+            value = `\\${value}`;
+          }
+          const match = REGEX_NON_SPECIAL_CHARS.exec(remaining());
+          if (match) {
+            value += match[0];
+            state.index += match[0].length;
+          }
+          push({ type: "text", value });
+          continue;
+        }
+        if (prev && (prev.type === "globstar" || prev.star === true)) {
+          prev.type = "star";
+          prev.star = true;
+          prev.value += value;
+          prev.output = star;
+          state.backtrack = true;
+          state.globstar = true;
+          consume(value);
+          continue;
+        }
+        let rest = remaining();
+        if (opts.noextglob !== true && /^\([^?]/.test(rest)) {
+          extglobOpen("star", value);
+          continue;
+        }
+        if (prev.type === "star") {
+          if (opts.noglobstar === true) {
+            consume(value);
+            continue;
+          }
+          const prior = prev.prev;
+          const before = prior.prev;
+          const isStart = prior.type === "slash" || prior.type === "bos";
+          const afterStar = before && (before.type === "star" || before.type === "globstar");
+          if (opts.bash === true && (!isStart || rest[0] && rest[0] !== "/")) {
+            push({ type: "star", value, output: "" });
+            continue;
+          }
+          const isBrace = state.braces > 0 && (prior.type === "comma" || prior.type === "brace");
+          const isExtglob = extglobs.length && (prior.type === "pipe" || prior.type === "paren");
+          if (!isStart && prior.type !== "paren" && !isBrace && !isExtglob) {
+            push({ type: "star", value, output: "" });
+            continue;
+          }
+          while (rest.slice(0, 3) === "/**") {
+            const after = input[state.index + 4];
+            if (after && after !== "/") {
+              break;
+            }
+            rest = rest.slice(3);
+            consume("/**", 3);
+          }
+          if (prior.type === "bos" && eos()) {
+            prev.type = "globstar";
+            prev.value += value;
+            prev.output = globstar(opts);
+            state.output = prev.output;
+            state.globstar = true;
+            consume(value);
+            continue;
+          }
+          if (prior.type === "slash" && prior.prev.type !== "bos" && !afterStar && eos()) {
+            state.output = state.output.slice(0, -(prior.output + prev.output).length);
+            prior.output = `(?:${prior.output}`;
+            prev.type = "globstar";
+            prev.output = globstar(opts) + (opts.strictSlashes ? ")" : "|$)");
+            prev.value += value;
+            state.globstar = true;
+            state.output += prior.output + prev.output;
+            consume(value);
+            continue;
+          }
+          if (prior.type === "slash" && prior.prev.type !== "bos" && rest[0] === "/") {
+            const end = rest[1] !== void 0 ? "|$" : "";
+            state.output = state.output.slice(0, -(prior.output + prev.output).length);
+            prior.output = `(?:${prior.output}`;
+            prev.type = "globstar";
+            prev.output = `${globstar(opts)}${SLASH_LITERAL}|${SLASH_LITERAL}${end})`;
+            prev.value += value;
+            state.output += prior.output + prev.output;
+            state.globstar = true;
+            consume(value + advance());
+            push({ type: "slash", value: "/", output: "" });
+            continue;
+          }
+          if (prior.type === "bos" && rest[0] === "/") {
+            prev.type = "globstar";
+            prev.value += value;
+            prev.output = `(?:^|${SLASH_LITERAL}|${globstar(opts)}${SLASH_LITERAL})`;
+            state.output = prev.output;
+            state.globstar = true;
+            consume(value + advance());
+            push({ type: "slash", value: "/", output: "" });
+            continue;
+          }
+          state.output = state.output.slice(0, -prev.output.length);
+          prev.type = "globstar";
+          prev.output = globstar(opts);
+          prev.value += value;
+          state.output += prev.output;
+          state.globstar = true;
+          consume(value);
+          continue;
+        }
+        const token = { type: "star", value, output: star };
+        if (opts.bash === true) {
+          token.output = ".*?";
+          if (prev.type === "bos" || prev.type === "slash") {
+            token.output = nodot + token.output;
+          }
+          push(token);
+          continue;
+        }
+        if (prev && (prev.type === "bracket" || prev.type === "paren") && opts.regex === true) {
+          token.output = value;
+          push(token);
+          continue;
+        }
+        if (state.index === state.start || prev.type === "slash" || prev.type === "dot") {
+          if (prev.type === "dot") {
+            state.output += NO_DOT_SLASH;
+            prev.output += NO_DOT_SLASH;
+          } else if (opts.dot === true) {
+            state.output += NO_DOTS_SLASH;
+            prev.output += NO_DOTS_SLASH;
+          } else {
+            state.output += nodot;
+            prev.output += nodot;
+          }
+          if (peek() !== "*") {
+            state.output += ONE_CHAR;
+            prev.output += ONE_CHAR;
+          }
+        }
+        push(token);
+      }
+      while (state.brackets > 0) {
+        if (opts.strictBrackets === true) throw new SyntaxError(syntaxError("closing", "]"));
+        state.output = utils.escapeLast(state.output, "[");
+        decrement("brackets");
+      }
+      while (state.parens > 0) {
+        if (opts.strictBrackets === true) throw new SyntaxError(syntaxError("closing", ")"));
+        state.output = utils.escapeLast(state.output, "(");
+        decrement("parens");
+      }
+      while (state.braces > 0) {
+        if (opts.strictBrackets === true) throw new SyntaxError(syntaxError("closing", "}"));
+        state.output = utils.escapeLast(state.output, "{");
+        decrement("braces");
+      }
+      if (opts.strictSlashes !== true && (prev.type === "star" || prev.type === "bracket")) {
+        push({ type: "maybe_slash", value: "", output: `${SLASH_LITERAL}?` });
+      }
+      if (state.backtrack === true) {
+        state.output = "";
+        for (const token of state.tokens) {
+          state.output += token.output != null ? token.output : token.value;
+          if (token.suffix) {
+            state.output += token.suffix;
+          }
+        }
+      }
+      return state;
+    };
+    parse.fastpaths = (input, options) => {
+      const opts = { ...options };
+      const max = typeof opts.maxLength === "number" ? Math.min(MAX_LENGTH, opts.maxLength) : MAX_LENGTH;
+      const len = input.length;
+      if (len > max) {
+        throw new SyntaxError(`Input length: ${len}, exceeds maximum allowed length: ${max}`);
+      }
+      input = REPLACEMENTS[input] || input;
+      const win32 = utils.isWindows(options);
+      const {
+        DOT_LITERAL,
+        SLASH_LITERAL,
+        ONE_CHAR,
+        DOTS_SLASH,
+        NO_DOT,
+        NO_DOTS,
+        NO_DOTS_SLASH,
+        STAR,
+        START_ANCHOR
+      } = constants.globChars(win32);
+      const nodot = opts.dot ? NO_DOTS : NO_DOT;
+      const slashDot = opts.dot ? NO_DOTS_SLASH : NO_DOT;
+      const capture = opts.capture ? "" : "?:";
+      const state = { negated: false, prefix: "" };
+      let star = opts.bash === true ? ".*?" : STAR;
+      if (opts.capture) {
+        star = `(${star})`;
+      }
+      const globstar = (opts2) => {
+        if (opts2.noglobstar === true) return star;
+        return `(${capture}(?:(?!${START_ANCHOR}${opts2.dot ? DOTS_SLASH : DOT_LITERAL}).)*?)`;
+      };
+      const create = (str) => {
+        switch (str) {
+          case "*":
+            return `${nodot}${ONE_CHAR}${star}`;
+          case ".*":
+            return `${DOT_LITERAL}${ONE_CHAR}${star}`;
+          case "*.*":
+            return `${nodot}${star}${DOT_LITERAL}${ONE_CHAR}${star}`;
+          case "*/*":
+            return `${nodot}${star}${SLASH_LITERAL}${ONE_CHAR}${slashDot}${star}`;
+          case "**":
+            return nodot + globstar(opts);
+          case "**/*":
+            return `(?:${nodot}${globstar(opts)}${SLASH_LITERAL})?${slashDot}${ONE_CHAR}${star}`;
+          case "**/*.*":
+            return `(?:${nodot}${globstar(opts)}${SLASH_LITERAL})?${slashDot}${star}${DOT_LITERAL}${ONE_CHAR}${star}`;
+          case "**/.*":
+            return `(?:${nodot}${globstar(opts)}${SLASH_LITERAL})?${DOT_LITERAL}${ONE_CHAR}${star}`;
+          default: {
+            const match = /^(.*?)\.(\w+)$/.exec(str);
+            if (!match) return;
+            const source2 = create(match[1]);
+            if (!source2) return;
+            return source2 + DOT_LITERAL + match[2];
+          }
+        }
+      };
+      const output = utils.removePrefix(input, state);
+      let source = create(output);
+      if (source && opts.strictSlashes !== true) {
+        source += `${SLASH_LITERAL}?`;
+      }
+      return source;
+    };
+    module2.exports = parse;
+  }
+});
+
+// ../dev-workflow-core/node_modules/picomatch/lib/picomatch.js
+var require_picomatch = __commonJS({
+  "../dev-workflow-core/node_modules/picomatch/lib/picomatch.js"(exports2, module2) {
+    "use strict";
+    var path = require("path");
+    var scan = require_scan();
+    var parse = require_parse3();
+    var utils = require_utils3();
+    var constants = require_constants2();
+    var isObject = (val) => val && typeof val === "object" && !Array.isArray(val);
+    var picomatch = (glob, options, returnState = false) => {
+      if (Array.isArray(glob)) {
+        const fns = glob.map((input) => picomatch(input, options, returnState));
+        const arrayMatcher = (str) => {
+          for (const isMatch of fns) {
+            const state2 = isMatch(str);
+            if (state2) return state2;
+          }
+          return false;
+        };
+        return arrayMatcher;
+      }
+      const isState = isObject(glob) && glob.tokens && glob.input;
+      if (glob === "" || typeof glob !== "string" && !isState) {
+        throw new TypeError("Expected pattern to be a non-empty string");
+      }
+      const opts = options || {};
+      const posix = utils.isWindows(options);
+      const regex = isState ? picomatch.compileRe(glob, options) : picomatch.makeRe(glob, options, false, true);
+      const state = regex.state;
+      delete regex.state;
+      let isIgnored = () => false;
+      if (opts.ignore) {
+        const ignoreOpts = { ...options, ignore: null, onMatch: null, onResult: null };
+        isIgnored = picomatch(opts.ignore, ignoreOpts, returnState);
+      }
+      const matcher = (input, returnObject = false) => {
+        const { isMatch, match, output } = picomatch.test(input, regex, options, { glob, posix });
+        const result = { glob, state, regex, posix, input, output, match, isMatch };
+        if (typeof opts.onResult === "function") {
+          opts.onResult(result);
+        }
+        if (isMatch === false) {
+          result.isMatch = false;
+          return returnObject ? result : false;
+        }
+        if (isIgnored(input)) {
+          if (typeof opts.onIgnore === "function") {
+            opts.onIgnore(result);
+          }
+          result.isMatch = false;
+          return returnObject ? result : false;
+        }
+        if (typeof opts.onMatch === "function") {
+          opts.onMatch(result);
+        }
+        return returnObject ? result : true;
+      };
+      if (returnState) {
+        matcher.state = state;
+      }
+      return matcher;
+    };
+    picomatch.test = (input, regex, options, { glob, posix } = {}) => {
+      if (typeof input !== "string") {
+        throw new TypeError("Expected input to be a string");
+      }
+      if (input === "") {
+        return { isMatch: false, output: "" };
+      }
+      const opts = options || {};
+      const format = opts.format || (posix ? utils.toPosixSlashes : null);
+      let match = input === glob;
+      let output = match && format ? format(input) : input;
+      if (match === false) {
+        output = format ? format(input) : input;
+        match = output === glob;
+      }
+      if (match === false || opts.capture === true) {
+        if (opts.matchBase === true || opts.basename === true) {
+          match = picomatch.matchBase(input, regex, options, posix);
+        } else {
+          match = regex.exec(output);
+        }
+      }
+      return { isMatch: Boolean(match), match, output };
+    };
+    picomatch.matchBase = (input, glob, options, posix = utils.isWindows(options)) => {
+      const regex = glob instanceof RegExp ? glob : picomatch.makeRe(glob, options);
+      return regex.test(path.basename(input));
+    };
+    picomatch.isMatch = (str, patterns, options) => picomatch(patterns, options)(str);
+    picomatch.parse = (pattern, options) => {
+      if (Array.isArray(pattern)) return pattern.map((p) => picomatch.parse(p, options));
+      return parse(pattern, { ...options, fastpaths: false });
+    };
+    picomatch.scan = (input, options) => scan(input, options);
+    picomatch.compileRe = (state, options, returnOutput = false, returnState = false) => {
+      if (returnOutput === true) {
+        return state.output;
+      }
+      const opts = options || {};
+      const prepend = opts.contains ? "" : "^";
+      const append = opts.contains ? "" : "$";
+      let source = `${prepend}(?:${state.output})${append}`;
+      if (state && state.negated === true) {
+        source = `^(?!${source}).*$`;
+      }
+      const regex = picomatch.toRegex(source, options);
+      if (returnState === true) {
+        regex.state = state;
+      }
+      return regex;
+    };
+    picomatch.makeRe = (input, options = {}, returnOutput = false, returnState = false) => {
+      if (!input || typeof input !== "string") {
+        throw new TypeError("Expected a non-empty string");
+      }
+      let parsed = { negated: false, fastpaths: true };
+      if (options.fastpaths !== false && (input[0] === "." || input[0] === "*")) {
+        parsed.output = parse.fastpaths(input, options);
+      }
+      if (!parsed.output) {
+        parsed = parse(input, options);
+      }
+      return picomatch.compileRe(parsed, options, returnOutput, returnState);
+    };
+    picomatch.toRegex = (source, options) => {
+      try {
+        const opts = options || {};
+        return new RegExp(source, opts.flags || (opts.nocase ? "i" : ""));
+      } catch (err) {
+        if (options && options.debug === true) throw err;
+        return /$^/;
+      }
+    };
+    picomatch.constants = constants;
+    module2.exports = picomatch;
+  }
+});
+
+// ../dev-workflow-core/node_modules/picomatch/index.js
+var require_picomatch2 = __commonJS({
+  "../dev-workflow-core/node_modules/picomatch/index.js"(exports2, module2) {
+    "use strict";
+    module2.exports = require_picomatch();
+  }
+});
+
+// ../dev-workflow-core/node_modules/micromatch/index.js
+var require_micromatch = __commonJS({
+  "../dev-workflow-core/node_modules/micromatch/index.js"(exports2, module2) {
+    "use strict";
+    var util = require("util");
+    var braces = require_braces();
+    var picomatch = require_picomatch2();
+    var utils = require_utils3();
+    var isEmptyString = (v) => v === "" || v === "./";
+    var hasBraces = (v) => {
+      const index = v.indexOf("{");
+      return index > -1 && v.indexOf("}", index) > -1;
+    };
+    var micromatch = (list2, patterns, options) => {
+      patterns = [].concat(patterns);
+      list2 = [].concat(list2);
+      let omit = /* @__PURE__ */ new Set();
+      let keep = /* @__PURE__ */ new Set();
+      let items = /* @__PURE__ */ new Set();
+      let negatives = 0;
+      let onResult = (state) => {
+        items.add(state.output);
+        if (options && options.onResult) {
+          options.onResult(state);
+        }
+      };
+      for (let i = 0; i < patterns.length; i++) {
+        let isMatch = picomatch(String(patterns[i]), { ...options, onResult }, true);
+        let negated = isMatch.state.negated || isMatch.state.negatedExtglob;
+        if (negated) negatives++;
+        for (let item of list2) {
+          let matched = isMatch(item, true);
+          let match = negated ? !matched.isMatch : matched.isMatch;
+          if (!match) continue;
+          if (negated) {
+            omit.add(matched.output);
+          } else {
+            omit.delete(matched.output);
+            keep.add(matched.output);
+          }
+        }
+      }
+      let result = negatives === patterns.length ? [...items] : [...keep];
+      let matches = result.filter((item) => !omit.has(item));
+      if (options && matches.length === 0) {
+        if (options.failglob === true) {
+          throw new Error(`No matches found for "${patterns.join(", ")}"`);
+        }
+        if (options.nonull === true || options.nullglob === true) {
+          return options.unescape ? patterns.map((p) => p.replace(/\\/g, "")) : patterns;
+        }
+      }
+      return matches;
+    };
+    micromatch.match = micromatch;
+    micromatch.matcher = (pattern, options) => picomatch(pattern, options);
+    micromatch.isMatch = (str, patterns, options) => picomatch(patterns, options)(str);
+    micromatch.any = micromatch.isMatch;
+    micromatch.not = (list2, patterns, options = {}) => {
+      patterns = [].concat(patterns).map(String);
+      let result = /* @__PURE__ */ new Set();
+      let items = [];
+      let onResult = (state) => {
+        if (options.onResult) options.onResult(state);
+        items.push(state.output);
+      };
+      let matches = new Set(micromatch(list2, patterns, { ...options, onResult }));
+      for (let item of items) {
+        if (!matches.has(item)) {
+          result.add(item);
+        }
+      }
+      return [...result];
+    };
+    micromatch.contains = (str, pattern, options) => {
+      if (typeof str !== "string") {
+        throw new TypeError(`Expected a string: "${util.inspect(str)}"`);
+      }
+      if (Array.isArray(pattern)) {
+        return pattern.some((p) => micromatch.contains(str, p, options));
+      }
+      if (typeof pattern === "string") {
+        if (isEmptyString(str) || isEmptyString(pattern)) {
+          return false;
+        }
+        if (str.includes(pattern) || str.startsWith("./") && str.slice(2).includes(pattern)) {
+          return true;
+        }
+      }
+      return micromatch.isMatch(str, pattern, { ...options, contains: true });
+    };
+    micromatch.matchKeys = (obj, patterns, options) => {
+      if (!utils.isObject(obj)) {
+        throw new TypeError("Expected the first argument to be an object");
+      }
+      let keys = micromatch(Object.keys(obj), patterns, options);
+      let res = {};
+      for (let key of keys) res[key] = obj[key];
+      return res;
+    };
+    micromatch.some = (list2, patterns, options) => {
+      let items = [].concat(list2);
+      for (let pattern of [].concat(patterns)) {
+        let isMatch = picomatch(String(pattern), options);
+        if (items.some((item) => isMatch(item))) {
+          return true;
+        }
+      }
+      return false;
+    };
+    micromatch.every = (list2, patterns, options) => {
+      let items = [].concat(list2);
+      for (let pattern of [].concat(patterns)) {
+        let isMatch = picomatch(String(pattern), options);
+        if (!items.every((item) => isMatch(item))) {
+          return false;
+        }
+      }
+      return true;
+    };
+    micromatch.all = (str, patterns, options) => {
+      if (typeof str !== "string") {
+        throw new TypeError(`Expected a string: "${util.inspect(str)}"`);
+      }
+      return [].concat(patterns).every((p) => picomatch(p, options)(str));
+    };
+    micromatch.capture = (glob, input, options) => {
+      let posix = utils.isWindows(options);
+      let regex = picomatch.makeRe(String(glob), { ...options, capture: true });
+      let match = regex.exec(posix ? utils.toPosixSlashes(input) : input);
+      if (match) {
+        return match.slice(1).map((v) => v === void 0 ? "" : v);
+      }
+    };
+    micromatch.makeRe = (...args) => picomatch.makeRe(...args);
+    micromatch.scan = (...args) => picomatch.scan(...args);
+    micromatch.parse = (patterns, options) => {
+      let res = [];
+      for (let pattern of [].concat(patterns || [])) {
+        for (let str of braces(String(pattern), options)) {
+          res.push(picomatch.parse(str, options));
+        }
+      }
+      return res;
+    };
+    micromatch.braces = (pattern, options) => {
+      if (typeof pattern !== "string") throw new TypeError("Expected a string");
+      if (options && options.nobrace === true || !hasBraces(pattern)) {
+        return [pattern];
+      }
+      return braces(pattern, options);
+    };
+    micromatch.braceExpand = (pattern, options) => {
+      if (typeof pattern !== "string") throw new TypeError("Expected a string");
+      return micromatch.braces(pattern, { ...options, expand: true });
+    };
+    micromatch.hasBraces = hasBraces;
+    module2.exports = micromatch;
+  }
+});
+
+// ../dev-workflow-core/node_modules/fast-glob/out/utils/pattern.js
+var require_pattern = __commonJS({
+  "../dev-workflow-core/node_modules/fast-glob/out/utils/pattern.js"(exports2) {
+    "use strict";
+    Object.defineProperty(exports2, "__esModule", { value: true });
+    exports2.isAbsolute = exports2.partitionAbsoluteAndRelative = exports2.removeDuplicateSlashes = exports2.matchAny = exports2.convertPatternsToRe = exports2.makeRe = exports2.getPatternParts = exports2.expandBraceExpansion = exports2.expandPatternsWithBraceExpansion = exports2.isAffectDepthOfReadingPattern = exports2.endsWithSlashGlobStar = exports2.hasGlobStar = exports2.getBaseDirectory = exports2.isPatternRelatedToParentDirectory = exports2.getPatternsOutsideCurrentDirectory = exports2.getPatternsInsideCurrentDirectory = exports2.getPositivePatterns = exports2.getNegativePatterns = exports2.isPositivePattern = exports2.isNegativePattern = exports2.convertToNegativePattern = exports2.convertToPositivePattern = exports2.isDynamicPattern = exports2.isStaticPattern = void 0;
+    var path = require("path");
+    var globParent = require_glob_parent();
+    var micromatch = require_micromatch();
+    var GLOBSTAR = "**";
+    var ESCAPE_SYMBOL = "\\";
+    var COMMON_GLOB_SYMBOLS_RE = /[*?]|^!/;
+    var REGEX_CHARACTER_CLASS_SYMBOLS_RE = /\[[^[]*]/;
+    var REGEX_GROUP_SYMBOLS_RE = /(?:^|[^!*+?@])\([^(]*\|[^|]*\)/;
+    var GLOB_EXTENSION_SYMBOLS_RE = /[!*+?@]\([^(]*\)/;
+    var BRACE_EXPANSION_SEPARATORS_RE = /,|\.\./;
+    var DOUBLE_SLASH_RE = /(?!^)\/{2,}/g;
+    function isStaticPattern(pattern, options = {}) {
+      return !isDynamicPattern(pattern, options);
+    }
+    exports2.isStaticPattern = isStaticPattern;
+    function isDynamicPattern(pattern, options = {}) {
+      if (pattern === "") {
+        return false;
+      }
+      if (options.caseSensitiveMatch === false || pattern.includes(ESCAPE_SYMBOL)) {
+        return true;
+      }
+      if (COMMON_GLOB_SYMBOLS_RE.test(pattern) || REGEX_CHARACTER_CLASS_SYMBOLS_RE.test(pattern) || REGEX_GROUP_SYMBOLS_RE.test(pattern)) {
+        return true;
+      }
+      if (options.extglob !== false && GLOB_EXTENSION_SYMBOLS_RE.test(pattern)) {
+        return true;
+      }
+      if (options.braceExpansion !== false && hasBraceExpansion(pattern)) {
+        return true;
+      }
+      return false;
+    }
+    exports2.isDynamicPattern = isDynamicPattern;
+    function hasBraceExpansion(pattern) {
+      const openingBraceIndex = pattern.indexOf("{");
+      if (openingBraceIndex === -1) {
+        return false;
+      }
+      const closingBraceIndex = pattern.indexOf("}", openingBraceIndex + 1);
+      if (closingBraceIndex === -1) {
+        return false;
+      }
+      const braceContent = pattern.slice(openingBraceIndex, closingBraceIndex);
+      return BRACE_EXPANSION_SEPARATORS_RE.test(braceContent);
+    }
+    function convertToPositivePattern(pattern) {
+      return isNegativePattern(pattern) ? pattern.slice(1) : pattern;
+    }
+    exports2.convertToPositivePattern = convertToPositivePattern;
+    function convertToNegativePattern(pattern) {
+      return "!" + pattern;
+    }
+    exports2.convertToNegativePattern = convertToNegativePattern;
+    function isNegativePattern(pattern) {
+      return pattern.startsWith("!") && pattern[1] !== "(";
+    }
+    exports2.isNegativePattern = isNegativePattern;
+    function isPositivePattern(pattern) {
+      return !isNegativePattern(pattern);
+    }
+    exports2.isPositivePattern = isPositivePattern;
+    function getNegativePatterns(patterns) {
+      return patterns.filter(isNegativePattern);
+    }
+    exports2.getNegativePatterns = getNegativePatterns;
+    function getPositivePatterns(patterns) {
+      return patterns.filter(isPositivePattern);
+    }
+    exports2.getPositivePatterns = getPositivePatterns;
+    function getPatternsInsideCurrentDirectory(patterns) {
+      return patterns.filter((pattern) => !isPatternRelatedToParentDirectory(pattern));
+    }
+    exports2.getPatternsInsideCurrentDirectory = getPatternsInsideCurrentDirectory;
+    function getPatternsOutsideCurrentDirectory(patterns) {
+      return patterns.filter(isPatternRelatedToParentDirectory);
+    }
+    exports2.getPatternsOutsideCurrentDirectory = getPatternsOutsideCurrentDirectory;
+    function isPatternRelatedToParentDirectory(pattern) {
+      return pattern.startsWith("..") || pattern.startsWith("./..");
+    }
+    exports2.isPatternRelatedToParentDirectory = isPatternRelatedToParentDirectory;
+    function getBaseDirectory(pattern) {
+      return globParent(pattern, { flipBackslashes: false });
+    }
+    exports2.getBaseDirectory = getBaseDirectory;
+    function hasGlobStar(pattern) {
+      return pattern.includes(GLOBSTAR);
+    }
+    exports2.hasGlobStar = hasGlobStar;
+    function endsWithSlashGlobStar(pattern) {
+      return pattern.endsWith("/" + GLOBSTAR);
+    }
+    exports2.endsWithSlashGlobStar = endsWithSlashGlobStar;
+    function isAffectDepthOfReadingPattern(pattern) {
+      const basename4 = path.basename(pattern);
+      return endsWithSlashGlobStar(pattern) || isStaticPattern(basename4);
+    }
+    exports2.isAffectDepthOfReadingPattern = isAffectDepthOfReadingPattern;
+    function expandPatternsWithBraceExpansion(patterns) {
+      return patterns.reduce((collection, pattern) => {
+        return collection.concat(expandBraceExpansion(pattern));
+      }, []);
+    }
+    exports2.expandPatternsWithBraceExpansion = expandPatternsWithBraceExpansion;
+    function expandBraceExpansion(pattern) {
+      const patterns = micromatch.braces(pattern, { expand: true, nodupes: true, keepEscaping: true });
+      patterns.sort((a, b) => a.length - b.length);
+      return patterns.filter((pattern2) => pattern2 !== "");
+    }
+    exports2.expandBraceExpansion = expandBraceExpansion;
+    function getPatternParts(pattern, options) {
+      let { parts } = micromatch.scan(pattern, Object.assign(Object.assign({}, options), { parts: true }));
+      if (parts.length === 0) {
+        parts = [pattern];
+      }
+      if (parts[0].startsWith("/")) {
+        parts[0] = parts[0].slice(1);
+        parts.unshift("");
+      }
+      return parts;
+    }
+    exports2.getPatternParts = getPatternParts;
+    function makeRe(pattern, options) {
+      return micromatch.makeRe(pattern, options);
+    }
+    exports2.makeRe = makeRe;
+    function convertPatternsToRe(patterns, options) {
+      return patterns.map((pattern) => makeRe(pattern, options));
+    }
+    exports2.convertPatternsToRe = convertPatternsToRe;
+    function matchAny(entry, patternsRe) {
+      return patternsRe.some((patternRe) => patternRe.test(entry));
+    }
+    exports2.matchAny = matchAny;
+    function removeDuplicateSlashes(pattern) {
+      return pattern.replace(DOUBLE_SLASH_RE, "/");
+    }
+    exports2.removeDuplicateSlashes = removeDuplicateSlashes;
+    function partitionAbsoluteAndRelative(patterns) {
+      const absolute = [];
+      const relative = [];
+      for (const pattern of patterns) {
+        if (isAbsolute(pattern)) {
+          absolute.push(pattern);
+        } else {
+          relative.push(pattern);
+        }
+      }
+      return [absolute, relative];
+    }
+    exports2.partitionAbsoluteAndRelative = partitionAbsoluteAndRelative;
+    function isAbsolute(pattern) {
+      return path.isAbsolute(pattern);
+    }
+    exports2.isAbsolute = isAbsolute;
+  }
+});
+
+// ../dev-workflow-core/node_modules/merge2/index.js
+var require_merge2 = __commonJS({
+  "../dev-workflow-core/node_modules/merge2/index.js"(exports2, module2) {
+    "use strict";
+    var Stream = require("stream");
+    var PassThrough = Stream.PassThrough;
+    var slice = Array.prototype.slice;
+    module2.exports = merge2;
+    function merge2() {
+      const streamsQueue = [];
+      const args = slice.call(arguments);
+      let merging = false;
+      let options = args[args.length - 1];
+      if (options && !Array.isArray(options) && options.pipe == null) {
+        args.pop();
+      } else {
+        options = {};
+      }
+      const doEnd = options.end !== false;
+      const doPipeError = options.pipeError === true;
+      if (options.objectMode == null) {
+        options.objectMode = true;
+      }
+      if (options.highWaterMark == null) {
+        options.highWaterMark = 64 * 1024;
+      }
+      const mergedStream = PassThrough(options);
+      function addStream() {
+        for (let i = 0, len = arguments.length; i < len; i++) {
+          streamsQueue.push(pauseStreams(arguments[i], options));
+        }
+        mergeStream();
+        return this;
+      }
+      function mergeStream() {
+        if (merging) {
+          return;
+        }
+        merging = true;
+        let streams = streamsQueue.shift();
+        if (!streams) {
+          process.nextTick(endStream);
+          return;
+        }
+        if (!Array.isArray(streams)) {
+          streams = [streams];
+        }
+        let pipesCount = streams.length + 1;
+        function next() {
+          if (--pipesCount > 0) {
+            return;
+          }
+          merging = false;
+          mergeStream();
+        }
+        function pipe(stream) {
+          function onend() {
+            stream.removeListener("merge2UnpipeEnd", onend);
+            stream.removeListener("end", onend);
+            if (doPipeError) {
+              stream.removeListener("error", onerror);
+            }
+            next();
+          }
+          function onerror(err) {
+            mergedStream.emit("error", err);
+          }
+          if (stream._readableState.endEmitted) {
+            return next();
+          }
+          stream.on("merge2UnpipeEnd", onend);
+          stream.on("end", onend);
+          if (doPipeError) {
+            stream.on("error", onerror);
+          }
+          stream.pipe(mergedStream, { end: false });
+          stream.resume();
+        }
+        for (let i = 0; i < streams.length; i++) {
+          pipe(streams[i]);
+        }
+        next();
+      }
+      function endStream() {
+        merging = false;
+        mergedStream.emit("queueDrain");
+        if (doEnd) {
+          mergedStream.end();
+        }
+      }
+      mergedStream.setMaxListeners(0);
+      mergedStream.add = addStream;
+      mergedStream.on("unpipe", function(stream) {
+        stream.emit("merge2UnpipeEnd");
+      });
+      if (args.length) {
+        addStream.apply(null, args);
+      }
+      return mergedStream;
+    }
+    function pauseStreams(streams, options) {
+      if (!Array.isArray(streams)) {
+        if (!streams._readableState && streams.pipe) {
+          streams = streams.pipe(PassThrough(options));
+        }
+        if (!streams._readableState || !streams.pause || !streams.pipe) {
+          throw new Error("Only readable stream can be merged.");
+        }
+        streams.pause();
+      } else {
+        for (let i = 0, len = streams.length; i < len; i++) {
+          streams[i] = pauseStreams(streams[i], options);
+        }
+      }
+      return streams;
+    }
+  }
+});
+
+// ../dev-workflow-core/node_modules/fast-glob/out/utils/stream.js
+var require_stream = __commonJS({
+  "../dev-workflow-core/node_modules/fast-glob/out/utils/stream.js"(exports2) {
+    "use strict";
+    Object.defineProperty(exports2, "__esModule", { value: true });
+    exports2.merge = void 0;
+    var merge2 = require_merge2();
+    function merge(streams) {
+      const mergedStream = merge2(streams);
+      streams.forEach((stream) => {
+        stream.once("error", (error) => mergedStream.emit("error", error));
+      });
+      mergedStream.once("close", () => propagateCloseEventToSources(streams));
+      mergedStream.once("end", () => propagateCloseEventToSources(streams));
+      return mergedStream;
+    }
+    exports2.merge = merge;
+    function propagateCloseEventToSources(streams) {
+      streams.forEach((stream) => stream.emit("close"));
+    }
+  }
+});
+
+// ../dev-workflow-core/node_modules/fast-glob/out/utils/string.js
+var require_string = __commonJS({
+  "../dev-workflow-core/node_modules/fast-glob/out/utils/string.js"(exports2) {
+    "use strict";
+    Object.defineProperty(exports2, "__esModule", { value: true });
+    exports2.isEmpty = exports2.isString = void 0;
+    function isString(input) {
+      return typeof input === "string";
+    }
+    exports2.isString = isString;
+    function isEmpty(input) {
+      return input === "";
+    }
+    exports2.isEmpty = isEmpty;
+  }
+});
+
+// ../dev-workflow-core/node_modules/fast-glob/out/utils/index.js
+var require_utils4 = __commonJS({
+  "../dev-workflow-core/node_modules/fast-glob/out/utils/index.js"(exports2) {
+    "use strict";
+    Object.defineProperty(exports2, "__esModule", { value: true });
+    exports2.string = exports2.stream = exports2.pattern = exports2.path = exports2.fs = exports2.errno = exports2.array = void 0;
+    var array = require_array();
+    exports2.array = array;
+    var errno = require_errno();
+    exports2.errno = errno;
+    var fs = require_fs();
+    exports2.fs = fs;
+    var path = require_path();
+    exports2.path = path;
+    var pattern = require_pattern();
+    exports2.pattern = pattern;
+    var stream = require_stream();
+    exports2.stream = stream;
+    var string = require_string();
+    exports2.string = string;
+  }
+});
+
+// ../dev-workflow-core/node_modules/fast-glob/out/managers/tasks.js
+var require_tasks = __commonJS({
+  "../dev-workflow-core/node_modules/fast-glob/out/managers/tasks.js"(exports2) {
+    "use strict";
+    Object.defineProperty(exports2, "__esModule", { value: true });
+    exports2.convertPatternGroupToTask = exports2.convertPatternGroupsToTasks = exports2.groupPatternsByBaseDirectory = exports2.getNegativePatternsAsPositive = exports2.getPositivePatterns = exports2.convertPatternsToTasks = exports2.generate = void 0;
+    var utils = require_utils4();
+    function generate(input, settings) {
+      const patterns = processPatterns(input, settings);
+      const ignore = processPatterns(settings.ignore, settings);
+      const positivePatterns = getPositivePatterns(patterns);
+      const negativePatterns = getNegativePatternsAsPositive(patterns, ignore);
+      const staticPatterns = positivePatterns.filter((pattern) => utils.pattern.isStaticPattern(pattern, settings));
+      const dynamicPatterns = positivePatterns.filter((pattern) => utils.pattern.isDynamicPattern(pattern, settings));
+      const staticTasks = convertPatternsToTasks(
+        staticPatterns,
+        negativePatterns,
+        /* dynamic */
+        false
+      );
+      const dynamicTasks = convertPatternsToTasks(
+        dynamicPatterns,
+        negativePatterns,
+        /* dynamic */
+        true
+      );
+      return staticTasks.concat(dynamicTasks);
+    }
+    exports2.generate = generate;
+    function processPatterns(input, settings) {
+      let patterns = input;
+      if (settings.braceExpansion) {
+        patterns = utils.pattern.expandPatternsWithBraceExpansion(patterns);
+      }
+      if (settings.baseNameMatch) {
+        patterns = patterns.map((pattern) => pattern.includes("/") ? pattern : `**/${pattern}`);
+      }
+      return patterns.map((pattern) => utils.pattern.removeDuplicateSlashes(pattern));
+    }
+    function convertPatternsToTasks(positive, negative, dynamic) {
+      const tasks = [];
+      const patternsOutsideCurrentDirectory = utils.pattern.getPatternsOutsideCurrentDirectory(positive);
+      const patternsInsideCurrentDirectory = utils.pattern.getPatternsInsideCurrentDirectory(positive);
+      const outsideCurrentDirectoryGroup = groupPatternsByBaseDirectory(patternsOutsideCurrentDirectory);
+      const insideCurrentDirectoryGroup = groupPatternsByBaseDirectory(patternsInsideCurrentDirectory);
+      tasks.push(...convertPatternGroupsToTasks(outsideCurrentDirectoryGroup, negative, dynamic));
+      if ("." in insideCurrentDirectoryGroup) {
+        tasks.push(convertPatternGroupToTask(".", patternsInsideCurrentDirectory, negative, dynamic));
+      } else {
+        tasks.push(...convertPatternGroupsToTasks(insideCurrentDirectoryGroup, negative, dynamic));
+      }
+      return tasks;
+    }
+    exports2.convertPatternsToTasks = convertPatternsToTasks;
+    function getPositivePatterns(patterns) {
+      return utils.pattern.getPositivePatterns(patterns);
+    }
+    exports2.getPositivePatterns = getPositivePatterns;
+    function getNegativePatternsAsPositive(patterns, ignore) {
+      const negative = utils.pattern.getNegativePatterns(patterns).concat(ignore);
+      const positive = negative.map(utils.pattern.convertToPositivePattern);
+      return positive;
+    }
+    exports2.getNegativePatternsAsPositive = getNegativePatternsAsPositive;
+    function groupPatternsByBaseDirectory(patterns) {
+      const group = {};
+      return patterns.reduce((collection, pattern) => {
+        const base = utils.pattern.getBaseDirectory(pattern);
+        if (base in collection) {
+          collection[base].push(pattern);
+        } else {
+          collection[base] = [pattern];
+        }
+        return collection;
+      }, group);
+    }
+    exports2.groupPatternsByBaseDirectory = groupPatternsByBaseDirectory;
+    function convertPatternGroupsToTasks(positive, negative, dynamic) {
+      return Object.keys(positive).map((base) => {
+        return convertPatternGroupToTask(base, positive[base], negative, dynamic);
+      });
+    }
+    exports2.convertPatternGroupsToTasks = convertPatternGroupsToTasks;
+    function convertPatternGroupToTask(base, positive, negative, dynamic) {
+      return {
+        dynamic,
+        positive,
+        negative,
+        base,
+        patterns: [].concat(positive, negative.map(utils.pattern.convertToNegativePattern))
+      };
+    }
+    exports2.convertPatternGroupToTask = convertPatternGroupToTask;
+  }
+});
+
+// ../dev-workflow-core/node_modules/@nodelib/fs.stat/out/providers/async.js
+var require_async = __commonJS({
+  "../dev-workflow-core/node_modules/@nodelib/fs.stat/out/providers/async.js"(exports2) {
+    "use strict";
+    Object.defineProperty(exports2, "__esModule", { value: true });
+    exports2.read = void 0;
+    function read(path, settings, callback) {
+      settings.fs.lstat(path, (lstatError, lstat2) => {
+        if (lstatError !== null) {
+          callFailureCallback(callback, lstatError);
+          return;
+        }
+        if (!lstat2.isSymbolicLink() || !settings.followSymbolicLink) {
+          callSuccessCallback(callback, lstat2);
+          return;
+        }
+        settings.fs.stat(path, (statError, stat) => {
+          if (statError !== null) {
+            if (settings.throwErrorOnBrokenSymbolicLink) {
+              callFailureCallback(callback, statError);
+              return;
+            }
+            callSuccessCallback(callback, lstat2);
+            return;
+          }
+          if (settings.markSymbolicLink) {
+            stat.isSymbolicLink = () => true;
+          }
+          callSuccessCallback(callback, stat);
+        });
+      });
+    }
+    exports2.read = read;
+    function callFailureCallback(callback, error) {
+      callback(error);
+    }
+    function callSuccessCallback(callback, result) {
+      callback(null, result);
+    }
+  }
+});
+
+// ../dev-workflow-core/node_modules/@nodelib/fs.stat/out/providers/sync.js
+var require_sync = __commonJS({
+  "../dev-workflow-core/node_modules/@nodelib/fs.stat/out/providers/sync.js"(exports2) {
+    "use strict";
+    Object.defineProperty(exports2, "__esModule", { value: true });
+    exports2.read = void 0;
+    function read(path, settings) {
+      const lstat2 = settings.fs.lstatSync(path);
+      if (!lstat2.isSymbolicLink() || !settings.followSymbolicLink) {
+        return lstat2;
+      }
+      try {
+        const stat = settings.fs.statSync(path);
+        if (settings.markSymbolicLink) {
+          stat.isSymbolicLink = () => true;
+        }
+        return stat;
+      } catch (error) {
+        if (!settings.throwErrorOnBrokenSymbolicLink) {
+          return lstat2;
+        }
+        throw error;
+      }
+    }
+    exports2.read = read;
+  }
+});
+
+// ../dev-workflow-core/node_modules/@nodelib/fs.stat/out/adapters/fs.js
+var require_fs2 = __commonJS({
+  "../dev-workflow-core/node_modules/@nodelib/fs.stat/out/adapters/fs.js"(exports2) {
+    "use strict";
+    Object.defineProperty(exports2, "__esModule", { value: true });
+    exports2.createFileSystemAdapter = exports2.FILE_SYSTEM_ADAPTER = void 0;
+    var fs = require("fs");
+    exports2.FILE_SYSTEM_ADAPTER = {
+      lstat: fs.lstat,
+      stat: fs.stat,
+      lstatSync: fs.lstatSync,
+      statSync: fs.statSync
+    };
+    function createFileSystemAdapter(fsMethods) {
+      if (fsMethods === void 0) {
+        return exports2.FILE_SYSTEM_ADAPTER;
+      }
+      return Object.assign(Object.assign({}, exports2.FILE_SYSTEM_ADAPTER), fsMethods);
+    }
+    exports2.createFileSystemAdapter = createFileSystemAdapter;
+  }
+});
+
+// ../dev-workflow-core/node_modules/@nodelib/fs.stat/out/settings.js
+var require_settings = __commonJS({
+  "../dev-workflow-core/node_modules/@nodelib/fs.stat/out/settings.js"(exports2) {
+    "use strict";
+    Object.defineProperty(exports2, "__esModule", { value: true });
+    var fs = require_fs2();
+    var Settings = class {
+      constructor(_options = {}) {
+        this._options = _options;
+        this.followSymbolicLink = this._getValue(this._options.followSymbolicLink, true);
+        this.fs = fs.createFileSystemAdapter(this._options.fs);
+        this.markSymbolicLink = this._getValue(this._options.markSymbolicLink, false);
+        this.throwErrorOnBrokenSymbolicLink = this._getValue(this._options.throwErrorOnBrokenSymbolicLink, true);
+      }
+      _getValue(option, value) {
+        return option !== null && option !== void 0 ? option : value;
+      }
+    };
+    exports2.default = Settings;
+  }
+});
+
+// ../dev-workflow-core/node_modules/@nodelib/fs.stat/out/index.js
+var require_out = __commonJS({
+  "../dev-workflow-core/node_modules/@nodelib/fs.stat/out/index.js"(exports2) {
+    "use strict";
+    Object.defineProperty(exports2, "__esModule", { value: true });
+    exports2.statSync = exports2.stat = exports2.Settings = void 0;
+    var async = require_async();
+    var sync = require_sync();
+    var settings_1 = require_settings();
+    exports2.Settings = settings_1.default;
+    function stat(path, optionsOrSettingsOrCallback, callback) {
+      if (typeof optionsOrSettingsOrCallback === "function") {
+        async.read(path, getSettings(), optionsOrSettingsOrCallback);
+        return;
+      }
+      async.read(path, getSettings(optionsOrSettingsOrCallback), callback);
+    }
+    exports2.stat = stat;
+    function statSync(path, optionsOrSettings) {
+      const settings = getSettings(optionsOrSettings);
+      return sync.read(path, settings);
+    }
+    exports2.statSync = statSync;
+    function getSettings(settingsOrOptions = {}) {
+      if (settingsOrOptions instanceof settings_1.default) {
+        return settingsOrOptions;
+      }
+      return new settings_1.default(settingsOrOptions);
+    }
+  }
+});
+
+// ../dev-workflow-core/node_modules/queue-microtask/index.js
+var require_queue_microtask = __commonJS({
+  "../dev-workflow-core/node_modules/queue-microtask/index.js"(exports2, module2) {
+    var promise;
+    module2.exports = typeof queueMicrotask === "function" ? queueMicrotask.bind(typeof window !== "undefined" ? window : global) : (cb) => (promise || (promise = Promise.resolve())).then(cb).catch((err) => setTimeout(() => {
+      throw err;
+    }, 0));
+  }
+});
+
+// ../dev-workflow-core/node_modules/run-parallel/index.js
+var require_run_parallel = __commonJS({
+  "../dev-workflow-core/node_modules/run-parallel/index.js"(exports2, module2) {
+    module2.exports = runParallel;
+    var queueMicrotask2 = require_queue_microtask();
+    function runParallel(tasks, cb) {
+      let results, pending, keys;
+      let isSync = true;
+      if (Array.isArray(tasks)) {
+        results = [];
+        pending = tasks.length;
+      } else {
+        keys = Object.keys(tasks);
+        results = {};
+        pending = keys.length;
+      }
+      function done(err) {
+        function end() {
+          if (cb) cb(err, results);
+          cb = null;
+        }
+        if (isSync) queueMicrotask2(end);
+        else end();
+      }
+      function each(i, err, result) {
+        results[i] = result;
+        if (--pending === 0 || err) {
+          done(err);
+        }
+      }
+      if (!pending) {
+        done(null);
+      } else if (keys) {
+        keys.forEach(function(key) {
+          tasks[key](function(err, result) {
+            each(key, err, result);
+          });
+        });
+      } else {
+        tasks.forEach(function(task, i) {
+          task(function(err, result) {
+            each(i, err, result);
+          });
+        });
+      }
+      isSync = false;
+    }
+  }
+});
+
+// ../dev-workflow-core/node_modules/@nodelib/fs.scandir/out/constants.js
+var require_constants3 = __commonJS({
+  "../dev-workflow-core/node_modules/@nodelib/fs.scandir/out/constants.js"(exports2) {
+    "use strict";
+    Object.defineProperty(exports2, "__esModule", { value: true });
+    exports2.IS_SUPPORT_READDIR_WITH_FILE_TYPES = void 0;
+    var NODE_PROCESS_VERSION_PARTS = process.versions.node.split(".");
+    if (NODE_PROCESS_VERSION_PARTS[0] === void 0 || NODE_PROCESS_VERSION_PARTS[1] === void 0) {
+      throw new Error(`Unexpected behavior. The 'process.versions.node' variable has invalid value: ${process.versions.node}`);
+    }
+    var MAJOR_VERSION = Number.parseInt(NODE_PROCESS_VERSION_PARTS[0], 10);
+    var MINOR_VERSION = Number.parseInt(NODE_PROCESS_VERSION_PARTS[1], 10);
+    var SUPPORTED_MAJOR_VERSION = 10;
+    var SUPPORTED_MINOR_VERSION = 10;
+    var IS_MATCHED_BY_MAJOR = MAJOR_VERSION > SUPPORTED_MAJOR_VERSION;
+    var IS_MATCHED_BY_MAJOR_AND_MINOR = MAJOR_VERSION === SUPPORTED_MAJOR_VERSION && MINOR_VERSION >= SUPPORTED_MINOR_VERSION;
+    exports2.IS_SUPPORT_READDIR_WITH_FILE_TYPES = IS_MATCHED_BY_MAJOR || IS_MATCHED_BY_MAJOR_AND_MINOR;
+  }
+});
+
+// ../dev-workflow-core/node_modules/@nodelib/fs.scandir/out/utils/fs.js
+var require_fs3 = __commonJS({
+  "../dev-workflow-core/node_modules/@nodelib/fs.scandir/out/utils/fs.js"(exports2) {
+    "use strict";
+    Object.defineProperty(exports2, "__esModule", { value: true });
+    exports2.createDirentFromStats = void 0;
+    var DirentFromStats = class {
+      constructor(name, stats) {
+        this.name = name;
+        this.isBlockDevice = stats.isBlockDevice.bind(stats);
+        this.isCharacterDevice = stats.isCharacterDevice.bind(stats);
+        this.isDirectory = stats.isDirectory.bind(stats);
+        this.isFIFO = stats.isFIFO.bind(stats);
+        this.isFile = stats.isFile.bind(stats);
+        this.isSocket = stats.isSocket.bind(stats);
+        this.isSymbolicLink = stats.isSymbolicLink.bind(stats);
+      }
+    };
+    function createDirentFromStats(name, stats) {
+      return new DirentFromStats(name, stats);
+    }
+    exports2.createDirentFromStats = createDirentFromStats;
+  }
+});
+
+// ../dev-workflow-core/node_modules/@nodelib/fs.scandir/out/utils/index.js
+var require_utils5 = __commonJS({
+  "../dev-workflow-core/node_modules/@nodelib/fs.scandir/out/utils/index.js"(exports2) {
+    "use strict";
+    Object.defineProperty(exports2, "__esModule", { value: true });
+    exports2.fs = void 0;
+    var fs = require_fs3();
+    exports2.fs = fs;
+  }
+});
+
+// ../dev-workflow-core/node_modules/@nodelib/fs.scandir/out/providers/common.js
+var require_common2 = __commonJS({
+  "../dev-workflow-core/node_modules/@nodelib/fs.scandir/out/providers/common.js"(exports2) {
+    "use strict";
+    Object.defineProperty(exports2, "__esModule", { value: true });
+    exports2.joinPathSegments = void 0;
+    function joinPathSegments(a, b, separator) {
+      if (a.endsWith(separator)) {
+        return a + b;
+      }
+      return a + separator + b;
+    }
+    exports2.joinPathSegments = joinPathSegments;
+  }
+});
+
+// ../dev-workflow-core/node_modules/@nodelib/fs.scandir/out/providers/async.js
+var require_async2 = __commonJS({
+  "../dev-workflow-core/node_modules/@nodelib/fs.scandir/out/providers/async.js"(exports2) {
+    "use strict";
+    Object.defineProperty(exports2, "__esModule", { value: true });
+    exports2.readdir = exports2.readdirWithFileTypes = exports2.read = void 0;
+    var fsStat = require_out();
+    var rpl = require_run_parallel();
+    var constants_1 = require_constants3();
+    var utils = require_utils5();
+    var common = require_common2();
+    function read(directory, settings, callback) {
+      if (!settings.stats && constants_1.IS_SUPPORT_READDIR_WITH_FILE_TYPES) {
+        readdirWithFileTypes(directory, settings, callback);
+        return;
+      }
+      readdir7(directory, settings, callback);
+    }
+    exports2.read = read;
+    function readdirWithFileTypes(directory, settings, callback) {
+      settings.fs.readdir(directory, { withFileTypes: true }, (readdirError, dirents) => {
+        if (readdirError !== null) {
+          callFailureCallback(callback, readdirError);
+          return;
+        }
+        const entries = dirents.map((dirent) => ({
+          dirent,
+          name: dirent.name,
+          path: common.joinPathSegments(directory, dirent.name, settings.pathSegmentSeparator)
+        }));
+        if (!settings.followSymbolicLinks) {
+          callSuccessCallback(callback, entries);
+          return;
+        }
+        const tasks = entries.map((entry) => makeRplTaskEntry(entry, settings));
+        rpl(tasks, (rplError, rplEntries) => {
+          if (rplError !== null) {
+            callFailureCallback(callback, rplError);
+            return;
+          }
+          callSuccessCallback(callback, rplEntries);
+        });
+      });
+    }
+    exports2.readdirWithFileTypes = readdirWithFileTypes;
+    function makeRplTaskEntry(entry, settings) {
+      return (done) => {
+        if (!entry.dirent.isSymbolicLink()) {
+          done(null, entry);
+          return;
+        }
+        settings.fs.stat(entry.path, (statError, stats) => {
+          if (statError !== null) {
+            if (settings.throwErrorOnBrokenSymbolicLink) {
+              done(statError);
+              return;
+            }
+            done(null, entry);
+            return;
+          }
+          entry.dirent = utils.fs.createDirentFromStats(entry.name, stats);
+          done(null, entry);
+        });
+      };
+    }
+    function readdir7(directory, settings, callback) {
+      settings.fs.readdir(directory, (readdirError, names) => {
+        if (readdirError !== null) {
+          callFailureCallback(callback, readdirError);
+          return;
+        }
+        const tasks = names.map((name) => {
+          const path = common.joinPathSegments(directory, name, settings.pathSegmentSeparator);
+          return (done) => {
+            fsStat.stat(path, settings.fsStatSettings, (error, stats) => {
+              if (error !== null) {
+                done(error);
+                return;
+              }
+              const entry = {
+                name,
+                path,
+                dirent: utils.fs.createDirentFromStats(name, stats)
+              };
+              if (settings.stats) {
+                entry.stats = stats;
+              }
+              done(null, entry);
+            });
+          };
+        });
+        rpl(tasks, (rplError, entries) => {
+          if (rplError !== null) {
+            callFailureCallback(callback, rplError);
+            return;
+          }
+          callSuccessCallback(callback, entries);
+        });
+      });
+    }
+    exports2.readdir = readdir7;
+    function callFailureCallback(callback, error) {
+      callback(error);
+    }
+    function callSuccessCallback(callback, result) {
+      callback(null, result);
+    }
+  }
+});
+
+// ../dev-workflow-core/node_modules/@nodelib/fs.scandir/out/providers/sync.js
+var require_sync2 = __commonJS({
+  "../dev-workflow-core/node_modules/@nodelib/fs.scandir/out/providers/sync.js"(exports2) {
+    "use strict";
+    Object.defineProperty(exports2, "__esModule", { value: true });
+    exports2.readdir = exports2.readdirWithFileTypes = exports2.read = void 0;
+    var fsStat = require_out();
+    var constants_1 = require_constants3();
+    var utils = require_utils5();
+    var common = require_common2();
+    function read(directory, settings) {
+      if (!settings.stats && constants_1.IS_SUPPORT_READDIR_WITH_FILE_TYPES) {
+        return readdirWithFileTypes(directory, settings);
+      }
+      return readdir7(directory, settings);
+    }
+    exports2.read = read;
+    function readdirWithFileTypes(directory, settings) {
+      const dirents = settings.fs.readdirSync(directory, { withFileTypes: true });
+      return dirents.map((dirent) => {
+        const entry = {
+          dirent,
+          name: dirent.name,
+          path: common.joinPathSegments(directory, dirent.name, settings.pathSegmentSeparator)
+        };
+        if (entry.dirent.isSymbolicLink() && settings.followSymbolicLinks) {
+          try {
+            const stats = settings.fs.statSync(entry.path);
+            entry.dirent = utils.fs.createDirentFromStats(entry.name, stats);
+          } catch (error) {
+            if (settings.throwErrorOnBrokenSymbolicLink) {
+              throw error;
+            }
+          }
+        }
+        return entry;
+      });
+    }
+    exports2.readdirWithFileTypes = readdirWithFileTypes;
+    function readdir7(directory, settings) {
+      const names = settings.fs.readdirSync(directory);
+      return names.map((name) => {
+        const entryPath = common.joinPathSegments(directory, name, settings.pathSegmentSeparator);
+        const stats = fsStat.statSync(entryPath, settings.fsStatSettings);
+        const entry = {
+          name,
+          path: entryPath,
+          dirent: utils.fs.createDirentFromStats(name, stats)
+        };
+        if (settings.stats) {
+          entry.stats = stats;
+        }
+        return entry;
+      });
+    }
+    exports2.readdir = readdir7;
+  }
+});
+
+// ../dev-workflow-core/node_modules/@nodelib/fs.scandir/out/adapters/fs.js
+var require_fs4 = __commonJS({
+  "../dev-workflow-core/node_modules/@nodelib/fs.scandir/out/adapters/fs.js"(exports2) {
+    "use strict";
+    Object.defineProperty(exports2, "__esModule", { value: true });
+    exports2.createFileSystemAdapter = exports2.FILE_SYSTEM_ADAPTER = void 0;
+    var fs = require("fs");
+    exports2.FILE_SYSTEM_ADAPTER = {
+      lstat: fs.lstat,
+      stat: fs.stat,
+      lstatSync: fs.lstatSync,
+      statSync: fs.statSync,
+      readdir: fs.readdir,
+      readdirSync: fs.readdirSync
+    };
+    function createFileSystemAdapter(fsMethods) {
+      if (fsMethods === void 0) {
+        return exports2.FILE_SYSTEM_ADAPTER;
+      }
+      return Object.assign(Object.assign({}, exports2.FILE_SYSTEM_ADAPTER), fsMethods);
+    }
+    exports2.createFileSystemAdapter = createFileSystemAdapter;
+  }
+});
+
+// ../dev-workflow-core/node_modules/@nodelib/fs.scandir/out/settings.js
+var require_settings2 = __commonJS({
+  "../dev-workflow-core/node_modules/@nodelib/fs.scandir/out/settings.js"(exports2) {
+    "use strict";
+    Object.defineProperty(exports2, "__esModule", { value: true });
+    var path = require("path");
+    var fsStat = require_out();
+    var fs = require_fs4();
+    var Settings = class {
+      constructor(_options = {}) {
+        this._options = _options;
+        this.followSymbolicLinks = this._getValue(this._options.followSymbolicLinks, false);
+        this.fs = fs.createFileSystemAdapter(this._options.fs);
+        this.pathSegmentSeparator = this._getValue(this._options.pathSegmentSeparator, path.sep);
+        this.stats = this._getValue(this._options.stats, false);
+        this.throwErrorOnBrokenSymbolicLink = this._getValue(this._options.throwErrorOnBrokenSymbolicLink, true);
+        this.fsStatSettings = new fsStat.Settings({
+          followSymbolicLink: this.followSymbolicLinks,
+          fs: this.fs,
+          throwErrorOnBrokenSymbolicLink: this.throwErrorOnBrokenSymbolicLink
+        });
+      }
+      _getValue(option, value) {
+        return option !== null && option !== void 0 ? option : value;
+      }
+    };
+    exports2.default = Settings;
+  }
+});
+
+// ../dev-workflow-core/node_modules/@nodelib/fs.scandir/out/index.js
+var require_out2 = __commonJS({
+  "../dev-workflow-core/node_modules/@nodelib/fs.scandir/out/index.js"(exports2) {
+    "use strict";
+    Object.defineProperty(exports2, "__esModule", { value: true });
+    exports2.Settings = exports2.scandirSync = exports2.scandir = void 0;
+    var async = require_async2();
+    var sync = require_sync2();
+    var settings_1 = require_settings2();
+    exports2.Settings = settings_1.default;
+    function scandir(path, optionsOrSettingsOrCallback, callback) {
+      if (typeof optionsOrSettingsOrCallback === "function") {
+        async.read(path, getSettings(), optionsOrSettingsOrCallback);
+        return;
+      }
+      async.read(path, getSettings(optionsOrSettingsOrCallback), callback);
+    }
+    exports2.scandir = scandir;
+    function scandirSync(path, optionsOrSettings) {
+      const settings = getSettings(optionsOrSettings);
+      return sync.read(path, settings);
+    }
+    exports2.scandirSync = scandirSync;
+    function getSettings(settingsOrOptions = {}) {
+      if (settingsOrOptions instanceof settings_1.default) {
+        return settingsOrOptions;
+      }
+      return new settings_1.default(settingsOrOptions);
+    }
+  }
+});
+
+// ../dev-workflow-core/node_modules/reusify/reusify.js
+var require_reusify = __commonJS({
+  "../dev-workflow-core/node_modules/reusify/reusify.js"(exports2, module2) {
+    "use strict";
+    function reusify(Constructor) {
+      var head = new Constructor();
+      var tail = head;
+      function get() {
+        var current = head;
+        if (current.next) {
+          head = current.next;
+        } else {
+          head = new Constructor();
+          tail = head;
+        }
+        current.next = null;
+        return current;
+      }
+      function release(obj) {
+        tail.next = obj;
+        tail = obj;
+      }
+      return {
+        get,
+        release
+      };
+    }
+    module2.exports = reusify;
+  }
+});
+
+// ../dev-workflow-core/node_modules/fastq/queue.js
+var require_queue = __commonJS({
+  "../dev-workflow-core/node_modules/fastq/queue.js"(exports2, module2) {
+    "use strict";
+    var reusify = require_reusify();
+    function fastqueue(context, worker, _concurrency) {
+      if (typeof context === "function") {
+        _concurrency = worker;
+        worker = context;
+        context = null;
+      }
+      if (!(_concurrency >= 1)) {
+        throw new Error("fastqueue concurrency must be equal to or greater than 1");
+      }
+      var cache = reusify(Task);
+      var queueHead = null;
+      var queueTail = null;
+      var _running = 0;
+      var errorHandler = null;
+      var self = {
+        push,
+        drain: noop,
+        saturated: noop,
+        pause,
+        paused: false,
+        get concurrency() {
+          return _concurrency;
+        },
+        set concurrency(value) {
+          if (!(value >= 1)) {
+            throw new Error("fastqueue concurrency must be equal to or greater than 1");
+          }
+          _concurrency = value;
+          if (self.paused) return;
+          for (; queueHead && _running < _concurrency; ) {
+            _running++;
+            release();
+          }
+        },
+        running,
+        resume,
+        idle,
+        length,
+        getQueue,
+        unshift,
+        empty: noop,
+        kill,
+        killAndDrain,
+        error,
+        abort
+      };
+      return self;
+      function running() {
+        return _running;
+      }
+      function pause() {
+        self.paused = true;
+      }
+      function length() {
+        var current = queueHead;
+        var counter = 0;
+        while (current) {
+          current = current.next;
+          counter++;
+        }
+        return counter;
+      }
+      function getQueue() {
+        var current = queueHead;
+        var tasks = [];
+        while (current) {
+          tasks.push(current.value);
+          current = current.next;
+        }
+        return tasks;
+      }
+      function resume() {
+        if (!self.paused) return;
+        self.paused = false;
+        if (queueHead === null) {
+          _running++;
+          release();
+          return;
+        }
+        for (; queueHead && _running < _concurrency; ) {
+          _running++;
+          release();
+        }
+      }
+      function idle() {
+        return _running === 0 && self.length() === 0;
+      }
+      function push(value, done) {
+        var current = cache.get();
+        current.context = context;
+        current.release = release;
+        current.value = value;
+        current.callback = done || noop;
+        current.errorHandler = errorHandler;
+        if (_running >= _concurrency || self.paused) {
+          if (queueTail) {
+            queueTail.next = current;
+            queueTail = current;
+          } else {
+            queueHead = current;
+            queueTail = current;
+            self.saturated();
+          }
+        } else {
+          _running++;
+          worker.call(context, current.value, current.worked);
+        }
+      }
+      function unshift(value, done) {
+        var current = cache.get();
+        current.context = context;
+        current.release = release;
+        current.value = value;
+        current.callback = done || noop;
+        current.errorHandler = errorHandler;
+        if (_running >= _concurrency || self.paused) {
+          if (queueHead) {
+            current.next = queueHead;
+            queueHead = current;
+          } else {
+            queueHead = current;
+            queueTail = current;
+            self.saturated();
+          }
+        } else {
+          _running++;
+          worker.call(context, current.value, current.worked);
+        }
+      }
+      function release(holder) {
+        if (holder) {
+          cache.release(holder);
+        }
+        var next = queueHead;
+        if (next && _running <= _concurrency) {
+          if (!self.paused) {
+            if (queueTail === queueHead) {
+              queueTail = null;
+            }
+            queueHead = next.next;
+            next.next = null;
+            worker.call(context, next.value, next.worked);
+            if (queueTail === null) {
+              self.empty();
+            }
+          } else {
+            _running--;
+          }
+        } else if (--_running === 0) {
+          self.drain();
+        }
+      }
+      function kill() {
+        queueHead = null;
+        queueTail = null;
+        self.drain = noop;
+      }
+      function killAndDrain() {
+        queueHead = null;
+        queueTail = null;
+        self.drain();
+        self.drain = noop;
+      }
+      function abort() {
+        var current = queueHead;
+        queueHead = null;
+        queueTail = null;
+        while (current) {
+          var next = current.next;
+          var callback = current.callback;
+          var errorHandler2 = current.errorHandler;
+          var val = current.value;
+          var context2 = current.context;
+          current.value = null;
+          current.callback = noop;
+          current.errorHandler = null;
+          if (errorHandler2) {
+            errorHandler2(new Error("abort"), val);
+          }
+          callback.call(context2, new Error("abort"));
+          current.release(current);
+          current = next;
+        }
+        self.drain = noop;
+      }
+      function error(handler) {
+        errorHandler = handler;
+      }
+    }
+    function noop() {
+    }
+    function Task() {
+      this.value = null;
+      this.callback = noop;
+      this.next = null;
+      this.release = noop;
+      this.context = null;
+      this.errorHandler = null;
+      var self = this;
+      this.worked = function worked(err, result) {
+        var callback = self.callback;
+        var errorHandler = self.errorHandler;
+        var val = self.value;
+        self.value = null;
+        self.callback = noop;
+        if (self.errorHandler) {
+          errorHandler(err, val);
+        }
+        callback.call(self.context, err, result);
+        self.release(self);
+      };
+    }
+    function queueAsPromised(context, worker, _concurrency) {
+      if (typeof context === "function") {
+        _concurrency = worker;
+        worker = context;
+        context = null;
+      }
+      function asyncWrapper(arg, cb) {
+        worker.call(this, arg).then(function(res) {
+          cb(null, res);
+        }, cb);
+      }
+      var queue = fastqueue(context, asyncWrapper, _concurrency);
+      var pushCb = queue.push;
+      var unshiftCb = queue.unshift;
+      queue.push = push;
+      queue.unshift = unshift;
+      queue.drained = drained;
+      return queue;
+      function push(value) {
+        var p = new Promise(function(resolve14, reject) {
+          pushCb(value, function(err, result) {
+            if (err) {
+              reject(err);
+              return;
+            }
+            resolve14(result);
+          });
+        });
+        p.catch(noop);
+        return p;
+      }
+      function unshift(value) {
+        var p = new Promise(function(resolve14, reject) {
+          unshiftCb(value, function(err, result) {
+            if (err) {
+              reject(err);
+              return;
+            }
+            resolve14(result);
+          });
+        });
+        p.catch(noop);
+        return p;
+      }
+      function drained() {
+        var p = new Promise(function(resolve14) {
+          process.nextTick(function() {
+            if (queue.idle()) {
+              resolve14();
+            } else {
+              var previousDrain = queue.drain;
+              queue.drain = function() {
+                if (typeof previousDrain === "function") previousDrain();
+                resolve14();
+                queue.drain = previousDrain;
+              };
+            }
+          });
+        });
+        return p;
+      }
+    }
+    module2.exports = fastqueue;
+    module2.exports.promise = queueAsPromised;
+  }
+});
+
+// ../dev-workflow-core/node_modules/@nodelib/fs.walk/out/readers/common.js
+var require_common3 = __commonJS({
+  "../dev-workflow-core/node_modules/@nodelib/fs.walk/out/readers/common.js"(exports2) {
+    "use strict";
+    Object.defineProperty(exports2, "__esModule", { value: true });
+    exports2.joinPathSegments = exports2.replacePathSegmentSeparator = exports2.isAppliedFilter = exports2.isFatalError = void 0;
+    function isFatalError(settings, error) {
+      if (settings.errorFilter === null) {
+        return true;
+      }
+      return !settings.errorFilter(error);
+    }
+    exports2.isFatalError = isFatalError;
+    function isAppliedFilter(filter, value) {
+      return filter === null || filter(value);
+    }
+    exports2.isAppliedFilter = isAppliedFilter;
+    function replacePathSegmentSeparator(filepath, separator) {
+      return filepath.split(/[/\\]/).join(separator);
+    }
+    exports2.replacePathSegmentSeparator = replacePathSegmentSeparator;
+    function joinPathSegments(a, b, separator) {
+      if (a === "") {
+        return b;
+      }
+      if (a.endsWith(separator)) {
+        return a + b;
+      }
+      return a + separator + b;
+    }
+    exports2.joinPathSegments = joinPathSegments;
+  }
+});
+
+// ../dev-workflow-core/node_modules/@nodelib/fs.walk/out/readers/reader.js
+var require_reader = __commonJS({
+  "../dev-workflow-core/node_modules/@nodelib/fs.walk/out/readers/reader.js"(exports2) {
+    "use strict";
+    Object.defineProperty(exports2, "__esModule", { value: true });
+    var common = require_common3();
+    var Reader = class {
+      constructor(_root, _settings) {
+        this._root = _root;
+        this._settings = _settings;
+        this._root = common.replacePathSegmentSeparator(_root, _settings.pathSegmentSeparator);
+      }
+    };
+    exports2.default = Reader;
+  }
+});
+
+// ../dev-workflow-core/node_modules/@nodelib/fs.walk/out/readers/async.js
+var require_async3 = __commonJS({
+  "../dev-workflow-core/node_modules/@nodelib/fs.walk/out/readers/async.js"(exports2) {
+    "use strict";
+    Object.defineProperty(exports2, "__esModule", { value: true });
+    var events_1 = require("events");
+    var fsScandir = require_out2();
+    var fastq = require_queue();
+    var common = require_common3();
+    var reader_1 = require_reader();
+    var AsyncReader = class extends reader_1.default {
+      constructor(_root, _settings) {
+        super(_root, _settings);
+        this._settings = _settings;
+        this._scandir = fsScandir.scandir;
+        this._emitter = new events_1.EventEmitter();
+        this._queue = fastq(this._worker.bind(this), this._settings.concurrency);
+        this._isFatalError = false;
+        this._isDestroyed = false;
+        this._queue.drain = () => {
+          if (!this._isFatalError) {
+            this._emitter.emit("end");
+          }
+        };
+      }
+      read() {
+        this._isFatalError = false;
+        this._isDestroyed = false;
+        setImmediate(() => {
+          this._pushToQueue(this._root, this._settings.basePath);
+        });
+        return this._emitter;
+      }
+      get isDestroyed() {
+        return this._isDestroyed;
+      }
+      destroy() {
+        if (this._isDestroyed) {
+          throw new Error("The reader is already destroyed");
+        }
+        this._isDestroyed = true;
+        this._queue.killAndDrain();
+      }
+      onEntry(callback) {
+        this._emitter.on("entry", callback);
+      }
+      onError(callback) {
+        this._emitter.once("error", callback);
+      }
+      onEnd(callback) {
+        this._emitter.once("end", callback);
+      }
+      _pushToQueue(directory, base) {
+        const queueItem = { directory, base };
+        this._queue.push(queueItem, (error) => {
+          if (error !== null) {
+            this._handleError(error);
+          }
+        });
+      }
+      _worker(item, done) {
+        this._scandir(item.directory, this._settings.fsScandirSettings, (error, entries) => {
+          if (error !== null) {
+            done(error, void 0);
+            return;
+          }
+          for (const entry of entries) {
+            this._handleEntry(entry, item.base);
+          }
+          done(null, void 0);
+        });
+      }
+      _handleError(error) {
+        if (this._isDestroyed || !common.isFatalError(this._settings, error)) {
+          return;
+        }
+        this._isFatalError = true;
+        this._isDestroyed = true;
+        this._emitter.emit("error", error);
+      }
+      _handleEntry(entry, base) {
+        if (this._isDestroyed || this._isFatalError) {
+          return;
+        }
+        const fullpath = entry.path;
+        if (base !== void 0) {
+          entry.path = common.joinPathSegments(base, entry.name, this._settings.pathSegmentSeparator);
+        }
+        if (common.isAppliedFilter(this._settings.entryFilter, entry)) {
+          this._emitEntry(entry);
+        }
+        if (entry.dirent.isDirectory() && common.isAppliedFilter(this._settings.deepFilter, entry)) {
+          this._pushToQueue(fullpath, base === void 0 ? void 0 : entry.path);
+        }
+      }
+      _emitEntry(entry) {
+        this._emitter.emit("entry", entry);
+      }
+    };
+    exports2.default = AsyncReader;
+  }
+});
+
+// ../dev-workflow-core/node_modules/@nodelib/fs.walk/out/providers/async.js
+var require_async4 = __commonJS({
+  "../dev-workflow-core/node_modules/@nodelib/fs.walk/out/providers/async.js"(exports2) {
+    "use strict";
+    Object.defineProperty(exports2, "__esModule", { value: true });
+    var async_1 = require_async3();
+    var AsyncProvider = class {
+      constructor(_root, _settings) {
+        this._root = _root;
+        this._settings = _settings;
+        this._reader = new async_1.default(this._root, this._settings);
+        this._storage = [];
+      }
+      read(callback) {
+        this._reader.onError((error) => {
+          callFailureCallback(callback, error);
+        });
+        this._reader.onEntry((entry) => {
+          this._storage.push(entry);
+        });
+        this._reader.onEnd(() => {
+          callSuccessCallback(callback, this._storage);
+        });
+        this._reader.read();
+      }
+    };
+    exports2.default = AsyncProvider;
+    function callFailureCallback(callback, error) {
+      callback(error);
+    }
+    function callSuccessCallback(callback, entries) {
+      callback(null, entries);
+    }
+  }
+});
+
+// ../dev-workflow-core/node_modules/@nodelib/fs.walk/out/providers/stream.js
+var require_stream2 = __commonJS({
+  "../dev-workflow-core/node_modules/@nodelib/fs.walk/out/providers/stream.js"(exports2) {
+    "use strict";
+    Object.defineProperty(exports2, "__esModule", { value: true });
+    var stream_1 = require("stream");
+    var async_1 = require_async3();
+    var StreamProvider = class {
+      constructor(_root, _settings) {
+        this._root = _root;
+        this._settings = _settings;
+        this._reader = new async_1.default(this._root, this._settings);
+        this._stream = new stream_1.Readable({
+          objectMode: true,
+          read: () => {
+          },
+          destroy: () => {
+            if (!this._reader.isDestroyed) {
+              this._reader.destroy();
+            }
+          }
+        });
+      }
+      read() {
+        this._reader.onError((error) => {
+          this._stream.emit("error", error);
+        });
+        this._reader.onEntry((entry) => {
+          this._stream.push(entry);
+        });
+        this._reader.onEnd(() => {
+          this._stream.push(null);
+        });
+        this._reader.read();
+        return this._stream;
+      }
+    };
+    exports2.default = StreamProvider;
+  }
+});
+
+// ../dev-workflow-core/node_modules/@nodelib/fs.walk/out/readers/sync.js
+var require_sync3 = __commonJS({
+  "../dev-workflow-core/node_modules/@nodelib/fs.walk/out/readers/sync.js"(exports2) {
+    "use strict";
+    Object.defineProperty(exports2, "__esModule", { value: true });
+    var fsScandir = require_out2();
+    var common = require_common3();
+    var reader_1 = require_reader();
+    var SyncReader = class extends reader_1.default {
+      constructor() {
+        super(...arguments);
+        this._scandir = fsScandir.scandirSync;
+        this._storage = [];
+        this._queue = /* @__PURE__ */ new Set();
+      }
+      read() {
+        this._pushToQueue(this._root, this._settings.basePath);
+        this._handleQueue();
+        return this._storage;
+      }
+      _pushToQueue(directory, base) {
+        this._queue.add({ directory, base });
+      }
+      _handleQueue() {
+        for (const item of this._queue.values()) {
+          this._handleDirectory(item.directory, item.base);
+        }
+      }
+      _handleDirectory(directory, base) {
+        try {
+          const entries = this._scandir(directory, this._settings.fsScandirSettings);
+          for (const entry of entries) {
+            this._handleEntry(entry, base);
+          }
+        } catch (error) {
+          this._handleError(error);
+        }
+      }
+      _handleError(error) {
+        if (!common.isFatalError(this._settings, error)) {
+          return;
+        }
+        throw error;
+      }
+      _handleEntry(entry, base) {
+        const fullpath = entry.path;
+        if (base !== void 0) {
+          entry.path = common.joinPathSegments(base, entry.name, this._settings.pathSegmentSeparator);
+        }
+        if (common.isAppliedFilter(this._settings.entryFilter, entry)) {
+          this._pushToStorage(entry);
+        }
+        if (entry.dirent.isDirectory() && common.isAppliedFilter(this._settings.deepFilter, entry)) {
+          this._pushToQueue(fullpath, base === void 0 ? void 0 : entry.path);
+        }
+      }
+      _pushToStorage(entry) {
+        this._storage.push(entry);
+      }
+    };
+    exports2.default = SyncReader;
+  }
+});
+
+// ../dev-workflow-core/node_modules/@nodelib/fs.walk/out/providers/sync.js
+var require_sync4 = __commonJS({
+  "../dev-workflow-core/node_modules/@nodelib/fs.walk/out/providers/sync.js"(exports2) {
+    "use strict";
+    Object.defineProperty(exports2, "__esModule", { value: true });
+    var sync_1 = require_sync3();
+    var SyncProvider = class {
+      constructor(_root, _settings) {
+        this._root = _root;
+        this._settings = _settings;
+        this._reader = new sync_1.default(this._root, this._settings);
+      }
+      read() {
+        return this._reader.read();
+      }
+    };
+    exports2.default = SyncProvider;
+  }
+});
+
+// ../dev-workflow-core/node_modules/@nodelib/fs.walk/out/settings.js
+var require_settings3 = __commonJS({
+  "../dev-workflow-core/node_modules/@nodelib/fs.walk/out/settings.js"(exports2) {
+    "use strict";
+    Object.defineProperty(exports2, "__esModule", { value: true });
+    var path = require("path");
+    var fsScandir = require_out2();
+    var Settings = class {
+      constructor(_options = {}) {
+        this._options = _options;
+        this.basePath = this._getValue(this._options.basePath, void 0);
+        this.concurrency = this._getValue(this._options.concurrency, Number.POSITIVE_INFINITY);
+        this.deepFilter = this._getValue(this._options.deepFilter, null);
+        this.entryFilter = this._getValue(this._options.entryFilter, null);
+        this.errorFilter = this._getValue(this._options.errorFilter, null);
+        this.pathSegmentSeparator = this._getValue(this._options.pathSegmentSeparator, path.sep);
+        this.fsScandirSettings = new fsScandir.Settings({
+          followSymbolicLinks: this._options.followSymbolicLinks,
+          fs: this._options.fs,
+          pathSegmentSeparator: this._options.pathSegmentSeparator,
+          stats: this._options.stats,
+          throwErrorOnBrokenSymbolicLink: this._options.throwErrorOnBrokenSymbolicLink
+        });
+      }
+      _getValue(option, value) {
+        return option !== null && option !== void 0 ? option : value;
+      }
+    };
+    exports2.default = Settings;
+  }
+});
+
+// ../dev-workflow-core/node_modules/@nodelib/fs.walk/out/index.js
+var require_out3 = __commonJS({
+  "../dev-workflow-core/node_modules/@nodelib/fs.walk/out/index.js"(exports2) {
+    "use strict";
+    Object.defineProperty(exports2, "__esModule", { value: true });
+    exports2.Settings = exports2.walkStream = exports2.walkSync = exports2.walk = void 0;
+    var async_1 = require_async4();
+    var stream_1 = require_stream2();
+    var sync_1 = require_sync4();
+    var settings_1 = require_settings3();
+    exports2.Settings = settings_1.default;
+    function walk(directory, optionsOrSettingsOrCallback, callback) {
+      if (typeof optionsOrSettingsOrCallback === "function") {
+        new async_1.default(directory, getSettings()).read(optionsOrSettingsOrCallback);
+        return;
+      }
+      new async_1.default(directory, getSettings(optionsOrSettingsOrCallback)).read(callback);
+    }
+    exports2.walk = walk;
+    function walkSync(directory, optionsOrSettings) {
+      const settings = getSettings(optionsOrSettings);
+      const provider = new sync_1.default(directory, settings);
+      return provider.read();
+    }
+    exports2.walkSync = walkSync;
+    function walkStream(directory, optionsOrSettings) {
+      const settings = getSettings(optionsOrSettings);
+      const provider = new stream_1.default(directory, settings);
+      return provider.read();
+    }
+    exports2.walkStream = walkStream;
+    function getSettings(settingsOrOptions = {}) {
+      if (settingsOrOptions instanceof settings_1.default) {
+        return settingsOrOptions;
+      }
+      return new settings_1.default(settingsOrOptions);
+    }
+  }
+});
+
+// ../dev-workflow-core/node_modules/fast-glob/out/readers/reader.js
+var require_reader2 = __commonJS({
+  "../dev-workflow-core/node_modules/fast-glob/out/readers/reader.js"(exports2) {
+    "use strict";
+    Object.defineProperty(exports2, "__esModule", { value: true });
+    var path = require("path");
+    var fsStat = require_out();
+    var utils = require_utils4();
+    var Reader = class {
+      constructor(_settings) {
+        this._settings = _settings;
+        this._fsStatSettings = new fsStat.Settings({
+          followSymbolicLink: this._settings.followSymbolicLinks,
+          fs: this._settings.fs,
+          throwErrorOnBrokenSymbolicLink: this._settings.followSymbolicLinks
+        });
+      }
+      _getFullEntryPath(filepath) {
+        return path.resolve(this._settings.cwd, filepath);
+      }
+      _makeEntry(stats, pattern) {
+        const entry = {
+          name: pattern,
+          path: pattern,
+          dirent: utils.fs.createDirentFromStats(pattern, stats)
+        };
+        if (this._settings.stats) {
+          entry.stats = stats;
+        }
+        return entry;
+      }
+      _isFatalError(error) {
+        return !utils.errno.isEnoentCodeError(error) && !this._settings.suppressErrors;
+      }
+    };
+    exports2.default = Reader;
+  }
+});
+
+// ../dev-workflow-core/node_modules/fast-glob/out/readers/stream.js
+var require_stream3 = __commonJS({
+  "../dev-workflow-core/node_modules/fast-glob/out/readers/stream.js"(exports2) {
+    "use strict";
+    Object.defineProperty(exports2, "__esModule", { value: true });
+    var stream_1 = require("stream");
+    var fsStat = require_out();
+    var fsWalk = require_out3();
+    var reader_1 = require_reader2();
+    var ReaderStream = class extends reader_1.default {
+      constructor() {
+        super(...arguments);
+        this._walkStream = fsWalk.walkStream;
+        this._stat = fsStat.stat;
+      }
+      dynamic(root, options) {
+        return this._walkStream(root, options);
+      }
+      static(patterns, options) {
+        const filepaths = patterns.map(this._getFullEntryPath, this);
+        const stream = new stream_1.PassThrough({ objectMode: true });
+        stream._write = (index, _enc, done) => {
+          return this._getEntry(filepaths[index], patterns[index], options).then((entry) => {
+            if (entry !== null && options.entryFilter(entry)) {
+              stream.push(entry);
+            }
+            if (index === filepaths.length - 1) {
+              stream.end();
+            }
+            done();
+          }).catch(done);
+        };
+        for (let i = 0; i < filepaths.length; i++) {
+          stream.write(i);
+        }
+        return stream;
+      }
+      _getEntry(filepath, pattern, options) {
+        return this._getStat(filepath).then((stats) => this._makeEntry(stats, pattern)).catch((error) => {
+          if (options.errorFilter(error)) {
+            return null;
+          }
+          throw error;
+        });
+      }
+      _getStat(filepath) {
+        return new Promise((resolve14, reject) => {
+          this._stat(filepath, this._fsStatSettings, (error, stats) => {
+            return error === null ? resolve14(stats) : reject(error);
+          });
+        });
+      }
+    };
+    exports2.default = ReaderStream;
+  }
+});
+
+// ../dev-workflow-core/node_modules/fast-glob/out/readers/async.js
+var require_async5 = __commonJS({
+  "../dev-workflow-core/node_modules/fast-glob/out/readers/async.js"(exports2) {
+    "use strict";
+    Object.defineProperty(exports2, "__esModule", { value: true });
+    var fsWalk = require_out3();
+    var reader_1 = require_reader2();
+    var stream_1 = require_stream3();
+    var ReaderAsync = class extends reader_1.default {
+      constructor() {
+        super(...arguments);
+        this._walkAsync = fsWalk.walk;
+        this._readerStream = new stream_1.default(this._settings);
+      }
+      dynamic(root, options) {
+        return new Promise((resolve14, reject) => {
+          this._walkAsync(root, options, (error, entries) => {
+            if (error === null) {
+              resolve14(entries);
+            } else {
+              reject(error);
+            }
+          });
+        });
+      }
+      async static(patterns, options) {
+        const entries = [];
+        const stream = this._readerStream.static(patterns, options);
+        return new Promise((resolve14, reject) => {
+          stream.once("error", reject);
+          stream.on("data", (entry) => entries.push(entry));
+          stream.once("end", () => resolve14(entries));
+        });
+      }
+    };
+    exports2.default = ReaderAsync;
+  }
+});
+
+// ../dev-workflow-core/node_modules/fast-glob/out/providers/matchers/matcher.js
+var require_matcher = __commonJS({
+  "../dev-workflow-core/node_modules/fast-glob/out/providers/matchers/matcher.js"(exports2) {
+    "use strict";
+    Object.defineProperty(exports2, "__esModule", { value: true });
+    var utils = require_utils4();
+    var Matcher = class {
+      constructor(_patterns, _settings, _micromatchOptions) {
+        this._patterns = _patterns;
+        this._settings = _settings;
+        this._micromatchOptions = _micromatchOptions;
+        this._storage = [];
+        this._fillStorage();
+      }
+      _fillStorage() {
+        for (const pattern of this._patterns) {
+          const segments = this._getPatternSegments(pattern);
+          const sections = this._splitSegmentsIntoSections(segments);
+          this._storage.push({
+            complete: sections.length <= 1,
+            pattern,
+            segments,
+            sections
+          });
+        }
+      }
+      _getPatternSegments(pattern) {
+        const parts = utils.pattern.getPatternParts(pattern, this._micromatchOptions);
+        return parts.map((part) => {
+          const dynamic = utils.pattern.isDynamicPattern(part, this._settings);
+          if (!dynamic) {
+            return {
+              dynamic: false,
+              pattern: part
+            };
+          }
+          return {
+            dynamic: true,
+            pattern: part,
+            patternRe: utils.pattern.makeRe(part, this._micromatchOptions)
+          };
+        });
+      }
+      _splitSegmentsIntoSections(segments) {
+        return utils.array.splitWhen(segments, (segment) => segment.dynamic && utils.pattern.hasGlobStar(segment.pattern));
+      }
+    };
+    exports2.default = Matcher;
+  }
+});
+
+// ../dev-workflow-core/node_modules/fast-glob/out/providers/matchers/partial.js
+var require_partial = __commonJS({
+  "../dev-workflow-core/node_modules/fast-glob/out/providers/matchers/partial.js"(exports2) {
+    "use strict";
+    Object.defineProperty(exports2, "__esModule", { value: true });
+    var matcher_1 = require_matcher();
+    var PartialMatcher = class extends matcher_1.default {
+      match(filepath) {
+        const parts = filepath.split("/");
+        const levels = parts.length;
+        const patterns = this._storage.filter((info) => !info.complete || info.segments.length > levels);
+        for (const pattern of patterns) {
+          const section = pattern.sections[0];
+          if (!pattern.complete && levels > section.length) {
+            return true;
+          }
+          const match = parts.every((part, index) => {
+            const segment = pattern.segments[index];
+            if (segment.dynamic && segment.patternRe.test(part)) {
+              return true;
+            }
+            if (!segment.dynamic && segment.pattern === part) {
+              return true;
+            }
+            return false;
+          });
+          if (match) {
+            return true;
+          }
+        }
+        return false;
+      }
+    };
+    exports2.default = PartialMatcher;
+  }
+});
+
+// ../dev-workflow-core/node_modules/fast-glob/out/providers/filters/deep.js
+var require_deep = __commonJS({
+  "../dev-workflow-core/node_modules/fast-glob/out/providers/filters/deep.js"(exports2) {
+    "use strict";
+    Object.defineProperty(exports2, "__esModule", { value: true });
+    var utils = require_utils4();
+    var partial_1 = require_partial();
+    var DeepFilter = class {
+      constructor(_settings, _micromatchOptions) {
+        this._settings = _settings;
+        this._micromatchOptions = _micromatchOptions;
+      }
+      getFilter(basePath, positive, negative) {
+        const matcher = this._getMatcher(positive);
+        const negativeRe = this._getNegativePatternsRe(negative);
+        return (entry) => this._filter(basePath, entry, matcher, negativeRe);
+      }
+      _getMatcher(patterns) {
+        return new partial_1.default(patterns, this._settings, this._micromatchOptions);
+      }
+      _getNegativePatternsRe(patterns) {
+        const affectDepthOfReadingPatterns = patterns.filter(utils.pattern.isAffectDepthOfReadingPattern);
+        return utils.pattern.convertPatternsToRe(affectDepthOfReadingPatterns, this._micromatchOptions);
+      }
+      _filter(basePath, entry, matcher, negativeRe) {
+        if (this._isSkippedByDeep(basePath, entry.path)) {
+          return false;
+        }
+        if (this._isSkippedSymbolicLink(entry)) {
+          return false;
+        }
+        const filepath = utils.path.removeLeadingDotSegment(entry.path);
+        if (this._isSkippedByPositivePatterns(filepath, matcher)) {
+          return false;
+        }
+        return this._isSkippedByNegativePatterns(filepath, negativeRe);
+      }
+      _isSkippedByDeep(basePath, entryPath) {
+        if (this._settings.deep === Infinity) {
+          return false;
+        }
+        return this._getEntryLevel(basePath, entryPath) >= this._settings.deep;
+      }
+      _getEntryLevel(basePath, entryPath) {
+        const entryPathDepth = entryPath.split("/").length;
+        if (basePath === "") {
+          return entryPathDepth;
+        }
+        const basePathDepth = basePath.split("/").length;
+        return entryPathDepth - basePathDepth;
+      }
+      _isSkippedSymbolicLink(entry) {
+        return !this._settings.followSymbolicLinks && entry.dirent.isSymbolicLink();
+      }
+      _isSkippedByPositivePatterns(entryPath, matcher) {
+        return !this._settings.baseNameMatch && !matcher.match(entryPath);
+      }
+      _isSkippedByNegativePatterns(entryPath, patternsRe) {
+        return !utils.pattern.matchAny(entryPath, patternsRe);
+      }
+    };
+    exports2.default = DeepFilter;
+  }
+});
+
+// ../dev-workflow-core/node_modules/fast-glob/out/providers/filters/entry.js
+var require_entry = __commonJS({
+  "../dev-workflow-core/node_modules/fast-glob/out/providers/filters/entry.js"(exports2) {
+    "use strict";
+    Object.defineProperty(exports2, "__esModule", { value: true });
+    var utils = require_utils4();
+    var EntryFilter = class {
+      constructor(_settings, _micromatchOptions) {
+        this._settings = _settings;
+        this._micromatchOptions = _micromatchOptions;
+        this.index = /* @__PURE__ */ new Map();
+      }
+      getFilter(positive, negative) {
+        const [absoluteNegative, relativeNegative] = utils.pattern.partitionAbsoluteAndRelative(negative);
+        const patterns = {
+          positive: {
+            all: utils.pattern.convertPatternsToRe(positive, this._micromatchOptions)
+          },
+          negative: {
+            absolute: utils.pattern.convertPatternsToRe(absoluteNegative, Object.assign(Object.assign({}, this._micromatchOptions), { dot: true })),
+            relative: utils.pattern.convertPatternsToRe(relativeNegative, Object.assign(Object.assign({}, this._micromatchOptions), { dot: true }))
+          }
+        };
+        return (entry) => this._filter(entry, patterns);
+      }
+      _filter(entry, patterns) {
+        const filepath = utils.path.removeLeadingDotSegment(entry.path);
+        if (this._settings.unique && this._isDuplicateEntry(filepath)) {
+          return false;
+        }
+        if (this._onlyFileFilter(entry) || this._onlyDirectoryFilter(entry)) {
+          return false;
+        }
+        const isMatched = this._isMatchToPatternsSet(filepath, patterns, entry.dirent.isDirectory());
+        if (this._settings.unique && isMatched) {
+          this._createIndexRecord(filepath);
+        }
+        return isMatched;
+      }
+      _isDuplicateEntry(filepath) {
+        return this.index.has(filepath);
+      }
+      _createIndexRecord(filepath) {
+        this.index.set(filepath, void 0);
+      }
+      _onlyFileFilter(entry) {
+        return this._settings.onlyFiles && !entry.dirent.isFile();
+      }
+      _onlyDirectoryFilter(entry) {
+        return this._settings.onlyDirectories && !entry.dirent.isDirectory();
+      }
+      _isMatchToPatternsSet(filepath, patterns, isDirectory) {
+        const isMatched = this._isMatchToPatterns(filepath, patterns.positive.all, isDirectory);
+        if (!isMatched) {
+          return false;
+        }
+        const isMatchedByRelativeNegative = this._isMatchToPatterns(filepath, patterns.negative.relative, isDirectory);
+        if (isMatchedByRelativeNegative) {
+          return false;
+        }
+        const isMatchedByAbsoluteNegative = this._isMatchToAbsoluteNegative(filepath, patterns.negative.absolute, isDirectory);
+        if (isMatchedByAbsoluteNegative) {
+          return false;
+        }
+        return true;
+      }
+      _isMatchToAbsoluteNegative(filepath, patternsRe, isDirectory) {
+        if (patternsRe.length === 0) {
+          return false;
+        }
+        const fullpath = utils.path.makeAbsolute(this._settings.cwd, filepath);
+        return this._isMatchToPatterns(fullpath, patternsRe, isDirectory);
+      }
+      _isMatchToPatterns(filepath, patternsRe, isDirectory) {
+        if (patternsRe.length === 0) {
+          return false;
+        }
+        const isMatched = utils.pattern.matchAny(filepath, patternsRe);
+        if (!isMatched && isDirectory) {
+          return utils.pattern.matchAny(filepath + "/", patternsRe);
+        }
+        return isMatched;
+      }
+    };
+    exports2.default = EntryFilter;
+  }
+});
+
+// ../dev-workflow-core/node_modules/fast-glob/out/providers/filters/error.js
+var require_error = __commonJS({
+  "../dev-workflow-core/node_modules/fast-glob/out/providers/filters/error.js"(exports2) {
+    "use strict";
+    Object.defineProperty(exports2, "__esModule", { value: true });
+    var utils = require_utils4();
+    var ErrorFilter = class {
+      constructor(_settings) {
+        this._settings = _settings;
+      }
+      getFilter() {
+        return (error) => this._isNonFatalError(error);
+      }
+      _isNonFatalError(error) {
+        return utils.errno.isEnoentCodeError(error) || this._settings.suppressErrors;
+      }
+    };
+    exports2.default = ErrorFilter;
+  }
+});
+
+// ../dev-workflow-core/node_modules/fast-glob/out/providers/transformers/entry.js
+var require_entry2 = __commonJS({
+  "../dev-workflow-core/node_modules/fast-glob/out/providers/transformers/entry.js"(exports2) {
+    "use strict";
+    Object.defineProperty(exports2, "__esModule", { value: true });
+    var utils = require_utils4();
+    var EntryTransformer = class {
+      constructor(_settings) {
+        this._settings = _settings;
+      }
+      getTransformer() {
+        return (entry) => this._transform(entry);
+      }
+      _transform(entry) {
+        let filepath = entry.path;
+        if (this._settings.absolute) {
+          filepath = utils.path.makeAbsolute(this._settings.cwd, filepath);
+          filepath = utils.path.unixify(filepath);
+        }
+        if (this._settings.markDirectories && entry.dirent.isDirectory()) {
+          filepath += "/";
+        }
+        if (!this._settings.objectMode) {
+          return filepath;
+        }
+        return Object.assign(Object.assign({}, entry), { path: filepath });
+      }
+    };
+    exports2.default = EntryTransformer;
+  }
+});
+
+// ../dev-workflow-core/node_modules/fast-glob/out/providers/provider.js
+var require_provider = __commonJS({
+  "../dev-workflow-core/node_modules/fast-glob/out/providers/provider.js"(exports2) {
+    "use strict";
+    Object.defineProperty(exports2, "__esModule", { value: true });
+    var path = require("path");
+    var deep_1 = require_deep();
+    var entry_1 = require_entry();
+    var error_1 = require_error();
+    var entry_2 = require_entry2();
+    var Provider = class {
+      constructor(_settings) {
+        this._settings = _settings;
+        this.errorFilter = new error_1.default(this._settings);
+        this.entryFilter = new entry_1.default(this._settings, this._getMicromatchOptions());
+        this.deepFilter = new deep_1.default(this._settings, this._getMicromatchOptions());
+        this.entryTransformer = new entry_2.default(this._settings);
+      }
+      _getRootDirectory(task) {
+        return path.resolve(this._settings.cwd, task.base);
+      }
+      _getReaderOptions(task) {
+        const basePath = task.base === "." ? "" : task.base;
+        return {
+          basePath,
+          pathSegmentSeparator: "/",
+          concurrency: this._settings.concurrency,
+          deepFilter: this.deepFilter.getFilter(basePath, task.positive, task.negative),
+          entryFilter: this.entryFilter.getFilter(task.positive, task.negative),
+          errorFilter: this.errorFilter.getFilter(),
+          followSymbolicLinks: this._settings.followSymbolicLinks,
+          fs: this._settings.fs,
+          stats: this._settings.stats,
+          throwErrorOnBrokenSymbolicLink: this._settings.throwErrorOnBrokenSymbolicLink,
+          transform: this.entryTransformer.getTransformer()
+        };
+      }
+      _getMicromatchOptions() {
+        return {
+          dot: this._settings.dot,
+          matchBase: this._settings.baseNameMatch,
+          nobrace: !this._settings.braceExpansion,
+          nocase: !this._settings.caseSensitiveMatch,
+          noext: !this._settings.extglob,
+          noglobstar: !this._settings.globstar,
+          posix: true,
+          strictSlashes: false
+        };
+      }
+    };
+    exports2.default = Provider;
+  }
+});
+
+// ../dev-workflow-core/node_modules/fast-glob/out/providers/async.js
+var require_async6 = __commonJS({
+  "../dev-workflow-core/node_modules/fast-glob/out/providers/async.js"(exports2) {
+    "use strict";
+    Object.defineProperty(exports2, "__esModule", { value: true });
+    var async_1 = require_async5();
+    var provider_1 = require_provider();
+    var ProviderAsync = class extends provider_1.default {
+      constructor() {
+        super(...arguments);
+        this._reader = new async_1.default(this._settings);
+      }
+      async read(task) {
+        const root = this._getRootDirectory(task);
+        const options = this._getReaderOptions(task);
+        const entries = await this.api(root, task, options);
+        return entries.map((entry) => options.transform(entry));
+      }
+      api(root, task, options) {
+        if (task.dynamic) {
+          return this._reader.dynamic(root, options);
+        }
+        return this._reader.static(task.patterns, options);
+      }
+    };
+    exports2.default = ProviderAsync;
+  }
+});
+
+// ../dev-workflow-core/node_modules/fast-glob/out/providers/stream.js
+var require_stream4 = __commonJS({
+  "../dev-workflow-core/node_modules/fast-glob/out/providers/stream.js"(exports2) {
+    "use strict";
+    Object.defineProperty(exports2, "__esModule", { value: true });
+    var stream_1 = require("stream");
+    var stream_2 = require_stream3();
+    var provider_1 = require_provider();
+    var ProviderStream = class extends provider_1.default {
+      constructor() {
+        super(...arguments);
+        this._reader = new stream_2.default(this._settings);
+      }
+      read(task) {
+        const root = this._getRootDirectory(task);
+        const options = this._getReaderOptions(task);
+        const source = this.api(root, task, options);
+        const destination = new stream_1.Readable({ objectMode: true, read: () => {
+        } });
+        source.once("error", (error) => destination.emit("error", error)).on("data", (entry) => destination.emit("data", options.transform(entry))).once("end", () => destination.emit("end"));
+        destination.once("close", () => source.destroy());
+        return destination;
+      }
+      api(root, task, options) {
+        if (task.dynamic) {
+          return this._reader.dynamic(root, options);
+        }
+        return this._reader.static(task.patterns, options);
+      }
+    };
+    exports2.default = ProviderStream;
+  }
+});
+
+// ../dev-workflow-core/node_modules/fast-glob/out/readers/sync.js
+var require_sync5 = __commonJS({
+  "../dev-workflow-core/node_modules/fast-glob/out/readers/sync.js"(exports2) {
+    "use strict";
+    Object.defineProperty(exports2, "__esModule", { value: true });
+    var fsStat = require_out();
+    var fsWalk = require_out3();
+    var reader_1 = require_reader2();
+    var ReaderSync = class extends reader_1.default {
+      constructor() {
+        super(...arguments);
+        this._walkSync = fsWalk.walkSync;
+        this._statSync = fsStat.statSync;
+      }
+      dynamic(root, options) {
+        return this._walkSync(root, options);
+      }
+      static(patterns, options) {
+        const entries = [];
+        for (const pattern of patterns) {
+          const filepath = this._getFullEntryPath(pattern);
+          const entry = this._getEntry(filepath, pattern, options);
+          if (entry === null || !options.entryFilter(entry)) {
+            continue;
+          }
+          entries.push(entry);
+        }
+        return entries;
+      }
+      _getEntry(filepath, pattern, options) {
+        try {
+          const stats = this._getStat(filepath);
+          return this._makeEntry(stats, pattern);
+        } catch (error) {
+          if (options.errorFilter(error)) {
+            return null;
+          }
+          throw error;
+        }
+      }
+      _getStat(filepath) {
+        return this._statSync(filepath, this._fsStatSettings);
+      }
+    };
+    exports2.default = ReaderSync;
+  }
+});
+
+// ../dev-workflow-core/node_modules/fast-glob/out/providers/sync.js
+var require_sync6 = __commonJS({
+  "../dev-workflow-core/node_modules/fast-glob/out/providers/sync.js"(exports2) {
+    "use strict";
+    Object.defineProperty(exports2, "__esModule", { value: true });
+    var sync_1 = require_sync5();
+    var provider_1 = require_provider();
+    var ProviderSync = class extends provider_1.default {
+      constructor() {
+        super(...arguments);
+        this._reader = new sync_1.default(this._settings);
+      }
+      read(task) {
+        const root = this._getRootDirectory(task);
+        const options = this._getReaderOptions(task);
+        const entries = this.api(root, task, options);
+        return entries.map(options.transform);
+      }
+      api(root, task, options) {
+        if (task.dynamic) {
+          return this._reader.dynamic(root, options);
+        }
+        return this._reader.static(task.patterns, options);
+      }
+    };
+    exports2.default = ProviderSync;
+  }
+});
+
+// ../dev-workflow-core/node_modules/fast-glob/out/settings.js
+var require_settings4 = __commonJS({
+  "../dev-workflow-core/node_modules/fast-glob/out/settings.js"(exports2) {
+    "use strict";
+    Object.defineProperty(exports2, "__esModule", { value: true });
+    exports2.DEFAULT_FILE_SYSTEM_ADAPTER = void 0;
+    var fs = require("fs");
+    var os = require("os");
+    var CPU_COUNT = Math.max(os.cpus().length, 1);
+    exports2.DEFAULT_FILE_SYSTEM_ADAPTER = {
+      lstat: fs.lstat,
+      lstatSync: fs.lstatSync,
+      stat: fs.stat,
+      statSync: fs.statSync,
+      readdir: fs.readdir,
+      readdirSync: fs.readdirSync
+    };
+    var Settings = class {
+      constructor(_options = {}) {
+        this._options = _options;
+        this.absolute = this._getValue(this._options.absolute, false);
+        this.baseNameMatch = this._getValue(this._options.baseNameMatch, false);
+        this.braceExpansion = this._getValue(this._options.braceExpansion, true);
+        this.caseSensitiveMatch = this._getValue(this._options.caseSensitiveMatch, true);
+        this.concurrency = this._getValue(this._options.concurrency, CPU_COUNT);
+        this.cwd = this._getValue(this._options.cwd, process.cwd());
+        this.deep = this._getValue(this._options.deep, Infinity);
+        this.dot = this._getValue(this._options.dot, false);
+        this.extglob = this._getValue(this._options.extglob, true);
+        this.followSymbolicLinks = this._getValue(this._options.followSymbolicLinks, true);
+        this.fs = this._getFileSystemMethods(this._options.fs);
+        this.globstar = this._getValue(this._options.globstar, true);
+        this.ignore = this._getValue(this._options.ignore, []);
+        this.markDirectories = this._getValue(this._options.markDirectories, false);
+        this.objectMode = this._getValue(this._options.objectMode, false);
+        this.onlyDirectories = this._getValue(this._options.onlyDirectories, false);
+        this.onlyFiles = this._getValue(this._options.onlyFiles, true);
+        this.stats = this._getValue(this._options.stats, false);
+        this.suppressErrors = this._getValue(this._options.suppressErrors, false);
+        this.throwErrorOnBrokenSymbolicLink = this._getValue(this._options.throwErrorOnBrokenSymbolicLink, false);
+        this.unique = this._getValue(this._options.unique, true);
+        if (this.onlyDirectories) {
+          this.onlyFiles = false;
+        }
+        if (this.stats) {
+          this.objectMode = true;
+        }
+        this.ignore = [].concat(this.ignore);
+      }
+      _getValue(option, value) {
+        return option === void 0 ? value : option;
+      }
+      _getFileSystemMethods(methods = {}) {
+        return Object.assign(Object.assign({}, exports2.DEFAULT_FILE_SYSTEM_ADAPTER), methods);
+      }
+    };
+    exports2.default = Settings;
+  }
+});
+
+// ../dev-workflow-core/node_modules/fast-glob/out/index.js
+var require_out4 = __commonJS({
+  "../dev-workflow-core/node_modules/fast-glob/out/index.js"(exports2, module2) {
+    "use strict";
+    var taskManager = require_tasks();
+    var async_1 = require_async6();
+    var stream_1 = require_stream4();
+    var sync_1 = require_sync6();
+    var settings_1 = require_settings4();
+    var utils = require_utils4();
+    async function FastGlob(source, options) {
+      assertPatternsInput(source);
+      const works = getWorks(source, async_1.default, options);
+      const result = await Promise.all(works);
+      return utils.array.flatten(result);
+    }
+    (function(FastGlob2) {
+      FastGlob2.glob = FastGlob2;
+      FastGlob2.globSync = sync;
+      FastGlob2.globStream = stream;
+      FastGlob2.async = FastGlob2;
+      function sync(source, options) {
+        assertPatternsInput(source);
+        const works = getWorks(source, sync_1.default, options);
+        return utils.array.flatten(works);
+      }
+      FastGlob2.sync = sync;
+      function stream(source, options) {
+        assertPatternsInput(source);
+        const works = getWorks(source, stream_1.default, options);
+        return utils.stream.merge(works);
+      }
+      FastGlob2.stream = stream;
+      function generateTasks(source, options) {
+        assertPatternsInput(source);
+        const patterns = [].concat(source);
+        const settings = new settings_1.default(options);
+        return taskManager.generate(patterns, settings);
+      }
+      FastGlob2.generateTasks = generateTasks;
+      function isDynamicPattern(source, options) {
+        assertPatternsInput(source);
+        const settings = new settings_1.default(options);
+        return utils.pattern.isDynamicPattern(source, settings);
+      }
+      FastGlob2.isDynamicPattern = isDynamicPattern;
+      function escapePath(source) {
+        assertPatternsInput(source);
+        return utils.path.escape(source);
+      }
+      FastGlob2.escapePath = escapePath;
+      function convertPathToPattern(source) {
+        assertPatternsInput(source);
+        return utils.path.convertPathToPattern(source);
+      }
+      FastGlob2.convertPathToPattern = convertPathToPattern;
+      let posix;
+      (function(posix2) {
+        function escapePath2(source) {
+          assertPatternsInput(source);
+          return utils.path.escapePosixPath(source);
+        }
+        posix2.escapePath = escapePath2;
+        function convertPathToPattern2(source) {
+          assertPatternsInput(source);
+          return utils.path.convertPosixPathToPattern(source);
+        }
+        posix2.convertPathToPattern = convertPathToPattern2;
+      })(posix = FastGlob2.posix || (FastGlob2.posix = {}));
+      let win32;
+      (function(win322) {
+        function escapePath2(source) {
+          assertPatternsInput(source);
+          return utils.path.escapeWindowsPath(source);
+        }
+        win322.escapePath = escapePath2;
+        function convertPathToPattern2(source) {
+          assertPatternsInput(source);
+          return utils.path.convertWindowsPathToPattern(source);
+        }
+        win322.convertPathToPattern = convertPathToPattern2;
+      })(win32 = FastGlob2.win32 || (FastGlob2.win32 = {}));
+    })(FastGlob || (FastGlob = {}));
+    function getWorks(source, _Provider, options) {
+      const patterns = [].concat(source);
+      const settings = new settings_1.default(options);
+      const tasks = taskManager.generate(patterns, settings);
+      const provider = new _Provider(settings);
+      return tasks.map(provider.read, provider);
+    }
+    function assertPatternsInput(input) {
+      const source = [].concat(input);
+      const isValidSource = source.every((item) => utils.string.isString(item) && !utils.string.isEmpty(item));
+      if (!isValidSource) {
+        throw new TypeError("Patterns must be a string (non empty) or an array of strings");
+      }
+    }
+    module2.exports = FastGlob;
+  }
+});
+
+// src/index.ts
+var index_exports = {};
+__export(index_exports, {
+  parseFlags: () => parseFlags
+});
+module.exports = __toCommonJS(index_exports);
+
+// ../dev-workflow-core/src/types.ts
+var STATUS_ORDER = {
+  gate: 0,
+  active: 1,
+  "checkpoint-only": 2,
+  stale: 3,
+  "no-prd": 4,
+  empty: 5,
+  complete: 6,
+  archived: 7
+};
+
+// ../dev-workflow-core/src/parser.ts
+var import_promises = require("fs/promises");
+var import_path = require("path");
+var import_gray_matter = __toESM(require_gray_matter(), 1);
+
+// ../dev-workflow-core/src/glyphs.ts
+var PENDING_GLYPH = "\u2B1C";
+var RESOLVED_GLYPHS = ["\u2705", "\u23ED\uFE0F", "\u26D4", "\u23F9\uFE0F"];
+var EXPECTED_GLYPHS_TEXT = "\u2B1C \u2705 \u23ED\uFE0F \u26D4 \u23F9\uFE0F";
+var EMOJI_TOKEN = String.raw`\p{Extended_Pictographic}[️‍\p{Extended_Pictographic}]*`;
+var NUMBERED_STEP_RE = new RegExp(String.raw`^\s*(\d+)\.\s*(${EMOJI_TOKEN})`, "u");
+var BULLET_STEP_RE = new RegExp(String.raw`^\s*-\s+(${EMOJI_TOKEN})`, "u");
+var CELL_GLYPH_RE = new RegExp(String.raw`^(${EMOJI_TOKEN})`, "u");
+var VARIATION_SELECTOR_16 = /️/g;
+function canonical(glyph) {
+  return glyph.replace(VARIATION_SELECTOR_16, "");
+}
+var CANONICAL_RESOLVED = RESOLVED_GLYPHS.map(canonical);
+var CANONICAL_PENDING = canonical(PENDING_GLYPH);
+function classifyStepGlyph(glyph) {
+  const c = canonical(glyph);
+  if (c === CANONICAL_PENDING) return "pending";
+  if (CANONICAL_RESOLVED.includes(c)) return "resolved";
+  return "unknown";
+}
+function matchNumberedStepLine(line) {
+  const m = line.match(NUMBERED_STEP_RE);
+  if (!m) return null;
+  return { number: parseInt(m[1], 10), marker: m[2] };
+}
+function matchBulletStepLine(line) {
+  const m = line.match(BULLET_STEP_RE);
+  if (!m) return null;
+  return { marker: m[1] };
+}
+function firstGlyphInCell(cell) {
+  const m = cell.trim().match(CELL_GLYPH_RE);
+  return m ? m[1] : "";
+}
+
+// ../dev-workflow-core/src/parser.ts
+function normalizeEmoji(text) {
+  return text.replace(/:white_check_mark:/g, "\u2705").replace(/:white_large_square:/g, "\u2B1C").replace(/:next_track_button:|:track_next:/g, "\u23ED\uFE0F").replace(/:stop_button:/g, "\u23F9\uFE0F");
+}
+async function parseMasterPlan(filePath) {
+  let content;
+  try {
+    content = await (0, import_promises.readFile)(filePath, "utf-8");
+  } catch {
+    return null;
+  }
+  const summary = extractSummary(content);
+  const lastUpdated = extractFrontmatterField(content, "Last Updated");
+  const created = extractFrontmatterField(content, "Created");
+  const { phases, warnings } = extractPhases(content, (0, import_path.basename)(filePath));
+  let done = 0;
+  let total = 0;
+  for (const phase of phases) {
+    done += phase.done;
+    total += phase.total;
+  }
+  const percent = total > 0 ? Math.round(done / total * 100) : 0;
+  const tags = extractFrontmatterTags(content);
+  const keywordTags = deriveKeywordTags(content);
+  return {
+    summary,
+    tags,
+    keywordTags,
+    phases,
+    progress: { done, total, percent },
+    lastUpdated,
+    created,
+    // Omitted entirely when empty so healthy features' payloads keep their shape.
+    ...warnings.length > 0 ? { warnings } : {}
+  };
+}
+function mergeTags(primary, secondary) {
+  const seen = /* @__PURE__ */ new Set();
+  const out = [];
+  for (const tag of [...primary, ...secondary]) {
+    const key = tag.toLowerCase();
+    if (seen.has(key)) continue;
+    seen.add(key);
+    out.push(tag);
+  }
+  return out;
+}
+function extractFrontmatterTags(content) {
+  let data;
+  try {
+    data = (0, import_gray_matter.default)(content).data;
+  } catch {
+    return [];
+  }
+  if (!Array.isArray(data.tags)) return [];
+  return data.tags.filter((t) => typeof t === "string").map((t) => t.trim()).filter((t) => t.length > 0);
+}
+function extractSummary(content) {
+  for (const heading of ["Executive Summary", "Overview", "Summary", "Background"]) {
+    const para = extractHeadingParagraph(content, heading);
+    if (para) return para;
+  }
+  return extractFirstProse(content) ?? extractH1(content);
+}
+function extractHeadingParagraph(content, heading) {
+  const regex = new RegExp(`^##\\s+${heading}\\s*\\n(?:[ \\t]*\\n)*([^\\n#].*)`, "im");
+  const match = content.match(regex);
+  return match ? match[1].trim() : null;
+}
+function extractH1(content) {
+  const match = content.match(/^#\s+(.+)$/m);
+  return match ? match[1].trim() : null;
+}
+function extractFirstProse(content) {
+  const lines = content.split("\n");
+  let i = 0;
+  while (i < lines.length && lines[i].trim() === "") i++;
+  if (i < lines.length && lines[i].trim() === "---") {
+    i++;
+    while (i < lines.length && lines[i].trim() !== "---") i++;
+    if (i < lines.length) i++;
+  }
+  for (; i < lines.length; i++) {
+    const t = lines[i].trim();
+    if (t === "") continue;
+    if (t.startsWith("#")) continue;
+    if (/^([-*_])\1{2,}$/.test(t)) continue;
+    if (/^\*\*[^*]+\*\*\s*:/.test(t)) continue;
+    if (/^[-*+]\s/.test(t)) continue;
+    if (/^\d+\.\s/.test(t)) continue;
+    if (t.startsWith("|")) continue;
+    if (t.startsWith(">")) continue;
+    if (t.startsWith("\u23F8\uFE0F")) continue;
+    return t;
+  }
+  return null;
+}
+var TAG_STOPWORDS = /* @__PURE__ */ new Set([
+  // English function words
+  "the",
+  "a",
+  "an",
+  "and",
+  "or",
+  "but",
+  "for",
+  "to",
+  "of",
+  "in",
+  "on",
+  "at",
+  "by",
+  "with",
+  "from",
+  "into",
+  "is",
+  "are",
+  "be",
+  "was",
+  "were",
+  "this",
+  "that",
+  "these",
+  "those",
+  "it",
+  "its",
+  "as",
+  "all",
+  "any",
+  "via",
+  "per",
+  "not",
+  "no",
+  "we",
+  "you",
+  "will",
+  "can",
+  "could",
+  "should",
+  "would",
+  "must",
+  "may",
+  "when",
+  "then",
+  "than",
+  "also",
+  "if",
+  "so",
+  "out",
+  "up",
+  "down",
+  "over",
+  "under",
+  "about",
+  "each",
+  "both",
+  "first",
+  "second",
+  "third",
+  "next",
+  "new",
+  "only",
+  "one",
+  "two",
+  // imperative verbs that can head a heading
+  "add",
+  "build",
+  "write",
+  "run",
+  "use",
+  "using",
+  "make",
+  "create",
+  "update",
+  "implement",
+  "extend",
+  "define",
+  "support",
+  "edit",
+  "fix",
+  "check",
+  // PRD structural boilerplate
+  "phase",
+  "phases",
+  "step",
+  "steps",
+  "goal",
+  "goals",
+  "summary",
+  "executive",
+  "implementation",
+  "order",
+  "verification",
+  "verify",
+  "gate",
+  "status",
+  "created",
+  "updated",
+  "plan",
+  "overview",
+  "background",
+  "notes",
+  "note",
+  "decisions",
+  "blockers",
+  "context",
+  "todo",
+  "done",
+  "test",
+  "tests",
+  "fixture",
+  "fixtures",
+  "part",
+  "reference",
+  "references",
+  "file",
+  "files",
+  // canonical workflow filenames
+  "master-plan",
+  "00-master-plan",
+  "sub-prd",
+  "checkpoint",
+  "session-log",
+  "readme"
+]);
+var TAG_LIMIT = 8;
+var PATH_EXT = /\.(ts|tsx|js|cjs|mjs|jsx|md|json|sh|yml|yaml|css|html)$/i;
+function deriveKeywordTags(content) {
+  const candidates = /* @__PURE__ */ new Map();
+  const consider = (raw, index) => {
+    const tag = raw.toLowerCase().trim().replace(/^[-_.]+|[-_.]+$/g, "");
+    if (tag.length < 2) return;
+    if (/^\d+$/.test(tag)) return;
+    if (TAG_STOPWORDS.has(tag)) return;
+    const hit = candidates.get(tag);
+    if (hit) hit.count++;
+    else candidates.set(tag, { count: 1, first: index });
+  };
+  const headingRe = /^#{2,6}\s+(.+)$/gm;
+  let h;
+  while ((h = headingRe.exec(content)) !== null) {
+    const text = h[1].replace(/^Phase\s+\d+\s*[:\-—–]\s*/i, "");
+    for (const word of text.match(/[A-Za-z][A-Za-z0-9]+/g) ?? []) {
+      consider(word, h.index);
+    }
+  }
+  const codeRe = /`([^`]+)`/g;
+  let c;
+  while ((c = codeRe.exec(content)) !== null) {
+    const span = c[1].trim();
+    const looksLikePath = PATH_EXT.test(span) || span.includes("/") && !span.startsWith("/");
+    if (!looksLikePath) continue;
+    const base = span.split("/").pop() ?? span;
+    consider(base.replace(PATH_EXT, ""), c.index);
+  }
+  const idRe = /\b[A-Za-z][A-Za-z0-9]+\b/g;
+  let m;
+  while ((m = idRe.exec(content)) !== null) {
+    const upper = m[0].match(/[A-Z]/g)?.length ?? 0;
+    if (upper >= 2) consider(m[0], m.index);
+  }
+  return [...candidates.entries()].sort((a, b) => b[1].count - a[1].count || a[1].first - b[1].first).slice(0, TAG_LIMIT).map(([tag]) => tag);
+}
+function extractFrontmatterField(content, field) {
+  const regex = new RegExp(`\\*\\*${field}\\*\\*:\\s*(.+)`);
+  const match = content.match(regex);
+  return match ? match[1].trim() : null;
+}
+function extractPhases(rawContent, fileLabel) {
+  const content = normalizeEmoji(rawContent);
+  const phases = [];
+  const warnings = [];
+  const phaseRegex = /###?\s*Phase\s+(\d+)[:\s—–-]+\s*(.+)/g;
+  const headers = [];
+  let match;
+  while ((match = phaseRegex.exec(content)) !== null) {
+    headers.push({
+      number: parseInt(match[1], 10),
+      title: match[2].trim(),
+      index: match.index
+    });
+  }
+  for (let i = 0; i < headers.length; i++) {
+    const start = headers[i].index;
+    const end = i + 1 < headers.length ? headers[i + 1].index : content.length;
+    const section = content.slice(start, end);
+    let title = headers[i].title;
+    let titleMarker = null;
+    if (title.includes("\u2705")) {
+      titleMarker = "\u2705";
+      title = title.replace(/\s*✅\s*/, "").trim();
+    } else if (title.includes("\u2B1C")) {
+      titleMarker = "\u2B1C";
+      title = title.replace(/\s*⬜\s*/, "").trim();
+    }
+    const {
+      done,
+      total,
+      warnings: sectionWarnings
+    } = countSteps(section, { file: fileLabel, phase: headers[i].number });
+    warnings.push(...sectionWarnings);
+    let status;
+    if (total > 0) {
+      status = done === total ? "complete" : done > 0 ? "in-progress" : "not-started";
+    } else if (titleMarker) {
+      status = titleMarker === "\u2705" ? "complete" : "not-started";
+    } else {
+      const proseMarker = extractInlineStatusMarker(section);
+      const sectionStatus = extractSectionStatus(section);
+      status = proseMarker ?? sectionStatus ?? "not-started";
+    }
+    phases.push({
+      number: headers[i].number,
+      title,
+      done,
+      total,
+      status
+    });
+  }
+  return { phases, warnings };
+}
+function unrecognizedMarkerWarning(location, marker, cell) {
+  let what;
+  if (marker !== "") {
+    what = `unrecognized status marker ${JSON.stringify(marker)}`;
+  } else if (cell !== void 0 && cell.trim() !== "") {
+    what = `no status marker in ${JSON.stringify(cell.trim())}`;
+  } else {
+    what = "empty status cell";
+  }
+  return `${location}: ${what} (expected ${EXPECTED_GLYPHS_TEXT}) \u2014 counted as not done`;
+}
+function countSteps(section, ctx) {
+  let done = 0;
+  let total = 0;
+  const warnings = [];
+  let inVerification = false;
+  const lines = section.split("\n");
+  for (const line of lines) {
+    const trimmed = line.trim();
+    if (/^\*\*Verification\*\*/.test(trimmed)) {
+      inVerification = true;
+      continue;
+    }
+    if (inVerification && (trimmed === "" || trimmed.startsWith("#") || trimmed.startsWith("\u23F8\uFE0F"))) {
+      inVerification = false;
+    }
+    if (inVerification) continue;
+    if (trimmed.includes("\u23F8\uFE0F") && trimmed.includes("GATE")) continue;
+    if (trimmed.startsWith("#") || trimmed.startsWith("|")) continue;
+    const numbered = matchNumberedStepLine(trimmed);
+    if (numbered) {
+      total++;
+      const cls = classifyStepGlyph(numbered.marker);
+      if (cls === "resolved") {
+        done++;
+      } else if (cls === "unknown") {
+        warnings.push(
+          unrecognizedMarkerWarning(
+            `\`${ctx.file}\` Phase ${ctx.phase} step ${numbered.number}`,
+            numbered.marker
+          )
+        );
+      }
+      continue;
+    }
+    const numberedCheckbox = trimmed.match(/^\d+\.\s+`?\[(x| )\]`?/);
+    if (numberedCheckbox) {
+      total++;
+      if (numberedCheckbox[1] === "x") done++;
+      continue;
+    }
+    const bullet = matchBulletStepLine(trimmed);
+    if (bullet) {
+      total++;
+      const cls = classifyStepGlyph(bullet.marker);
+      if (cls === "resolved") {
+        done++;
+      } else if (cls === "unknown") {
+        warnings.push(
+          unrecognizedMarkerWarning(
+            `\`${ctx.file}\` Phase ${ctx.phase} step ${total}`,
+            bullet.marker
+          )
+        );
+      }
+      continue;
+    }
+    const checkboxMatch = trimmed.match(/^-\s+\[(x| )\]/);
+    if (checkboxMatch) {
+      total++;
+      if (checkboxMatch[1] === "x") done++;
+      continue;
+    }
+  }
+  return { done, total, warnings };
+}
+function extractSectionStatus(section) {
+  const match = section.match(/\*\*Status\*\*:\s*`?\[( |x)\]`?/i);
+  if (!match) return null;
+  return match[1] === "x" ? "complete" : "not-started";
+}
+function extractInlineStatusMarker(section) {
+  const lines = section.split("\n");
+  let i = 0;
+  while (i < lines.length && lines[i].trim() === "") i++;
+  if (i < lines.length && lines[i].trim().startsWith("#")) i++;
+  for (; i < lines.length; i++) {
+    const t = lines[i].trim();
+    if (t === "") continue;
+    if (t.startsWith("#")) return null;
+    if (t.startsWith("\u23F8\uFE0F")) return null;
+    if (/^\d+\.\s/.test(t)) return null;
+    if (/^-\s/.test(t)) return null;
+    if (t.startsWith("|")) return null;
+    if (/^See\s+\[/i.test(t)) continue;
+    const m = t.match(
+      /^(✅|⬜|❌|⏭️|⏹️)\s*\**\s*(DONE|SHIPPED|MERGED|CLOSED|COMPLETE|COMPLETED|DROPPED|SKIPPED|DEFERRED|NOT[\s-]?STARTED|TODO|IN[\s-]?PROGRESS)\b/i
+    );
+    if (!m) return null;
+    const emoji = m[1];
+    const word = m[2].toUpperCase().replace(/[\s-]/g, "");
+    if (word === "INPROGRESS") return "in-progress";
+    if (word === "NOTSTARTED" || word === "TODO") return "not-started";
+    if (emoji === "\u2B1C") return "not-started";
+    return "complete";
+  }
+  return null;
+}
+async function parseCheckpoint(filePath) {
+  let content;
+  try {
+    content = await (0, import_promises.readFile)(filePath, "utf-8");
+  } catch {
+    return null;
+  }
+  let frontmatter = {};
+  let body = content;
+  try {
+    const parsed = (0, import_gray_matter.default)(content);
+    frontmatter = parsed.data;
+    body = parsed.content;
+  } catch {
+  }
+  const branch = typeof frontmatter.branch === "string" ? frontmatter.branch : null;
+  const lastCommit = typeof frontmatter.last_commit === "string" ? frontmatter.last_commit : null;
+  const uncommittedChanges = typeof frontmatter.uncommitted_changes === "boolean" ? frontmatter.uncommitted_changes : null;
+  const checkpointed = typeof frontmatter.checkpointed === "string" ? frontmatter.checkpointed : frontmatter.checkpointed instanceof Date ? frontmatter.checkpointed.toISOString() : null;
+  const nextAction = extractXmlTag(content, "next_action");
+  const decisions = extractXmlListItems(content, "decisions");
+  const blockers = extractXmlListItems(content, "blockers");
+  const notes = extractXmlListItems(content, "notes");
+  const context = extractXmlTag(content, "context");
+  const currentState = extractXmlTag(content, "current_state");
+  const keyFiles = extractXmlTag(content, "key_files");
+  const prdFiles = extractPrdFiles(content);
+  const continuationPrompt = extractContinuationPromptFromBody(body);
+  return {
+    branch,
+    lastCommit,
+    uncommittedChanges,
+    checkpointed,
+    nextAction,
+    decisions,
+    blockers,
+    notes,
+    context,
+    currentState,
+    keyFiles,
+    prdFiles,
+    continuationPrompt
+  };
+}
+function extractXmlTag(content, tag) {
+  const regex = new RegExp(`<${tag}>([\\s\\S]*?)</${tag}>`, "gi");
+  if (!content.includes("`")) {
+    const matches2 = [...content.matchAll(regex)];
+    const match2 = matches2[matches2.length - 1];
+    return match2 ? match2[1].trim() : null;
+  }
+  const placeholders = [];
+  let counter = 0;
+  const stripped = content.replace(/`[^`]*`/g, (m) => {
+    const placeholder = `\0INLINE_CODE_${counter++}\0`;
+    placeholders.push({ placeholder, original: m });
+    return placeholder;
+  });
+  const matches = [...stripped.matchAll(regex)];
+  const match = matches[matches.length - 1];
+  if (!match) return null;
+  let result = match[1].trim();
+  for (const { placeholder, original } of placeholders) {
+    result = result.replace(placeholder, original);
+  }
+  return result;
+}
+function extractXmlListItems(content, tag) {
+  const block = extractXmlTag(content, tag);
+  if (!block) return [];
+  const items = [];
+  const lines = block.split("\n");
+  for (const line of lines) {
+    const trimmed = line.trim();
+    const listMatch = trimmed.match(/^-\s+(.+)/);
+    if (listMatch) {
+      const item = listMatch[1].replace(
+        /<\/(?:decisions|blockers|notes|context|current_state|next_action|key_files)>$/i,
+        ""
+      ).trim();
+      items.push(item);
+    }
+  }
+  return items;
+}
+function extractPrdFiles(content) {
+  const match = content.match(/Read the following PRD files in order:\s*\n([\s\S]*?)(?:\n\n|\n<)/i);
+  if (!match) return [];
+  const files = [];
+  const lines = match[1].split("\n");
+  for (const line of lines) {
+    const trimmed = line.trim();
+    const fileMatch = trimmed.match(/^\d+\.\s+(.+)/);
+    if (fileMatch) {
+      files.push(fileMatch[1].trim());
+    }
+  }
+  return files;
+}
+function extractContinuationPromptFromBody(body) {
+  const separatorRegex = /^---\s*$/gm;
+  let lastSeparatorIndex = -1;
+  let m;
+  while ((m = separatorRegex.exec(body)) !== null) {
+    lastSeparatorIndex = m.index;
+  }
+  if (lastSeparatorIndex === -1) return null;
+  const after = body.slice(lastSeparatorIndex + 3).trim();
+  if (!after) return null;
+  return after;
+}
+async function parseSubPrd(filePath) {
+  let content;
+  try {
+    content = normalizeEmoji(await (0, import_promises.readFile)(filePath, "utf-8"));
+  } catch {
+    return null;
+  }
+  const id = (0, import_path.basename)(filePath, ".md");
+  const titleMatch = content.match(/^#\s+Sub-PRD:\s*(.+)/m);
+  const title = titleMatch ? titleMatch[1].trim() : id;
+  const steps = [];
+  const tableRegex = /## Implementation Progress[\s\S]*?\|[\s\S]*?\|[\s\S]*?\|([\s\S]*?)(?=\n---|\n##|$)/;
+  const tableMatch = content.match(tableRegex);
+  const warnings = [];
+  if (tableMatch) {
+    const tableBody = tableMatch[1];
+    const rowRegex = /^[ \t]*\|\s*\*{0,2}(\d[\w.]*)\*{0,2}\s*\|([^|]*)\|([^|]*)\|/gm;
+    let rowMatch;
+    while ((rowMatch = rowRegex.exec(tableBody)) !== null) {
+      const marker = firstGlyphInCell(rowMatch[3]);
+      const cls = classifyStepGlyph(marker);
+      const step = {
+        number: rowMatch[1],
+        description: rowMatch[2].trim(),
+        status: cls === "resolved" ? "done" : "pending"
+      };
+      if (cls === "unknown") {
+        step.unrecognizedMarker = marker;
+        warnings.push(
+          unrecognizedMarkerWarning(
+            `\`${(0, import_path.basename)(filePath)}\` step ${step.number}`,
+            marker,
+            rowMatch[3]
+          )
+        );
+      }
+      steps.push(step);
+    }
+  }
+  const done = steps.filter((s) => s.status === "done").length;
+  const total = steps.length;
+  const headerStatus = extractSubPrdHeaderStatus(content);
+  const status = total === 0 ? headerStatus ?? "not-started" : done === total ? "complete" : done > 0 ? "in-progress" : "not-started";
+  return {
+    id,
+    title,
+    done,
+    total,
+    status,
+    steps,
+    headerStatus,
+    ...warnings.length > 0 ? { warnings } : {}
+  };
+}
+function extractSubPrdHeaderStatus(content) {
+  const match = content.match(/\*\*Status\*\*:\s*(.+)/i);
+  if (!match) return null;
+  const val = match[1].trim().toLowerCase();
+  const resolved = [
+    "complete",
+    "completed",
+    "done",
+    "shipped",
+    "merged",
+    "closed",
+    "deferred",
+    "dropped",
+    "skipped"
+  ];
+  if (resolved.includes(val)) return "complete";
+  if (val.startsWith("in progress") || val.startsWith("in-progress")) return "in-progress";
+  if (val === "not started" || val === "not-started" || val === "pending") return "not-started";
+  return null;
+}
+var THIRTY_DAYS_MS = 30 * 24 * 60 * 60 * 1e3;
+function determineFeatureStatus(input) {
+  const {
+    hasMasterPlan,
+    allComplete,
+    checkpointDate,
+    lastUpdated,
+    now,
+    isEmpty,
+    atGate,
+    progressDone
+  } = input;
+  if (isEmpty) return "empty";
+  if (!hasMasterPlan) {
+    if (checkpointDate) return "checkpoint-only";
+    return "no-prd";
+  }
+  if (allComplete) return "complete";
+  if (atGate) return "gate";
+  const referenceDate = checkpointDate || lastUpdated;
+  if (referenceDate) {
+    const refMs = new Date(referenceDate).getTime();
+    const ageMs = now.getTime() - refMs;
+    if (ageMs > THIRTY_DAYS_MS) return "stale";
+    if (progressDone === 0 && !checkpointDate) return "stale";
+    return "active";
+  }
+  return "stale";
+}
+async function parseFeature(featureDir, name) {
+  const isEmpty = await isEmptyFeatureDir(featureDir);
+  const masterPlan = await parseMasterPlan((0, import_path.resolve)(featureDir, "00-master-plan.md"));
+  const checkpoint = await parseCheckpoint((0, import_path.resolve)(featureDir, "checkpoint.md"));
+  const planPhases = masterPlan?.phases ?? [];
+  const subPrdPhases = masterPlan ? await parseSubPrdsAsPhases(featureDir) : [];
+  const subPrdsAuthoritative = subPrdPhases.length > planPhases.length;
+  const effectivePhases = subPrdsAuthoritative ? subPrdPhases : planPhases;
+  let progress = masterPlan?.progress ?? null;
+  if (masterPlan && subPrdsAuthoritative) {
+    const done = subPrdPhases.reduce((sum, p) => sum + p.done, 0);
+    const total = subPrdPhases.reduce((sum, p) => sum + p.total, 0);
+    if (total > 0) {
+      progress = { done, total, percent: Math.round(done / total * 100) };
+    }
+  } else if (masterPlan && masterPlan.progress.total === 0) {
+    const subPrdProgress = await aggregateSubPrdProgress(featureDir);
+    if (subPrdProgress && subPrdProgress.total > 0) {
+      progress = subPrdProgress;
+    } else if (masterPlan.phases.length > 0) {
+      const done = masterPlan.phases.filter((p) => p.status === "complete").length;
+      const total = masterPlan.phases.length;
+      progress = { done, total, percent: Math.round(done / total * 100) };
+    }
+  } else if (masterPlan && masterPlan.progress.total > 0 && masterPlan.progress.done === masterPlan.progress.total) {
+    const subPrdProgress = await aggregateSubPrdProgress(featureDir);
+    if (subPrdProgress && subPrdProgress.total > 0) {
+      const done = masterPlan.progress.done + subPrdProgress.done;
+      const total = masterPlan.progress.total + subPrdProgress.total;
+      progress = { done, total, percent: Math.round(done / total * 100) };
+    }
+  }
+  const allComplete = progress !== null && progress.total > 0 && progress.done === progress.total;
+  const atGate = !allComplete && effectivePhases.some((p) => p.status === "complete") && effectivePhases.some((p) => p.status === "not-started") && !effectivePhases.some((p) => p.status === "in-progress");
+  const status = determineFeatureStatus({
+    hasMasterPlan: masterPlan !== null,
+    allComplete,
+    checkpointDate: checkpoint?.checkpointed ?? null,
+    lastUpdated: masterPlan?.lastUpdated ?? null,
+    now: /* @__PURE__ */ new Date(),
+    isEmpty: isEmpty && masterPlan === null && checkpoint === null,
+    atGate,
+    progressDone: progress?.done
+  });
+  let currentPhase = null;
+  if (masterPlan) {
+    const inProgress = effectivePhases.find((p) => p.status === "in-progress");
+    const notStarted = effectivePhases.find((p) => p.status === "not-started");
+    const active = inProgress || notStarted;
+    if (active) {
+      currentPhase = {
+        number: active.number,
+        total: effectivePhases.length,
+        title: active.title
+      };
+    } else if (!allComplete) {
+      const subActive = subPrdPhases.find((p) => p.status === "in-progress") ?? subPrdPhases.find((p) => p.status === "not-started");
+      if (subActive) {
+        currentPhase = {
+          number: subActive.number,
+          total: subPrdPhases.length,
+          title: subActive.title
+        };
+      }
+    }
+  }
+  const warnings = capWarnings([
+    ...masterPlan?.warnings ?? [],
+    ...await collectSubPrdWarnings(featureDir)
+  ]);
+  return {
+    name,
+    status,
+    progress,
+    currentPhase,
+    lastCheckpoint: checkpoint?.checkpointed ?? null,
+    created: masterPlan?.created ?? null,
+    lastUpdated: masterPlan?.lastUpdated ?? null,
+    nextAction: checkpoint?.nextAction ?? null,
+    branch: checkpoint?.branch ?? null,
+    summary: masterPlan?.summary ?? null,
+    // Frontmatter tags (authoritative, first) unioned with derived keyword tags.
+    tags: masterPlan ? mergeTags(masterPlan.tags, masterPlan.keywordTags) : [],
+    // Key omitted when empty so healthy features' payloads keep their shape.
+    ...warnings.length > 0 ? { warnings } : {}
+  };
+}
+function isSubPrdFile(name) {
+  const match = /^(\d+)-.+\.md$/i.exec(name);
+  return match !== null && parseInt(match[1], 10) > 0;
+}
+function subPrdToPhase(sub) {
+  const numMatch = sub.id.match(/^(\d+)/);
+  return {
+    number: numMatch ? parseInt(numMatch[1], 10) : 0,
+    title: sub.title,
+    done: sub.done,
+    total: sub.total,
+    status: sub.status
+  };
+}
+var MAX_WARNINGS = 20;
+function capWarnings(warnings, max = MAX_WARNINGS) {
+  if (warnings.length <= max) return warnings;
+  return [...warnings.slice(0, max), `\u2026and ${warnings.length - max} more`];
+}
+async function collectSubPrdWarnings(featureDir) {
+  try {
+    const entries = await (0, import_promises.readdir)(featureDir);
+    const subPrdFiles = entries.filter(isSubPrdFile).sort();
+    if (subPrdFiles.length === 0) return [];
+    const warnings = [];
+    for (const file of subPrdFiles) {
+      const result = await parseSubPrd((0, import_path.resolve)(featureDir, file));
+      if (result?.warnings) warnings.push(...result.warnings);
+    }
+    return warnings;
+  } catch {
+    return [];
+  }
+}
+async function aggregateSubPrdProgress(featureDir) {
+  try {
+    const entries = await (0, import_promises.readdir)(featureDir);
+    const subPrdFiles = entries.filter(isSubPrdFile).sort();
+    if (subPrdFiles.length === 0) return null;
+    let done = 0;
+    let total = 0;
+    for (const file of subPrdFiles) {
+      const result = await parseSubPrd((0, import_path.resolve)(featureDir, file));
+      if (result) {
+        done += result.done;
+        total += result.total;
+      }
+    }
+    const percent = total > 0 ? Math.round(done / total * 100) : 0;
+    return { done, total, percent };
+  } catch {
+    return null;
+  }
+}
+async function parseSubPrdsAsPhases(featureDir) {
+  try {
+    const entries = await (0, import_promises.readdir)(featureDir);
+    const subPrdFiles = entries.filter(isSubPrdFile).sort();
+    if (subPrdFiles.length === 0) return [];
+    const phases = [];
+    for (const file of subPrdFiles) {
+      const result = await parseSubPrd((0, import_path.resolve)(featureDir, file));
+      if (result) phases.push(subPrdToPhase(result));
+    }
+    return phases;
+  } catch {
+    return [];
+  }
+}
+async function parseSessionLog(filePath) {
+  let content;
+  try {
+    content = await (0, import_promises.readFile)(filePath, "utf-8");
+  } catch {
+    return [];
+  }
+  if (!content.trim()) return [];
+  const sessionRegex = /^## Session\s+\d+\s*—\s*.+/gm;
+  const headings = [];
+  let match;
+  while ((match = sessionRegex.exec(content)) !== null) {
+    headings.push({ index: match.index, text: match[0] });
+  }
+  if (headings.length === 0) return [];
+  const entries = [];
+  for (let i = 0; i < headings.length; i++) {
+    const start = headings[i].index;
+    const end = i + 1 < headings.length ? headings[i + 1].index : content.length;
+    const section = content.slice(start, end);
+    try {
+      const dateMatch = section.match(/^## Session\s+\d+\s*—\s*(.+)/);
+      const date = dateMatch ? dateMatch[1].trim() : "";
+      const context = extractXmlTag(section, "context");
+      const decisions = extractXmlListItems(section, "decisions");
+      const blockers = extractXmlListItems(section, "blockers");
+      const notes = extractXmlListItems(section, "notes");
+      entries.push({
+        session: i + 1,
+        // 1-indexed, derived from position
+        date,
+        context,
+        decisions,
+        blockers,
+        notes
+      });
+    } catch (err) {
+      process.stderr.write(
+        `Warning: skipping malformed session entry at position ${i + 1}: ${err instanceof Error ? err.message : err}
+`
+      );
+    }
+  }
+  return entries;
+}
+async function parseSessionDigest(filePath) {
+  let content;
+  try {
+    content = await (0, import_promises.readFile)(filePath, "utf-8");
+  } catch {
+    return null;
+  }
+  let frontmatter = {};
+  try {
+    frontmatter = (0, import_gray_matter.default)(content).data;
+  } catch {
+  }
+  const sessionCount = typeof frontmatter.session_count === "number" ? frontmatter.session_count : 0;
+  const consolidatedThrough = typeof frontmatter.consolidated_through === "number" ? frontmatter.consolidated_through : 0;
+  const generated = typeof frontmatter.generated === "string" ? frontmatter.generated : frontmatter.generated instanceof Date ? frontmatter.generated.toISOString() : null;
+  const aggregate = extractXmlTag(content, "aggregate");
+  const decisions = extractXmlListItems(content, "decisions");
+  return { sessionCount, consolidatedThrough, generated, aggregate, decisions };
+}
+async function isEmptyFeatureDir(dirPath) {
+  try {
+    const entries = await (0, import_promises.readdir)(dirPath);
+    return entries.length === 0 || entries.length === 1 && entries[0] === ".gitkeep";
+  } catch {
+    return true;
+  }
+}
+
+// ../dev-workflow-core/src/scanner.ts
+var import_fast_glob = __toESM(require_out4(), 1);
+var import_promises2 = require("fs/promises");
+var import_path2 = require("path");
+var DEFAULT_MAX_DEPTH = 3;
+async function scanProjects(scanDirs, options = {}) {
+  const maxDepth = options.maxDepth ?? DEFAULT_MAX_DEPTH;
+  const projectMap = /* @__PURE__ */ new Map();
+  for (const scanDir of scanDirs) {
+    const devPatterns = buildGlobPatterns(maxDepth, ".dev");
+    let devDirs;
+    try {
+      devDirs = await (0, import_fast_glob.default)(devPatterns, {
+        cwd: scanDir,
+        onlyDirectories: true,
+        absolute: true,
+        dot: true,
+        ignore: ["**/node_modules/**", "**/.dev-archive/**"]
+      });
+    } catch {
+      continue;
+    }
+    for (const devDir of devDirs) {
+      const projectDir = (0, import_path2.dirname)(devDir);
+      const featureDirs = await readSubdirNames(devDir);
+      if (featureDirs.length === 0) continue;
+      const project = getOrCreateProject(projectMap, projectDir);
+      for (const featureName of featureDirs) {
+        const featurePath = (0, import_path2.resolve)(devDir, featureName);
+        const feature = await parseFeature(featurePath, featureName);
+        project.features.push(feature);
+      }
+      projectMap.set(projectDir, project);
+    }
+    const archivePatterns = buildGlobPatterns(maxDepth, ".dev-archive");
+    let archiveDirs;
+    try {
+      archiveDirs = await (0, import_fast_glob.default)(archivePatterns, {
+        cwd: scanDir,
+        onlyDirectories: true,
+        absolute: true,
+        dot: true,
+        ignore: ["**/node_modules/**"]
+      });
+    } catch {
+      continue;
+    }
+    for (const archiveDir of archiveDirs) {
+      const projectDir = (0, import_path2.dirname)(archiveDir);
+      const featureDirs = await readSubdirNames(archiveDir);
+      if (featureDirs.length === 0) continue;
+      const project = getOrCreateProject(projectMap, projectDir);
+      const activeNames = new Set(project.features.map((f) => f.name));
+      for (const featureName of featureDirs) {
+        if (activeNames.has(featureName)) continue;
+        const featurePath = (0, import_path2.resolve)(archiveDir, featureName);
+        const feature = await parseFeature(featurePath, featureName);
+        feature.status = "archived";
+        project.features.push(feature);
+      }
+      projectMap.set(projectDir, project);
+    }
+  }
+  return Array.from(projectMap.values());
+}
+async function readSubdirNames(dir) {
+  try {
+    const entries = await (0, import_promises2.readdir)(dir, { withFileTypes: true });
+    return entries.filter((e) => e.isDirectory()).map((e) => e.name);
+  } catch {
+    return [];
+  }
+}
+function getOrCreateProject(projectMap, projectDir) {
+  const existing = projectMap.get(projectDir);
+  return existing ?? { name: (0, import_path2.basename)(projectDir), path: projectDir, features: [] };
+}
+function buildGlobPatterns(maxDepth, dirName = ".dev") {
+  const patterns = [];
+  for (let d = 0; d < maxDepth; d++) {
+    const prefix = d === 0 ? "" : new Array(d).fill("*").join("/") + "/";
+    patterns.push(prefix + dirName);
+  }
+  return patterns;
+}
+
+// ../dev-workflow-core/src/writer.ts
+var import_promises3 = require("fs/promises");
+var import_gray_matter2 = __toESM(require_gray_matter(), 1);
+async function writeCheckpoint(filePath, data) {
+  const frontmatter = {};
+  if (data.branch !== void 0) frontmatter.branch = data.branch;
+  if (data.lastCommit !== void 0) frontmatter.last_commit = data.lastCommit;
+  if (data.uncommittedChanges !== void 0)
+    frontmatter.uncommitted_changes = data.uncommittedChanges;
+  frontmatter.checkpointed = data.checkpointed ?? (/* @__PURE__ */ new Date()).toISOString();
+  let body = "";
+  if (data.prdFiles && data.prdFiles.length > 0) {
+    body += "Read the following PRD files in order:\n\n";
+    for (let i = 0; i < data.prdFiles.length; i++) {
+      body += `${i + 1}. ${data.prdFiles[i]}
+`;
+    }
+    body += "\n";
+  }
+  body += `<context>
+${data.context}
 </context>
 
-`,n+=`<current_state>
-${t.currentState}
+`;
+  body += `<current_state>
+${data.currentState}
 </current_state>
 
-`,n+=`<next_action>
-${t.nextAction}
+`;
+  body += `<next_action>
+${data.nextAction}
 </next_action>
 
-`,n+=`<key_files>
-${t.keyFiles}
-</key_files>`,t.decisions&&t.decisions.length>0){n+=`
-
-<decisions>
-`;for(let s of t.decisions)n+=`- ${s}
-`;n+="</decisions>"}if(t.blockers&&t.blockers.length>0){n+=`
-
-<blockers>
-`;for(let s of t.blockers)n+=`- ${s}
-`;n+="</blockers>"}if(t.notes&&t.notes.length>0){n+=`
-
-<notes>
-`;for(let s of t.notes)n+=`- ${s}
-`;n+="</notes>"}t.continuationPrompt&&(n+=`
+`;
+  body += `<key_files>
+${data.keyFiles}
+</key_files>`;
+  if (data.decisions && data.decisions.length > 0) {
+    body += "\n\n<decisions>\n";
+    for (const d of data.decisions) {
+      body += `- ${d}
+`;
+    }
+    body += "</decisions>";
+  }
+  if (data.blockers && data.blockers.length > 0) {
+    body += "\n\n<blockers>\n";
+    for (const b of data.blockers) {
+      body += `- ${b}
+`;
+    }
+    body += "</blockers>";
+  }
+  if (data.notes && data.notes.length > 0) {
+    body += "\n\n<notes>\n";
+    for (const n of data.notes) {
+      body += `- ${n}
+`;
+    }
+    body += "</notes>";
+  }
+  if (data.continuationPrompt) {
+    body += `
 
 ---
 
-${t.continuationPrompt}
-`);let i=ss.default.stringify(n,r);await(0,Rt.writeFile)(e,i,"utf-8")}async function $l(e,t){let r={consolidated_through:t.consolidatedThrough,session_count:t.sessionCount,generated:t.generated??new Date().toISOString()},n=`<aggregate>
-${t.aggregate}
-</aggregate>`;if(t.decisions&&t.decisions.length>0){n+=`
+${data.continuationPrompt}
+`;
+  }
+  const output = import_gray_matter2.default.stringify(body, frontmatter);
+  await (0, import_promises3.writeFile)(filePath, output, "utf-8");
+}
+async function writeSessionDigest(filePath, data) {
+  const frontmatter = {
+    consolidated_through: data.consolidatedThrough,
+    session_count: data.sessionCount,
+    generated: data.generated ?? (/* @__PURE__ */ new Date()).toISOString()
+  };
+  let body = `<aggregate>
+${data.aggregate}
+</aggregate>`;
+  if (data.decisions && data.decisions.length > 0) {
+    body += "\n\n<decisions>\n";
+    for (const d of data.decisions) {
+      body += `- ${d}
+`;
+    }
+    body += "</decisions>";
+  }
+  const output = import_gray_matter2.default.stringify(body, frontmatter);
+  await (0, import_promises3.writeFile)(filePath, output, "utf-8");
+}
+function unwritableMarkerError(step, filePath, marker, cell) {
+  let what;
+  if (marker !== "") {
+    what = `has unrecognized status marker ${JSON.stringify(marker)}`;
+  } else if (cell !== void 0 && cell.trim() !== "") {
+    what = `has no status marker in ${JSON.stringify(cell.trim())}`;
+  } else {
+    what = "has an empty status cell";
+  }
+  return new Error(
+    `step ${step} in ${filePath} ${what} (expected ${EXPECTED_GLYPHS_TEXT}) \u2014 fix the row, then re-run`
+  );
+}
+async function updateStatus(filePath, target, marker) {
+  const original = await (0, import_promises3.readFile)(filePath, "utf-8");
+  const normalized = normalizeEmoji(original);
+  const lines = normalized.split("\n");
+  const phaseRegex = /^#{2,3}\s*Phase\s+(\d+)/i;
+  const phases = [];
+  const phaseHeadingLines = [];
+  for (let i = 0; i < lines.length; i++) {
+    const match = lines[i].match(phaseRegex);
+    if (match) {
+      phaseHeadingLines.push({
+        number: parseInt(match[1], 10),
+        line: i,
+        text: lines[i]
+      });
+    }
+  }
+  for (let i = 0; i < phaseHeadingLines.length; i++) {
+    const startLine = phaseHeadingLines[i].line;
+    const endLine = i + 1 < phaseHeadingLines.length ? phaseHeadingLines[i + 1].line : lines.length;
+    phases.push({
+      number: phaseHeadingLines[i].number,
+      startLine,
+      endLine
+    });
+  }
+  const phase = phases.find((p) => p.number === target.phase);
+  let targetLineIdx = -1;
+  if (!phase) {
+    targetLineIdx = updateSubPrdFallback(lines, target, marker, filePath);
+    if (targetLineIdx === -1) {
+      throw new Error(`Phase ${target.phase} not found in ${filePath}`);
+    }
+  } else if (target.step === void 0) {
+    targetLineIdx = phase.startLine;
+    const line = lines[targetLineIdx];
+    const opposite = marker === "\u2705" ? "\u2B1C" : "\u2705";
+    if (line.includes(opposite)) {
+      lines[targetLineIdx] = line.replace(opposite, marker);
+    } else if (line.includes(marker)) {
+    } else {
+      lines[targetLineIdx] = line.trimEnd() + " " + marker;
+    }
+  } else {
+    let stepCount = 0;
+    let inVerification = false;
+    for (let i = phase.startLine; i < phase.endLine; i++) {
+      const trimmed = lines[i].trimEnd();
+      if (/^\*\*Verification\*\*/.test(trimmed)) {
+        inVerification = true;
+        continue;
+      }
+      if (inVerification) {
+        if (trimmed === "" || trimmed.startsWith("#") || trimmed.startsWith("\u23F8\uFE0F")) {
+          inVerification = false;
+        } else {
+          continue;
+        }
+      }
+      if (trimmed.includes("\u23F8\uFE0F") && trimmed.includes("GATE")) continue;
+      const numbered = matchNumberedStepLine(trimmed);
+      if (numbered) {
+        if (numbered.number === target.step) {
+          if (classifyStepGlyph(numbered.marker) === "unknown") {
+            throw unwritableMarkerError(target.step, filePath, numbered.marker);
+          }
+          targetLineIdx = i;
+          if (numbered.marker !== marker) {
+            lines[i] = lines[i].replace(numbered.marker, marker);
+          }
+          break;
+        }
+        stepCount++;
+        continue;
+      }
+      const bullet = matchBulletStepLine(trimmed);
+      if (bullet) {
+        stepCount++;
+        if (stepCount === target.step) {
+          if (classifyStepGlyph(bullet.marker) === "unknown") {
+            throw unwritableMarkerError(target.step, filePath, bullet.marker);
+          }
+          targetLineIdx = i;
+          if (bullet.marker !== marker) {
+            lines[i] = lines[i].replace(bullet.marker, marker);
+          }
+          break;
+        }
+        continue;
+      }
+      const numberedCheckbox = trimmed.match(/^(\s*)(\d+)\.\s+`?\[(x| )\]`?/);
+      if (numberedCheckbox) {
+        const stepNum = parseInt(numberedCheckbox[2], 10);
+        if (stepNum === target.step) {
+          targetLineIdx = i;
+          const current = numberedCheckbox[3];
+          if (marker === "\u2705" && current !== "x") {
+            lines[i] = lines[i].replace("[ ]", "[x]").replace("`[ ]`", "`[x]`");
+          } else if (marker === "\u2B1C" && current !== " ") {
+            lines[i] = lines[i].replace("[x]", "[ ]").replace("`[x]`", "`[ ]`");
+          }
+          break;
+        }
+        stepCount++;
+        continue;
+      }
+      const bulletCheckbox = trimmed.match(/^(\s*-\s+)\[(x| )\]/);
+      if (bulletCheckbox) {
+        stepCount++;
+        if (stepCount === target.step) {
+          targetLineIdx = i;
+          const current = bulletCheckbox[2];
+          if (marker === "\u2705" && current !== "x") {
+            lines[i] = lines[i].replace("[ ]", "[x]");
+          } else if (marker === "\u2B1C" && current !== " ") {
+            lines[i] = lines[i].replace("[x]", "[ ]");
+          }
+          break;
+        }
+        continue;
+      }
+    }
+  }
+  if (targetLineIdx === -1) {
+    throw new Error(
+      `Could not find ${target.step ? `step ${target.step} in ` : ""}phase ${target.phase} in ${filePath}`
+    );
+  }
+  const newContent = lines.join("\n");
+  const fileModified = newContent !== original;
+  if (fileModified) {
+    await (0, import_promises3.writeFile)(filePath, newContent, "utf-8");
+  }
+  return {
+    changed: fileModified,
+    line: targetLineIdx + 1,
+    // 1-indexed
+    file: filePath
+  };
+}
+function updateSubPrdFallback(lines, target, marker, filePath) {
+  if (!lines.some((l) => /^##\s+Implementation Progress/i.test(l))) return -1;
+  return target.step === void 0 ? updateSubPrdStatusField(lines, marker) : updateSubPrdTableStep(lines, target.step, marker, filePath);
+}
+function updateSubPrdTableStep(lines, step, marker, filePath) {
+  const label = marker === "\u2705" ? "Done" : "Not Started";
+  let inTable = false;
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i];
+    if (/^##\s+Implementation Progress/i.test(line)) {
+      inTable = true;
+      continue;
+    }
+    if (!inTable) continue;
+    const trimmed = line.trim();
+    if (trimmed.startsWith("#") || trimmed === "---") {
+      inTable = false;
+      continue;
+    }
+    if (!trimmed.startsWith("|")) continue;
+    const cells = line.split("|");
+    if (cells.length < 5) continue;
+    if (cells[1].replace(/\*/g, "").trim() !== String(step)) continue;
+    const currentGlyph = firstGlyphInCell(cells[3]);
+    if (classifyStepGlyph(currentGlyph) === "unknown") {
+      throw unwritableMarkerError(step, filePath, currentGlyph, cells[3]);
+    }
+    if (currentGlyph === marker) return i;
+    cells[3] = ` ${marker} ${label} `;
+    lines[i] = cells.join("|");
+    return i;
+  }
+  return -1;
+}
+function updateSubPrdStatusField(lines, marker) {
+  const value = marker === "\u2705" ? "Complete" : "Not Started";
+  for (let i = 0; i < lines.length; i++) {
+    const m = lines[i].match(/^(\*\*Status\*\*:\s*).+$/i);
+    if (m) {
+      lines[i] = `${m[1]}${value}`;
+      return i;
+    }
+  }
+  return -1;
+}
 
-<decisions>
-`;for(let s of t.decisions)n+=`- ${s}
-`;n+="</decisions>"}let i=ss.default.stringify(n,r);await(0,Rt.writeFile)(e,i,"utf-8")}function is(e,t,r,n){let i;return r!==""?i=`has unrecognized status marker ${JSON.stringify(r)}`:n!==void 0&&n.trim()!==""?i=`has no status marker in ${JSON.stringify(n.trim())}`:i="has an empty status cell",new Error(`step ${e} in ${t} ${i} (expected ${ar}) \u2014 fix the row, then re-run`)}async function Il(e,t,r){let n=await(0,Rt.readFile)(e,"utf-8"),s=pr(n).split(`
-`),o=/^#{2,3}\s*Phase\s+(\d+)/i,a=[],u=[];for(let d=0;d<s.length;d++){let g=s[d].match(o);g&&u.push({number:parseInt(g[1],10),line:d,text:s[d]})}for(let d=0;d<u.length;d++){let g=u[d].line,h=d+1<u.length?u[d+1].line:s.length;a.push({number:u[d].number,startLine:g,endLine:h})}let c=a.find(d=>d.number===t.phase),l=-1;if(c)if(t.step===void 0){l=c.startLine;let d=s[l],g=r==="\u2705"?"\u2B1C":"\u2705";d.includes(g)?s[l]=d.replace(g,r):d.includes(r)||(s[l]=d.trimEnd()+" "+r)}else{let d=0,g=!1;for(let h=c.startLine;h<c.endLine;h++){let m=s[h].trimEnd();if(/^\*\*Verification\*\*/.test(m)){g=!0;continue}if(g)if(m===""||m.startsWith("#")||m.startsWith("\u23F8\uFE0F"))g=!1;else continue;if(m.includes("\u23F8\uFE0F")&&m.includes("GATE"))continue;let b=ur(m);if(b){if(b.number===t.step){if(De(b.marker)==="unknown")throw is(t.step,e,b.marker);l=h,b.marker!==r&&(s[h]=s[h].replace(b.marker,r));break}d++;continue}let w=cr(m);if(w){if(d++,d===t.step){if(De(w.marker)==="unknown")throw is(t.step,e,w.marker);l=h,w.marker!==r&&(s[h]=s[h].replace(w.marker,r));break}continue}let k=m.match(/^(\s*)(\d+)\.\s+`?\[(x| )\]`?/);if(k){if(parseInt(k[2],10)===t.step){l=h;let R=k[3];r==="\u2705"&&R!=="x"?s[h]=s[h].replace("[ ]","[x]").replace("`[ ]`","`[x]`"):r==="\u2B1C"&&R!==" "&&(s[h]=s[h].replace("[x]","[ ]").replace("`[x]`","`[ ]`"));break}d++;continue}let $=m.match(/^(\s*-\s+)\[(x| )\]/);if($){if(d++,d===t.step){l=h;let U=$[2];r==="\u2705"&&U!=="x"?s[h]=s[h].replace("[ ]","[x]"):r==="\u2B1C"&&U!==" "&&(s[h]=s[h].replace("[x]","[ ]"));break}continue}}}else if(l=F0(s,t,r,e),l===-1)throw new Error(`Phase ${t.phase} not found in ${e}`);if(l===-1)throw new Error(`Could not find ${t.step?`step ${t.step} in `:""}phase ${t.phase} in ${e}`);let p=s.join(`
-`),f=p!==n;return f&&await(0,Rt.writeFile)(e,p,"utf-8"),{changed:f,line:l+1,file:e}}function F0(e,t,r,n){return e.some(i=>/^##\s+Implementation Progress/i.test(i))?t.step===void 0?D0(e,r):L0(e,t.step,r,n):-1}function L0(e,t,r,n){let i=r==="\u2705"?"Done":"Not Started",s=!1;for(let o=0;o<e.length;o++){let a=e[o];if(/^##\s+Implementation Progress/i.test(a)){s=!0;continue}if(!s)continue;let u=a.trim();if(u.startsWith("#")||u==="---"){s=!1;continue}if(!u.startsWith("|"))continue;let c=a.split("|");if(c.length<5||c[1].replace(/\*/g,"").trim()!==String(t))continue;let l=lr(c[3]);if(De(l)==="unknown")throw is(t,n,l,c[3]);return l===r||(c[3]=` ${r} ${i} `,e[o]=c.join("|")),o}return-1}function D0(e,t){let r=t==="\u2705"?"Complete":"Not Started";for(let n=0;n<e.length;n++){let i=e[n].match(/^(\*\*Status\*\*:\s*).+$/i);if(i)return e[n]=`${i[1]}${r}`,n}return-1}var B=require("fs/promises"),K=require("path"),Ur=require("fs");function Nl(e,t){let r=0;for(let s of e)r+=s.features.length;let n=["---",`generated: "${t}"`,`projects: ${e.length}`,`features: ${r}`,"---","","# Dev Wiki Index",""];if(e.length===0)return n.push("*No projects found.*"),n.join(`
-`)+`
-`;let i=[...e].sort((s,o)=>s.name.localeCompare(o.name));for(let s of i){let o=s.features.filter(u=>u.status!=="archived"),a=s.features.filter(u=>u.status==="archived");if(n.push(`## ${s.name} (${s.features.length} features)`),n.push(""),o.length>0){let u=[...o].sort((c,l)=>{let p=(lt[c.status]??99)-(lt[l.status]??99);return p!==0?p:as(c.lastCheckpoint,l.lastCheckpoint)});n.push("| Feature | Status | Progress | Summary | Tags |"),n.push("|---------|--------|----------|---------|------|");for(let c of u){let l=`[${c.name}](projects/${s.name}/${c.name}/00-master-plan.md)`,p=c.progress?`${c.progress.done}/${c.progress.total} (${c.progress.percent}%)`:"\u2014",f=os(c.summary??"",120),d=Ml(c.tags);n.push(`| ${l} | ${c.status} | ${p} | ${f} | ${d} |`)}n.push("")}if(a.length>0){let u=[...a].sort((c,l)=>as(c.lastCheckpoint,l.lastCheckpoint));n.push(`### Archived (${a.length})`),n.push(""),n.push("| Feature | Progress | Summary | Tags |"),n.push("|---------|----------|---------|------|");for(let c of u){let l=`[${c.name}](projects/${s.name}--archive/${c.name}/00-master-plan.md)`,p=c.progress?`${c.progress.done}/${c.progress.total} (${c.progress.percent}%)`:"\u2014",f=os(c.summary??"",120),d=Ml(c.tags);n.push(`| ${l} | ${p} | ${f} | ${d} |`)}n.push("")}}return n.join(`
-`)+`
-`}function jl(e,t){let r=[];for(let i of e)for(let s of i.features){let o=s.lastCheckpoint??s.lastUpdated??null,a=o?$0(o):"unknown",u=s.progress?`${s.progress.percent}%`:"\u2014";r.push({project:i.name,name:s.name,status:s.status,progress:u,summary:os(s.summary??"",120),tags:s.tags.join(", "),date:a,dateRaw:o})}r.sort((i,s)=>as(i.dateRaw,s.dateRaw));let n=["---",`generated: "${t}"`,`entries: ${r.length}`,"---","","# Dev Wiki Log",""];if(r.length===0)return n.push("*No features found.*"),n.join(`
-`)+`
-`;for(let i of r)n.push(`## [${i.date}] ${i.project} | ${i.name} | ${i.status} | ${i.progress}`),i.summary&&(n.push(""),n.push(i.summary)),i.tags&&(n.push(""),n.push(`**Tags**: ${i.tags}`)),n.push("");return n.join(`
-`)+`
-`}function Hl(){return`# Dev Wiki
+// ../dev-workflow-core/src/wiki.ts
+var import_promises4 = require("fs/promises");
+var import_path3 = require("path");
+var import_fs = require("fs");
+
+// ../dev-workflow-core/src/wiki-templates.ts
+function buildIndexPage(projects, generated) {
+  let totalFeatures = 0;
+  for (const p of projects) totalFeatures += p.features.length;
+  const lines = [
+    "---",
+    `generated: "${generated}"`,
+    `projects: ${projects.length}`,
+    `features: ${totalFeatures}`,
+    "---",
+    "",
+    "# Dev Wiki Index",
+    ""
+  ];
+  if (projects.length === 0) {
+    lines.push("*No projects found.*");
+    return lines.join("\n") + "\n";
+  }
+  const sorted = [...projects].sort((a, b) => a.name.localeCompare(b.name));
+  for (const project of sorted) {
+    const activeFeatures = project.features.filter((f) => f.status !== "archived");
+    const archivedFeatures = project.features.filter((f) => f.status === "archived");
+    lines.push(`## ${project.name} (${project.features.length} features)`);
+    lines.push("");
+    if (activeFeatures.length > 0) {
+      const sortedActive = [...activeFeatures].sort((a, b) => {
+        const statusDiff = (STATUS_ORDER[a.status] ?? 99) - (STATUS_ORDER[b.status] ?? 99);
+        if (statusDiff !== 0) return statusDiff;
+        return compareDatesDesc(a.lastCheckpoint, b.lastCheckpoint);
+      });
+      lines.push("| Feature | Status | Progress | Summary | Tags |");
+      lines.push("|---------|--------|----------|---------|------|");
+      for (const f of sortedActive) {
+        const link = `[${f.name}](projects/${project.name}/${f.name}/00-master-plan.md)`;
+        const progress = f.progress ? `${f.progress.done}/${f.progress.total} (${f.progress.percent}%)` : "\u2014";
+        const summary = truncate(f.summary ?? "", 120);
+        const tags = formatTags(f.tags);
+        lines.push(`| ${link} | ${f.status} | ${progress} | ${summary} | ${tags} |`);
+      }
+      lines.push("");
+    }
+    if (archivedFeatures.length > 0) {
+      const sortedArchived = [...archivedFeatures].sort(
+        (a, b) => compareDatesDesc(a.lastCheckpoint, b.lastCheckpoint)
+      );
+      lines.push(`### Archived (${archivedFeatures.length})`);
+      lines.push("");
+      lines.push("| Feature | Progress | Summary | Tags |");
+      lines.push("|---------|----------|---------|------|");
+      for (const f of sortedArchived) {
+        const link = `[${f.name}](projects/${project.name}--archive/${f.name}/00-master-plan.md)`;
+        const progress = f.progress ? `${f.progress.done}/${f.progress.total} (${f.progress.percent}%)` : "\u2014";
+        const summary = truncate(f.summary ?? "", 120);
+        const tags = formatTags(f.tags);
+        lines.push(`| ${link} | ${progress} | ${summary} | ${tags} |`);
+      }
+      lines.push("");
+    }
+  }
+  return lines.join("\n") + "\n";
+}
+function buildLogPage(projects, generated) {
+  const allFeatures = [];
+  for (const project of projects) {
+    for (const f of project.features) {
+      const dateRaw = f.lastCheckpoint ?? f.lastUpdated ?? null;
+      const date = dateRaw ? formatDate(dateRaw) : "unknown";
+      const progress = f.progress ? `${f.progress.percent}%` : "\u2014";
+      allFeatures.push({
+        project: project.name,
+        name: f.name,
+        status: f.status,
+        progress,
+        summary: truncate(f.summary ?? "", 120),
+        tags: f.tags.join(", "),
+        date,
+        dateRaw
+      });
+    }
+  }
+  allFeatures.sort((a, b) => compareDatesDesc(a.dateRaw, b.dateRaw));
+  const lines = [
+    "---",
+    `generated: "${generated}"`,
+    `entries: ${allFeatures.length}`,
+    "---",
+    "",
+    "# Dev Wiki Log",
+    ""
+  ];
+  if (allFeatures.length === 0) {
+    lines.push("*No features found.*");
+    return lines.join("\n") + "\n";
+  }
+  for (const entry of allFeatures) {
+    lines.push(
+      `## [${entry.date}] ${entry.project} | ${entry.name} | ${entry.status} | ${entry.progress}`
+    );
+    if (entry.summary) {
+      lines.push("");
+      lines.push(entry.summary);
+    }
+    if (entry.tags) {
+      lines.push("");
+      lines.push(`**Tags**: ${entry.tags}`);
+    }
+    lines.push("");
+  }
+  return lines.join("\n") + "\n";
+}
+function buildReadmePage() {
+  return `# Dev Wiki
 
 This directory is an auto-generated wiki of all your \`.dev/\` development features across projects.
 
@@ -124,33 +10706,1517 @@ SORT progress DESC
 ## Project Symlinks
 
 The \`projects/\` directory contains symlinks to each project's \`.dev/\` and \`.dev-archive/\` directories. This means you can browse feature PRDs directly without copying files.
-`}function ql(){return JSON.stringify({alwaysUpdateLinks:!0,newLinkFormat:"relative"},null,2)+`
-`}function os(e,t){return e.length<=t?e:e.slice(0,t-1)+"\u2026"}function Ml(e){return e.length>0?e.join(", "):"\u2014"}function $0(e){let t=new Date(e);return isNaN(t.getTime())?"unknown":t.toISOString().slice(0,10)}function as(e,t){return!e&&!t?0:e?t?new Date(t).getTime()-new Date(e).getTime():-1:1}async function Wl(e,t,r){let n=(0,K.join)(t,"projects");await(0,B.mkdir)(n,{recursive:!0});let i=new Set(e.map(f=>(0,K.resolve)(f.path))),o=[...await I0(n)].filter(f=>!i.has(f)),a=o.length>0?await Ye(o):[],u=new Map;for(let f of a)u.set(f.name,f);for(let f of e)u.set(f.name,f);let c=Array.from(u.values()),l=new Set;for(let f of c){let d=(0,K.join)(f.path,".dev"),g=f.name;l.add(g),await Bl(n,g,d);let h=(0,K.join)(f.path,".dev-archive");if((0,Ur.existsSync)(h)){let m=`${f.name}--archive`;l.add(m),await Bl(n,m,h)}}await M0(n,l);let p=new Date().toISOString();if(await(0,B.writeFile)((0,K.join)(t,"index.md"),Nl(c,p)),await(0,B.writeFile)((0,K.join)(t,"log.md"),jl(c,p)),r?.includeReadme&&await(0,B.writeFile)((0,K.join)(t,"README.md"),Hl()),r?.initObsidian){let f=(0,K.join)(t,".obsidian");(0,Ur.existsSync)(f)||(await(0,B.mkdir)(f,{recursive:!0}),await(0,B.writeFile)((0,K.join)(f,"app.json"),ql()))}}async function I0(e){let t=new Set,r;try{r=await(0,B.readdir)(e)}catch{return t}for(let n of r){let i=(0,K.join)(e,n),s;try{if(!(await(0,B.lstat)(i)).isSymbolicLink())continue;s=(0,K.resolve)(e,await(0,B.readlink)(i))}catch{continue}if(!(0,Ur.existsSync)(s))continue;let o=(0,K.basename)(s);(o===".dev"||o===".dev-archive")&&t.add((0,K.dirname)(s))}return t}async function Bl(e,t,r){let n=(0,K.join)(e,t),i=(0,K.resolve)(r);try{if((await(0,B.lstat)(n)).isSymbolicLink()){let o=await(0,B.readlink)(n);if((0,K.resolve)(e,o)===i)return;await(0,B.unlink)(n)}else return}catch{}await(0,B.symlink)(i,n)}async function M0(e,t){let r;try{r=await(0,B.readdir)(e)}catch{return}for(let n of r){if(t.has(n))continue;let i=(0,K.join)(e,n);try{(await(0,B.lstat)(i)).isSymbolicLink()&&await(0,B.unlink)(i)}catch{}}}var N0=[{name:"name",extract:e=>e.name},{name:"summary",extract:e=>e.summary},{name:"nextAction",extract:e=>e.nextAction},{name:"branch",extract:e=>e.branch},{name:"currentPhase",extract:e=>e.currentPhase?.title??null},{name:"tags",extract:e=>e.tags.join(" ")}];function Ul(e,t){let r=t.maxResults??20,n=t.query.toLowerCase().split(/\s+/).filter(s=>s.length>0);if(n.length===0)return[];let i=[];for(let s of e)for(let o of s.features){let a=j0(o,n);a&&i.push({project:s.name,feature:o,matches:a.matches,score:a.score})}return i.sort((s,o)=>o.score-s.score),i.slice(0,r)}function j0(e,t){let r=[],n=new Set;for(let s of N0){let o=s.extract(e);if(!o)continue;let a=o.toLowerCase();for(let u of t)a.includes(u)&&(n.add(u),r.push({field:s.name,snippet:H0(o,u)}))}if(n.size<t.length)return null;let i=r.length;return{matches:r,score:i}}function H0(e,t){let i=e.toLowerCase().indexOf(t);if(i===-1)return e.slice(0,120);let s=Math.max(0,i-60),o=Math.min(e.length,i+t.length+60),a=e.slice(s,o).trim();return s>0&&(a="..."+a),o<e.length&&(a=a+"..."),a}var Xe=require("fs/promises"),Gr=require("os"),Ke=require("path");function Ve(e){return e==="~"?(0,Gr.homedir)():e.startsWith("~/")?(0,Ke.resolve)((0,Gr.homedir)(),e.slice(2)):(0,Ke.resolve)(e)}function us(){let e=process.env.XDG_CONFIG_HOME??(0,Ke.join)((0,Gr.homedir)(),".config");return(0,Ke.join)(e,"dev-dashboard","config.json")}async function ct(e){if(e)return[Ve(e)];let t=await q0();return t.length>0?t:[process.cwd()]}async function q0(){let e=us(),t;try{t=await(0,Xe.readFile)(e,"utf-8")}catch{return[]}let r;try{r=JSON.parse(t)}catch{return console.warn(`Warning: dashboard config at ${e} is invalid JSON; falling back to cwd.`),[]}if(!r||typeof r!="object")return[];let n=r.scanDirs;if(!Array.isArray(n))return[];let i=[],s=new Set;for(let o of n){if(typeof o!="string")continue;let a=Ve(o.trim());!a||s.has(a)||(s.add(a),i.push(a))}return i}async function Gl(e){let t=Ve(e),r=us(),n={};try{let o=await(0,Xe.readFile)(r,"utf-8");try{let a=JSON.parse(o);a&&typeof a=="object"&&(n=a)}catch{console.warn(`Warning: dashboard config at ${r} is invalid JSON; not registering scan dir.`);return}}catch{}let i=Array.isArray(n.scanDirs)?n.scanDirs.filter(o=>typeof o=="string"):[];if(i.some(o=>Ve(o.trim())===t))return;let s={...n,scanDirs:[...i,t],scanDirsConfigured:!0};await(0,Xe.mkdir)((0,Ke.dirname)(r),{recursive:!0}),await(0,Xe.writeFile)(r,JSON.stringify(s,null,2)+`
-`,"utf-8")}async function Yl(){let e;try{e=await(0,Xe.readFile)(us(),"utf-8")}catch{return null}let t;try{t=JSON.parse(e)}catch{return null}if(!t||typeof t!="object")return null;let r=t.wikiDir;return typeof r!="string"?null:Ve(r.trim())}function Yr(e,t){return e.name===t?!0:e.path===Ve(t)}var B0=require("fs/promises"),W0=require("path");var cs=require("path");function ne(e){return typeof e.dir=="string"?(0,cs.resolve)(e.dir):typeof e.feature=="string"?(0,cs.resolve)(process.cwd(),".dev",e.feature):null}async function Kl(e){let{flags:t}=W(e),r=t.json===!0,n=ne(t);if(!n)return console.error("Could not resolve feature directory. Use --dir <path> or --feature <name>."),1;let i=t.feature??n.split("/").pop(),s=await st(n,i);if(r)console.log(JSON.stringify(s,null,2));else if(console.log(`Feature: ${s.name}`),console.log(`Status:  ${s.status}`),s.progress&&console.log(`Progress: ${s.progress.done}/${s.progress.total} (${s.progress.percent}%)`),s.currentPhase&&console.log(`Phase:   ${s.currentPhase.number}/${s.currentPhase.total} \u2014 ${s.currentPhase.title}`),s.lastCheckpoint&&console.log(`Checkpoint: ${s.lastCheckpoint}`),s.nextAction&&console.log(`Next: ${s.nextAction}`),s.summary&&console.log(`Summary: ${s.summary}`),s.warnings&&s.warnings.length>0){console.error(),console.error("Warnings:");for(let o of s.warnings)console.error(`  ${o}`)}return 0}var ls=require("path");var Vl=require("fs/promises");async function Xl(e){let{flags:t}=W(e),r=t.json===!0,n=ne(t);if(!n)return console.error("Could not resolve feature directory. Use --dir <path> or --feature <name>."),1;let i=t.feature??n.split("/").pop(),s=await $e((0,ls.resolve)(n,"00-master-plan.md"));if(!s)return console.error(`No master plan found in ${n}`),1;let o;try{o=await(0,Vl.readdir)(n)}catch{o=[]}let a=o.filter(Me).sort(),u=[],c=[],l=[];for(let m of a){let b=await St((0,ls.resolve)(n,m));b&&(u.push({id:b.id,title:b.title,done:b.done,total:b.total,status:b.status}),c.push(hr(b)),b.warnings&&l.push(...b.warnings))}let p=dr([...s.warnings??[],...l]),f=c.length>s.phases.length,d=f?c:s.phases,g=s.progress;if(f){let m=c.reduce((w,k)=>w+k.done,0),b=c.reduce((w,k)=>w+k.total,0);b>0&&(g={done:m,total:b,percent:Math.round(m/b*100)})}else if(g.total===0&&u.length>0){let m=u.reduce((w,k)=>w+k.done,0),b=u.reduce((w,k)=>w+k.total,0);b>0&&(g={done:m,total:b,percent:Math.round(m/b*100)})}if(g.total===0&&d.length>0){let m=d.filter(w=>w.status==="complete").length,b=d.length;g={done:m,total:b,percent:Math.round(m/b*100)}}let h={feature:i,overall:g,phases:d.map(m=>({number:m.number,title:m.title,done:m.done,total:m.total,status:m.status})),subPrds:u,...p.length>0?{warnings:p}:{}};if(r)console.log(JSON.stringify(h,null,2));else{if(console.log(`Feature: ${i}`),console.log(`Overall: ${g.done}/${g.total} (${g.percent}%)`),console.log(),h.phases.length>0){console.log("Phases:");for(let m of h.phases){let b=m.status==="complete"?"[done]":m.status==="in-progress"?"[active]":"[pending]";console.log(`  ${m.number}. ${m.title} ${b} (${m.done}/${m.total})`)}}if(h.subPrds.length>0){console.log(),console.log("Sub-PRDs:");for(let m of h.subPrds){let b=m.status==="complete"?"[done]":m.status==="in-progress"?"[active]":"[pending]";console.log(`  ${m.id}: ${m.title} ${b} (${m.done}/${m.total})`)}}if(p.length>0){console.error(),console.error("Warnings:");for(let m of p)console.error(`  ${m}`)}}return 0}var Ql=require("path");var Jl="GATE: deliver the recap first \u2014 impact, key choices, evidence (file:line + test names), gaps \u2014 then ask: continue to the next phase or /dev-checkpoint. External actions (push, PR, merge) stay with the user.";async function zl(e){let{flags:t}=W(e),r=t.json===!0,n=ne(t);if(!n)return console.error("Could not resolve feature directory. Use --dir <path> or --feature <name>."),1;let i=t.feature??n.split("/").pop(),s=await $e((0,Ql.resolve)(n,"00-master-plan.md"));if(!s)return console.error(`No master plan found in ${n}`),1;let o=s.phases;o.length===0&&(o=await yn(n));let a=o.length>0&&o.every(h=>h.status==="complete"),u=o.some(h=>h.status==="complete"),c=o.some(h=>h.status==="not-started"),l=o.some(h=>h.status==="in-progress"),p=!a&&u&&c&&!l,f=null,d=null;if(p){let h=o.filter(w=>w.status==="complete"),m=h[h.length-1];f={number:m.number,title:m.title};let b=o.find(w=>w.status==="not-started");b&&(d={number:b.number,title:b.title})}let g={feature:i,atGate:p,completedPhase:f,nextPhase:d,allComplete:a};if(p&&(g.gateContract=Jl),r)console.log(JSON.stringify(g,null,2));else if(console.log(`Feature: ${i}`),a)console.log("All phases complete.");else if(p)console.log(`AT GATE: Phase ${f.number} (${f.title}) complete.`),console.log(`Next: Phase ${d.number} (${d.title})`),console.log(Jl);else{console.log("Not at a gate.");let h=o.find(m=>m.status==="in-progress");h&&console.log(`In progress: Phase ${h.number} (${h.title})`)}return 0}var Zl=require("path");async function ef(e){let{flags:t}=W(e),r=t.json===!0,n=ne(t);if(!n)return console.error("Could not resolve feature directory. Use --dir <path> or --feature <name>."),1;let i=await Ie((0,Zl.resolve)(n,"checkpoint.md"));if(!i)return console.error(`No checkpoint found in ${n}`),1;if(r)console.log(JSON.stringify(i,null,2));else{if(i.branch&&console.log(`Branch: ${i.branch}`),i.lastCommit&&console.log(`Last commit: ${i.lastCommit}`),i.uncommittedChanges!==null&&console.log(`Uncommitted: ${i.uncommittedChanges}`),i.checkpointed&&console.log(`Checkpointed: ${i.checkpointed}`),i.context&&(console.log(),console.log("Context:"),console.log(i.context)),i.currentState&&(console.log(),console.log("Current state:"),console.log(i.currentState)),i.nextAction&&(console.log(),console.log("Next action:"),console.log(i.nextAction)),i.keyFiles&&(console.log(),console.log("Key files:"),console.log(i.keyFiles)),i.prdFiles.length>0){console.log(),console.log("PRD files:");for(let s of i.prdFiles)console.log(`  ${s}`)}if(i.continuationPrompt&&(console.log(),console.log("Continuation:"),console.log(i.continuationPrompt)),i.decisions.length>0){console.log(),console.log("Decisions:");for(let s of i.decisions)console.log(`  - ${s}`)}if(i.blockers.length>0){console.log(),console.log("Blockers:");for(let s of i.blockers)console.log(`  - ${s}`)}if(i.notes.length>0){console.log(),console.log("Notes:");for(let s of i.notes)console.log(`  - ${s}`)}}return 0}var Kr=require("path"),kt=require("fs/promises");var U0=10;async function G0(e){try{let r=(await(0,kt.readFile)(e,"utf-8")).match(/^## Session\s+\d+/gm);return r?r.length:0}catch{return 0}}async function Y0(){let e=[];for await(let t of process.stdin)e.push(typeof t=="string"?Buffer.from(t):t);return Buffer.concat(e).toString("utf-8")}async function K0(e){return(0,kt.readFile)(e,"utf-8")}async function V0(e,t){let r=0;try{let a=(await(0,kt.readFile)(t,"utf-8")).match(/^## Session\s+\d+/gm);r=a?a.length:0}catch{}let n=r+1,i=e.checkpointed??new Date().toISOString(),s=`
-## Session ${n} \u2014 ${i}
+`;
+}
+function buildObsidianAppConfig() {
+  return JSON.stringify({ alwaysUpdateLinks: true, newLinkFormat: "relative" }, null, 2) + "\n";
+}
+function truncate(text, maxLen) {
+  if (text.length <= maxLen) return text;
+  return text.slice(0, maxLen - 1) + "\u2026";
+}
+function formatTags(tags) {
+  return tags.length > 0 ? tags.join(", ") : "\u2014";
+}
+function formatDate(dateStr) {
+  const d = new Date(dateStr);
+  if (isNaN(d.getTime())) return "unknown";
+  return d.toISOString().slice(0, 10);
+}
+function compareDatesDesc(a, b) {
+  if (!a && !b) return 0;
+  if (!a) return 1;
+  if (!b) return -1;
+  return new Date(b).getTime() - new Date(a).getTime();
+}
 
-`;if(e.context&&(s+=`<context>
-${e.context}
+// ../dev-workflow-core/src/wiki.ts
+async function generateWiki(projects, outputDir, options) {
+  const projectsDir = (0, import_path3.join)(outputDir, "projects");
+  await (0, import_promises4.mkdir)(projectsDir, { recursive: true });
+  const currentPaths = new Set(projects.map((p) => (0, import_path3.resolve)(p.path)));
+  const knownRoots = await discoverExistingRoots(projectsDir);
+  const rootsToRescan = [...knownRoots].filter((root) => !currentPaths.has(root));
+  const rescanned = rootsToRescan.length > 0 ? await scanProjects(rootsToRescan) : [];
+  const unionByName = /* @__PURE__ */ new Map();
+  for (const project of rescanned) unionByName.set(project.name, project);
+  for (const project of projects) unionByName.set(project.name, project);
+  const allProjects = Array.from(unionByName.values());
+  const expectedLinks = /* @__PURE__ */ new Set();
+  for (const project of allProjects) {
+    const devTarget = (0, import_path3.join)(project.path, ".dev");
+    const linkName = project.name;
+    expectedLinks.add(linkName);
+    await ensureSymlink(projectsDir, linkName, devTarget);
+    const archiveTarget = (0, import_path3.join)(project.path, ".dev-archive");
+    if ((0, import_fs.existsSync)(archiveTarget)) {
+      const archiveLinkName = `${project.name}--archive`;
+      expectedLinks.add(archiveLinkName);
+      await ensureSymlink(projectsDir, archiveLinkName, archiveTarget);
+    }
+  }
+  await removeStaleSymlinks(projectsDir, expectedLinks);
+  const generated = (/* @__PURE__ */ new Date()).toISOString();
+  await (0, import_promises4.writeFile)((0, import_path3.join)(outputDir, "index.md"), buildIndexPage(allProjects, generated));
+  await (0, import_promises4.writeFile)((0, import_path3.join)(outputDir, "log.md"), buildLogPage(allProjects, generated));
+  if (options?.includeReadme) {
+    await (0, import_promises4.writeFile)((0, import_path3.join)(outputDir, "README.md"), buildReadmePage());
+  }
+  if (options?.initObsidian) {
+    const obsidianDir = (0, import_path3.join)(outputDir, ".obsidian");
+    if (!(0, import_fs.existsSync)(obsidianDir)) {
+      await (0, import_promises4.mkdir)(obsidianDir, { recursive: true });
+      await (0, import_promises4.writeFile)((0, import_path3.join)(obsidianDir, "app.json"), buildObsidianAppConfig());
+    }
+  }
+}
+async function discoverExistingRoots(projectsDir) {
+  const roots = /* @__PURE__ */ new Set();
+  let entries;
+  try {
+    entries = await (0, import_promises4.readdir)(projectsDir);
+  } catch {
+    return roots;
+  }
+  for (const entry of entries) {
+    const linkPath = (0, import_path3.join)(projectsDir, entry);
+    let target;
+    try {
+      const stats = await (0, import_promises4.lstat)(linkPath);
+      if (!stats.isSymbolicLink()) continue;
+      target = (0, import_path3.resolve)(projectsDir, await (0, import_promises4.readlink)(linkPath));
+    } catch {
+      continue;
+    }
+    if (!(0, import_fs.existsSync)(target)) continue;
+    const base = (0, import_path3.basename)(target);
+    if (base === ".dev" || base === ".dev-archive") {
+      roots.add((0, import_path3.dirname)(target));
+    }
+  }
+  return roots;
+}
+async function ensureSymlink(parentDir, linkName, target) {
+  const linkPath = (0, import_path3.join)(parentDir, linkName);
+  const absTarget = (0, import_path3.resolve)(target);
+  try {
+    const stats = await (0, import_promises4.lstat)(linkPath);
+    if (stats.isSymbolicLink()) {
+      const currentTarget = await (0, import_promises4.readlink)(linkPath);
+      if ((0, import_path3.resolve)(parentDir, currentTarget) === absTarget) return;
+      await (0, import_promises4.unlink)(linkPath);
+    } else {
+      return;
+    }
+  } catch {
+  }
+  await (0, import_promises4.symlink)(absTarget, linkPath);
+}
+async function removeStaleSymlinks(projectsDir, expectedLinks) {
+  let entries;
+  try {
+    entries = await (0, import_promises4.readdir)(projectsDir);
+  } catch {
+    return;
+  }
+  for (const entry of entries) {
+    if (expectedLinks.has(entry)) continue;
+    const entryPath = (0, import_path3.join)(projectsDir, entry);
+    try {
+      const stats = await (0, import_promises4.lstat)(entryPath);
+      if (stats.isSymbolicLink()) {
+        await (0, import_promises4.unlink)(entryPath);
+      }
+    } catch {
+    }
+  }
+}
+
+// ../dev-workflow-core/src/search.ts
+var DEFAULT_MAX_RESULTS = 20;
+var SEARCHABLE_FIELDS = [
+  { name: "name", extract: (f) => f.name },
+  { name: "summary", extract: (f) => f.summary },
+  { name: "nextAction", extract: (f) => f.nextAction },
+  { name: "branch", extract: (f) => f.branch },
+  { name: "currentPhase", extract: (f) => f.currentPhase?.title ?? null },
+  { name: "tags", extract: (f) => f.tags.join(" ") }
+];
+function searchFeatures(projects, options) {
+  const maxResults = options.maxResults ?? DEFAULT_MAX_RESULTS;
+  const terms = options.query.toLowerCase().split(/\s+/).filter((t) => t.length > 0);
+  if (terms.length === 0) return [];
+  const hits = [];
+  for (const project of projects) {
+    for (const feature of project.features) {
+      const result = matchFeature(feature, terms);
+      if (result) {
+        hits.push({
+          project: project.name,
+          feature,
+          matches: result.matches,
+          score: result.score
+        });
+      }
+    }
+  }
+  hits.sort((a, b) => b.score - a.score);
+  return hits.slice(0, maxResults);
+}
+function matchFeature(feature, terms) {
+  const matches = [];
+  const termHits = /* @__PURE__ */ new Set();
+  for (const field of SEARCHABLE_FIELDS) {
+    const value = field.extract(feature);
+    if (!value) continue;
+    const lower = value.toLowerCase();
+    for (const term of terms) {
+      if (lower.includes(term)) {
+        termHits.add(term);
+        matches.push({
+          field: field.name,
+          snippet: extractSnippet(value, term)
+        });
+      }
+    }
+  }
+  if (termHits.size < terms.length) return null;
+  const score = matches.length;
+  return { matches, score };
+}
+function extractSnippet(text, term) {
+  const WINDOW = 60;
+  const lower = text.toLowerCase();
+  const idx = lower.indexOf(term);
+  if (idx === -1) return text.slice(0, WINDOW * 2);
+  const start = Math.max(0, idx - WINDOW);
+  const end = Math.min(text.length, idx + term.length + WINDOW);
+  let snippet = text.slice(start, end).trim();
+  if (start > 0) snippet = "..." + snippet;
+  if (end < text.length) snippet = snippet + "...";
+  return snippet;
+}
+
+// ../dev-workflow-core/src/scan-dirs.ts
+var import_promises5 = require("fs/promises");
+var import_os = require("os");
+var import_path4 = require("path");
+function expandHome(dir) {
+  if (dir === "~") return (0, import_os.homedir)();
+  if (dir.startsWith("~/")) return (0, import_path4.resolve)((0, import_os.homedir)(), dir.slice(2));
+  return (0, import_path4.resolve)(dir);
+}
+function getDashboardConfigPath() {
+  const configHome = process.env.XDG_CONFIG_HOME ?? (0, import_path4.join)((0, import_os.homedir)(), ".config");
+  return (0, import_path4.join)(configHome, "dev-dashboard", "config.json");
+}
+async function resolveScanDirs(scanFlag) {
+  if (scanFlag) return [expandHome(scanFlag)];
+  const fromConfig = await readDashboardScanDirs();
+  if (fromConfig.length > 0) return fromConfig;
+  return [process.cwd()];
+}
+async function readDashboardScanDirs() {
+  const configPath = getDashboardConfigPath();
+  let raw;
+  try {
+    raw = await (0, import_promises5.readFile)(configPath, "utf-8");
+  } catch {
+    return [];
+  }
+  let parsed;
+  try {
+    parsed = JSON.parse(raw);
+  } catch {
+    console.warn(`Warning: dashboard config at ${configPath} is invalid JSON; falling back to cwd.`);
+    return [];
+  }
+  if (!parsed || typeof parsed !== "object") return [];
+  const dirs = parsed.scanDirs;
+  if (!Array.isArray(dirs)) return [];
+  const out = [];
+  const seen = /* @__PURE__ */ new Set();
+  for (const dir of dirs) {
+    if (typeof dir !== "string") continue;
+    const expanded = expandHome(dir.trim());
+    if (!expanded || seen.has(expanded)) continue;
+    seen.add(expanded);
+    out.push(expanded);
+  }
+  return out;
+}
+async function ensureScanDir(root) {
+  const expanded = expandHome(root);
+  const configPath = getDashboardConfigPath();
+  let parsed = {};
+  try {
+    const raw = await (0, import_promises5.readFile)(configPath, "utf-8");
+    try {
+      const json = JSON.parse(raw);
+      if (json && typeof json === "object") parsed = json;
+    } catch {
+      console.warn(
+        `Warning: dashboard config at ${configPath} is invalid JSON; not registering scan dir.`
+      );
+      return;
+    }
+  } catch {
+  }
+  const existing = Array.isArray(parsed.scanDirs) ? parsed.scanDirs.filter((d) => typeof d === "string") : [];
+  if (existing.some((d) => expandHome(d.trim()) === expanded)) return;
+  const updated = {
+    ...parsed,
+    scanDirs: [...existing, expanded],
+    scanDirsConfigured: true
+  };
+  await (0, import_promises5.mkdir)((0, import_path4.dirname)(configPath), { recursive: true });
+  await (0, import_promises5.writeFile)(configPath, JSON.stringify(updated, null, 2) + "\n", "utf-8");
+}
+async function readDashboardWikiDir() {
+  let raw;
+  try {
+    raw = await (0, import_promises5.readFile)(getDashboardConfigPath(), "utf-8");
+  } catch {
+    return null;
+  }
+  let parsed;
+  try {
+    parsed = JSON.parse(raw);
+  } catch {
+    return null;
+  }
+  if (!parsed || typeof parsed !== "object") return null;
+  const wikiDir = parsed.wikiDir;
+  if (typeof wikiDir !== "string") return null;
+  return expandHome(wikiDir.trim());
+}
+function matchesProject(p, filter) {
+  if (p.name === filter) return true;
+  return p.path === expandHome(filter);
+}
+
+// ../dev-workflow-core/src/feature-detail.ts
+var import_promises6 = require("fs/promises");
+var import_path5 = require("path");
+
+// src/resolve.ts
+var import_path6 = require("path");
+function resolveFeatureDir(flags) {
+  if (typeof flags.dir === "string") {
+    return (0, import_path6.resolve)(flags.dir);
+  }
+  if (typeof flags.feature === "string") {
+    return (0, import_path6.resolve)(process.cwd(), ".dev", flags.feature);
+  }
+  return null;
+}
+
+// src/commands/feature-show.ts
+async function featureShow(args) {
+  const { flags } = parseFlags(args);
+  const json = flags.json === true;
+  const featureDir = resolveFeatureDir(flags);
+  if (!featureDir) {
+    console.error("Could not resolve feature directory. Use --dir <path> or --feature <name>.");
+    return 1;
+  }
+  const featureName = flags.feature ?? featureDir.split("/").pop();
+  const feature = await parseFeature(featureDir, featureName);
+  if (json) {
+    console.log(JSON.stringify(feature, null, 2));
+  } else {
+    console.log(`Feature: ${feature.name}`);
+    console.log(`Status:  ${feature.status}`);
+    if (feature.progress) {
+      console.log(`Progress: ${feature.progress.done}/${feature.progress.total} (${feature.progress.percent}%)`);
+    }
+    if (feature.currentPhase) {
+      console.log(`Phase:   ${feature.currentPhase.number}/${feature.currentPhase.total} \u2014 ${feature.currentPhase.title}`);
+    }
+    if (feature.lastCheckpoint) {
+      console.log(`Checkpoint: ${feature.lastCheckpoint}`);
+    }
+    if (feature.nextAction) {
+      console.log(`Next: ${feature.nextAction}`);
+    }
+    if (feature.summary) {
+      console.log(`Summary: ${feature.summary}`);
+    }
+    if (feature.warnings && feature.warnings.length > 0) {
+      console.error();
+      console.error("Warnings:");
+      for (const w of feature.warnings) {
+        console.error(`  ${w}`);
+      }
+    }
+  }
+  return 0;
+}
+
+// src/commands/progress-summary.ts
+var import_path7 = require("path");
+var import_promises7 = require("fs/promises");
+async function progressSummary(args) {
+  const { flags } = parseFlags(args);
+  const json = flags.json === true;
+  const featureDir = resolveFeatureDir(flags);
+  if (!featureDir) {
+    console.error("Could not resolve feature directory. Use --dir <path> or --feature <name>.");
+    return 1;
+  }
+  const featureName = flags.feature ?? featureDir.split("/").pop();
+  const masterPlan = await parseMasterPlan((0, import_path7.resolve)(featureDir, "00-master-plan.md"));
+  if (!masterPlan) {
+    console.error(`No master plan found in ${featureDir}`);
+    return 1;
+  }
+  let entries;
+  try {
+    entries = await (0, import_promises7.readdir)(featureDir);
+  } catch {
+    entries = [];
+  }
+  const subPrdFiles = entries.filter(isSubPrdFile).sort();
+  const subPrds = [];
+  const subPrdPhases = [];
+  const subPrdWarnings = [];
+  for (const file of subPrdFiles) {
+    const result = await parseSubPrd((0, import_path7.resolve)(featureDir, file));
+    if (result) {
+      subPrds.push({
+        id: result.id,
+        title: result.title,
+        done: result.done,
+        total: result.total,
+        status: result.status
+      });
+      subPrdPhases.push(subPrdToPhase(result));
+      if (result.warnings) subPrdWarnings.push(...result.warnings);
+    }
+  }
+  const warnings = capWarnings([...masterPlan.warnings ?? [], ...subPrdWarnings]);
+  const subPrdsAuthoritative = subPrdPhases.length > masterPlan.phases.length;
+  const effectivePhases = subPrdsAuthoritative ? subPrdPhases : masterPlan.phases;
+  let overall = masterPlan.progress;
+  if (subPrdsAuthoritative) {
+    const done = subPrdPhases.reduce((sum, p) => sum + p.done, 0);
+    const total = subPrdPhases.reduce((sum, p) => sum + p.total, 0);
+    if (total > 0) overall = { done, total, percent: Math.round(done / total * 100) };
+  } else if (overall.total === 0 && subPrds.length > 0) {
+    const done = subPrds.reduce((sum, s) => sum + s.done, 0);
+    const total = subPrds.reduce((sum, s) => sum + s.total, 0);
+    if (total > 0) overall = { done, total, percent: Math.round(done / total * 100) };
+  }
+  if (overall.total === 0 && effectivePhases.length > 0) {
+    const done = effectivePhases.filter((p) => p.status === "complete").length;
+    const total = effectivePhases.length;
+    overall = { done, total, percent: Math.round(done / total * 100) };
+  }
+  const output = {
+    feature: featureName,
+    overall,
+    phases: effectivePhases.map((p) => ({
+      number: p.number,
+      title: p.title,
+      done: p.done,
+      total: p.total,
+      status: p.status
+    })),
+    subPrds,
+    ...warnings.length > 0 ? { warnings } : {}
+  };
+  if (json) {
+    console.log(JSON.stringify(output, null, 2));
+  } else {
+    console.log(`Feature: ${featureName}`);
+    console.log(`Overall: ${overall.done}/${overall.total} (${overall.percent}%)`);
+    console.log();
+    if (output.phases.length > 0) {
+      console.log("Phases:");
+      for (const p of output.phases) {
+        const mark = p.status === "complete" ? "[done]" : p.status === "in-progress" ? "[active]" : "[pending]";
+        console.log(`  ${p.number}. ${p.title} ${mark} (${p.done}/${p.total})`);
+      }
+    }
+    if (output.subPrds.length > 0) {
+      console.log();
+      console.log("Sub-PRDs:");
+      for (const s of output.subPrds) {
+        const mark = s.status === "complete" ? "[done]" : s.status === "in-progress" ? "[active]" : "[pending]";
+        console.log(`  ${s.id}: ${s.title} ${mark} (${s.done}/${s.total})`);
+      }
+    }
+    if (warnings.length > 0) {
+      console.error();
+      console.error("Warnings:");
+      for (const w of warnings) {
+        console.error(`  ${w}`);
+      }
+    }
+  }
+  return 0;
+}
+
+// src/commands/gate-check.ts
+var import_path8 = require("path");
+var GATE_CONTRACT = "GATE: deliver the recap first \u2014 impact, key choices, evidence (file:line + test names), gaps \u2014 then ask: continue to the next phase or /dev-checkpoint. External actions (push, PR, merge) stay with the user.";
+async function gateCheck(args) {
+  const { flags } = parseFlags(args);
+  const json = flags.json === true;
+  const featureDir = resolveFeatureDir(flags);
+  if (!featureDir) {
+    console.error("Could not resolve feature directory. Use --dir <path> or --feature <name>.");
+    return 1;
+  }
+  const featureName = flags.feature ?? featureDir.split("/").pop();
+  const masterPlan = await parseMasterPlan((0, import_path8.resolve)(featureDir, "00-master-plan.md"));
+  if (!masterPlan) {
+    console.error(`No master plan found in ${featureDir}`);
+    return 1;
+  }
+  let phases = masterPlan.phases;
+  if (phases.length === 0) {
+    phases = await parseSubPrdsAsPhases(featureDir);
+  }
+  const allComplete = phases.length > 0 && phases.every((p) => p.status === "complete");
+  const hasCompleted = phases.some((p) => p.status === "complete");
+  const hasNotStarted = phases.some((p) => p.status === "not-started");
+  const hasInProgress = phases.some((p) => p.status === "in-progress");
+  const atGate = !allComplete && hasCompleted && hasNotStarted && !hasInProgress;
+  let completedPhase = null;
+  let nextPhase = null;
+  if (atGate) {
+    const completedPhases = phases.filter((p) => p.status === "complete");
+    const last = completedPhases[completedPhases.length - 1];
+    completedPhase = { number: last.number, title: last.title };
+    const next = phases.find((p) => p.status === "not-started");
+    if (next) {
+      nextPhase = { number: next.number, title: next.title };
+    }
+  }
+  const output = { feature: featureName, atGate, completedPhase, nextPhase, allComplete };
+  if (atGate) {
+    output.gateContract = GATE_CONTRACT;
+  }
+  if (json) {
+    console.log(JSON.stringify(output, null, 2));
+  } else {
+    console.log(`Feature: ${featureName}`);
+    if (allComplete) {
+      console.log("All phases complete.");
+    } else if (atGate) {
+      console.log(`AT GATE: Phase ${completedPhase.number} (${completedPhase.title}) complete.`);
+      console.log(`Next: Phase ${nextPhase.number} (${nextPhase.title})`);
+      console.log(GATE_CONTRACT);
+    } else {
+      console.log("Not at a gate.");
+      const active = phases.find((p) => p.status === "in-progress");
+      if (active) {
+        console.log(`In progress: Phase ${active.number} (${active.title})`);
+      }
+    }
+  }
+  return 0;
+}
+
+// src/commands/checkpoint-read.ts
+var import_path9 = require("path");
+async function checkpointRead(args) {
+  const { flags } = parseFlags(args);
+  const json = flags.json === true;
+  const featureDir = resolveFeatureDir(flags);
+  if (!featureDir) {
+    console.error("Could not resolve feature directory. Use --dir <path> or --feature <name>.");
+    return 1;
+  }
+  const checkpoint = await parseCheckpoint((0, import_path9.resolve)(featureDir, "checkpoint.md"));
+  if (!checkpoint) {
+    console.error(`No checkpoint found in ${featureDir}`);
+    return 1;
+  }
+  if (json) {
+    console.log(JSON.stringify(checkpoint, null, 2));
+  } else {
+    if (checkpoint.branch) console.log(`Branch: ${checkpoint.branch}`);
+    if (checkpoint.lastCommit) console.log(`Last commit: ${checkpoint.lastCommit}`);
+    if (checkpoint.uncommittedChanges !== null) console.log(`Uncommitted: ${checkpoint.uncommittedChanges}`);
+    if (checkpoint.checkpointed) console.log(`Checkpointed: ${checkpoint.checkpointed}`);
+    if (checkpoint.context) {
+      console.log();
+      console.log("Context:");
+      console.log(checkpoint.context);
+    }
+    if (checkpoint.currentState) {
+      console.log();
+      console.log("Current state:");
+      console.log(checkpoint.currentState);
+    }
+    if (checkpoint.nextAction) {
+      console.log();
+      console.log("Next action:");
+      console.log(checkpoint.nextAction);
+    }
+    if (checkpoint.keyFiles) {
+      console.log();
+      console.log("Key files:");
+      console.log(checkpoint.keyFiles);
+    }
+    if (checkpoint.prdFiles.length > 0) {
+      console.log();
+      console.log("PRD files:");
+      for (const f of checkpoint.prdFiles) console.log(`  ${f}`);
+    }
+    if (checkpoint.continuationPrompt) {
+      console.log();
+      console.log("Continuation:");
+      console.log(checkpoint.continuationPrompt);
+    }
+    if (checkpoint.decisions.length > 0) {
+      console.log();
+      console.log("Decisions:");
+      for (const d of checkpoint.decisions) console.log(`  - ${d}`);
+    }
+    if (checkpoint.blockers.length > 0) {
+      console.log();
+      console.log("Blockers:");
+      for (const b of checkpoint.blockers) console.log(`  - ${b}`);
+    }
+    if (checkpoint.notes.length > 0) {
+      console.log();
+      console.log("Notes:");
+      for (const n of checkpoint.notes) console.log(`  - ${n}`);
+    }
+  }
+  return 0;
+}
+
+// src/commands/checkpoint-write.ts
+var import_path10 = require("path");
+var import_promises8 = require("fs/promises");
+var CONSOLIDATION_THRESHOLD = 10;
+async function countSessions(sessionLogPath) {
+  try {
+    const existing = await (0, import_promises8.readFile)(sessionLogPath, "utf-8");
+    const headings = existing.match(/^## Session\s+\d+/gm);
+    return headings ? headings.length : 0;
+  } catch {
+    return 0;
+  }
+}
+async function readStdin() {
+  const chunks = [];
+  for await (const chunk of process.stdin) {
+    chunks.push(typeof chunk === "string" ? Buffer.from(chunk) : chunk);
+  }
+  return Buffer.concat(chunks).toString("utf-8");
+}
+async function readInputFile(path) {
+  return (0, import_promises8.readFile)(path, "utf-8");
+}
+async function formatSessionEntry(checkpoint, sessionLogPath) {
+  let sessionCount = 0;
+  try {
+    const existing = await (0, import_promises8.readFile)(sessionLogPath, "utf-8");
+    const sessionHeadings = existing.match(/^## Session\s+\d+/gm);
+    sessionCount = sessionHeadings ? sessionHeadings.length : 0;
+  } catch {
+  }
+  const n = sessionCount + 1;
+  const timestamp = checkpoint.checkpointed ?? (/* @__PURE__ */ new Date()).toISOString();
+  let entry = `
+## Session ${n} \u2014 ${timestamp}
+
+`;
+  if (checkpoint.context) {
+    entry += `<context>
+${checkpoint.context}
 </context>
 
-`),e.decisions&&e.decisions.length>0){s+=`<decisions>
-`;for(let o of e.decisions)s+=`- ${o}
-`;s+=`</decisions>
+`;
+  }
+  if (checkpoint.decisions && checkpoint.decisions.length > 0) {
+    entry += `<decisions>
+`;
+    for (const d of checkpoint.decisions) {
+      entry += `- ${d}
+`;
+    }
+    entry += `</decisions>
 
-`}if(e.blockers&&e.blockers.length>0){s+=`<blockers>
-`;for(let o of e.blockers)s+=`- ${o}
-`;s+=`</blockers>
+`;
+  }
+  if (checkpoint.blockers && checkpoint.blockers.length > 0) {
+    entry += `<blockers>
+`;
+    for (const b of checkpoint.blockers) {
+      entry += `- ${b}
+`;
+    }
+    entry += `</blockers>
 
-`}if(e.notes&&e.notes.length>0){s+=`<notes>
-`;for(let o of e.notes)s+=`- ${o}
-`;s+=`</notes>
+`;
+  }
+  if (checkpoint.notes && checkpoint.notes.length > 0) {
+    entry += `<notes>
+`;
+    for (const n2 of checkpoint.notes) {
+      entry += `- ${n2}
+`;
+    }
+    entry += `</notes>
 
-`}return s+=`---
-`,s}async function X0(e,t){let r=(0,Kr.resolve)(e,"checkpoint.md"),n=(0,Kr.resolve)(e,"session-log.md"),i=await Ie(r);if(i){let c=await V0(i,n);await(0,kt.appendFile)(n,c,"utf-8")}await Dl(r,t);let s=await G0(n),a=(await gr((0,Kr.resolve)(e,"session-digest.md")))?.sessionCount??0,u=s-a>=U0;return{success:!0,file:r,sessionCount:s,consolidationDue:u}}async function tf(e){let{flags:t}=W(e),r=t.json===!0,n=t.stdin===!0,i=typeof t["input-file"]=="string"?t["input-file"]:null,s=ne(t);if(!s)return console.error("Could not resolve feature directory. Use --dir <path> or --feature <name>."),1;if(n&&i)return console.error("--stdin and --input-file are mutually exclusive. Pass exactly one."),1;if(!n&&!i)return console.error("Must pass either --stdin or --input-file <path> with CheckpointWriteInput JSON."),1;let o;try{let u=n?await Y0():await K0(i);o=JSON.parse(u)}catch(u){let c=n?"stdin":`input file (${i})`;return console.error(`Failed to read ${c} JSON: ${u instanceof Error?u.message:u}`),1}if(!o.context||!o.currentState||!o.nextAction||!o.keyFiles)return console.error("Missing required fields: context, currentState, nextAction, keyFiles"),1;let a=await X0(s,o);return r?console.log(JSON.stringify(a,null,2)):(console.log(`Checkpoint written to ${a.file}`),a.consolidationDue&&console.log(`Session consolidation due (${a.sessionCount} sessions) \u2014 run the /dev-checkpoint consolidation step.`)),0}var rf=require("path"),nf=require("fs/promises");async function J0(){let e=[];for await(let t of process.stdin)e.push(typeof t=="string"?Buffer.from(t):t);return Buffer.concat(e).toString("utf-8")}async function Q0(e){return(0,nf.readFile)(e,"utf-8")}async function z0(e,t){let r=(0,rf.resolve)(e,"session-digest.md");return await $l(r,t),{success:!0,file:r}}async function sf(e){let{flags:t}=W(e),r=t.json===!0,n=t.stdin===!0,i=typeof t["input-file"]=="string"?t["input-file"]:null,s=ne(t);if(!s)return console.error("Could not resolve feature directory. Use --dir <path> or --feature <name>."),1;if(n&&i)return console.error("--stdin and --input-file are mutually exclusive. Pass exactly one."),1;if(!n&&!i)return console.error("Must pass either --stdin or --input-file <path> with SessionDigestWriteInput JSON."),1;let o;try{let u=n?await J0():await Q0(i);o=JSON.parse(u)}catch(u){let c=n?"stdin":`input file (${i})`;return console.error(`Failed to read ${c} JSON: ${u instanceof Error?u.message:u}`),1}if(typeof o.aggregate!="string"||typeof o.sessionCount!="number"||typeof o.consolidatedThrough!="number")return console.error("Missing or invalid required fields: aggregate (string), sessionCount (number), consolidatedThrough (number)"),1;let a=await z0(s,o);return console.log(r?JSON.stringify(a,null,2):`Session digest written to ${a.file}`),0}var fs=require("path"),of=require("fs/promises");var Z0={done:"\u2705",todo:"\u2B1C"};async function af(e){let{flags:t}=W(e),r=t.json===!0,n=ne(t);if(!n)return console.error("Could not resolve feature directory. Use --dir <path> or --feature <name>."),1;let i=t.phase;if(!i||typeof i!="string")return console.error("--phase <number> is required."),1;let s=parseInt(i,10);if(isNaN(s)||s<1)return console.error("--phase must be a positive integer."),1;let o;if(t.step&&typeof t.step=="string"&&(o=parseInt(t.step,10),isNaN(o)||o<1))return console.error("--step must be a positive integer."),1;let a=t.marker;if(!a||typeof a!="string")return console.error("--marker <done|todo> is required."),1;let u=Z0[a.toLowerCase()];if(!u)return console.error(`Invalid --marker value "${a}". Use "done" or "todo".`),1;let c=await e_(n,s);if(!c)return console.error(`Could not find Phase ${s} in any PRD file under ${n}`),1;let l={phase:s,step:o},p;try{p=await Il(c,l,u)}catch(f){return console.error(f instanceof Error?f.message:String(f)),1}if(r)console.log(JSON.stringify(p,null,2));else{let f=o?` step ${o}`:"";p.changed?console.log(`Phase ${s}${f} marked ${a.toLowerCase()} in ${p.file} (line ${p.line})`):console.log(`Phase ${s}${f} already ${a.toLowerCase()} in ${p.file} (line ${p.line})`)}return 0}async function e_(e,t){let r=(0,fs.resolve)(e,"00-master-plan.md"),n=await $e(r);if(n?.phases.some(i=>i.number===t&&i.total>0))return r;try{let s=(await(0,of.readdir)(e)).filter(Me).sort();for(let o of s){let a=o.match(/^(\d+)/);if(a&&parseInt(a[1],10)===t)return(0,fs.resolve)(e,o)}}catch{}return n?r:null}var Ut=require("path"),cf=require("fs/promises"),lf=require("child_process"),ff=require("util");var pf=(0,ff.promisify)(lf.execFile),t_=4320*60*1e3;async function r_(){try{let{stdout:e}=await pf("git",["branch","--show-current"]);return e.trim()}catch{return""}}async function n_(){try{let{stdout:e}=await pf("git",["status","--porcelain"]);return e.trim().length>0}catch{return!1}}function i_(e,t,r){return e&&e!==t?"drifted":r&&Date.now()-new Date(r).getTime()>=t_?"stale":"fresh"}function s_(e,t){let r=e,n=/^#{2,3}\s*Phase\s+(\d+)[:\s—–-]+\s*(.+)/gm,i=[],s;for(;(s=n.exec(r))!==null;)i.push({number:parseInt(s[1],10),index:s.index});let o=i.find(d=>d.number===t);if(!o)return null;let a=r.slice(o.index),u=/^#{2,3}\s*(?:Phase\s+\d+|File Changes Summary)/gm;u.lastIndex=0;let c,l=a.length,p=a.indexOf(`
-`),f=p>=0?p+1:0;for(u.lastIndex=f;(c=u.exec(a))!==null;){l=c.index;break}return a.slice(0,l).trim()}function o_(e){let t=e.match(/## Reference Files\s*\n([\s\S]*?)(?=\n##|\n$|$)/);if(!t)return[];let r=[],n=t[1].split(`
-`);for(let i of n){let o=i.trim().match(/^-\s+`?([^`—\n]+)`?\s*(?:—|-{1,2})\s*/);o&&r.push(o[1].trim())}return r}function uf(e){let t=new Set,r=[];for(let n of e)for(let i of n.decisions)t.has(i)||(t.add(i),r.push(i));return r}function a_(e){let t=new Set,r=[];for(let n of e)t.has(n)||(t.add(n),r.push(n));return r}async function hf(e){let{flags:t}=W(e),r=t.json===!0,n=ne(t);if(!n)return console.error("Could not resolve feature directory. Use --dir <path> or --feature <name>."),1;let i=5;if(t.sessions&&typeof t.sessions=="string")if(t.sessions.toLowerCase()==="all")i=1/0;else{let $=parseInt(t.sessions,10);!isNaN($)&&$>=0&&(i=$===0?1/0:$)}let s=t.feature??n.split("/").pop(),o=(0,Ut.resolve)(n,"00-master-plan.md"),[a,u,c,l,p,f,d]=await Promise.all([st(n,s),Ie((0,Ut.resolve)(n,"checkpoint.md")),xn((0,Ut.resolve)(n,"session-log.md")),gr((0,Ut.resolve)(n,"session-digest.md")),r_(),n_(),(0,cf.readFile)(o,"utf-8").catch(()=>null)]),g=i_(u?.branch??null,p,u?.checkpointed??null),h=null,m=[];d&&(a.currentPhase&&(h=s_(d,a.currentPhase.number)),m=o_(d));let b=i===1/0?c:c.slice(-i),w=l?a_([...l.decisions,...uf(b)]):uf(c),k={feature:{name:a.name,status:a.status,progress:a.progress,currentPhase:a.currentPhase},checkpoint:{context:u?.context??null,nextAction:u?.nextAction??null,decisions:u?.decisions??[],blockers:u?.blockers??[],notes:u?.notes??[]},validity:g,validityDetails:{checkpointBranch:u?.branch??null,currentBranch:p,checkpointUncommitted:u?.uncommittedChanges??null,currentUncommitted:f},currentPhasePrd:h,referenceFiles:m,sessionDigest:l,recentSessionHistory:b,accumulatedDecisions:w};if(r)console.log(JSON.stringify(k,null,2));else{if(console.log(`Feature: ${a.name}`),console.log(`Status: ${a.status}`),a.progress&&console.log(`Progress: ${a.progress.done}/${a.progress.total} (${a.progress.percent}%)`),a.currentPhase&&console.log(`Current Phase: ${a.currentPhase.number}/${a.currentPhase.total} \u2014 ${a.currentPhase.title}`),console.log(`Validity: ${g}`),u?.context&&(console.log(),console.log("Context:"),console.log(u.context)),u?.nextAction&&(console.log(),console.log("Next Action:"),console.log(u.nextAction)),l&&(console.log(),console.log(`Session Digest (sessions 1\u2013${l.consolidatedThrough} of ${l.sessionCount} consolidated):`),l.aggregate&&console.log(l.aggregate)),w.length>0){console.log(),console.log("Accumulated Decisions:");for(let $ of w)console.log(`  - ${$}`)}if(b.length>0){console.log(),console.log(`Recent Session History (${b.length} sessions shown):`);for(let $ of b)console.log(`  Session ${$.session} (${$.date}): ${$.context??"(no context)"}`)}if(m.length>0){console.log(),console.log("Reference Files:");for(let $ of m)console.log(`  - ${$}`)}}return 0}var mf=require("path");var df=new Set(["gate","active","stale","complete","checkpoint-only","no-prd","empty","archived"]);async function yf(e){let{flags:t}=W(e),r=t.json===!0,n=t.all===!0,i=typeof t.project=="string"?t.project:null,s=typeof t.status=="string"?t.status:null,o=typeof t.scan=="string"?t.scan:null;if(s&&!df.has(s))return console.error(`Unknown status: ${s}. Valid: ${[...df].join(", ")}`),1;let a=await ct(o),c=(await Ye(a)).map(l=>({name:l.name,path:l.path,features:l.features.filter(p=>u_(p,{all:n,statusFilter:s}))})).filter(l=>i&&!Yr(l,i)?!1:l.features.length>0);if(c_(c),r){let l={scanDirs:a,projects:c.map(p=>({name:p.name,path:p.path,features:p.features.map(f=>l_(f,p.path))}))};return console.log(JSON.stringify(l,null,2)),0}return f_(c,a),0}function u_(e,t){let{all:r,statusFilter:n}=t;return n?e.status===n:!(!r&&e.status==="archived")}function c_(e){for(let t of e)t.features.sort((r,n)=>{let i=lt[r.status]-lt[n.status];return i!==0?i:r.name.localeCompare(n.name)});e.sort((t,r)=>{let n=gf(t),i=gf(r);if(n&&i){let s=i-n;if(s!==0)return s}else{if(n&&!i)return-1;if(!n&&i)return 1}return t.name.localeCompare(r.name)})}function gf(e){let t=0;for(let r of e.features){let n=r.lastCheckpoint;if(!n)continue;let i=new Date(n).getTime();Number.isFinite(i)&&i>t&&(t=i)}return t>0?t:null}function l_(e,t){return{name:e.name,path:(0,mf.join)(t,e.status==="archived"?".dev-archive":".dev",e.name),status:e.status,progress:e.progress,currentPhase:e.currentPhase}}function f_(e,t){if(e.length===0){let r=t.join(", ");console.log(`No features found under: ${r}`);return}for(let r=0;r<e.length;r++){let n=e[r];r>0&&console.log(""),console.log(`Project: ${n.name} (${n.path})`);let i=Math.max(...n.features.map(o=>o.name.length)),s=Math.max(...n.features.map(o=>o.status.length));for(let o of n.features){let a=o.name.padEnd(i),u=o.status.padEnd(s),c=o.progress?`${o.progress.done}/${o.progress.total}`:"-",l=o.currentPhase?`Phase ${o.currentPhase.number}/${o.currentPhase.total}`:"-";console.log(`  ${a}  ${u}  ${c.padEnd(7)} ${l.padEnd(13)}`)}}}var xf=new Set(["gate","active","stale","complete","checkpoint-only","no-prd","empty","archived"]);async function _f(e){let{flags:t}=W(e),r=t.json===!0,n=typeof t.query=="string"?t.query:null,i=typeof t.project=="string"?t.project:null,s=typeof t.status=="string"?t.status:null,o=typeof t.scan=="string"?t.scan:null,a=typeof t.max=="string"?parseInt(t.max,10):void 0;if(!n)return console.error("--query is required"),1;if(s&&!xf.has(s))return console.error(`Unknown status: ${s}. Valid: ${[...xf].join(", ")}`),1;let u=await ct(o),c=await Ye(u);i&&(c=c.filter(p=>Yr(p,i))),s&&(c=c.map(p=>({...p,features:p.features.filter(f=>f.status===s)})).filter(p=>p.features.length>0));let l=Ul(c,{query:n,maxResults:a});if(r){let p={query:n,hits:l.map(f=>({projectName:f.project,name:f.feature.name,status:f.feature.status,progress:f.feature.progress,currentPhase:f.feature.currentPhase,score:f.score,snippet:f.matches[0]?.snippet??null,matches:f.matches}))};console.log(JSON.stringify(p,null,2))}else p_(l,n);return l.length>0?0:1}function p_(e,t){if(e.length===0){console.log(`No results for "${t}"`);return}let r=new Map;for(let i of e){let s=r.get(i.project)??[];s.push(i),r.set(i.project,s)}let n=!0;for(let[i,s]of r){n||console.log(""),n=!1;let o=s.length===1?"1 hit":`${s.length} hits`;console.log(`${i} (${o})`);let a=Math.max(...s.map(c=>c.feature.name.length)),u=Math.max(...s.map(c=>c.feature.status.length));for(let c of s){let l=c.feature,p=l.name.padEnd(a),f=l.status.padEnd(u),d=l.progress?`${l.progress.done}/${l.progress.total}`:"-";console.log(`  ${p}  ${f}  ${d}`);let g=c.matches[0]?.snippet;g&&console.log(`    ${g}`)}}}var bf=require("os"),Af=require("path");async function vf(e){let{flags:t}=W(e),r=t.json===!0,n=t.generate===!0,i=typeof t.scan=="string"?t.scan:null,s=typeof t.ensure=="string"?t.ensure:null,o=typeof t.out=="string"?t.out:null,a;s?(await Gl(s),a=await ct(null)):a=await ct(i);let u=await h_(o),c=await Ye(a);if(n){await Wl(c,u,{includeReadme:!0,initObsidian:!0});let l=ps(c);return r?console.log(JSON.stringify({wikiDir:u,generated:!0,projects:l.projectCount,features:l.featureCount,entries:Sf(c)},null,2)):(console.log(`Generated wiki at ${u}`),console.log(`  index.md \u2014 ${l.projectCount} projects, ${l.featureCount} features`),console.log(`  log.md \u2014 ${l.featureCount} entries`),console.log(`  projects/ \u2014 ${l.projectCount} symlinks`),console.log("  README.md \u2014 Obsidian setup guide")),0}if(r){let l=ps(c);return console.log(JSON.stringify({wikiDir:u,generated:!1,projects:l.projectCount,features:l.featureCount,entries:Sf(c)},null,2)),0}return d_(c,u),0}async function h_(e){if(e)return Ve(e);let t=await Yl();return t||(0,Af.join)((0,bf.homedir)(),".dev-wiki")}function ps(e){let t=0;for(let r of e)t+=r.features.length;return{projectCount:e.length,featureCount:t}}function Sf(e){let t=[];for(let r of e)for(let n of r.features)t.push({project:r.name,name:n.name,status:n.status,progress:n.progress?.percent??null,summary:n.summary,lastCheckpoint:n.lastCheckpoint});return t.sort((r,n)=>!r.lastCheckpoint&&!n.lastCheckpoint?0:r.lastCheckpoint?n.lastCheckpoint?new Date(n.lastCheckpoint).getTime()-new Date(r.lastCheckpoint).getTime():-1:1),t}function d_(e,t){let r=ps(e);console.log(`Dev Wiki Index \u2014 ${r.projectCount} projects, ${r.featureCount} features`),console.log("");let n=[...e].sort((i,s)=>i.name.localeCompare(s.name));for(let i of n){console.log(`${i.name} (${i.features.length} features)`);for(let s of i.features){let o=s.status.padEnd(16),a=s.progress?`${s.progress.percent}%`:"\u2014",u=s.summary?g_(s.summary,50):"";console.log(`  ${s.name.padEnd(40)} ${o} ${a.padStart(4)}  ${u}`)}console.log("")}console.log(`Wiki directory: ${t}`),console.log("  Use --generate to write index.md and log.md")}function g_(e,t){return e.length<=t?e:e.slice(0,t-1)+"\u2026"}var wf=[{name:"feature-show",description:"Show feature summary",run:Kl},{name:"progress-summary",description:"Show aggregate progress",run:Xl},{name:"gate-check",description:"Check if feature is at a phase gate",run:zl},{name:"checkpoint-read",description:"Read checkpoint data",run:ef},{name:"checkpoint-write",description:"Write checkpoint from stdin JSON (+session-log)",run:tf},{name:"session-consolidate",description:"Write a composed session digest (WRITE-only)",run:sf},{name:"status-update",description:"Update PRD status marker",run:af},{name:"resume-context",description:"Merged resume context packet",run:hf},{name:"list",description:"List features and AFK-runnable status",run:yf},{name:"search",description:"Search features by content",run:_f},{name:"wiki-index",description:"Generate cross-project wiki index",run:vf}];function Ef(){console.log(`Usage: dev-workflow <command> [options]
-`),console.log("Commands:");for(let e of wf)console.log(`  ${e.name.padEnd(20)} ${e.description}`);console.log(`
-Options:`),console.log("  --json               Output as JSON"),console.log("  --dir <path>         Feature directory"),console.log("  --feature <name>     Feature name under .dev/"),console.log("  --stdin              Read input from stdin (checkpoint-write, session-consolidate)"),console.log("  --input-file <path>  Read input JSON from file (checkpoint-write, session-consolidate)"),console.log("  --phase <number>     Phase number (status-update)"),console.log("  --step <number>      Step number (status-update)"),console.log("  --marker <done|todo> Marker value (status-update)"),console.log("  --sessions <N|all>   Session history limit (resume-context, default: 5)"),console.log("  --scan <dir>         Scan directory (list)"),console.log("  --all                Include archived features (list)"),console.log("  --project <name>     Filter project by name or path (list)"),console.log("  --status <status>    Filter feature status (list)"),console.log("  --query <text>       Search query (search)"),console.log("  --max <number>       Max results (search, default: 20)"),console.log("  --generate           Write wiki files to disk (wiki-index)"),console.log("  --out <dir>          Output directory (wiki-index)")}function W(e){let t={},r=[];for(let n=0;n<e.length;n++){let i=e[n];if(i.startsWith("--")){let s=i.indexOf("=");if(s!==-1){let o=i.slice(2,s),a=i.slice(s+1);t[o]=a===""?!0:a}else{let o=i.slice(2),a=e[n+1];a&&!a.startsWith("--")?(t[o]=a,n++):t[o]=!0}}else r.push(i)}return{flags:t,positional:r}}async function m_(){let e=process.argv.slice(2);if(e.length===0||e[0]==="--help"||e[0]==="-h")return Ef(),e.length===0?1:0;let t=e[0],r=wf.find(n=>n.name===t);return r?r.run(e.slice(1)):(console.error(`Unknown command: ${t}`),Ef(),1)}typeof process<"u"&&!process.env.VITEST&&m_().then(e=>process.exit(e));0&&(module.exports={parseFlags});
+`;
+  }
+  entry += `---
+`;
+  return entry;
+}
+async function doCheckpointWrite(featureDir, inputData) {
+  const checkpointPath = (0, import_path10.resolve)(featureDir, "checkpoint.md");
+  const sessionLogPath = (0, import_path10.resolve)(featureDir, "session-log.md");
+  const existingCheckpoint = await parseCheckpoint(checkpointPath);
+  if (existingCheckpoint) {
+    const sessionEntry = await formatSessionEntry(existingCheckpoint, sessionLogPath);
+    await (0, import_promises8.appendFile)(sessionLogPath, sessionEntry, "utf-8");
+  }
+  await writeCheckpoint(checkpointPath, inputData);
+  const sessionCount = await countSessions(sessionLogPath);
+  const digest = await parseSessionDigest((0, import_path10.resolve)(featureDir, "session-digest.md"));
+  const lastConsolidated = digest?.sessionCount ?? 0;
+  const consolidationDue = sessionCount - lastConsolidated >= CONSOLIDATION_THRESHOLD;
+  return { success: true, file: checkpointPath, sessionCount, consolidationDue };
+}
+async function checkpointWrite(args) {
+  const { flags } = parseFlags(args);
+  const json = flags.json === true;
+  const useStdin = flags.stdin === true;
+  const inputFile = typeof flags["input-file"] === "string" ? flags["input-file"] : null;
+  const featureDir = resolveFeatureDir(flags);
+  if (!featureDir) {
+    console.error("Could not resolve feature directory. Use --dir <path> or --feature <name>.");
+    return 1;
+  }
+  if (useStdin && inputFile) {
+    console.error("--stdin and --input-file are mutually exclusive. Pass exactly one.");
+    return 1;
+  }
+  if (!useStdin && !inputFile) {
+    console.error("Must pass either --stdin or --input-file <path> with CheckpointWriteInput JSON.");
+    return 1;
+  }
+  let inputData;
+  try {
+    const raw = useStdin ? await readStdin() : await readInputFile(inputFile);
+    inputData = JSON.parse(raw);
+  } catch (err) {
+    const source = useStdin ? "stdin" : `input file (${inputFile})`;
+    console.error(`Failed to read ${source} JSON: ${err instanceof Error ? err.message : err}`);
+    return 1;
+  }
+  if (!inputData.context || !inputData.currentState || !inputData.nextAction || !inputData.keyFiles) {
+    console.error("Missing required fields: context, currentState, nextAction, keyFiles");
+    return 1;
+  }
+  const result = await doCheckpointWrite(featureDir, inputData);
+  if (json) {
+    console.log(JSON.stringify(result, null, 2));
+  } else {
+    console.log(`Checkpoint written to ${result.file}`);
+    if (result.consolidationDue) {
+      console.log(
+        `Session consolidation due (${result.sessionCount} sessions) \u2014 run the /dev-checkpoint consolidation step.`
+      );
+    }
+  }
+  return 0;
+}
+
+// src/commands/session-consolidate.ts
+var import_path11 = require("path");
+var import_promises9 = require("fs/promises");
+async function readStdin2() {
+  const chunks = [];
+  for await (const chunk of process.stdin) {
+    chunks.push(typeof chunk === "string" ? Buffer.from(chunk) : chunk);
+  }
+  return Buffer.concat(chunks).toString("utf-8");
+}
+async function readInputFile2(path) {
+  return (0, import_promises9.readFile)(path, "utf-8");
+}
+async function doSessionConsolidate(featureDir, inputData) {
+  const digestPath = (0, import_path11.resolve)(featureDir, "session-digest.md");
+  await writeSessionDigest(digestPath, inputData);
+  return { success: true, file: digestPath };
+}
+async function sessionConsolidate(args) {
+  const { flags } = parseFlags(args);
+  const json = flags.json === true;
+  const useStdin = flags.stdin === true;
+  const inputFile = typeof flags["input-file"] === "string" ? flags["input-file"] : null;
+  const featureDir = resolveFeatureDir(flags);
+  if (!featureDir) {
+    console.error("Could not resolve feature directory. Use --dir <path> or --feature <name>.");
+    return 1;
+  }
+  if (useStdin && inputFile) {
+    console.error("--stdin and --input-file are mutually exclusive. Pass exactly one.");
+    return 1;
+  }
+  if (!useStdin && !inputFile) {
+    console.error("Must pass either --stdin or --input-file <path> with SessionDigestWriteInput JSON.");
+    return 1;
+  }
+  let inputData;
+  try {
+    const raw = useStdin ? await readStdin2() : await readInputFile2(inputFile);
+    inputData = JSON.parse(raw);
+  } catch (err) {
+    const source = useStdin ? "stdin" : `input file (${inputFile})`;
+    console.error(`Failed to read ${source} JSON: ${err instanceof Error ? err.message : err}`);
+    return 1;
+  }
+  if (typeof inputData.aggregate !== "string" || typeof inputData.sessionCount !== "number" || typeof inputData.consolidatedThrough !== "number") {
+    console.error("Missing or invalid required fields: aggregate (string), sessionCount (number), consolidatedThrough (number)");
+    return 1;
+  }
+  const result = await doSessionConsolidate(featureDir, inputData);
+  if (json) {
+    console.log(JSON.stringify(result, null, 2));
+  } else {
+    console.log(`Session digest written to ${result.file}`);
+  }
+  return 0;
+}
+
+// src/commands/status-update.ts
+var import_path12 = require("path");
+var import_promises10 = require("fs/promises");
+var MARKER_MAP = {
+  done: "\u2705",
+  todo: "\u2B1C"
+};
+async function statusUpdate(args) {
+  const { flags } = parseFlags(args);
+  const json = flags.json === true;
+  const featureDir = resolveFeatureDir(flags);
+  if (!featureDir) {
+    console.error("Could not resolve feature directory. Use --dir <path> or --feature <name>.");
+    return 1;
+  }
+  const phase = flags.phase;
+  if (!phase || typeof phase !== "string") {
+    console.error("--phase <number> is required.");
+    return 1;
+  }
+  const phaseNum = parseInt(phase, 10);
+  if (isNaN(phaseNum) || phaseNum < 1) {
+    console.error("--phase must be a positive integer.");
+    return 1;
+  }
+  let stepNum;
+  if (flags.step && typeof flags.step === "string") {
+    stepNum = parseInt(flags.step, 10);
+    if (isNaN(stepNum) || stepNum < 1) {
+      console.error("--step must be a positive integer.");
+      return 1;
+    }
+  }
+  const markerInput = flags.marker;
+  if (!markerInput || typeof markerInput !== "string") {
+    console.error("--marker <done|todo> is required.");
+    return 1;
+  }
+  const marker = MARKER_MAP[markerInput.toLowerCase()];
+  if (!marker) {
+    console.error(`Invalid --marker value "${markerInput}". Use "done" or "todo".`);
+    return 1;
+  }
+  const targetFile = await resolveTargetPrd(featureDir, phaseNum);
+  if (!targetFile) {
+    console.error(`Could not find Phase ${phaseNum} in any PRD file under ${featureDir}`);
+    return 1;
+  }
+  const target = { phase: phaseNum, step: stepNum };
+  let result;
+  try {
+    result = await updateStatus(targetFile, target, marker);
+  } catch (err) {
+    console.error(err instanceof Error ? err.message : String(err));
+    return 1;
+  }
+  if (json) {
+    console.log(JSON.stringify(result, null, 2));
+  } else {
+    const stepText = stepNum ? ` step ${stepNum}` : "";
+    if (result.changed) {
+      console.log(
+        `Phase ${phaseNum}${stepText} marked ${markerInput.toLowerCase()} in ${result.file} (line ${result.line})`
+      );
+    } else {
+      console.log(
+        `Phase ${phaseNum}${stepText} already ${markerInput.toLowerCase()} in ${result.file} (line ${result.line})`
+      );
+    }
+  }
+  return 0;
+}
+async function resolveTargetPrd(featureDir, phaseNum) {
+  const masterPlanPath = (0, import_path12.resolve)(featureDir, "00-master-plan.md");
+  const masterPlan = await parseMasterPlan(masterPlanPath);
+  if (masterPlan?.phases.some((p) => p.number === phaseNum && p.total > 0)) {
+    return masterPlanPath;
+  }
+  try {
+    const entries = await (0, import_promises10.readdir)(featureDir);
+    const subPrdFiles = entries.filter(isSubPrdFile).sort();
+    for (const file of subPrdFiles) {
+      const numMatch = file.match(/^(\d+)/);
+      if (numMatch && parseInt(numMatch[1], 10) === phaseNum) {
+        return (0, import_path12.resolve)(featureDir, file);
+      }
+    }
+  } catch {
+  }
+  return masterPlan ? masterPlanPath : null;
+}
+
+// src/commands/resume-context.ts
+var import_path13 = require("path");
+var import_promises11 = require("fs/promises");
+var import_child_process = require("child_process");
+var import_util = require("util");
+var execFileAsync = (0, import_util.promisify)(import_child_process.execFile);
+var THREE_DAYS_MS = 3 * 24 * 60 * 60 * 1e3;
+async function getCurrentBranch() {
+  try {
+    const { stdout } = await execFileAsync("git", ["branch", "--show-current"]);
+    return stdout.trim();
+  } catch {
+    return "";
+  }
+}
+async function hasUncommittedChanges() {
+  try {
+    const { stdout } = await execFileAsync("git", ["status", "--porcelain"]);
+    return stdout.trim().length > 0;
+  } catch {
+    return false;
+  }
+}
+function computeValidity(checkpointBranch, currentBranch, checkpointDate) {
+  if (checkpointBranch && checkpointBranch !== currentBranch) {
+    return "drifted";
+  }
+  if (checkpointDate) {
+    const ageMs = Date.now() - new Date(checkpointDate).getTime();
+    if (ageMs >= THREE_DAYS_MS) {
+      return "stale";
+    }
+  }
+  return "fresh";
+}
+function extractCurrentPhasePrd(content, phaseNum) {
+  const normalized = content;
+  const phaseRegex = /^#{2,3}\s*Phase\s+(\d+)[:\s—–-]+\s*(.+)/gm;
+  const headings = [];
+  let match;
+  while ((match = phaseRegex.exec(normalized)) !== null) {
+    headings.push({ number: parseInt(match[1], 10), index: match.index });
+  }
+  const targetHeading = headings.find((h) => h.number === phaseNum);
+  if (!targetHeading) return null;
+  const afterStart = normalized.slice(targetHeading.index);
+  const endRegex = /^#{2,3}\s*(?:Phase\s+\d+|File Changes Summary)/gm;
+  endRegex.lastIndex = 0;
+  let endMatch;
+  let endIdx = afterStart.length;
+  const firstNewline = afterStart.indexOf("\n");
+  const searchFrom = firstNewline >= 0 ? firstNewline + 1 : 0;
+  endRegex.lastIndex = searchFrom;
+  while ((endMatch = endRegex.exec(afterStart)) !== null) {
+    endIdx = endMatch.index;
+    break;
+  }
+  return afterStart.slice(0, endIdx).trim();
+}
+function parseReferenceFiles(content) {
+  const refSection = content.match(/## Reference Files\s*\n([\s\S]*?)(?=\n##|\n$|$)/);
+  if (!refSection) return [];
+  const files = [];
+  const lines = refSection[1].split("\n");
+  for (const line of lines) {
+    const trimmed = line.trim();
+    const pathMatch = trimmed.match(/^-\s+`?([^`—\n]+)`?\s*(?:—|-{1,2})\s*/);
+    if (pathMatch) {
+      files.push(pathMatch[1].trim());
+    }
+  }
+  return files;
+}
+function deduplicateDecisions(allSessions) {
+  const seen = /* @__PURE__ */ new Set();
+  const result = [];
+  for (const session of allSessions) {
+    for (const decision of session.decisions) {
+      if (!seen.has(decision)) {
+        seen.add(decision);
+        result.push(decision);
+      }
+    }
+  }
+  return result;
+}
+function dedupeStrings(items) {
+  const seen = /* @__PURE__ */ new Set();
+  const result = [];
+  for (const item of items) {
+    if (!seen.has(item)) {
+      seen.add(item);
+      result.push(item);
+    }
+  }
+  return result;
+}
+async function resumeContext(args) {
+  const { flags } = parseFlags(args);
+  const json = flags.json === true;
+  const featureDir = resolveFeatureDir(flags);
+  if (!featureDir) {
+    console.error("Could not resolve feature directory. Use --dir <path> or --feature <name>.");
+    return 1;
+  }
+  let maxSessions = 5;
+  if (flags.sessions && typeof flags.sessions === "string") {
+    if (flags.sessions.toLowerCase() === "all") {
+      maxSessions = Infinity;
+    } else {
+      const parsed = parseInt(flags.sessions, 10);
+      if (!isNaN(parsed) && parsed >= 0) {
+        maxSessions = parsed === 0 ? Infinity : parsed;
+      }
+    }
+  }
+  const featureName = flags.feature ?? featureDir.split("/").pop();
+  const masterPlanPath = (0, import_path13.resolve)(featureDir, "00-master-plan.md");
+  const [feature, checkpoint, allSessions, sessionDigest, currentBranch, currentUncommitted, masterContent] = await Promise.all([
+    parseFeature(featureDir, featureName),
+    parseCheckpoint((0, import_path13.resolve)(featureDir, "checkpoint.md")),
+    parseSessionLog((0, import_path13.resolve)(featureDir, "session-log.md")),
+    parseSessionDigest((0, import_path13.resolve)(featureDir, "session-digest.md")),
+    getCurrentBranch(),
+    hasUncommittedChanges(),
+    (0, import_promises11.readFile)(masterPlanPath, "utf-8").catch(() => null)
+  ]);
+  const validity = computeValidity(
+    checkpoint?.branch ?? null,
+    currentBranch,
+    checkpoint?.checkpointed ?? null
+  );
+  let currentPhasePrd = null;
+  let referenceFiles = [];
+  if (masterContent) {
+    if (feature.currentPhase) {
+      currentPhasePrd = extractCurrentPhasePrd(masterContent, feature.currentPhase.number);
+    }
+    referenceFiles = parseReferenceFiles(masterContent);
+  }
+  const recentSessionHistory = maxSessions === Infinity ? allSessions : allSessions.slice(-maxSessions);
+  const accumulatedDecisions = sessionDigest ? dedupeStrings([...sessionDigest.decisions, ...deduplicateDecisions(recentSessionHistory)]) : deduplicateDecisions(allSessions);
+  const output = {
+    feature: {
+      name: feature.name,
+      status: feature.status,
+      progress: feature.progress,
+      currentPhase: feature.currentPhase
+    },
+    checkpoint: {
+      context: checkpoint?.context ?? null,
+      nextAction: checkpoint?.nextAction ?? null,
+      decisions: checkpoint?.decisions ?? [],
+      blockers: checkpoint?.blockers ?? [],
+      notes: checkpoint?.notes ?? []
+    },
+    validity,
+    validityDetails: {
+      checkpointBranch: checkpoint?.branch ?? null,
+      currentBranch,
+      checkpointUncommitted: checkpoint?.uncommittedChanges ?? null,
+      currentUncommitted
+    },
+    currentPhasePrd,
+    referenceFiles,
+    sessionDigest,
+    recentSessionHistory,
+    accumulatedDecisions
+  };
+  if (json) {
+    console.log(JSON.stringify(output, null, 2));
+  } else {
+    console.log(`Feature: ${feature.name}`);
+    console.log(`Status: ${feature.status}`);
+    if (feature.progress) {
+      console.log(`Progress: ${feature.progress.done}/${feature.progress.total} (${feature.progress.percent}%)`);
+    }
+    if (feature.currentPhase) {
+      console.log(`Current Phase: ${feature.currentPhase.number}/${feature.currentPhase.total} \u2014 ${feature.currentPhase.title}`);
+    }
+    console.log(`Validity: ${validity}`);
+    if (checkpoint?.context) {
+      console.log();
+      console.log("Context:");
+      console.log(checkpoint.context);
+    }
+    if (checkpoint?.nextAction) {
+      console.log();
+      console.log("Next Action:");
+      console.log(checkpoint.nextAction);
+    }
+    if (sessionDigest) {
+      console.log();
+      console.log(
+        `Session Digest (sessions 1\u2013${sessionDigest.consolidatedThrough} of ${sessionDigest.sessionCount} consolidated):`
+      );
+      if (sessionDigest.aggregate) {
+        console.log(sessionDigest.aggregate);
+      }
+    }
+    if (accumulatedDecisions.length > 0) {
+      console.log();
+      console.log("Accumulated Decisions:");
+      for (const d of accumulatedDecisions) {
+        console.log(`  - ${d}`);
+      }
+    }
+    if (recentSessionHistory.length > 0) {
+      console.log();
+      console.log(`Recent Session History (${recentSessionHistory.length} sessions shown):`);
+      for (const s of recentSessionHistory) {
+        console.log(`  Session ${s.session} (${s.date}): ${s.context ?? "(no context)"}`);
+      }
+    }
+    if (referenceFiles.length > 0) {
+      console.log();
+      console.log("Reference Files:");
+      for (const f of referenceFiles) {
+        console.log(`  - ${f}`);
+      }
+    }
+  }
+  return 0;
+}
+
+// src/commands/list.ts
+var import_path14 = require("path");
+var VALID_STATUSES = /* @__PURE__ */ new Set([
+  "gate",
+  "active",
+  "stale",
+  "complete",
+  "checkpoint-only",
+  "no-prd",
+  "empty",
+  "archived"
+]);
+async function list(args) {
+  const { flags } = parseFlags(args);
+  const json = flags.json === true;
+  const all = flags.all === true;
+  const projectFilter = typeof flags.project === "string" ? flags.project : null;
+  const statusFilter = typeof flags.status === "string" ? flags.status : null;
+  const scanOverride = typeof flags.scan === "string" ? flags.scan : null;
+  if (statusFilter && !VALID_STATUSES.has(statusFilter)) {
+    console.error(
+      `Unknown status: ${statusFilter}. Valid: ${[...VALID_STATUSES].join(", ")}`
+    );
+    return 1;
+  }
+  const scanDirs = await resolveScanDirs(scanOverride);
+  const projects = await scanProjects(scanDirs);
+  const filtered = projects.map((p) => ({
+    name: p.name,
+    path: p.path,
+    features: p.features.filter((f) => keepFeature(f, { all, statusFilter }))
+  })).filter((p) => {
+    if (projectFilter && !matchesProject(p, projectFilter)) return false;
+    return p.features.length > 0;
+  });
+  sortListing(filtered);
+  if (json) {
+    const payload = {
+      scanDirs,
+      projects: filtered.map((p) => ({
+        name: p.name,
+        path: p.path,
+        features: p.features.map((f) => featureJson(f, p.path))
+      }))
+    };
+    console.log(JSON.stringify(payload, null, 2));
+    return 0;
+  }
+  printText(filtered, scanDirs);
+  return 0;
+}
+function keepFeature(f, opts) {
+  const { all, statusFilter } = opts;
+  if (statusFilter) return f.status === statusFilter;
+  if (!all && f.status === "archived") return false;
+  return true;
+}
+function sortListing(projects) {
+  for (const p of projects) {
+    p.features.sort((a, b) => {
+      const statusDelta = STATUS_ORDER[a.status] - STATUS_ORDER[b.status];
+      if (statusDelta !== 0) return statusDelta;
+      return a.name.localeCompare(b.name);
+    });
+  }
+  projects.sort((a, b) => {
+    const aDate = mostRecentCheckpoint(a);
+    const bDate = mostRecentCheckpoint(b);
+    if (aDate && bDate) {
+      const delta = bDate - aDate;
+      if (delta !== 0) return delta;
+    } else if (aDate && !bDate) {
+      return -1;
+    } else if (!aDate && bDate) {
+      return 1;
+    }
+    return a.name.localeCompare(b.name);
+  });
+}
+function mostRecentCheckpoint(p) {
+  let max = 0;
+  for (const f of p.features) {
+    const cp = f.lastCheckpoint;
+    if (!cp) continue;
+    const ms = new Date(cp).getTime();
+    if (Number.isFinite(ms) && ms > max) max = ms;
+  }
+  return max > 0 ? max : null;
+}
+function featureJson(f, projectPath) {
+  return {
+    name: f.name,
+    path: (0, import_path14.join)(projectPath, f.status === "archived" ? ".dev-archive" : ".dev", f.name),
+    status: f.status,
+    progress: f.progress,
+    currentPhase: f.currentPhase
+  };
+}
+function printText(projects, scanDirs) {
+  if (projects.length === 0) {
+    const where = scanDirs.join(", ");
+    console.log(`No features found under: ${where}`);
+    return;
+  }
+  for (let i = 0; i < projects.length; i++) {
+    const p = projects[i];
+    if (i > 0) console.log("");
+    console.log(`Project: ${p.name} (${p.path})`);
+    const nameWidth = Math.max(...p.features.map((f) => f.name.length));
+    const statusWidth = Math.max(...p.features.map((f) => f.status.length));
+    for (const f of p.features) {
+      const name = f.name.padEnd(nameWidth);
+      const status = f.status.padEnd(statusWidth);
+      const progress = f.progress ? `${f.progress.done}/${f.progress.total}` : "-";
+      const phase = f.currentPhase ? `Phase ${f.currentPhase.number}/${f.currentPhase.total}` : "-";
+      console.log(`  ${name}  ${status}  ${progress.padEnd(7)} ${phase.padEnd(13)}`);
+    }
+  }
+}
+
+// src/commands/search.ts
+var VALID_STATUSES2 = /* @__PURE__ */ new Set([
+  "gate",
+  "active",
+  "stale",
+  "complete",
+  "checkpoint-only",
+  "no-prd",
+  "empty",
+  "archived"
+]);
+async function search(args) {
+  const { flags } = parseFlags(args);
+  const json = flags.json === true;
+  const query = typeof flags.query === "string" ? flags.query : null;
+  const projectFilter = typeof flags.project === "string" ? flags.project : null;
+  const statusFilter = typeof flags.status === "string" ? flags.status : null;
+  const scanOverride = typeof flags.scan === "string" ? flags.scan : null;
+  const maxResults = typeof flags.max === "string" ? parseInt(flags.max, 10) : void 0;
+  if (!query) {
+    console.error("--query is required");
+    return 1;
+  }
+  if (statusFilter && !VALID_STATUSES2.has(statusFilter)) {
+    console.error(
+      `Unknown status: ${statusFilter}. Valid: ${[...VALID_STATUSES2].join(", ")}`
+    );
+    return 1;
+  }
+  const scanDirs = await resolveScanDirs(scanOverride);
+  let projects = await scanProjects(scanDirs);
+  if (projectFilter) {
+    projects = projects.filter((p) => matchesProject(p, projectFilter));
+  }
+  if (statusFilter) {
+    projects = projects.map((p) => ({
+      ...p,
+      features: p.features.filter((f) => f.status === statusFilter)
+    })).filter((p) => p.features.length > 0);
+  }
+  const hits = searchFeatures(projects, { query, maxResults });
+  if (json) {
+    const payload = {
+      query,
+      hits: hits.map((h) => ({
+        projectName: h.project,
+        name: h.feature.name,
+        status: h.feature.status,
+        progress: h.feature.progress,
+        currentPhase: h.feature.currentPhase,
+        score: h.score,
+        snippet: h.matches[0]?.snippet ?? null,
+        matches: h.matches
+      }))
+    };
+    console.log(JSON.stringify(payload, null, 2));
+  } else {
+    printText2(hits, query);
+  }
+  return hits.length > 0 ? 0 : 1;
+}
+function printText2(hits, query) {
+  if (hits.length === 0) {
+    console.log(`No results for "${query}"`);
+    return;
+  }
+  const grouped = /* @__PURE__ */ new Map();
+  for (const hit of hits) {
+    const list2 = grouped.get(hit.project) ?? [];
+    list2.push(hit);
+    grouped.set(hit.project, list2);
+  }
+  let first = true;
+  for (const [project, projectHits] of grouped) {
+    if (!first) console.log("");
+    first = false;
+    const countLabel = projectHits.length === 1 ? "1 hit" : `${projectHits.length} hits`;
+    console.log(`${project} (${countLabel})`);
+    const nameWidth = Math.max(...projectHits.map((h) => h.feature.name.length));
+    const statusWidth = Math.max(...projectHits.map((h) => h.feature.status.length));
+    for (const hit of projectHits) {
+      const f = hit.feature;
+      const name = f.name.padEnd(nameWidth);
+      const status = f.status.padEnd(statusWidth);
+      const progress = f.progress ? `${f.progress.done}/${f.progress.total}` : "-";
+      console.log(`  ${name}  ${status}  ${progress}`);
+      const snippet = hit.matches[0]?.snippet;
+      if (snippet) {
+        console.log(`    ${snippet}`);
+      }
+    }
+  }
+}
+
+// src/commands/wiki-index.ts
+var import_os2 = require("os");
+var import_path15 = require("path");
+async function wikiIndex(args) {
+  const { flags } = parseFlags(args);
+  const json = flags.json === true;
+  const generate = flags.generate === true;
+  const scanOverride = typeof flags.scan === "string" ? flags.scan : null;
+  const ensureRoot = typeof flags.ensure === "string" ? flags.ensure : null;
+  const outOverride = typeof flags.out === "string" ? flags.out : null;
+  let scanDirs;
+  if (ensureRoot) {
+    await ensureScanDir(ensureRoot);
+    scanDirs = await resolveScanDirs(null);
+  } else {
+    scanDirs = await resolveScanDirs(scanOverride);
+  }
+  const wikiDir = await resolveWikiDir(outOverride);
+  const projects = await scanProjects(scanDirs);
+  if (generate) {
+    await generateWiki(projects, wikiDir, { includeReadme: true, initObsidian: true });
+    const stats = countStats(projects);
+    if (json) {
+      console.log(JSON.stringify({
+        wikiDir,
+        generated: true,
+        projects: stats.projectCount,
+        features: stats.featureCount,
+        entries: buildEntries(projects)
+      }, null, 2));
+    } else {
+      console.log(`Generated wiki at ${wikiDir}`);
+      console.log(`  index.md \u2014 ${stats.projectCount} projects, ${stats.featureCount} features`);
+      console.log(`  log.md \u2014 ${stats.featureCount} entries`);
+      console.log(`  projects/ \u2014 ${stats.projectCount} symlinks`);
+      console.log(`  README.md \u2014 Obsidian setup guide`);
+    }
+    return 0;
+  }
+  if (json) {
+    const stats = countStats(projects);
+    console.log(JSON.stringify({
+      wikiDir,
+      generated: false,
+      projects: stats.projectCount,
+      features: stats.featureCount,
+      entries: buildEntries(projects)
+    }, null, 2));
+    return 0;
+  }
+  printText3(projects, wikiDir);
+  return 0;
+}
+async function resolveWikiDir(outFlag) {
+  if (outFlag) return expandHome(outFlag);
+  const fromConfig = await readDashboardWikiDir();
+  if (fromConfig) return fromConfig;
+  return (0, import_path15.join)((0, import_os2.homedir)(), ".dev-wiki");
+}
+function countStats(projects) {
+  let featureCount = 0;
+  for (const p of projects) featureCount += p.features.length;
+  return { projectCount: projects.length, featureCount };
+}
+function buildEntries(projects) {
+  const entries = [];
+  for (const p of projects) {
+    for (const f of p.features) {
+      entries.push({
+        project: p.name,
+        name: f.name,
+        status: f.status,
+        progress: f.progress?.percent ?? null,
+        summary: f.summary,
+        lastCheckpoint: f.lastCheckpoint
+      });
+    }
+  }
+  entries.sort((a, b) => {
+    if (!a.lastCheckpoint && !b.lastCheckpoint) return 0;
+    if (!a.lastCheckpoint) return 1;
+    if (!b.lastCheckpoint) return -1;
+    return new Date(b.lastCheckpoint).getTime() - new Date(a.lastCheckpoint).getTime();
+  });
+  return entries;
+}
+function printText3(projects, wikiDir) {
+  const stats = countStats(projects);
+  console.log(`Dev Wiki Index \u2014 ${stats.projectCount} projects, ${stats.featureCount} features`);
+  console.log("");
+  const sorted = [...projects].sort((a, b) => a.name.localeCompare(b.name));
+  for (const p of sorted) {
+    console.log(`${p.name} (${p.features.length} features)`);
+    for (const f of p.features) {
+      const status = f.status.padEnd(16);
+      const progress = f.progress ? `${f.progress.percent}%` : "\u2014";
+      const summary = f.summary ? truncate2(f.summary, 50) : "";
+      console.log(`  ${f.name.padEnd(40)} ${status} ${progress.padStart(4)}  ${summary}`);
+    }
+    console.log("");
+  }
+  console.log(`Wiki directory: ${wikiDir}`);
+  console.log("  Use --generate to write index.md and log.md");
+}
+function truncate2(text, maxLen) {
+  if (text.length <= maxLen) return text;
+  return text.slice(0, maxLen - 1) + "\u2026";
+}
+
+// src/index.ts
+var commands = [
+  { name: "feature-show", description: "Show feature summary", run: featureShow },
+  { name: "progress-summary", description: "Show aggregate progress", run: progressSummary },
+  { name: "gate-check", description: "Check if feature is at a phase gate", run: gateCheck },
+  { name: "checkpoint-read", description: "Read checkpoint data", run: checkpointRead },
+  { name: "checkpoint-write", description: "Write checkpoint from stdin JSON (+session-log)", run: checkpointWrite },
+  { name: "session-consolidate", description: "Write a composed session digest (WRITE-only)", run: sessionConsolidate },
+  { name: "status-update", description: "Update PRD status marker", run: statusUpdate },
+  { name: "resume-context", description: "Merged resume context packet", run: resumeContext },
+  { name: "list", description: "List features and AFK-runnable status", run: list },
+  { name: "search", description: "Search features by content", run: search },
+  { name: "wiki-index", description: "Generate cross-project wiki index", run: wikiIndex }
+];
+function printUsage() {
+  console.log("Usage: dev-workflow <command> [options]\n");
+  console.log("Commands:");
+  for (const cmd of commands) {
+    console.log(`  ${cmd.name.padEnd(20)} ${cmd.description}`);
+  }
+  console.log("\nOptions:");
+  console.log("  --json               Output as JSON");
+  console.log("  --dir <path>         Feature directory");
+  console.log("  --feature <name>     Feature name under .dev/");
+  console.log("  --stdin              Read input from stdin (checkpoint-write, session-consolidate)");
+  console.log("  --input-file <path>  Read input JSON from file (checkpoint-write, session-consolidate)");
+  console.log("  --phase <number>     Phase number (status-update)");
+  console.log("  --step <number>      Step number (status-update)");
+  console.log("  --marker <done|todo> Marker value (status-update)");
+  console.log("  --sessions <N|all>   Session history limit (resume-context, default: 5)");
+  console.log("  --scan <dir>         Scan directory (list)");
+  console.log("  --all                Include archived features (list)");
+  console.log("  --project <name>     Filter project by name or path (list)");
+  console.log("  --status <status>    Filter feature status (list)");
+  console.log("  --query <text>       Search query (search)");
+  console.log("  --max <number>       Max results (search, default: 20)");
+  console.log("  --generate           Write wiki files to disk (wiki-index)");
+  console.log("  --out <dir>          Output directory (wiki-index)");
+}
+function parseFlags(args) {
+  const flags = {};
+  const positional = [];
+  for (let i = 0; i < args.length; i++) {
+    const arg = args[i];
+    if (arg.startsWith("--")) {
+      const eqIdx = arg.indexOf("=");
+      if (eqIdx !== -1) {
+        const key = arg.slice(2, eqIdx);
+        const value = arg.slice(eqIdx + 1);
+        flags[key] = value === "" ? true : value;
+      } else {
+        const key = arg.slice(2);
+        const next = args[i + 1];
+        if (next && !next.startsWith("--")) {
+          flags[key] = next;
+          i++;
+        } else {
+          flags[key] = true;
+        }
+      }
+    } else {
+      positional.push(arg);
+    }
+  }
+  return { flags, positional };
+}
+async function main() {
+  const args = process.argv.slice(2);
+  if (args.length === 0 || args[0] === "--help" || args[0] === "-h") {
+    printUsage();
+    return args.length === 0 ? 1 : 0;
+  }
+  const commandName = args[0];
+  const command = commands.find((c) => c.name === commandName);
+  if (!command) {
+    console.error(`Unknown command: ${commandName}`);
+    printUsage();
+    return 1;
+  }
+  return command.run(args.slice(1));
+}
+if (typeof process !== "undefined" && !process.env.VITEST) {
+  main().then((code) => process.exit(code));
+}
+// Annotate the CommonJS export names for ESM import in node:
+0 && (module.exports = {
+  parseFlags
+});
 /*! Bundled license information:
 
 is-extendable/index.js:
