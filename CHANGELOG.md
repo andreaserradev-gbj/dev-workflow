@@ -441,6 +441,18 @@ Checkpoints and resumes are now powered by deterministic CLI commands instead of
 
 <!-- GITHUB-RELEASES-START -->
 
+## v1.42.1 - 2026-10-14
+
+### Fixed
+
+- **Dashboard: sanitize all rendered markdown (Socket `gptAnomaly`).** `tools/dev-dashboard` rendered PRD-adjacent text (checkpoint `nextAction`, decisions, blockers) to `dangerouslySetInnerHTML` through `marked` with no sanitizer, so raw HTML, event handlers, and `javascript:`/`data:` URLs from `.dev/` content executed in the dashboard page. `markdown.ts` now runs DOMPurify (defaults + `http(s)`/`mailto`/relative URI allowlist) on both `render` and `renderInline`; link text survives, schemes are stripped inert. Covered by new XSS-vector tests in `test/markdown.test.ts` (jsdom).
+
+### Changed
+
+- **CLI bundle ships unminified.** `bin/dev-workflow.cjs` and per-skill copies are esbuild-bundled with `minify: false` (184KB → 416KB): the skills.sh Gen Agent Trust Hub scanner flagged the minified artifact as OBFUSCATION (MEDIUM on dev-plan/dev-resume). Behavior unchanged; all 133 CLI tests and the 49-script suite pass.
+- **Stale skills.sh findings no longer trip the audit gate.** `scripts/check-skills-audit.sh` `--fail-on` now excludes findings older than `STALE_DAYS` (7) from the triggered-alert computation — a stale risk level describes an artifact no longer in the repo; fresh scans follow every release. Stale rows remain visible with their `[STALE]` marker.
+- **Added `SECURITY.md`** documenting the trust model: `.dev/` markdown is untrusted data, dashboard rendering is sanitized, process launches are `execFile` arg-arrays, and which scanner categories are inherent to the product shape.
+
 ## v1.42.0 - 2026-10-14
 
 ### Added
