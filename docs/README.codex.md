@@ -33,6 +33,7 @@ curl -fsSL https://github.com/andreaserradev-gbj/dev-workflow/archive/refs/heads
 | `dev-plan` | Plan a new feature with structured PRD documentation |
 | `dev-checkpoint` | Save progress and generate a continuation prompt |
 | `dev-resume` | Resume work from a previous session checkpoint |
+| `dev-orchestrator` | Run one PRD phase by delegating steps to worker agents in Herdr panes; inert outside Herdr |
 | `dev-review` | Generate an architect-readable PRD-vs-implementation alignment report |
 | `dev-wrapup` | Review the conversation for learnings worth keeping |
 | `dev-dashboard` | Start the bundled dashboard server and show its URL |
@@ -46,6 +47,8 @@ Codex activates a skill when you mention it by name ("use dev-plan"), when the t
 Some skills reference Claude Code subagents via the `Task` tool (e.g. `subagent_type=dev-workflow:prd-researcher`, `…:feature-reporter`). Codex has no equivalent, so those delegation steps are skipped — the skills still provide their full structured workflow (phases, templates, guidance); the research just runs inline instead of via parallel agents. For `dev-plan` the research phase is done inline; for `dev-review` the report structure in the skill body drives an inline review.
 
 The CLI-backed skills (`dev-plan`, `dev-checkpoint`, `dev-resume`, `dev-review`, `dev-wiki`) shell out to a self-contained `node` CLI bundled inside each skill, so Node must be on PATH and Codex must permit the `node` call.
+
+`dev-orchestrator` ships to all AgentSkills.io agents and is inert outside Herdr (`HERDR_ENV` unset): it degrades to plain `dev-resume` behavior and performs zero `herdr` calls, so no Herdr install is needed where orchestration doesn't apply.
 
 ## Manage
 

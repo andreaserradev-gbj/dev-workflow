@@ -211,8 +211,8 @@ check_sync() {
   done
 }
 
-check_sync discover.sh dev-plan dev-resume dev-wrapup dev-review dev-wiki
-check_sync validate.sh dev-plan dev-resume dev-review dev-wiki
+check_sync discover.sh dev-orchestrator dev-plan dev-resume dev-wrapup dev-review dev-wiki
+check_sync validate.sh dev-orchestrator dev-plan dev-resume dev-review dev-wiki
 check_sync git-state.sh dev-resume dev-review
 
 BIN_DIR="$(cd "$(dirname "$0")/../plugins/dev-workflow/bin" && pwd)"
@@ -237,7 +237,7 @@ check_bin_sync() {
   done
 }
 
-check_bin_sync dev-workflow.cjs dev-checkpoint dev-plan dev-resume dev-review dev-wiki
+check_bin_sync dev-workflow.cjs dev-checkpoint dev-orchestrator dev-plan dev-resume dev-review dev-wiki
 
 echo ""
 echo "--- bundle smoke test ---"

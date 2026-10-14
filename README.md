@@ -3,7 +3,7 @@
 # dev-workflow
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
-[![Version](https://img.shields.io/badge/version-1.41.0-green.svg)](.claude-plugin/marketplace.json)
+[![Version](https://img.shields.io/badge/version-1.42.0-green.svg)](.claude-plugin/marketplace.json)
 [![AgentSkills.io](https://img.shields.io/badge/standard-AgentSkills.io-purple.svg)](https://agentskills.io)
 
 **AI coding agents start every session from zero. Your architecture shouldn't.**
@@ -181,6 +181,17 @@ Reconstructs context from a checkpoint:
 ```
 /dev-resume
 /dev-resume oauth-login
+```
+
+### `/dev-orchestrator` — Run one phase by delegation
+
+Runs a feature's current PRD phase end-to-end by delegating its steps to worker agents in [Herdr](https://herdr.dev) panes. A coordinator skill: it transcribes PRD steps into worker briefs, launches one worker at a time (`herdr agent start --kind omp`), gates each step's completion on the verification evidence the worker reports, ticks PRD markers, and stops at the phase gate with a recap. The coordinator never implements.
+
+**Requires Herdr** (version 0.9.1+) with a signed-in `omp` agent — outside Herdr (`HERDR_ENV` unset) the skill is inert and degrades to plain `/dev-resume` behavior, so it works even in environments that don't have Herdr installed.
+
+```
+/dev-orchestrator
+/dev-orchestrator oauth-login
 ```
 
 ### `/dev-review` — PRD-vs-implementation alignment report
