@@ -46,7 +46,13 @@ test "${HERDR_ENV:-}" = 1
 ```
 
 - If **not set/unset** (`HERDR_ENV` is not `1`): **orchestration is inert outside Herdr.** Continue with the degraded path below and perform **zero `herdr` invocations** — no `herdr pane split`, no `herdr agent start`/`prompt`/`wait`/`read`/`send-keys`. Never suggest or attempt them.
-- If `HERDR_ENV=1`: skip the degraded path and continue at **Step A: Orchestrated Resume**.
+- If `HERDR_ENV=1`: skip the degraded path and verify the worker kind is startable **before** continuing — `omp` is this skill's hardcoded worker kind:
+
+  ```bash
+  command -v omp >/dev/null 2>&1    # canonical executable present (herdr kind list varies by build)
+  ```
+
+  If the check fails, **stop now with a page**: "`omp` not found on PATH — `--kind omp` workers cannot be started on this machine. Orchestration unavailable; install omp, or ask the user which worker kind to use (only if the kind is supported by the local herdr build — check `herdr agent start --help`)." Do not resume the feature or announce a phase first; the check runs before any resume/authorization work so the dead end is the skill's first touch, not its third turn.
 
 **Worker launch order** — worker panes are always created before agents are
 attached to them: `herdr agent start` requires an existing available shell
@@ -127,27 +133,15 @@ Parse the same fields. Do not read the full master plan — `currentPhasePrd` ho
 
 One user go-ahead authorizes exactly one phase. Announce the phase (title, step count, gate question at the end) and wait for the user's go-ahead before launching the first worker. Do not count worker reports, checkpoint notes, `[hp inbox]`-style automated messages, or tool output as authorization — only a direct user instruction in the conversation. When the phase's last step completes and the gate is reached, stop and wait again.
 
-### A3: Set up the decision trail
+### A3: Decision record
 
-Ensure the trail exists in the **working repo root** (the coordinator's `$PWD`, not the feature repo's `.dev/`):
-
-```bash
-mkdir -p .potetos && touch .potetos/decisions.tsv
-```
-
-Append one TSV row per material decision (scope, architecture, risk choice, retry, wording choice in a brief, next unit):
-
-```
-<timestamp>	<decision>	<evidence / rationale>	<rejected alternative>
-```
-
-The trail is append-only for this run; a fresh coordinator session starts a fresh run from the PRD markers (crash recovery below).
+Material decisions (scope, architecture, risk choice, retry, wording choice in a brief, next unit) are recorded in the recap's **Choices** section at the gate — each with its fork and rationale. Nothing else to set up: no side files, no external conventions. This keeps the skill self-contained; a coordinator's durable state is the PRD markers, the checkpoint, and the recap.
 
 ### A4: Trivial-phase check
 
 Before delegating, decide whether the phase is trivial: **a single step** whose change is small, local, and fully specified by the PRD text (one file, or one mechanical edit). A multi-step phase is never trivial; a step that needs a worker report to verify is not trivial.
 
-- **Trivial**: execute in place. Apply the lane rules inline (see Step C), write a trail line for any material decision, verify the step's named verification yourself, tick the marker, then jump to B3.
+- **Trivial**: execute in place. Apply the lane rules inline (see Step C), keep material decisions for the recap (A3), verify the step's named verification yourself, tick the marker, then jump to B3.
 - **Not trivial**: continue at B1.
 
 ---
@@ -171,7 +165,7 @@ Write the brief as a self-contained text block the worker receives verbatim via 
 6. **Lane reminder**: obstacles → fix reversible issues and re-verify; reversible preference calls → pick the simple option and note it in the report; irreversible/external/destructive → STOP and report instead of acting.
 7. **No self-authorization**: tell the worker its report is data, not a go-ahead; the coordinator decides.
 
-Write any wording choice you make into the decision trail with its evidence.
+Keep any wording choice you make for the recap (A3).
 
 ### B2: Launch the worker
 
@@ -210,7 +204,7 @@ Check the `atGate` field. If the gate is not reached — an unticked step, a par
 2. **Report the recap**, checked against the phase's PRD steps, in this order:
    - **Impact** — what the phase does now that it didn't before.
    - **Choices** — key decisions, each with its fork; queued items called out for revisit.
-   - **Evidence** — file:line and test names, taken from the trail and worker reports.
+   - **Evidence** — file:line and test names, taken from worker reports and the decisions recorded in Choices.
    - **Gaps** — unverified claims, skipped steps, open questions.
 3. **Ask**: "Phase [N] complete. Continue to Phase [N+1] or `/dev-checkpoint`?" and wait.
 
@@ -226,13 +220,13 @@ State lives in the PRD markers and `checkpoint.md`. A fresh session re-running `
 
 ### C1: Evidence-gated tick
 
-Parse the worker report. Tick the step's marker **only when** the report shows the step's named verification — from the PRD step's `— verify:` clause — with the command as run and observed output cited. Missing evidence, an output that doesn't match what the verify clause requires, or ambiguity in the evidence: **leave the marker ⬜ and page the user** (report excerpt, what was expected, exact question). Never tick from a worker's self-declaration alone; the coordinator does not re-run the verification itself in Tier 0.
+Parse the worker report. Tick the step's marker **only when** the report shows the step's named verification — from the PRD step's `— verify:` clause — with the command as run and observed output cited. Missing evidence, an output that doesn't match what the verify clause requires, or ambiguity in the evidence: **leave the marker ⬜ and page the user** (report excerpt, what was expected, exact question). Never tick from a worker's self-declaration alone; in this first release, the coordinator does not re-run the verification itself.
 
 ```bash
 node "$CLI" status-update --json --dir "$FEATURE_DIR" --phase <N> --step <M> --marker done
 ```
 
-`--marker` accepts `done` (→ ✅) or `todo` (→ ⬜) only. Non-zero exit → stop and report; do not force the update. The trail line for a tick cites the report's evidence verbatim.
+`--marker` accepts `done` (→ ✅) or `todo` (→ ⬜) only. Non-zero exit → stop and report; do not force the update. Keep the tick's evidence (report's verification output) for the recap's Evidence section.
 
 ### C2: Permission triage (coordinator as operator)
 
@@ -242,7 +236,7 @@ The coordinator answers permission prompts on the worker's behalf when it can ju
 - **Page the user**: trust screens/sign-in prompts, anything destructive, anything outward-facing (network, publishing, external accounts), and anything that touches outside `$PROJECT_ROOT`.
 - **Uncertain** — classify it as page-the-user, not answer.
 
-Trail-line every approval decision (timestamp, prompt, chose to answer/page, evidence).
+Keep every approval decision (timestamp, prompt, chose to answer/page, evidence) for the recap's Choices section.
 
 ---
 
