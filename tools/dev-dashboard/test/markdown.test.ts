@@ -90,6 +90,13 @@ describe('sanitization (XSS vectors)', () => {
     expect(html).toContain('/rel');
   });
 
+  it('keeps bare-path-relative URLs (review gap: scheme-less filenames)', () => {
+    const html = render('[p](page.html) [d](docs/x.md) [u](../up)');
+    expect(html).toContain('href="page.html"');
+    expect(html).toContain('href="docs/x.md"');
+    expect(html).toContain('href="../up"');
+  });
+
   it('preserves legitimate formatting end to end', () => {
     const html = render('## H\n1. **bold** item\n2. `code`');
     expect(html).toContain('<h2');

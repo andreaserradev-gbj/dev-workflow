@@ -1,25 +1,14 @@
 import { marked } from 'marked';
-import DOMPurify from 'dompurify';
-import type { Config as DOMPurifyConfig, DOMPurify as DOMPurifyInstance } from 'dompurify';
+import purify from 'dompurify';
+import type {
+  DOMPurify as DOMPurifyInstance,
+  UponSanitizeAttributeHook as SanitizeAttrHook,
+} from 'dompurify';
 
 // Configure once at module load. GFM keeps tables / fenced code, but
 // `breaks: false` means a single newline does NOT become a <br/> — we want
 // authored markdown semantics for NEXT ACTION blocks, not chat-style autolinking.
 marked.setOptions({ gfm: true, breaks: false });
-
-// Sanitizer profile. DOMPurify defaults already drop <script>, event handlers,
-// and dangerous elements; the configured gap is URL schemes, where the default
-// allowlist misses exotic ones. Restrict to http(s), mailto, and relative URLs
-// — the only schemes PRD prose legitimately uses. Link text survives: a
-// `[click](javascript:…)` renders as an inert link, per the Socket gptAnomaly
-// remediation.
-//
-// `class` and `start` stay allowlisted so marked's own table/ol output
-// survives; everything class-bearing in this client is our stylesheet.
-const SANITIZE_PROFILE: DOMPurifyConfig = {
-  ALLOWED_ATTR: ['href', 'src', 'alt', 'title', 'class', 'start'],
-  ALLOWED_URI_REGEXP: /^(?:(?:https?|mailto):|[^a-zA-Z0-9+#-]|[#?])/i,
-};
 
 // DOMPurify needs a DOM window. The browser supplies the global; vitest runs
 // this module under `@vitest-environment jsdom` (see test/markdown.test.ts),
@@ -29,8 +18,24 @@ function createSanitizer(): DOMPurifyInstance {
   if (typeof window === 'undefined') {
     throw new Error('markdown.ts requires a DOM window (browser or jsdom test env)');
   }
-  return DOMPurify(window);
+  return purify(window);
 }
+
+// DOMPurify defaults already drop <script>, event handlers, and dangerous
+// elements. The remaining gap is URL schemes: the default URI allowlist still
+// permits several exotic-but-legit schemes (ftp, tel, sms…). PRD prose
+// legitimately carries only http(s), mailto, and relative URLs (page.html,
+// docs/x.md, ../up, #anchor, ?q, //host/path — no scheme), so this hook blanks
+// the attribute value for any other scheme. Text survives: a
+// `[click](javascript:…)` renders as an inert link, per the Socket gptAnomaly
+// remediation.
+const ALLOWED_SCHEMES = new Set(['http', 'https', 'mailto']);
+
+const stripExoticSchemes: SanitizeAttrHook = (_node, data) => {
+  if (data.attrName !== 'href' && data.attrName !== 'src') return;
+  const m = /^([a-zA-Z][a-zA-Z0-9+.-]*):/.exec(data.attrValue);
+  if (m && !ALLOWED_SCHEMES.has(m[1].toLowerCase())) data.attrValue = '';
+};
 
 // Trust boundary: input is PRD content rendered into `dangerouslySetInnerHTML`
 // (checkpoint nextAction / decisions / blockers from `.dev/<feature>/`). That
@@ -41,8 +46,8 @@ let sanitizer: DOMPurifyInstance | null = null;
 
 function sanitize(html: string): string {
   sanitizer ??= createSanitizer();
-  // DOMPurify returns string (not TrustedHTML) unless RETURN_TRUSTED_TYPE is set.
-  return sanitizer.sanitize(html, SANITIZE_PROFILE) as string;
+  // DOMPurify returns string unless RETURN_TRUSTED_TYPE is set (it is not).
+  return sanitizer.sanitize(html, { uponSanitizeAttribute: stripExoticSchemes }) as string;
 }
 
 export function render(text: string): string {
