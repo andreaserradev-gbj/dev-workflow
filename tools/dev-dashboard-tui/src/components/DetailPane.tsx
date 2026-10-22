@@ -5,6 +5,7 @@ import type { DOMElement } from 'ink';
 import type { FeatureDetail, SessionLogEntry } from 'dev-workflow-core/types';
 import { getStatusTheme } from '../theme/status.js';
 import { getPhaseIcon } from '../theme/phaseIcons.js';
+import { DETAIL_PANE_WIDTH } from '../layout.js';
 
 interface Props {
   detail: FeatureDetail | null;
@@ -18,18 +19,24 @@ interface Props {
   scroll?: number;
   /** Reports the clamped maximum scroll offset up so the nav hook can bound j/k. */
   onScrollMax?: (max: number) => void;
+  /** Outer pane width (border-box). Fixed at `DETAIL_PANE_WIDTH`; the viewport width below it. */
+  width?: number;
 }
 
 /**
- * Right pane: the selected feature's expanded detail — status/phase/progress
- * header, next action, decisions, blockers, phases (with icons), sub-PRDs, and a
+ * Right pane: the selected feature's expanded detail — a status/progress
+ * header, phases (with icons), next action, decisions, blockers, sub-PRDs, and a
  * collapsible session history. The terminal analog of the web dashboard's
  * FeaturePanel (read-only; the open/archive actions are out of MVP).
  *
+ * Phases sit directly under the header because they are read first; the prose
+ * sections follow. Reordering sections does not touch the scroll machinery: the
+ * body scrolls as one unit — j/k when the pane is focused move `scroll`, and the
+ * content that overflows the viewport is reachable by scrolling rather than lost
+ * off-screen.
+ *
  * Every prose/list section wraps to the full pane width (nothing is clipped to a
- * single row); because the pane is a fixed height, the whole body scrolls as one
- * unit — j/k when the pane is focused move `scroll`, and the content that
- * overflows the viewport is reachable by scrolling rather than lost off-screen.
+ * single row).
  */
 export function DetailPane({
   detail,
@@ -39,6 +46,7 @@ export function DetailPane({
   sessionExpanded = false,
   scroll = 0,
   onScrollMax,
+  width = DETAIL_PANE_WIDTH,
 }: Props) {
   const viewportRef = useRef<DOMElement | null>(null);
   const contentRef = useRef<DOMElement | null>(null);
@@ -67,8 +75,8 @@ export function DetailPane({
   return (
     <Box
       flexDirection="column"
-      flexGrow={1}
-      flexBasis={0}
+      width={width}
+      flexShrink={0}
       borderStyle="round"
       borderColor={focused ? 'cyan' : 'gray'}
       paddingX={1}
@@ -133,24 +141,6 @@ function DetailBody({
         </Text>
       </Box>
 
-      {checkpoint?.nextAction ? (
-        <Section title="Next Action" color="cyan">
-          <Text>{stripLeadingHeading(checkpoint.nextAction)}</Text>
-        </Section>
-      ) : null}
-
-      {checkpoint && checkpoint.decisions.length > 0 ? (
-        <Section title="Decisions">
-          <BulletList items={checkpoint.decisions} />
-        </Section>
-      ) : null}
-
-      {checkpoint && checkpoint.blockers.length > 0 ? (
-        <Section title="Blockers" color="yellow">
-          <BulletList items={checkpoint.blockers} color="yellow" />
-        </Section>
-      ) : null}
-
       {detail.phases.length > 0 ? (
         <Section title="Phases">
           {detail.phases.map((phase) => (
@@ -169,6 +159,24 @@ function DetailBody({
               ) : null}
             </Box>
           ))}
+        </Section>
+      ) : null}
+
+      {checkpoint?.nextAction ? (
+        <Section title="Next Action" color="cyan">
+          <Text>{stripLeadingHeading(checkpoint.nextAction)}</Text>
+        </Section>
+      ) : null}
+
+      {checkpoint && checkpoint.decisions.length > 0 ? (
+        <Section title="Decisions">
+          <BulletList items={checkpoint.decisions} />
+        </Section>
+      ) : null}
+
+      {checkpoint && checkpoint.blockers.length > 0 ? (
+        <Section title="Blockers" color="yellow">
+          <BulletList items={checkpoint.blockers} color="yellow" />
         </Section>
       ) : null}
 

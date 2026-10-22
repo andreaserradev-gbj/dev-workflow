@@ -1,17 +1,24 @@
 import { Box, Text } from 'ink';
 import type { Project } from 'dev-workflow-core/types';
+import { RAIL_WIDTH } from '../layout.js';
 
 interface Props {
   projects: Project[];
   /** Index of the highlighted project. */
   selectedIndex: number;
+  /** Outer width (border-box); the shell passes `layout.railWidth` (28 or 16). */
   width?: number;
   /** Cyan border when this pane holds keyboard focus. */
   focused?: boolean;
 }
 
 /** Left pane: recency-sorted project rail with per-project feature counts. */
-export function ProjectRail({ projects, selectedIndex, width = 28, focused = false }: Props) {
+export function ProjectRail({
+  projects,
+  selectedIndex,
+  width = RAIL_WIDTH,
+  focused = false,
+}: Props) {
   return (
     <Box
       flexDirection="column"
@@ -20,6 +27,7 @@ export function ProjectRail({ projects, selectedIndex, width = 28, focused = fal
       borderStyle="round"
       borderColor={focused ? 'cyan' : 'gray'}
       paddingX={1}
+      overflowX="hidden"
       overflowY="hidden"
     >
       <Text bold>Projects</Text>

@@ -37,7 +37,7 @@ curl -fsSL https://github.com/andreaserradev-gbj/dev-workflow/archive/refs/heads
 | `dev-review` | Generate an architect-readable PRD-vs-implementation alignment report |
 | `dev-wrapup` | Review the conversation for learnings worth keeping |
 | `dev-dashboard` | Start the bundled dashboard server and show its URL |
-| `dev-dashboard-tui` | Print the command to launch the terminal-native dashboard (Ink TUI) |
+| `dev-dashboard-tui` | Print the command to launch the terminal-native dashboard (Ink TUI) — responsive panes: a fixed 60-column detail, the rail narrowing then hiding, and a one-line feature strip on narrow terminals |
 | `dev-wiki` | Generate a cross-project markdown wiki from `.dev/` PRDs |
 
 Codex activates a skill when you mention it by name ("use dev-plan"), when the task matches its description, or when you invoke it explicitly.

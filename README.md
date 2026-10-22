@@ -3,7 +3,7 @@
 # dev-workflow
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
-[![Version](https://img.shields.io/badge/version-1.43.0-green.svg)](.claude-plugin/marketplace.json)
+[![Version](https://img.shields.io/badge/version-1.44.0-green.svg)](.claude-plugin/marketplace.json)
 [![AgentSkills.io](https://img.shields.io/badge/standard-AgentSkills.io-purple.svg)](https://agentskills.io)
 
 **AI coding agents start every session from zero. Your architecture shouldn't.**
@@ -293,6 +293,8 @@ bash "<plugin>/skills/dev-dashboard-tui/scripts/launch.sh"
 ```
 
 Pass `--scan <dir>` to point it at specific directories instead of the stored dashboard config.
+
+**Responsive layout.** The TUI adapts to the terminal width instead of collapsing into it. At **134 columns or more** all three panes are at full width — a 28-column project rail, the feature list taking the remaining space, and the detail pane fixed at **60 columns**. Narrowing below that degrades in a fixed order: the rail shrinks to **16 columns** below 134 and disappears below **116**; the feature list narrows and then, below **76 columns**, is replaced by a one-line feature strip above the detail. The detail pane keeps its 60 columns the whole way down and only takes the viewport width below 60 columns, so prose never re-wraps into a one-character ribbon. With the rail hidden, `h`/`l` move between the list and the detail — the focus follows the panes that are actually on screen.
 
 **Keybindings:** `j`/`k` or `↑`/`↓` move the selection · `h`/`l` or `←`/`→` move focus across panes · `Tab` or `1`–`6` switch the status filter · `Space` toggles session history · `q` quits.
 

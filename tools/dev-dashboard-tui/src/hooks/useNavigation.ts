@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useApp, useInput } from 'ink';
 import { FILTER_KEYS, type FilterKey, type Store } from './useStore.js';
 
@@ -7,6 +7,20 @@ export type Pane = 'rail' | 'list' | 'detail';
 // Left-to-right pane order — matches the on-screen layout, so h/l map to
 // prev/next in this array.
 export const PANES: readonly Pane[] = ['rail', 'list', 'detail'];
+
+/**
+ * The panes actually rendered at this layout. Hiding the rail must remove it
+ * from the focus cycle too, or h/l would stop on an invisible pane and swallow
+ * j/k.
+ */
+export function visiblePanes(showRail: boolean): readonly Pane[] {
+  return showRail ? PANES : PANES.filter((pane) => pane !== 'rail');
+}
+
+/** The focus if it is on a visible pane, else the first visible pane. */
+export function clampFocus(focus: Pane, panes: readonly Pane[]): Pane {
+  return panes.includes(focus) ? focus : (panes[0] ?? 'detail');
+}
 
 export interface NavState {
   focus: Pane;
@@ -20,9 +34,13 @@ function clamp(value: number, lo: number, hi: number): number {
 }
 
 /** Move focus one pane left/right, clamped at the ends (h/l, ←/→). */
-export function movePaneFocus(current: Pane, dir: 'left' | 'right'): Pane {
-  const i = PANES.indexOf(current);
-  return dir === 'right' ? PANES[Math.min(i + 1, PANES.length - 1)] : PANES[Math.max(i - 1, 0)];
+export function movePaneFocus(
+  current: Pane,
+  dir: 'left' | 'right',
+  panes: readonly Pane[] = PANES,
+): Pane {
+  const i = Math.max(0, panes.indexOf(current));
+  return dir === 'right' ? panes[Math.min(i + 1, panes.length - 1)] : panes[Math.max(i - 1, 0)];
 }
 
 /** Cycle the active filter forward/back with wrap-around (Tab / Shift+Tab). */
@@ -43,12 +61,28 @@ export function cycleFilter(current: FilterKey, dir: 1 | -1): FilterKey {
  *
  * `detailScrollMax` is measured by the detail pane (content height vs. viewport)
  * and threaded back in so j/k can't scroll past the end.
+ *
+ * `showRail` mirrors the layout: when the rail is hidden it leaves the focus
+ * cycle entirely, so h/l never land on an unrendered pane. Every key handler
+ * branches on the clamped `active` focus, not the raw state — a stale `'rail'`
+ * focus would otherwise swallow j/k after a resize.
  */
-export function useNavigation(store: Store, detailScrollMax = 0): NavState {
+export function useNavigation(store: Store, detailScrollMax = 0, showRail = true): NavState {
   const { exit } = useApp();
-  const [focus, setFocus] = useState<Pane>('rail');
+  const panes = visiblePanes(showRail);
+  const [focus, setFocus] = useState<Pane>(showRail ? 'rail' : 'list');
   const [sessionExpanded, setSessionExpanded] = useState(false);
   const [detailScroll, setDetailScroll] = useState(0);
+
+  // Re-clamp on layout changes so a resize that hides the focused pane moves
+  // the focus to the first visible one instead of stranding it. Keyed on the
+  // pane set's string identity: `visiblePanes` returns a fresh array each render.
+  const paneKey = panes.join(',');
+  const panesRef = useRef(panes);
+  panesRef.current = panes;
+  useEffect(() => {
+    setFocus((f) => clampFocus(f, panesRef.current));
+  }, [paneKey]);
 
   // Reset the detail scroll whenever the selected feature changes, so a fresh
   // detail never opens mid-scroll. Keyed on project+feature (names repeat).
@@ -85,16 +119,20 @@ export function useNavigation(store: Store, detailScrollMax = 0): NavState {
 
     // ─── Horizontal: focus across panes ───────────────────────
     if (input === 'l' || key.rightArrow) {
-      setFocus((f) => movePaneFocus(f, 'right'));
+      setFocus((f) => movePaneFocus(clampFocus(f, panes), 'right', panes));
       return;
     }
     if (input === 'h' || key.leftArrow) {
-      setFocus((f) => movePaneFocus(f, 'left'));
+      setFocus((f) => movePaneFocus(clampFocus(f, panes), 'left', panes));
       return;
     }
 
+    // Branch on the clamped focus, never the raw state: a hidden pane keeps its
+    // stale `focus` until the next render, and acting on it would drop the key.
+    const active = clampFocus(focus, panes);
+
     // ─── Detail: toggle the session history ───────────────────
-    if (focus === 'detail' && (key.return || input === ' ')) {
+    if (active === 'detail' && (key.return || input === ' ')) {
       setSessionExpanded((v) => !v);
       return;
     }
@@ -105,14 +143,14 @@ export function useNavigation(store: Store, detailScrollMax = 0): NavState {
     if (!down && !up) return;
     const delta = down ? 1 : -1;
 
-    if (focus === 'rail') {
+    if (active === 'rail') {
       // Moving projects re-homes the feature cursor to the first row so the
       // list + detail never point at a stale index.
       store.setSelectedProjectIndex(
         clamp(store.selectedProjectIndex + delta, 0, store.filteredProjects.length - 1),
       );
       store.setSelectedFeatureIndex(0);
-    } else if (focus === 'list') {
+    } else if (active === 'list') {
       const count = store.selectedProject?.features.length ?? 0;
       store.setSelectedFeatureIndex(clamp(store.selectedFeatureIndex + delta, 0, count - 1));
     } else {

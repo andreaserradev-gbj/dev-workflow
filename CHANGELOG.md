@@ -4,6 +4,16 @@ All notable changes to this project should be documented in this file.
 
 <!-- LOCAL-RELEASES-START -->
 
+## v1.44.0 - 2026-10-22
+
+### Changed
+
+- **TUI: responsive layout with a fixed-width detail pane.** The detail pane collapsed to a one-character column on narrow terminals: it was the only elastic column (`flexGrow={1} flexBasis={0}`, no `minWidth`), so Yoga gave it whatever was left — zero once the rail and list floors were subtracted — and its prose re-wrapped one character per line. A new pure resolver (`tools/dev-dashboard-tui/src/layout.ts`) turns `stdout.columns` into an explicit layout, and the shell passes widths down instead of leaning on flex shrink. The detail holds **60 columns** the whole way down and only takes the viewport width below 60; the other panes give way first — the rail narrows 28 → 16 below 134 columns and disappears below 116, the list absorbs the surplus on wide terminals and narrows below that, and below 76 columns a one-line feature strip (`‹ previous › selected`) replaces the list so the feature stays navigable. Every breakpoint is unit-tested against the resolver, and the rendered pane widths are asserted at eight terminal widths through a new `renderAtWidth` harness (ink's own `render()` on a fake TTY — `ink-testing-library` hard-codes 100 columns).
+
+- **TUI: Phases moves to the top of the detail pane.** The phase list — the information read first — sat below Next Action, Decisions and Blockers in one scrolling body. It now renders directly under the name/status header, and the order (Phases → Next Action → Decisions → Blockers → Sub-PRDs → Session History) is pinned by an `indexOf` assertion. A checkpoint-only feature still renders no Phases section.
+
+- **TUI: keyboard focus follows the visible panes.** Hiding the rail previously would have stranded the focus on an unrendered pane and silently swallowed `j`/`k`. `useNavigation` now takes the layout's `showRail`, restricts `h`/`l` to the visible panes, re-clamps the focus when a resize removes the focused pane, and branches on the clamped focus inside the key handler. Below 76 columns a compact feature row drops the progress bar and counts (keeping marker + status dot + name), the pill and help rows clip instead of spilling past the terminal edge, and the help bar swaps to a short variant below 85 columns so the keys stay readable.
+
 ## v1.43.0 - 2026-10-14
 
 ### Changed
