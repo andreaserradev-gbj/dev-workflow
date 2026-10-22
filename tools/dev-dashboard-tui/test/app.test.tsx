@@ -4,6 +4,7 @@ import { join } from 'path';
 import { render } from 'ink-testing-library';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { App } from '../src/app.js';
+import { renderAtWidth } from './helpers/renderAtWidth.js';
 
 describe('App (portfolio)', () => {
   let scanDir: string;
@@ -70,7 +71,11 @@ describe('App (keyboard navigation)', () => {
   });
 
   it('moves the feature selection with the list focused, updating the detail pane', async () => {
-    const { stdin, lastFrame, unmount } = render(<App scanDirs={[scanDir]} />);
+    // Rendered at 160 columns so all three panes are visible and the focus
+    // starts on the rail: at the default harness width (100) the rail is hidden
+    // and the list already holds the focus, which would make the sequence below
+    // exercise a different code path.
+    const { stdin, lastFrame, unmount } = renderAtWidth(<App scanDirs={[scanDir]} />, 160);
 
     await vi.waitFor(() => {
       expect(shownToken(lastFrame() ?? '')).not.toBeNull();

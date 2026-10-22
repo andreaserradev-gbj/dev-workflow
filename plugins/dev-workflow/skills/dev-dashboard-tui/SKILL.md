@@ -66,10 +66,17 @@ stop afterwards. Requires `node` (>= 24).
 Once it opens:
 
 - `j`/`k` or `↑`/`↓` — move the selection within the focused pane
-- `h`/`l` or `←`/`→` — move focus across the panes (rail → list → detail)
+- `h`/`l` or `←`/`→` — move focus across the panes (rail → list → detail). The
+  rail is only on screen at 116+ columns, so with it hidden the range is
+  list → detail
 - `Tab` or `1`–`6` — switch the status filter
 - `Space` — toggle the session-history detail
 - `q` or `Ctrl+C` — quit (restores the terminal cleanly)
+
+The layout follows the terminal width: all three panes from 134 columns, the rail
+narrowed to 16 below that and hidden below 116, the feature list replaced by a
+one-line strip below 76, and the detail pane held at 60 columns (it takes the
+viewport width below 60).
 
 Leave it running while you work — the portfolio updates live as checkpoints and
 PRDs change.

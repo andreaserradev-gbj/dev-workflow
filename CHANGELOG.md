@@ -4,6 +4,16 @@ All notable changes to this project should be documented in this file.
 
 <!-- LOCAL-RELEASES-START -->
 
+## v1.44.0 - 2026-10-22
+
+### Changed
+
+- **TUI: responsive layout with a fixed-width detail pane.** The detail pane collapsed to a one-character column on narrow terminals: it was the only elastic column (`flexGrow={1} flexBasis={0}`, no `minWidth`), so Yoga gave it whatever was left — zero once the rail and list floors were subtracted — and its prose re-wrapped one character per line. A new pure resolver (`tools/dev-dashboard-tui/src/layout.ts`) turns `stdout.columns` into an explicit layout, and the shell passes widths down instead of leaning on flex shrink. The detail holds **60 columns** the whole way down and only takes the viewport width below 60; the other panes give way first — the rail narrows 28 → 16 below 134 columns and disappears below 116, the list absorbs the surplus on wide terminals and narrows below that, and below 76 columns a one-line feature strip (`‹ previous › selected`) replaces the list so the feature stays navigable. Every breakpoint is unit-tested against the resolver, and the rendered pane widths are asserted at eight terminal widths through a new `renderAtWidth` harness (ink's own `render()` on a fake TTY — `ink-testing-library` hard-codes 100 columns).
+
+- **TUI: Phases moves to the top of the detail pane.** The phase list — the information read first — sat below Next Action, Decisions and Blockers in one scrolling body. It now renders directly under the name/status header, and the order (Phases → Next Action → Decisions → Blockers → Sub-PRDs → Session History) is pinned by an `indexOf` assertion. A checkpoint-only feature still renders no Phases section.
+
+- **TUI: keyboard focus follows the visible panes.** Hiding the rail previously would have stranded the focus on an unrendered pane and silently swallowed `j`/`k`. `useNavigation` now takes the layout's `showRail`, restricts `h`/`l` to the visible panes, re-clamps the focus when a resize removes the focused pane, and branches on the clamped focus inside the key handler. Below 76 columns a compact feature row drops the progress bar and counts (keeping marker + status dot + name), the pill and help rows clip instead of spilling past the terminal edge, and the help bar swaps to a short variant below 85 columns so the keys stay readable.
+
 ## v1.43.0 - 2026-10-14
 
 ### Changed
@@ -440,6 +450,12 @@ Checkpoints and resumes are now powered by deterministic CLI commands instead of
 <!-- LOCAL-RELEASES-END -->
 
 <!-- GITHUB-RELEASES-START -->
+
+## v1.43.0 - 2026-10-14
+
+### Changed
+
+- **`/dev-orchestrator` rewritten: Herdr per-step delegation → whole-feature in-session runner.** One agent session now executes every phase of a checkpointed feature end-to-end instead of spawning a fresh Herdr worker per PRD step. The per-step design paid pane + session startup per spawn and each worker was amnesiac by construction; Herdr imposed none of it (one `agent start` is a persistent session), so the protocol, not the tool, was the defect. The Herdr protocol is deleted entirely — `HERDR_ENV` gating, the degraded dev-resume duplicate, the worker/pane loop, and permission triage are gone; git history and the archived PRD keep it. The session now re-derives position from `resume-context` plus a direct `checkpoint.md` read, executes steps under embedded lane rules (fix reversible / pick-and-log local preference / page on the rest), ticks each marker only on the verification it ran itself, and at every gate delivers a recap (impact, choices with forks, evidence file:line + test names, gaps), writes a checkpoint with the decision trail via `checkpoint-write`, and auto-continues to the next phase without asking. Paging contract: verification failing with no fix after one attempt (the same repair failing twice = stop), architectural preference calls, external/irreversible actions, missing key files, drifted branch. The skill's name, scripts, and CLI surface are unchanged; `allowed-tools` gains `Edit`/`Write`. `gate-check`'s shipped `GATE_CONTRACT` string stays shared and consumer-agnostic: recap → checkpoint-write → continue, auto-continue for whole-feature runs and ask-and-wait for step-level runs (`dev-resume`), and `gate-check` now surfaces PRD parse warnings — an optional `warnings` field in the `--json` payload plus `WARNING:` lines in text output, present only when rows carry unreadable status markers. A new no-herdr guard in `tests/test-scripts.sh` (targeting the skill's hand-written files — `SKILL.md` + `scripts/*.sh`, not the derived bundle copies; FAILs when `SKILL.md` is missing) pins herdr-independence, observed failing before first trusted pass; README, Codex docs, and CLAUDE.md describe the new behavior; suite at 50 passed / 0 failed.
 
 ## v1.42.1 - 2026-10-14
 

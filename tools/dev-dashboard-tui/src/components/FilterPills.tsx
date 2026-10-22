@@ -21,7 +21,7 @@ interface Props {
 /** Top bar: the six filter pills with counts; the active one is inverse. Number prefixes are the hotkeys. */
 export function FilterPills({ filter, counts }: Props) {
   return (
-    <Box>
+    <Box flexShrink={0}>
       {FILTER_KEYS.map((key, i) => {
         const active = key === filter;
         return (

@@ -107,6 +107,22 @@ describe('FeatureList', () => {
     // a bare trailing-space marker gets trimmed under Yoga width pressure).
     expect(frame).toMatch(/›\s+●/);
   });
+  it('drops the bar and counts in a compact row but keeps the name', () => {
+    const features = [feature('compact-me', 'active', { done: 8, total: 23, percent: 35 })];
+    const compactFrame =
+      render(
+        <FeatureList title="proj" features={features} selectedIndex={0} width={20} compact />,
+      ).lastFrame() ?? '';
+    expect(compactFrame).toContain('compact-me');
+    expect(compactFrame).not.toContain('8/23');
+    // The progress bar is drawn with block glyphs; compact rows have none.
+    expect(compactFrame).not.toMatch(/[█░]/);
+
+    const fullFrame =
+      render(<FeatureList title="proj" features={features} selectedIndex={0} width={40} />)
+        .lastFrame() ?? '';
+    expect(fullFrame).toContain('8/23');
+  });
 });
 
 function detail(overrides: Partial<FeatureDetail> = {}): FeatureDetail {
@@ -219,6 +235,26 @@ describe('DetailPane', () => {
     // (the oldest and newest both present, not paged out by a 4-row window).
     expect(frame).toContain('Session 1');
     expect(frame).toContain('Session 8');
+  });
+
+  it('orders the sections: Phases before Next Action before Decisions before Blockers before Sub-PRDs', () => {
+    const frame =
+      render(<DetailPane detail={detail()} loading={false} error={null} />).lastFrame() ?? '';
+    // Match the section title 'Phases' — the status line also contains the
+    // singular 'Phase 2/2', so the plural is the unambiguous anchor.
+    const order = ['Phases', 'Next Action', 'Decisions', 'Blockers', 'Sub-PRDs'].map((title) =>
+      frame.indexOf(title),
+    );
+    expect(order.every((i) => i >= 0)).toBe(true);
+    expect(order).toEqual([...order].sort((a, b) => a - b));
+  });
+
+  it('omits the Phases section entirely for a checkpoint-only feature', () => {
+    const frame =
+      render(<DetailPane detail={detail({ phases: [] })} loading={false} error={null} />)
+        .lastFrame() ?? '';
+    expect(frame).not.toContain('Phases');
+    expect(frame).toContain('Next Action');
   });
 
   it('renders loading and empty states', () => {
